@@ -312,3 +312,91 @@ class AOKVQATask(VQATask):
             json.dump(result_leaderboard, f)
 
         logging.info(f"Saved results for leaderboard evaluation at {result_file}")
+
+
+@registry.register_task("vqa_introspect")
+class VQAIntrospectTask(VQATask):
+    def valid_step(self, model, samples):
+        answers = model.predict_answers(
+            samples=samples,
+            answer_list=self.answer_list,
+            inference_method=self.inference_method,
+            num_beams=self.num_beams,
+            max_len=self.max_len,
+            min_len=self.min_len,
+            num_ans_candidates=self.num_ans_candidates,
+        )
+
+        pred_qa_pairs = []
+
+        # TODO: gt_answerws from sample['what']?
+        question_id = samples["question_id"]
+        gt_answers = samples["sub_answer"]
+        print('in valid_step() in class VQAIntrospectTask')
+        print('question_id: ', question_id)
+        print('gt_answers: ', gt_answers)
+
+        for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+            pred_qa_pairs.append(
+                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
+            )
+
+        return pred_qa_pairs
+
+    @dist_utils.main_process
+    def _report_metrics(self, result_file, split):
+        """
+        Implementing accuracy computation for AOKVQA, see
+        https://github.com/allenai/aokvqa/blob/main/evaluation/eval_predictions.py#L45 for details.
+        """
+        # TODO everything of _report_metrics() in VQAIntrospectTask class
+
+        results = json.load(open(result_file, "r"))
+        acc = []
+
+        for res in results:
+            if res["gt_ans"] is None:
+                # prepare test results for leaderboard evaluation
+                self._save_result_leaderboard(results)
+                return
+
+            pred = res["pred_ans"]
+            gt_ans = res["gt_ans"]
+
+            num_match = sum([pred == gt for gt in gt_ans])
+            vqa_acc = min(1.0, num_match / 3.0)
+
+            acc.append(vqa_acc)
+
+        accuracy = sum(acc) / len(acc) * 100
+        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+
+        with open(
+            os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+        ) as f:
+            f.write(json.dumps(metrics) + "\n")
+
+        logging.info(metrics)
+
+        return metrics
+
+    @dist_utils.main_process
+    def _save_result_leaderboard(self, results):
+        """
+        Saving the results in the format required for leaderboard evaluation.
+
+        [TODO] add support for multi-choice.
+        """
+        result_leaderboard = dict()
+        for res in results:
+            result_leaderboard[res["question_id"]] = {
+                "direct_answer": res["pred_ans"],
+                "multiple_choice": "",
+            }
+
+        result_file = registry.get_path("result_dir") + "_leaderboard.json"
+
+        with open(result_file, "w") as f:
+            json.dump(result_leaderboard, f)
+
+        logging.info(f"Saved results for leaderboard evaluation at {result_file}")
