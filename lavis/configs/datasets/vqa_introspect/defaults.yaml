@@ -4,7 +4,7 @@
  # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
 datasets:
-  aok_vqa:
+  vqa_introspect:
     # data_dir: ${env.data_dir}/datasets
     data_type: images # [images|videos|features]
 
@@ -13,23 +13,20 @@ datasets:
       annotations:
         train:
           url:
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/aokvqa_v1p0_train.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_trainv1.0.json
           storage:
-              - aokvqa/annotations/aokvqa_v1p0_train.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_trainv1.0.json
         val:
           url:
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/aokvqa_v1p0_val.json
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/specialized_vocab_train.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
           storage:
-              - aokvqa/annotations/aokvqa_v1p0_val.json
-              - aokvqa/annotations/specialized_vocab_train_lavis.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
+#              - aokvqa/annotations/specialized_vocab_train_lavis.json
               # - aokvqa/annotations/large_vocab_train_lavis.json
         test:
           url:
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/aokvqa_v1p0_test.json
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/specialized_vocab_train.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
           storage:
-              - aokvqa/annotations/aokvqa_v1p0_test.json
-              - aokvqa/annotations/specialized_vocab_train_lavis.json
+              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
       images:
           storage: coco/images/

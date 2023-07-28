@@ -8,7 +8,7 @@ model:
   load_finetuned: False
   load_pretrained: True
 
-  pretrained: "https://storage.googleapis.com/sfr-vision-language-research/LAVIS/models/InstructBLIP/instruct_blip_vicuna7b_trimmed.pth"
+  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
   finetuned: ""
 
   # vit encoder
@@ -22,10 +22,11 @@ model:
   num_query_token: 32
 
   # path to Vicuna checkpoint
-  llm_model: "./llm/vicuna-7b"
+#  llm_model: "./llm/vicuna-7b"
+  llm_model: "/home/ywjang/models/lmsys/vicuna-7b-v1.3"
 
   # generation configs
-  prompt: ""
+  prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
 
 
 preprocess:
