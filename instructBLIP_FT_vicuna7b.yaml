@@ -31,7 +31,9 @@ datasets:
     #         storage: '/export/share/datasets/vision/coco/images/'
 
 run:
-  task: vqa_introspect
+#  task: vqa_introspect
+  task: captioning
+
   # optimizer
   lr_sched: "linear_warmup_cosine_lr"
   init_lr: 1e-5

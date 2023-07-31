@@ -26,9 +26,14 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
+## instructBLIP Fine-Tuning을 위한 수정사항
+
+- task 추가: `lavis/tasks/captioning.py`
+- configs(yaml) 파일 수정: `./instructBLIP_FT_vicuna7b.yaml`
+
 ywjang 수정:
 
-- output: `/home/ywjang/LBA/LBA_LAVIS/lavis/output/BLIP2/instructBLIP2_FT_vicuna7b_vitFreeze_230727/`
+- output: `/home/ywjang/LBA/LBA_LAVIS/lavis/ywjang_output/`
 
 
 ## What's New: 🎉 

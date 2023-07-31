@@ -66,3 +66,12 @@ class VATEXCapBuilder(BaseDatasetBuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/vatex/defaults_cap.yaml",
     }
+
+
+@registry.register_builder("vqa_instrospect_captioning")
+class VQAIntrospectCapBuilder(BaseDatasetBuilder):
+    eval_dataset_cls = NoCapsEvalDataset
+
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/nocaps/defaults.yaml",
+    }
