@@ -26,6 +26,11 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
+ywjang 수정:
+
+- output: `/home/ywjang/LBA/LBA_LAVIS/lavis/output/BLIP2/instructBLIP2_FT_vicuna7b_vitFreeze_230727/`
+
+
 ## What's New: 🎉 
   * [Model Release] July 2023, released implementation of **BLIP-Diffusion** <br>
   [Paper](https://arxiv.org/abs/2305.06500), [Project Page](https://github.com/salesforce/LAVIS/tree/main/projects/blip-diffusion), [Website](https://dxli94.github.io/BLIP-Diffusion-website/)
