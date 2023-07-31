@@ -332,9 +332,9 @@ class VQAIntrospectTask(VQATask):
         # TODO: gt_answerws from sample['what']?
         question_id = samples["question_id"]
         gt_answers = samples["sub_answer"]
-        print('in valid_step() in class VQAIntrospectTask')
-        print('question_id: ', question_id)
-        print('gt_answers: ', gt_answers)
+        # print('in valid_step() in class VQAIntrospectTask')
+        # print('question_id: ', question_id)
+        # print('gt_answers: ', gt_answers)
 
         for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
             pred_qa_pairs.append(
