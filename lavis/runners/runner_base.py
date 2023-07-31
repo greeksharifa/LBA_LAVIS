@@ -377,19 +377,33 @@ class RunnerBase:
                     val_log = self.eval_epoch(
                         split_name=split_name, cur_epoch=cur_epoch
                     )
+                    print('val_log:', val_log)
+                    print('best_agg_metric:', best_agg_metric)
                     if val_log is not None:
+                        print('is_main_process():', is_main_process())
                         if is_main_process():
                             assert (
                                 "agg_metrics" in val_log
                             ), "No agg_metrics found in validation log."
 
                             agg_metrics = val_log["agg_metrics"]
-                            if agg_metrics > best_agg_metric and split_name == "val":
+                            print('agg_metrics:', agg_metrics)
+                            print('split_name:', split_name)
+                            
+                            save_to = os.path.join(
+                                self.output_dir,
+                                "checkpoint_{}.pth".format("best"),
+                            )
+                            
+                            if (agg_metrics > best_agg_metric and split_name == "val") or not os.path.exists(save_to):
                                 best_epoch, best_agg_metric = cur_epoch, agg_metrics
 
+                                print('self._save_checkpoint(cur_epoch, is_best=True) start')
                                 self._save_checkpoint(cur_epoch, is_best=True)
+                                print('self._save_checkpoint(cur_epoch, is_best=True) done')
 
                             val_log.update({"best_epoch": best_epoch})
+                            print('updated val_log:', val_log)
                             self.log_stats(val_log, split_name)
 
             else:
@@ -455,15 +469,22 @@ class RunnerBase:
         # TODO In validation, you need to compute loss as well as metrics
         # TODO consider moving to model.before_evaluation()
         model = self.unwrap_dist_model(self.model)
+        print('#' * 160)
+        print('best model loading: ',)
+        print('cur_epoch:', cur_epoch)
         if not skip_reload and cur_epoch == "best":
             model = self._reload_best_model(model)
+        print('model load done')
         model.eval()
+        print('modal.eval() done')
+        print('$' * 160)
 
         self.task.before_evaluation(
             model=model,
             dataset=self.datasets[split_name],
         )
         results = self.task.evaluation(model, data_loader)
+        print('results is None?: ', results is None)
 
         if results is not None:
             return self.task.after_evaluation(

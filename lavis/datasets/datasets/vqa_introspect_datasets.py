@@ -56,7 +56,7 @@ class VQAIntrospectDataset(VQADataset, __DisplMixin):
             
             for question_id, value in json_data.items():
                 _cnt += 1
-                if _cnt > 50: break
+                # if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]
@@ -148,7 +148,7 @@ class VQAIntrospectEvalDataset(VQAEvalDataset, __DisplMixin):
             
             for question_id, value in json_data.items():
                 _cnt += 1
-                if _cnt > 50: break
+                # if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]

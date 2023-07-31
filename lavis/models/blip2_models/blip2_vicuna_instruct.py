@@ -48,9 +48,10 @@ class Blip2VicunaInstruct(Blip2Base):
         qformer_text_input=True,
     ):
         super().__init__()
-        transformers_version = version.parse(transformers.__version__)
+        transformers_version = version.parse(transformers.__version__)              # <Version('4.28.0')>
         assert transformers_version >= version.parse("4.28"), "BLIP-2 Vicuna requires transformers>=4.28"        
-        from transformers import LlamaTokenizer
+        from transformers import LlamaTokenizer         # for 3090ti server
+        # from lavis.models.llama import LlamaTokenizer   # for gaia server
         from lavis.models.blip2_models.modeling_llama import LlamaForCausalLM
         
         self.tokenizer = self.init_tokenizer(truncation_side="left")
@@ -686,23 +687,23 @@ class Blip2VicunaInstruct(Blip2Base):
 
     @classmethod
     def from_config(cls, cfg):
-        vit_model = cfg.get("vit_model", "eva_clip_g")
-        img_size = cfg.get("image_size")
-        num_query_token = cfg.get("num_query_token")
-        llm_model = cfg.get("llm_model")
+        vit_model = cfg.get("vit_model", "eva_clip_g")              # 'eva_clip_g'
+        img_size = cfg.get("image_size")                            # 224
+        num_query_token = cfg.get("num_query_token")                # 32
+        llm_model = cfg.get("llm_model")                            # '/home/ywjang/models/lmsys/vicuna-7b-v1.3'
 
-        drop_path_rate = cfg.get("drop_path_rate", 0)
-        use_grad_checkpoint = cfg.get("use_grad_checkpoint", False)
-        vit_precision = cfg.get("vit_precision", "fp16")
-        freeze_vit = cfg.get("freeze_vit", True)
+        drop_path_rate = cfg.get("drop_path_rate", 0)               # 0
+        use_grad_checkpoint = cfg.get("use_grad_checkpoint", False) # True
+        vit_precision = cfg.get("vit_precision", "fp16")            # 'fp16'
+        freeze_vit = cfg.get("freeze_vit", True)                    # True
 
-        prompt = cfg.get("prompt", "")
-        max_txt_len = cfg.get("max_txt_len", 128)
-        max_output_txt_len = cfg.get("max_output_txt_len", 256)
+        prompt = cfg.get("prompt", "")                              # "Write a sub-question about image, when main-question is '{}'. sub-question:"
+        max_txt_len = cfg.get("max_txt_len", 128)                   # 128
+        max_output_txt_len = cfg.get("max_output_txt_len", 256)     # 256
 
-        apply_lemmatizer = cfg.get("apply_lemmatizer", False)
+        apply_lemmatizer = cfg.get("apply_lemmatizer", False)       # False
 
-        qformer_text_input = cfg.get("qformer_text_input", True)
+        qformer_text_input = cfg.get("qformer_text_input", True)    # True
 
         model = cls(
             vit_model=vit_model,
