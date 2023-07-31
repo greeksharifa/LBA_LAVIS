@@ -44,16 +44,19 @@ class VQAIntrospectDataset(VQADataset, __DisplMixin):
         print('text_processor', text_processor)
         print('vis_root', vis_root)
         print('ann_paths', ann_paths)
-
+        
         self.vis_root = vis_root
-
+        
         # TODO: annotation 불러오기
         # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
         self.annotation = []
+        _cnt = 0
         for ann_path in ann_paths:
             json_data = json.load(open(ann_path, "r"))
             
             for question_id, value in json_data.items():
+                _cnt += 1
+                if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]
@@ -134,14 +137,18 @@ class VQAIntrospectEvalDataset(VQAEvalDataset, __DisplMixin):
         vis_root (string): Root directory of images (e.g. gqa/images/)
         ann_root (string): directory to store the annotation file
         """
+        self.vis_root = vis_root
         
         # TODO: annotation 불러오기
         # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
         self.annotation = []
+        _cnt = 0
         for ann_path in ann_paths:
             json_data = json.load(open(ann_path, "r"))
             
             for question_id, value in json_data.items():
+                _cnt += 1
+                if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]
