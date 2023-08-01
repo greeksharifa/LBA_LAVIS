@@ -8,6 +8,9 @@
 import json
 import os
 
+import numpy as np
+from nltk.translate.bleu_score import sentence_bleu
+
 from lavis.common.dist_utils import main_process
 from lavis.common.registry import registry
 from lavis.tasks.base_task import BaseTask
@@ -44,7 +47,7 @@ class CaptionTask(BaseTask):
             report_metric=report_metric,
         )
 
-    def valid_step(self, model, samples):
+    def valid_step(self, model, samples):   # samples(batch)에 대해 모델의 inference 결과를 반환
         results = []
 
         # run_cfg = slf.cfg.run_cfg
@@ -57,8 +60,9 @@ class CaptionTask(BaseTask):
         )
 
         img_ids = samples["image_id"]
+        main_question_id = samples["main_question_id"]
         for caption, img_id in zip(captions, img_ids):
-            results.append({"caption": caption, "image_id": int(img_id)})
+            results.append({"caption": caption, "image_id": int(img_id), "main_question_id": int(main_question_id)})
 
         return results
 
@@ -98,6 +102,54 @@ class CaptionTask(BaseTask):
         coco_res["agg_metrics"] = agg_metrics
 
         return coco_res
+
+
+@registry.register_task("vqa_introspect_captioning")
+class VQAIntrospectCaptionTask(CaptionTask):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @main_process
+    def _report_metrics(self, eval_result_file, split_name):
+        gt_file = os.path.join(registry.get_path("cache_root"), "VQA-Introspect/VQAIntrospect_valv1.0.json")
+        raw_gt_data = json.load(open(gt_file))              # gt data
+        """
+        >>> raw_gt_data['565248001']
+        {'reasoning_answer_most_common': 'yes', 'introspect': [
+                {'sub_qa': [{'sub_question': 'are the woman on the horses near to the sea?', 'sub_answer': 'yea'}], 'pred_q_type': 'perception'},
+                {'sub_qa': [{'sub_question': 'is there sand and whitewater?', 'sub_answer': 'yes'}], 'pred_q_type': 'reasoning'},
+                {'sub_qa': [{'sub_question': 'are the woman on the horses near to the sea?', 'sub_answer': 'yea'}], 'pred_q_type': 'perception'},
+                {'sub_qa': [{'sub_question': 'is there sand and whitewater?', 'sub_answer': 'yes'}], 'pred_q_type': 'reasoning'}
+            ],
+            'reasoning_question': 'are they at the beach?', 'image_id': 565248}
+        """
+        gt_data = dict()
+        for main_Q_id, value in raw_gt_data.items():
+            if main_Q_id not in gt_data:
+                gt_data[main_Q_id] = []
+            for introspect in value['introspect']:
+                for sub_qa in introspect['sub_qa']:
+                    gt_data[main_Q_id].append(sub_qa['sub_question'])
+        for main_Q_id, value in gt_data.items():
+            gt_data[main_Q_id] = list(set(value))
+        """
+        gt_data: dict. key=main_Q_id, value=list of sub_Q
+        gt_data['565248001']: [
+            'are the woman on the horses near to the sea?',
+            'is there sand and whitewater?'
+        ]
+        """
+        blue_scores = []
+        res_data = json.load(open(eval_result_file))    # result data
+        # res example: {'caption': 'stabilityout land guerre...', 'image_id': 565248, 'main_question_id': 565248001}
+        for res in res_data:
+            reference = [ref_sentence.split() for ref_sentence in gt_data[str(res['main_question_id'])]]
+            candidate = res['caption'].split()
+            blue_score = sentence_bleu(reference, candidate, weights=(0.25, 0.25, 0.25, 0.25))
+            # print('blue_score:', blue_score)
+            blue_scores.append(blue_score)
+        
+        return {"agg_metrics": np.mean(blue_scores)}
 
 
 # TODO better structure for this.

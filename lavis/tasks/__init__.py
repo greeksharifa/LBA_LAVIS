@@ -7,7 +7,7 @@
 
 from lavis.common.registry import registry
 from lavis.tasks.base_task import BaseTask
-from lavis.tasks.captioning import CaptionTask
+from lavis.tasks.captioning import CaptionTask, VQAIntrospectCaptionTask
 from lavis.tasks.image_text_pretrain import ImageTextPretrainTask
 from lavis.tasks.multimodal_classification import (
     MultimodalClassificationTask,
@@ -44,4 +44,5 @@ __all__ = [
     "ImageTextPretrainTask",
     "DialogueTask",
     "TextToImageGenerationTask",
+    "VQAIntrospectCaptionTask",
 ]
