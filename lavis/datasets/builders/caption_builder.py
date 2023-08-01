@@ -17,6 +17,10 @@ from lavis.datasets.datasets.video_caption_datasets import (
     VideoCaptionDataset,
     VideoCaptionEvalDataset,
 )
+from lavis.datasets.datasets.vqa_instrospect_caption_datasets import (
+    VQAIntrospectCapDataset,
+    VQAIntrospectCapEvalDataset
+)
 
 
 @registry.register_builder("coco_caption")
@@ -68,10 +72,12 @@ class VATEXCapBuilder(BaseDatasetBuilder):
     }
 
 
-@registry.register_builder("vqa_instrospect_captioning")
+@registry.register_builder("vqa_introspect_caption")
 class VQAIntrospectCapBuilder(BaseDatasetBuilder):
-    eval_dataset_cls = NoCapsEvalDataset
+    print('in VQAIntrospectCapBuilder class')
+    train_dataset_cls = VQAIntrospectCapDataset
+    eval_dataset_cls = VQAIntrospectCapEvalDataset
 
     DATASET_CONFIG_DICT = {
-        "default": "configs/datasets/nocaps/defaults.yaml",
+        "default": "configs/datasets/vqa_introspect/defaults_cap.yaml",
     }

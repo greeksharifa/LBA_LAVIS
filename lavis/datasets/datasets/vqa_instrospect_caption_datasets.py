@@ -34,7 +34,7 @@ class __DisplMixin:
         )
     
 
-class VQAInstospectCapDataset(CaptionDataset, __DisplMixin):
+class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)

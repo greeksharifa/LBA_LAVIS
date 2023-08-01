@@ -11,6 +11,7 @@ from lavis.datasets.builders.caption_builder import (
     MSRVTTCapBuilder,
     MSVDCapBuilder,
     VATEXCapBuilder,
+    VQAIntrospectCapBuilder,
 )
 from lavis.datasets.builders.image_text_pair_builder import (
     ConceptualCaption12MBuilder,
@@ -65,6 +66,7 @@ __all__ = [
     "VGCaptionBuilder",
     "VGVQABuilder",
     "AVSDDialBuilder",
+    "VQAIntrospectCapBuilder",
 ]
 
 

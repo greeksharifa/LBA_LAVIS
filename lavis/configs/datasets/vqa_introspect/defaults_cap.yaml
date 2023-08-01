@@ -4,7 +4,7 @@
  # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
 datasets:
-  vqa_introspect:
+  vqa_introspect_caption: # name of the dataset builder
     # data_dir: ${env.data_dir}/datasets
     data_type: images # [images|videos|features]
 
