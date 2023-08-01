@@ -25,6 +25,8 @@ class Config:
         user_config = self._build_opt_list(self.args.options)
 
         config = OmegaConf.load(self.args.cfg_path)
+        print('config:', config)
+        # import pdb; pdb.set_trace()
 
         runner_config = self.build_runner_config(config)
         model_config = self.build_model_config(config, **user_config)
@@ -87,6 +89,7 @@ class Config:
     @staticmethod
     def build_dataset_config(config):
         datasets = config.get("datasets", None)
+        print('datasets:', datasets)
         if datasets is None:
             raise KeyError(
                 "Expecting 'datasets' as the root key for dataset configuration."
