@@ -6,15 +6,17 @@ from transformers import AutoTokenizer
 # Download instruct_blip_vicuna7b_trimmed.pth
 # wget https://storage.googleapis.com/sfr-vision-language-research/LAVIS/models/InstructBLIP/instruct_blip_vicuna7b_trimmed.pth
 
+ROOT_DIR = "/home/ywjang/models/"
+# ROOT_DIR = "/Users/sharifa/models/"
 
 def download_HF_model(model_ckpt):
     print('Downloading {}...'.format(model_ckpt))
-    os.makedirs(f"/home/ywjang/models/{model_ckpt}/", exist_ok=True)
+    os.makedirs(f"{ROOT_DIR}{model_ckpt}/", exist_ok=True)
     tokenizer = AutoTokenizer.from_pretrained(model_ckpt)
-    tokenizer.save_pretrained(f"/home/ywjang/models/{model_ckpt}/")
+    tokenizer.save_pretrained(f"{ROOT_DIR}{model_ckpt}/")
     
-    model = Blip2ForConditionalGeneration.from_pretrained(model_ckpt, device_map="auto")
-    model.save_pretrained(f"/home/ywjang/models/{model_ckpt}/")
+    model = Blip2ForConditionalGeneration.from_pretrained(model_ckpt, device_map="auto")#, offload_folder="offload")
+    model.save_pretrained(f"{ROOT_DIR}{model_ckpt}/")
     print('Done.')
 
 

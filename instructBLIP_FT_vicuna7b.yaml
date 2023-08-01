@@ -32,7 +32,8 @@ datasets:
 
 run:
 #  task: vqa_introspect
-  task: captioning
+#  task: captioning
+  task: vqa_introspect_captioning
 
   # optimizer
   lr_sched: "linear_warmup_cosine_lr"
