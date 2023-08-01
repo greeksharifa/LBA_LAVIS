@@ -51,7 +51,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         for ann_path in ann_paths:
             json_data = json.load(open(ann_path, "r"))
             
-            for question_id, value in json_data.items():
+            for main_question_id, value in json_data.items():
                 _cnt += 1
                 if _cnt > 50: break
                 image_id = value["image_id"]
@@ -65,7 +65,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
                     for sub_qa in sub_qa_list:
                         _sample = {
                             "image_id": image_id,
-                            "question_id": question_id,
+                            "main_question_id": main_question_id,
                             "main_question": main_question,
                             "main_answer": main_answer,
                             "sub_question": sub_qa["sub_question"],
@@ -90,8 +90,8 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        # val2014/COCO_val2014_000000265814.jpg
-        image_path = os.path.join(self.vis_root, f'val2014/COCO_val2014_{ann["image_id"]:012}.jpg')
+        # train2014/COCO_train2014_000000216531.jpg
+        image_path = os.path.join(self.vis_root, f'train2014/COCO_train2014_{ann["image_id"]:012}.jpg')
         # image_path = os.path.join(self.vis_root, ann["image"])
         image = Image.open(image_path).convert("RGB")
 
@@ -127,7 +127,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         for ann_path in ann_paths:
             json_data = json.load(open(ann_path, "r"))
             
-            for question_id, value in json_data.items():
+            for main_question_id, value in json_data.items():
                 _cnt += 1
                 if _cnt > 50: break
                 image_id = value["image_id"]
@@ -141,7 +141,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
                     for sub_qa in sub_qa_list:
                         _sample = {
                             "image_id": image_id,
-                            "question_id": question_id,
+                            "main_question_id": main_question_id,
                             "main_question": main_question,
                             "main_answer": main_answer,
                             "sub_question": sub_qa["sub_question"],
@@ -166,19 +166,22 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
     
     def __getitem__(self, index):
         ann = self.annotation[index]
-
-        image_path = os.path.join(self.vis_root, ann["image"])
+        
+        # val2014/COCO_val2014_000000265814.jpg
+        image_path = os.path.join(self.vis_root, f'val2014/COCO_val2014_{ann["image_id"]:012}.jpg')
+        # image_path = os.path.join(self.vis_root, ann["image"])
         image = Image.open(image_path).convert("RGB")
-
+        
         image = self.vis_processor(image)
-
-        img_id = ann["img_id"]
         main_question = self.text_processor(ann["main_question"])
         sub_question = self.text_processor(ann["sub_question"])
+        img_id = ann["image_id"]
+        main_question_id = ann["main_question_id"]
 
         return {
             "image": image,
             "image_id": img_id,
+            "main_question_id": main_question_id,
             "instance_id": ann["instance_id"],
             "text_input": main_question,
             "text_output": sub_question,

@@ -476,14 +476,14 @@ class RunnerBase:
             model = self._reload_best_model(model)
         print('model load done')
         model.eval()
-        print('modal.eval() done')
-        print('$' * 160)
 
         self.task.before_evaluation(
             model=model,
             dataset=self.datasets[split_name],
         )
         results = self.task.evaluation(model, data_loader)
+        print('self.task.evaluation done')
+        print('$' * 160)
         print('results is None?: ', results is None)
 
         if results is not None:
