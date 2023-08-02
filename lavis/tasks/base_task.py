@@ -51,9 +51,9 @@ class BaseTask:
         assert len(datasets_config) > 0, "At least one dataset has to be specified."
 
         for name in datasets_config:
-            logging.info('name:', name)
+            print('name:', name)
             dataset_config = datasets_config[name]
-            logging.info('dataset_config:', dataset_config)
+            print('dataset_config:', dataset_config)
 
             builder = registry.get_builder_class(name)(dataset_config)
             dataset = builder.build_datasets()
@@ -217,6 +217,7 @@ class BaseTask:
                     "iters": i,
                 }
             )
+            # logging.info(samples)
 
             lr_scheduler.step(cur_epoch=inner_epoch, cur_step=i)
 

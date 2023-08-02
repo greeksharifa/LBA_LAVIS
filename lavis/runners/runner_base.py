@@ -438,7 +438,7 @@ class RunnerBase:
     def train_epoch(self, epoch):
         # train
         self.model.train()
-
+        
         return self.task.train_epoch(
             epoch=epoch,
             model=self.model,
@@ -450,6 +450,9 @@ class RunnerBase:
             log_freq=self.log_freq,
             accum_grad_iters=self.accum_grad_iters,
         )
+        # call base_task.train_epoch(...)
+        # call base_task._train_inner_loop(...)
+        # call base_task._train_step(...)
 
     @torch.no_grad()
     def eval_epoch(self, split_name, cur_epoch, skip_reload=False):
@@ -469,12 +472,12 @@ class RunnerBase:
         # TODO In validation, you need to compute loss as well as metrics
         # TODO consider moving to model.before_evaluation()
         model = self.unwrap_dist_model(self.model)
-        print('#' * 160)
-        print('best model loading: ',)
-        print('cur_epoch:', cur_epoch)
+        # logging.info('#' * 160)
+        # logging.info('best model loading: ',)
+        logging.info('cur_epoch:', cur_epoch)
         if not skip_reload and cur_epoch == "best":
             model = self._reload_best_model(model)
-        print('model load done')
+        # logging.info('model load done')
         model.eval()
 
         self.task.before_evaluation(
@@ -482,9 +485,9 @@ class RunnerBase:
             dataset=self.datasets[split_name],
         )
         results = self.task.evaluation(model, data_loader)
-        print('self.task.evaluation done')
-        print('$' * 160)
-        print('results is None?: ', results is None)
+        # logging.info('self.task.evaluation done')
+        # logging.info('$' * 160)
+        # logging.info('results is None?: ', results is None)
 
         if results is not None:
             return self.task.after_evaluation(

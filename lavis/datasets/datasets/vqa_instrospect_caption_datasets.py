@@ -102,7 +102,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         return {
             "image": image,
             "text_input": main_question,
-            "text_output": sub_question,
+            "text_output": sub_question + '###',    # add EOS token
             # "answer": answer,
             # "question_id": ann["question_id"],
             # "instance_id": ann["instance_id"],
@@ -184,6 +184,6 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
             "main_question_id": main_question_id,
             "instance_id": ann["instance_id"],
             "text_input": main_question,
-            "text_output": sub_question,
+            "text_output": sub_question + '###',    # add EOS token
         }
 

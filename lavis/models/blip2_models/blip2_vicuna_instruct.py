@@ -366,7 +366,8 @@ class Blip2VicunaInstruct(Blip2Base):
             inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens.input_ids)
             inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)
             attention_mask = torch.cat([atts_llm, llm_tokens.attention_mask], dim=1)
-
+            
+            self.llm_tokenizer.eos_token_id = 835
             outputs = self.llm_model.generate(
                 inputs_embeds=inputs_embeds,
                 attention_mask=attention_mask,
@@ -377,6 +378,7 @@ class Blip2VicunaInstruct(Blip2Base):
                 max_length=max_length,
                 min_length=min_length,
                 # eos_token_id=self.eos_token_id,
+                eos_token_id=self.llm_tokenizer.eos_token_id,
                 repetition_penalty=repetition_penalty,
                 length_penalty=length_penalty,
                 num_return_sequences=num_captions,
