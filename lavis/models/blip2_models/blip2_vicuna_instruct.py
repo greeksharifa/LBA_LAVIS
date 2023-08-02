@@ -117,7 +117,7 @@ class Blip2VicunaInstruct(Blip2Base):
 
         self.max_txt_len = max_txt_len
         self.max_output_txt_len = max_output_txt_len
-        self.prompt = prompt
+        self.prompÏt = prompt
         prompt_tokens = self.llm_tokenizer(self.prompt, return_tensors="pt")
         self.prompt_length = prompt_tokens.attention_mask.sum(1)
 

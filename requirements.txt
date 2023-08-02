@@ -1,3 +1,5 @@
+accelerate
+nltk
 contexttimer
 decord
 diffusers<=0.16.0

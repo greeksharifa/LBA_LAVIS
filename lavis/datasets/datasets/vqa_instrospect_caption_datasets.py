@@ -7,6 +7,7 @@
 
 import os
 import json
+import random
 from collections import OrderedDict
 
 from PIL import Image
@@ -15,6 +16,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from lavis.datasets.datasets.caption_datasets import CaptionDataset, CaptionEvalDataset
+from lavis.common.registry import registry
 
 COCOCapDataset = CaptionDataset
 
@@ -32,7 +34,18 @@ class __DisplMixin:
                 "image": sample["image"],
             }
         )
-    
+
+
+# _prompt_file_path = os.path.join(registry.get_path("cache_root"), "coco_gt")
+_prompt_file_path = "prompts.json"
+
+
+def _apply_VQAIntrospect_prompt(*tokens):
+    prompts = json.load(open(_prompt_file_path, "r"))
+    token_num = str(len(tokens))
+    prompt = random.choice(prompts[token_num]).strip()
+    return prompt.format(*tokens)
+
 
 class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
@@ -96,7 +109,8 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         image = Image.open(image_path).convert("RGB")
 
         image = self.vis_processor(image)
-        main_question = self.text_processor(ann["main_question"])
+        main_question = _apply_VQAIntrospect_prompt(ann["main_question"])
+        main_question = self.text_processor(main_question)
         sub_question = self.text_processor(ann["sub_question"])
 
         return {
@@ -173,7 +187,8 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         image = Image.open(image_path).convert("RGB")
         
         image = self.vis_processor(image)
-        main_question = self.text_processor(ann["main_question"])
+        main_question = _apply_VQAIntrospect_prompt(ann["main_question"])
+        main_question = self.text_processor(main_question)
         sub_question = self.text_processor(ann["sub_question"])
         img_id = ann["image_id"]
         main_question_id = ann["main_question_id"]

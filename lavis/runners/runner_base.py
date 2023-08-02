@@ -357,6 +357,7 @@ class RunnerBase:
             self._load_checkpoint(self.resume_ckpt_path)
 
         for cur_epoch in range(self.start_epoch, self.max_epoch):
+            logging.info("#" * 50 + "Start epoch {}".format(cur_epoch) + "#" * 50)
             # training phase
             if not self.evaluate_only:
                 logging.info("Start training")
