@@ -53,7 +53,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
             
             for main_question_id, value in json_data.items():
                 _cnt += 1
-                if _cnt > 50: break
+                # if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]
@@ -129,7 +129,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
             
             for main_question_id, value in json_data.items():
                 _cnt += 1
-                if _cnt > 50: break
+                # if _cnt > 50: break
                 image_id = value["image_id"]
                 main_question = value["reasoning_question"]
                 main_answer = value["reasoning_answer_most_common"]

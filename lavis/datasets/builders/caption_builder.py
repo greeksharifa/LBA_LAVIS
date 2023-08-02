@@ -74,7 +74,7 @@ class VATEXCapBuilder(BaseDatasetBuilder):
 
 @registry.register_builder("vqa_introspect_caption")
 class VQAIntrospectCapBuilder(BaseDatasetBuilder):
-    print('in VQAIntrospectCapBuilder class')
+    # print('in VQAIntrospectCapBuilder class')
     train_dataset_cls = VQAIntrospectCapDataset
     eval_dataset_cls = VQAIntrospectCapEvalDataset
 

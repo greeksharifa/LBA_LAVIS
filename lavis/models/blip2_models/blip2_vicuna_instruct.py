@@ -88,25 +88,17 @@ class Blip2VicunaInstruct(Blip2Base):
         self.llm_tokenizer.add_special_tokens({'bos_token': '</s>'})
         self.llm_tokenizer.add_special_tokens({'eos_token': '</s>'})
         self.llm_tokenizer.add_special_tokens({'unk_token': '</s>'})
-        print('%' * 170)
-        print('pad, bos, eos, unk, 0, 1, 835')
-        print(self.llm_tokenizer(
-             self.llm_tokenizer.pad_token, add_special_tokens=False
-        ).input_ids[0])
-        print(self.llm_tokenizer(
-             self.llm_tokenizer.bos_token, add_special_tokens=False
-        ).input_ids[0])
-        print(self.llm_tokenizer(
-             self.llm_tokenizer.eos_token, add_special_tokens=False
-        ).input_ids[0])
-        print(self.llm_tokenizer(
-             self.llm_tokenizer.unk_token, add_special_tokens=False
-        ).input_ids[0])
-        for i in range(10):
-            for j in range(10):
-                print(10*i+j, '\t', self.llm_tokenizer.decode([10*i+j]))
-        print(self.llm_tokenizer.decode([835]))
-        print('%' * 170)
+        # logging.info('%' * 170)
+        logging.info('pad\tbos\teos\tunk\t835')
+        logging.info(self.llm_tokenizer(self.llm_tokenizer.pad_token, add_special_tokens=False).input_ids[0])
+        logging.info(self.llm_tokenizer(self.llm_tokenizer.bos_token, add_special_tokens=False).input_ids[0])
+        logging.info(self.llm_tokenizer(self.llm_tokenizer.eos_token, add_special_tokens=False).input_ids[0])
+        logging.info(self.llm_tokenizer(self.llm_tokenizer.unk_token, add_special_tokens=False).input_ids[0])
+        # for i in range(10):
+        #     for j in range(10):
+        #         logging.info(10*i+j, '\t', self.llm_tokenizer.decode([10*i+j]))
+        logging.info(self.llm_tokenizer.decode([835]))
+        # logging.info('%' * 170)
 
         # self.llm_tokenizer.pad_token = self.llm_tokenizer.unk_token
 

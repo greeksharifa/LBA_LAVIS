@@ -51,9 +51,9 @@ class BaseTask:
         assert len(datasets_config) > 0, "At least one dataset has to be specified."
 
         for name in datasets_config:
-            print('name:', name)
+            logging.info('name:', name)
             dataset_config = datasets_config[name]
-            print('dataset_config:', dataset_config)
+            logging.info('dataset_config:', dataset_config)
 
             builder = registry.get_builder_class(name)(dataset_config)
             dataset = builder.build_datasets()

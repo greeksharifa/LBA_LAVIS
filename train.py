@@ -6,6 +6,7 @@
 """
 
 import argparse
+import logging
 import os
 import random
 
@@ -72,7 +73,7 @@ def get_runner_class(cfg):
 
 
 def main():
-    print('in captioning_base branch')
+    logging.info('in captioning_base branch')
     # allow auto-dl completes on main process without timeout when using NCCL backend.
     # os.environ["NCCL_BLOCKING_WAIT"] = "1"
 

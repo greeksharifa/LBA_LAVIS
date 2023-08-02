@@ -25,7 +25,7 @@ class Config:
         user_config = self._build_opt_list(self.args.options)
 
         config = OmegaConf.load(self.args.cfg_path)
-        print('config:', config)
+        # logging.info('config:', config)
         # import pdb; pdb.set_trace()
 
         runner_config = self.build_runner_config(config)

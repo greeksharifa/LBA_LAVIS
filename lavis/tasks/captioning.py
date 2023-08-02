@@ -139,6 +139,7 @@ class VQAIntrospectCaptionTask(CaptionTask):
             'is there sand and whitewater?'
         ]
         """
+        import warnings;    warnings.filterwarnings("ignore")
         blue_scores = []
         res_data = json.load(open(eval_result_file))    # result data
         # res example: {'caption': 'stabilityout land guerre...', 'image_id': 565248, 'main_question_id': 565248001}
