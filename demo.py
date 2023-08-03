@@ -22,4 +22,15 @@ image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
 
 print(model.generate({"image": image, "prompt": "Write a detailed description."}))
 
-import pdb; pdb.set_trace()
+ROOT_DIR = '/data/coco/images/'
+splits = ['train', 'val']
+for split in splits:
+    print(f'Generate in {split} split...')
+    for idx, image_path in enumerate(tqdm(enumerate(glob.iglob(os.path.join(ROOT_DIR, f"{split}2014/*.jpg"))))):
+        if idx >= 3:
+            break
+        raw_image = Image.open(image_path).convert("RGB")
+        image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+        print(model.generate({"image": image, "prompt": "Write a detailed description."}))
+    print(f'split {split} Done.')
+    
