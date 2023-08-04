@@ -266,6 +266,7 @@ class Blip2VicunaInstruct(Blip2Base):
         num_captions=1,
         temperature=1,
     ):
+        prompt = None
         try:
             self.llm_tokenizer.padding_side = "left"
             
@@ -275,6 +276,7 @@ class Blip2VicunaInstruct(Blip2Base):
                 prompt = self.prompt
     
             if self._cnt == 0:
+                print('for first', '!' * 170)
                 self._cnt += 1
                 for key in samples.keys():
                     if key != "image":
@@ -377,7 +379,7 @@ class Blip2VicunaInstruct(Blip2Base):
                 inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)
                 attention_mask = torch.cat([atts_llm, llm_tokens.attention_mask], dim=1)
                 
-                self.llm_tokenizer.eos_token_id = 835
+                # self.llm_tokenizer.eos_token_id = 835
                 outputs = self.llm_model.generate(
                     inputs_embeds=inputs_embeds,
                     attention_mask=attention_mask,
@@ -388,7 +390,7 @@ class Blip2VicunaInstruct(Blip2Base):
                     max_length=max_length,
                     min_length=min_length,
                     # eos_token_id=self.eos_token_id,
-                    eos_token_id=self.llm_tokenizer.eos_token_id,
+                    # eos_token_id=self.llm_tokenizer.eos_token_id,
                     repetition_penalty=repetition_penalty,
                     length_penalty=length_penalty,
                     num_return_sequences=num_captions,
@@ -397,14 +399,18 @@ class Blip2VicunaInstruct(Blip2Base):
             outputs[outputs == 0] = 2 # convert output id 0 to 2 (eos_token_id)
             output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
             output_text = [text.strip() for text in output_text]
+            
+            return output_text
+        
         except Exception as e:
+            print('ERROR OCCUR!', '!' * 170)
             for key in samples.keys():
                 if key != "image":
                     print(key, samples[key])
             print('prompt:', prompt)
             print('error msg:', e)
+            return ['ERROR message: ' + str(e)] * samples["image"].size(0)
     
-        return output_text
 
     def predict_answers(
         self,

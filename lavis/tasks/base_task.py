@@ -95,7 +95,29 @@ class BaseTask:
 
         for samples in metric_logger.log_every(data_loader, print_freq, header):
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
-
+            
+            print('&' * 170)
+            print('samples:', samples)
+            """
+            samples: {
+                'image': Tensor
+                'image_id': tensor([565248, 284885, 276693, 119210], device='cuda:0'),
+                'main_question_id': ['565248001', '284885001', '276693003', '119210000'],
+                'instance_id': ['0', '4', '8', '12'],
+                'text_input': ["write a informative sub-question about image, when main-question is 'are they at the beach?'",
+                                "write a sub-question about image, when main-question is 'is the house new?'",
+                                "write a informative sub-question about image, when main-question is 'is the woman going up or downhill?'",
+                                "write a sub-question about image, when main-question is 'what feature is significant about this animal?'"],
+                'prompt': ["write a informative sub-question about image, when main-question is 'are they at the beach?'",
+                            "write a sub-question about image, when main-question is 'is the house new?'",
+                            "write a informative sub-question about image, when main-question is 'is the woman going up or downhill?'",
+                            "write a sub-question about image, when main-question is 'what feature is significant about this animal?'"],
+                'text_output': ['are the woman on the horses near to the sea?</s>',
+                                'is the window of the house boarded up?</s>',
+                                'is the path in the distance higher or lower than in the front?</s>',
+                                'does the zebra have stripes?</s>']
+                }
+            """
             eval_output = self.valid_step(model=model, samples=samples)
             results.extend(eval_output)
 

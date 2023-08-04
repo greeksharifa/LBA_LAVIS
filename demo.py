@@ -44,7 +44,7 @@ for split in splits:
         print(f'{split} image_id_list:', len(image_id_list))
         
         not_exist_image_id_list = []
-        for image_id in image_id_list:
+        for image_id in tqdm(image_id_list):
             image_path = os.path.join(ROOT_DIR, f"coco/images/{split}2014/COCO_{split}2014_{image_id:012}.jpg")
             if os.path.exists(image_path) is False:
                 not_exist_image_id_list.append(image_path.split('/')[-1])

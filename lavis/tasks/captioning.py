@@ -62,11 +62,15 @@ class CaptionTask(BaseTask):
         img_ids = samples["image_id"]
         main_question_ids = samples["main_question_id"]
         text_inputs = samples["text_input"]
+        print('in valid step(): captions, img_ids, main_question_ids, text_inputs')
+        print(captions, img_ids, main_question_ids, text_inputs, sep='\n')
         for caption, img_id, main_question_id, text_input in zip(captions, img_ids, main_question_ids, text_inputs):
+            print('in valid step(): caption, img_id, main_question_id, text_input')
+            print(caption, img_id, main_question_id, text_input, sep='\n')
             results.append({
                 "caption": caption,
                 "image_id": int(img_id),
-                "main_question_id": int(main_question_id),
+                "main_question_id": main_question_id,
                 "text_input": text_input
             })
 
@@ -77,7 +81,7 @@ class CaptionTask(BaseTask):
             result=val_result,
             result_dir=registry.get_path("result_dir"),
             filename="{}_epoch{}".format(split_name, epoch),
-            remove_duplicate="image_id",
+            remove_duplicate="main_question_id",
         )
 
         if self.report_metric:
