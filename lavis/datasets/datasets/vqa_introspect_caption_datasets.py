@@ -75,17 +75,22 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
                     sub_qa_list = introspect["sub_qa"]
                     pred_q_type = introspect["pred_q_type"]
                     
+                    sub_qa_set = set()
                     for sub_qa in sub_qa_list:
-                        _sample = {
-                            "image_id": image_id,
-                            "main_question_id": main_question_id,
-                            "main_question": main_question,
-                            "main_answer": main_answer,
-                            "sub_question": sub_qa["sub_question"],
-                            "sub_answer": sub_qa["sub_answer"],
-                            "pred_q_type": pred_q_type,
-                        }
-                        self.annotation.append(_sample)
+                        if sub_qa["sub_question"] in sub_qa_set:
+                            pass    # 중복
+                        else:
+                            sub_qa_set.add(sub_qa["sub_question"])
+                            _sample = {
+                                "image_id": image_id,
+                                "main_question_id": main_question_id,
+                                "main_question": main_question,
+                                "main_answer": main_answer,
+                                "sub_question": sub_qa["sub_question"],
+                                "sub_answer": sub_qa["sub_answer"],
+                                "pred_q_type": pred_q_type,
+                            }
+                            self.annotation.append(_sample)
         
         self.img_ids = {}
         n = 0
@@ -110,7 +115,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
 
         image = self.vis_processor(image)
         text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        sub_question = self.text_processor(ann["sub_question"] + '###')    # add EOS token
+        sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
 
         return {
             "image": image,
@@ -151,17 +156,22 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
                     sub_qa_list = introspect["sub_qa"]
                     pred_q_type = introspect["pred_q_type"]
                     
+                    sub_qa_set = set()
                     for sub_qa in sub_qa_list:
-                        _sample = {
-                            "image_id": image_id,
-                            "main_question_id": main_question_id,
-                            "main_question": main_question,
-                            "main_answer": main_answer,
-                            "sub_question": sub_qa["sub_question"],
-                            "sub_answer": sub_qa["sub_answer"],
-                            "pred_q_type": pred_q_type,
-                        }
-                        self.annotation.append(_sample)
+                        if sub_qa["sub_question"] in sub_qa_set:
+                            pass  # 중복
+                        else:
+                            sub_qa_set.add(sub_qa["sub_question"])
+                            _sample = {
+                                "image_id": image_id,
+                                "main_question_id": main_question_id,
+                                "main_question": main_question,
+                                "main_answer": main_answer,
+                                "sub_question": sub_qa["sub_question"],
+                                "sub_answer": sub_qa["sub_answer"],
+                                "pred_q_type": pred_q_type,
+                            }
+                            self.annotation.append(_sample)
         
         self.img_ids = {}
         n = 0
@@ -187,7 +197,8 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         
         image = self.vis_processor(image)
         text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        sub_question = self.text_processor(ann["sub_question"] + '###')    # add EOS token
+        # sub_question = self.text_processor(ann["sub_question"] + '###')    # add EOS token
+        sub_question = ann["sub_question"] + '</s>'    # add EOS token
         img_id = ann["image_id"]
         main_question_id = ann["main_question_id"]
 
@@ -197,6 +208,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
             "main_question_id": main_question_id,
             "instance_id": ann["instance_id"],
             "text_input": text_input,
+            "prompt": text_input,
             "text_output": sub_question,
         }
 

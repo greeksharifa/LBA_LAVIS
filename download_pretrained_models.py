@@ -21,7 +21,13 @@ def download_HF_model(model_ckpt):
 
 
 # Download blip2-opt-2.7b
-download_HF_model("Salesforce/blip2-opt-2.7b")
+# download_HF_model("Salesforce/blip2-opt-2.7b")
+
+# Download vicuna-7b-v1.1
+# download_HF_model("lmsys/vicuna-7b-v1.1")
 
 # Download vicuna-7b-v1.3
-download_HF_model("lmsys/vicuna-7b-v1.3")
+# download_HF_model("lmsys/vicuna-7b-v1.3")
+
+# Download vicuna-7b-v1.1
+download_HF_model("eachadea/vicuna-7b-1.1")

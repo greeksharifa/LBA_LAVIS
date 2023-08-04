@@ -36,6 +36,8 @@ run:
   task: vqa_introspect_captioning
 
   # optimizer
+  # batch_size * accum_grad_iters = 128 or 256
+  # batch_size * warmup_steps = 128k or 256k
   lr_sched: "linear_warmup_cosine_lr"
   init_lr: 1e-5
   min_lr: 0
@@ -49,7 +51,7 @@ run:
   accum_grad_iters: 1
   prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
 
-  max_len: 30
+  max_len: 128
   min_len: 8
   num_beams: 5
 

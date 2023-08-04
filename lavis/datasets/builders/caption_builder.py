@@ -17,7 +17,7 @@ from lavis.datasets.datasets.video_caption_datasets import (
     VideoCaptionDataset,
     VideoCaptionEvalDataset,
 )
-from lavis.datasets.datasets.vqa_instrospect_caption_datasets import (
+from lavis.datasets.datasets.vqa_introspect_caption_datasets import (
     VQAIntrospectCapDataset,
     VQAIntrospectCapEvalDataset
 )

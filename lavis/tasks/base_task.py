@@ -208,6 +208,9 @@ class BaseTask:
                 break
 
             samples = next(data_loader)
+            # for key in samples.keys():
+            #     if key != "image":
+            #         print(key, samples[key])
 
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             samples.update(
