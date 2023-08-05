@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.run --master-port=52900 generate_image_description.py

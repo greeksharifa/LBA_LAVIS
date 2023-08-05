@@ -71,3 +71,8 @@ for split in splits:
                 f_out.write(str(new_data) + '\n')
             
     print(f'split {split} Done.')
+    print('not_exist_image_id_list:', not_exist_image_id_list)
+    print('len(not_exist_image_id_list):', len(not_exist_image_id_list))
+    print('out file:', os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl'))
+    print('not exist image file:', os.path.join(ROOT_DIR, f'VQA-Introspect/not_exist_image_id_list_{split}v1.0.txt'))
+    
