@@ -1,4 +1,5 @@
 import json
+import jsonlines
 import os
 import glob
 
@@ -34,7 +35,15 @@ result = {}
 splits = ['val']
 for split in splits:
     print(f'Generate in {split} split...')
-    f_out = open(os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl'), 'a')
+    
+    if os.path.exists(os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl')):
+        with jsonlines.open(os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl'), 'r') as f_out:
+            for line in f_out:
+                result[line["image_path"]] = line["description"]
+    if os.path.exists(os.path.join(ROOT_DIR, f'VQA-Introspect/not_exist_image_id_list_{split}v1.0.txt')):
+        for line in open(os.path.join(ROOT_DIR, f'VQA-Introspect/not_exist_image_id_list_{split}v1.0.txt'), 'r').readlines():
+            result[line.strip()] = "IMAGE_PATH NOT EXIST"
+        
     with open(os.path.join(ROOT_DIR, f'VQA-Introspect/VQAIntrospect_{split}v1.0.json'), 'r') as f_in:
         json_data = json.load(f_in)
         
@@ -49,12 +58,16 @@ for split in splits:
             if idx >= 10:
                 break
             image_path = os.path.join(ROOT_DIR, f"coco/images/{split}2014/COCO_{split}2014_{image_id:012}.jpg")
+            short_image_path = '/'.join(image_path.split('/')[-2:])
+            if short_image_path in result.keys():
+                print('already exist:', image_path)
+                continue
             
             if os.path.exists(image_path) is False:
                 not_exist_image_id_list.append(image_path.split('/')[-1])
                 print('not exist image_path:', image_path)
                 with open(os.path.join(ROOT_DIR, f'VQA-Introspect/not_exist_image_id_list_{split}v1.0.txt'), 'a') as f_out2:
-                    f_out2.write('/'.join(image_path.split('/')[-2:]) + '\n')
+                    f_out2.write(short_image_path + '\n')
                 continue
                 
             raw_image = Image.open(image_path).convert("RGB")
@@ -63,12 +76,13 @@ for split in splits:
             description = model.generate({"image": image, "prompt": "Write a detailed description."})
             print(description)
             new_data = {
-                "image_path": '/'.join(image_path.split('/')[-2:]),     # image_path.split('/')[-1],
+                "image_path": short_image_path,     # image_path.split('/')[-1],
                 "description": description,
             }
             result[image_id] = new_data
             with open(os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl'), 'a') as f_out:
-                f_out.write(str(new_data) + '\n')
+                json.dump(new_data, f_out)
+                f_out.write('\n')
             
     print(f'split {split} Done.')
     print('not_exist_image_id_list:', not_exist_image_id_list)
