@@ -96,8 +96,10 @@ class BaseTask:
         for samples in metric_logger.log_every(data_loader, print_freq, header):
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             
-            print('&' * 170)
-            print('samples:', samples)
+            # print('in base_task. evaluation()', '&' * 170)
+            # for key in samples.keys():
+            #     if key != "image":
+            #         print(key, samples[key])
             """
             samples: {
                 'image': Tensor
@@ -112,6 +114,7 @@ class BaseTask:
                             "write a sub-question about image, when main-question is 'is the house new?'",
                             "write a informative sub-question about image, when main-question is 'is the woman going up or downhill?'",
                             "write a sub-question about image, when main-question is 'what feature is significant about this animal?'"],
+                'sub_question_id': 무언가,
                 'text_output': ['are the woman on the horses near to the sea?</s>',
                                 'is the window of the house boarded up?</s>',
                                 'is the path in the distance higher or lower than in the front?</s>',

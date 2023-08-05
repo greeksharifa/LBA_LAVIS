@@ -62,16 +62,18 @@ class CaptionTask(BaseTask):
         img_ids = samples["image_id"]
         main_question_ids = samples["main_question_id"]
         text_inputs = samples["text_input"]
-        print('in valid step(): captions, img_ids, main_question_ids, text_inputs')
-        print(captions, img_ids, main_question_ids, text_inputs, sep='\n')
-        for caption, img_id, main_question_id, text_input in zip(captions, img_ids, main_question_ids, text_inputs):
-            print('in valid step(): caption, img_id, main_question_id, text_input')
-            print(caption, img_id, main_question_id, text_input, sep='\n')
+        sub_question_ids = samples["sub_question_id"]
+        # print('in valid step(): img_ids, main_question_ids, text_inputs, sub_question_ids, captions')
+        # print(img_ids, main_question_ids, text_inputs, sub_question_ids, captions, sep='\n')
+        for caption, img_id, main_question_id, text_input, sub_question_id in zip(captions, img_ids, main_question_ids, text_inputs, sub_question_ids):
+            # print('in valid step(): img_id, main_question_id, text_input, sub_question_id, caption')
+            # print(img_id, main_question_id, text_input, sub_question_id, caption, sep='\n')
             results.append({
-                "caption": caption,
                 "image_id": int(img_id),
-                "main_question_id": main_question_id,
-                "text_input": text_input
+                "main_question_id": int(main_question_id),
+                "text_input": text_input,
+                "sub_question_id": int(sub_question_id),
+                "caption": caption,
             })
 
         return results
@@ -81,7 +83,7 @@ class CaptionTask(BaseTask):
             result=val_result,
             result_dir=registry.get_path("result_dir"),
             filename="{}_epoch{}".format(split_name, epoch),
-            remove_duplicate="main_question_id",
+            # remove_duplicate="sub_question_id",
         )
 
         if self.report_metric:

@@ -92,7 +92,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
                             self.annotation.append(_sample)
                             
                             sub_question_id += 1
-                            if sub_question_id >= 100: break
+                if sub_question_id >= 100: break
         
         self.img_ids = {}
         n = 0
@@ -179,13 +179,13 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
                             self.annotation.append(_sample)
                             
                             sub_question_id += 1
-                            if sub_question_id >= 100: break
+                if sub_question_id >= 20: break
         
         self.img_ids = {}
         n = 0
         for ann in self.annotation:
-            # img_id = ann["image_id"]
-            img_id = ann["main_question_id"]
+            img_id = ann["image_id"]
+            # img_id = ann["main_question_id"]
             if img_id not in self.img_ids.keys():
                 self.img_ids[img_id] = n
                 n += 1
@@ -217,9 +217,10 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
             "instance_id": ann["instance_id"],
             "text_input": text_input,
             "prompt": text_input,
+            "sub_question_id": ann["sub_question_id"],
             "text_output": sub_question,
         }
-        print('_return:', _return)
+        # print('_return:', _return)
 
         return _return
 

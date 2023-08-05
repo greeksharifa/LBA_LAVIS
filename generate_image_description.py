@@ -62,11 +62,12 @@ for split in splits:
             print('image_id:', image_id, '\t', "image_path:", image_path)
             description = model.generate({"image": image, "prompt": "Write a detailed description."})
             print(description)
-            result[image_id] = {
+            new_data = {
                 "image_path": '/'.join(image_path.split('/')[-2:]),     # image_path.split('/')[-1],
                 "description": description,
             }
+            result[image_id] = new_data
             with open(os.path.join(ROOT_DIR, f'VQA-Introspect/instructBLIP_Description_{split}v1.0.jsonl'), 'a') as f_out:
-                f_out.write(str(result) + '\n')
+                f_out.write(str(new_data) + '\n')
             
     print(f'split {split} Done.')
