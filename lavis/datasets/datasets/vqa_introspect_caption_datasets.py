@@ -39,6 +39,7 @@ class __DisplMixin:
 
 def _init_VQAIntrospectCapDataset(ann_paths, max_sample_num=99999999):
     annotation = []
+    
     sub_question_id = 0
     for ann_path in ann_paths:
         logging.info(f"Loading {ann_path}")

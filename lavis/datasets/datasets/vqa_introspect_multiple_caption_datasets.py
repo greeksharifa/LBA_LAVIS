@@ -24,6 +24,8 @@ COCOCapDataset = CaptionDataset
 
 def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
     annotation = []
+    from collections import Counter
+    counter = Counter()
     
     sub_question_id = 0
     for ann_path in ann_paths:
@@ -59,6 +61,10 @@ def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
                         
                         sub_q_id_list.append(sub_question_id)
                         sub_question_id += 1
+
+            counter[len(sub_q_set)] += 1
+            if len(sub_q_set) == 0:
+                continue
             
             _sample = {
                 "image_id": image_id,
@@ -72,8 +78,9 @@ def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
             }
             annotation.append(_sample)
             
-            if sub_question_id >= max_sample_num: break
+            if len(sub_q_set) >= max_sample_num: break
     
+    print('counter: ', counter)
     return annotation
 
 
@@ -97,6 +104,8 @@ _prompt_file_path = "prompts.json"
 
 
 def _apply_VQAIntrospect_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
+    logging.info('in _apply_VQAIntrospect_MultipleSubQ_prompt()')
+    
     multiple_prompts = json.load(open(_prompt_file_path, "r"))["multiple"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
     sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
@@ -180,7 +189,7 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         
-        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 50)
+        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 20)
         
         self.img_ids = {}
         n = 0
