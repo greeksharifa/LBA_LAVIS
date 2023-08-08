@@ -120,8 +120,10 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         image = Image.open(image_path).convert("RGB")
 
         image = self.vis_processor(image)
-        text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
+        # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
+        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
+        # sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
+        sub_question = ann["sub_question"]  # + '</s>'    # add EOS token
 
         return {
             "image": image,
@@ -207,8 +209,10 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         image = Image.open(image_path).convert("RGB")
         
         image = self.vis_processor(image)
-        text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
+        # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
+        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
+        # sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
+        sub_question = ann["sub_question"]  # + '</s>'    # add EOS token
         
         _return = {
             "image": image,

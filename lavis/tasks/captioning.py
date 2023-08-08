@@ -62,17 +62,18 @@ class CaptionTask(BaseTask):
         img_ids = samples["image_id"]
         main_question_ids = samples["main_question_id"]
         text_inputs = samples["text_input"]
-        sub_question_ids = samples["sub_question_id"]
+        # sub_question_ids = samples["sub_question_id"]
         # print('in valid step(): img_ids, main_question_ids, text_inputs, sub_question_ids, captions')
         # print(img_ids, main_question_ids, text_inputs, sub_question_ids, captions, sep='\n')
-        for caption, img_id, main_question_id, text_input, sub_question_id in zip(captions, img_ids, main_question_ids, text_inputs, sub_question_ids):
+        # for caption, img_id, main_question_id, text_input, sub_question_id in zip(captions, img_ids, main_question_ids, text_inputs, sub_question_ids):
+        for caption, img_id, main_question_id, text_input in zip(captions, img_ids, main_question_ids, text_inputs):
             # print('in valid step(): img_id, main_question_id, text_input, sub_question_id, caption')
             # print(img_id, main_question_id, text_input, sub_question_id, caption, sep='\n')
             results.append({
                 "image_id": int(img_id),
                 "main_question_id": int(main_question_id),
                 "text_input": text_input,
-                "sub_question_id": int(sub_question_id),
+                # "sub_question_id": int(sub_question_id),
                 "caption": caption,
             })
 
