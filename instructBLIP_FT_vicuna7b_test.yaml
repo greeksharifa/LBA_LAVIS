@@ -46,7 +46,7 @@ run:
   warmup_steps: 16000
   weight_decay: 0.05
   max_epoch: 5
-  batch_size_train: 8
+  batch_size_train: 4
   batch_size_eval: 1
   num_workers: 0
   accum_grad_iters: 16

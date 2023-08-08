@@ -489,7 +489,9 @@ class RunnerBase:
         results = self.task.evaluation(model, data_loader)
         logging.info('self.task.evaluation done')
         logging.info('$' * 160)
-        # print('results is None?: ', results is None)
+        logging.info('self.task.evaluation results:')
+        from pprint import pprint
+        pprint(results)
 
         if results is not None:
             return self.task.after_evaluation(

@@ -12,5 +12,10 @@
   "2": [
     "Write a sub-question about concept '{}', when main-question is '{}'. sub-question:",
     "Instruction: Given a picture, a question and a correct answer related the picture are provided. The answer can be inferred from the picture. The target(object) of question which is existed in the picture is important key to infer the answer. The additional information of object related question is helpful for answer the question more correctly. Therefore, our goal is to get new information related answer by asking a new question. Write an additional question to help to answer the original question correctly.\nQuestion: {}\nAnswer: {}"
-  ]
+  ],
+  "multiple": {
+    "init_prompt": "Generate a sub-question about image, when main-question is '{}'.",
+    "after_prompt": " While creating the new sub-question, consider the following pairs of previously created (sub-question, corresponding answer). ",
+    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
+  }
 }

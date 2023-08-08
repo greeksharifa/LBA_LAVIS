@@ -22,6 +22,61 @@ from lavis.common.registry import registry
 COCOCapDataset = CaptionDataset
 
 
+def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
+    annotation = []
+    
+    sub_question_id = 0
+    for ann_path in ann_paths:
+        logging.info(f"Loading {ann_path}")
+        json_data = json.load(open(ann_path, "r"))
+        
+        for main_question_id, value in json_data.items():
+            image_id = value["image_id"]
+            main_question = value["reasoning_question"]
+            main_answer = value["reasoning_answer_most_common"]
+            
+            sub_q_set = set()
+            
+            sub_q_list = []
+            sub_a_list = []
+            sub_q_id_list = []
+            
+            pred_q_type_list = []
+            
+            for introspect in value["introspect"]:
+                sub_qa_list = introspect["sub_qa"]
+                pred_q_type = introspect["pred_q_type"]
+                
+                for sub_qa in sub_qa_list:
+                    if sub_qa["sub_question"] in sub_q_set:
+                        pass  # 중복
+                    else:
+                        sub_q_set.add(sub_qa["sub_question"])
+                        
+                        sub_q_list.append(sub_qa["sub_question"])
+                        sub_a_list.append(sub_qa["sub_answer"])
+                        pred_q_type_list.append(pred_q_type)
+                        
+                        sub_q_id_list.append(sub_question_id)
+                        sub_question_id += 1
+            
+            _sample = {
+                "image_id": image_id,
+                "main_question_id": int(main_question_id),
+                "main_question": main_question,
+                "main_answer": main_answer,
+                "sub_question_id_list": sub_q_id_list,
+                "sub_question_list": sub_q_list,
+                "sub_answer_list": sub_a_list,
+                "pred_q_type_list": pred_q_type_list,
+            }
+            annotation.append(_sample)
+            
+            if sub_question_id >= max_sample_num: break
+    
+    return annotation
+
+
 class __DisplMixin:
     def displ_item(self, index):
         sample, ann = self.__getitem__(index), self.annotation[index]
@@ -37,60 +92,31 @@ class __DisplMixin:
         )
 
 
-def _init_VQAIntrospectCapDataset(ann_paths, max_sample_num=99999999):
-    annotation = []
-    sub_question_id = 0
-    for ann_path in ann_paths:
-        logging.info(f"Loading {ann_path}")
-        json_data = json.load(open(ann_path, "r"))
-        
-        for main_question_id, value in json_data.items():
-            image_id = value["image_id"]
-            main_question = value["reasoning_question"]
-            main_answer = value["reasoning_answer_most_common"]
-            
-            sub_q_set = set()
-            
-            for introspect in value["introspect"]:
-                sub_qa_list = introspect["sub_qa"]
-                pred_q_type = introspect["pred_q_type"]
-                
-                for sub_qa in sub_qa_list:
-                    if sub_qa["sub_question"] in sub_q_set:
-                        pass  # 중복
-                    else:
-                        sub_q_set.add(sub_qa["sub_question"])
-                        _sample = {
-                            "image_id": image_id,
-                            "main_question_id": int(main_question_id),
-                            "main_question": main_question,
-                            "main_answer": main_answer,
-                            "sub_question_id": sub_question_id,
-                            "sub_question": sub_qa["sub_question"],
-                            "sub_answer": sub_qa["sub_answer"],
-                            "pred_q_type": pred_q_type,
-                        }
-                        annotation.append(_sample)
-                        
-                        sub_question_id += 1
-            if sub_question_id >= max_sample_num:
-                break
-                
-    return annotation
-
-
 # _prompt_file_path = os.path.join(registry.get_path("cache_root"), "coco_gt")
 _prompt_file_path = "prompts.json"
 
 
-def _apply_VQAIntrospect_prompt(*tokens):
-    prompts = json.load(open(_prompt_file_path, "r"))
-    token_num = str(len(tokens))
-    prompt = random.choice(prompts[token_num]).strip()
-    return prompt.format(*tokens)
+def _apply_VQAIntrospect_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["multiple"]
+    # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
+    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
+    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    
+    text_input = multiple_prompts["init_prompt"].format(main_question)
+    if sub_qa_pair_num > 1:
+        text_input += multiple_prompts["after_prompt"]
+        for i in range(1, sub_qa_pair_num):
+            index = sub_qa_indices[i]
+            if i > 1:
+                text_input += ', '
+            text_input += multiple_prompts["pair_prompt"].format(i, sub_question_list[index], i, sub_answer_list[index])
+    
+    text_output = sub_question_list[sub_qa_indices[0]]
+    
+    return text_input, text_output
 
 
-class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
+class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
@@ -100,7 +126,9 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         
-        self.annotation = _init_VQAIntrospectCapDataset(ann_paths, 100)
+        # TODO: annotation 불러오기
+        # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
+        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 100)
         
         self.img_ids = {}
         n = 0
@@ -116,7 +144,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectCapDataset: {len(self.annotation)}")
+        logging.info(f"VQAIntrospectMultipleCapDataset: {len(self.annotation)}")
 
         
     def __getitem__(self, index):
@@ -129,22 +157,20 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
 
         image = self.vis_processor(image)
         # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
-        # sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
-        sub_question = ann["sub_question"]  # + '</s>'    # add EOS token
+        text_input, text_output = _apply_VQAIntrospect_MultipleSubQ_prompt(
+            ann["main_question"],
+            ann["sub_question_list"],
+            ann["sub_answer_list"],
+        )
 
         return {
             "image": image,
             "text_input": text_input,
-            "text_output": sub_question,
-            # "answer": answer,
-            # "question_id": ann["question_id"],
-            # "instance_id": ann["instance_id"],
-            # "sub_answer": ann["sub_answer"],
+            "text_output": text_output,
         }
 
 
-class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
+class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
@@ -154,7 +180,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         
-        self.annotation = _init_VQAIntrospectCapDataset(ann_paths, 50)
+        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 50)
         
         self.img_ids = {}
         n = 0
@@ -170,7 +196,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectCapEvalDataset: {len(self.annotation)}")
+        logging.info(f"VQAIntrospectMultipleCapEvalDataset: {len(self.annotation)}")
     
     
     def __getitem__(self, index):
@@ -183,9 +209,11 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         
         image = self.vis_processor(image)
         # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        # sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
-        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
-        sub_question = ann["sub_question"]  # + '</s>'    # add EOS token
+        text_input, text_output = _apply_VQAIntrospect_MultipleSubQ_prompt(
+            ann["main_question"],
+            ann["sub_question_list"],
+            ann["sub_answer_list"],
+        )
         
         _return = {
             "image": image,
@@ -194,8 +222,8 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
             "instance_id": ann["instance_id"],
             "text_input": text_input,
             "prompt": text_input,
-            "sub_question_id": ann["sub_question_id"],
-            "text_output": sub_question,
+            # "sub_question_id": ann["sub_question_id"],
+            "text_output": text_output,
         }
         # print('_return:', _return)
 

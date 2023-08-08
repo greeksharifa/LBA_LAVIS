@@ -21,6 +21,10 @@ from lavis.datasets.datasets.vqa_introspect_caption_datasets import (
     VQAIntrospectCapDataset,
     VQAIntrospectCapEvalDataset
 )
+from lavis.datasets.datasets.vqa_introspect_multiple_caption_datasets import (
+    VQAIntrospectMultipleCapDataset,
+    VQAIntrospectMultipleCapEvalDataset
+)
 
 
 @registry.register_builder("coco_caption")
@@ -80,4 +84,15 @@ class VQAIntrospectCapBuilder(BaseDatasetBuilder):
 
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/vqa_introspect/defaults_cap.yaml",
+    }
+
+
+@registry.register_builder("vqa_introspect_multiple_caption")
+class VQAIntrospectMultipleCapBuilder(BaseDatasetBuilder):
+    # print('in VQAIntrospectMultipleCapBuilder class')
+    train_dataset_cls = VQAIntrospectMultipleCapDataset
+    eval_dataset_cls = VQAIntrospectMultipleCapEvalDataset
+
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/vqa_introspect/defaults_multiple_cap.yaml",
     }

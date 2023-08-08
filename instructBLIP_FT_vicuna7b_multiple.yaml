@@ -12,7 +12,7 @@ model:
   freeze_vit: True
 
 datasets:
-  vqa_introspect_caption: # name of the dataset builder
+  vqa_introspect_multiple_caption: # name of the dataset builder
     vis_processor:
         train:
           name: "blip2_image_train"
