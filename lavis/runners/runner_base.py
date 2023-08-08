@@ -473,9 +473,10 @@ class RunnerBase:
         # TODO In validation, you need to compute loss as well as metrics
         # TODO consider moving to model.before_evaluation()
         model = self.unwrap_dist_model(self.model)
+        print('in eval_epoch() in lavis/runners/runner_base.py, cur_epoch:', cur_epoch)
         # logging.info('#' * 160)
-        # logging.info('best model loading: ',)
-        logging.info('cur_epoch:', cur_epoch)
+        # logging.info('best model loading: ')
+        # print('cur_epoch:', cur_epoch)
         if not skip_reload and cur_epoch == "best":
             model = self._reload_best_model(model)
         # logging.info('model load done')
@@ -486,9 +487,9 @@ class RunnerBase:
             dataset=self.datasets[split_name],
         )
         results = self.task.evaluation(model, data_loader)
-        # logging.info('self.task.evaluation done')
-        # logging.info('$' * 160)
-        # logging.info('results is None?: ', results is None)
+        logging.info('self.task.evaluation done')
+        logging.info('$' * 160)
+        # print('results is None?: ', results is None)
 
         if results is not None:
             return self.task.after_evaluation(

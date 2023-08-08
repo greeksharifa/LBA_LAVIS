@@ -404,14 +404,14 @@ class Blip2VicunaInstruct(Blip2Base):
         
         except Exception as e:
             print('ERROR OCCUR!', '!' * 170)
-            # raise Exception(e)
             for key in samples.keys():
                 if key != "image":
                     print(key, samples[key])
             print('prompt:', prompt)
             print('error msg:', e)
             return ['ERROR message: ' + str(e)] * samples["image"].size(0)
-    
+            # raise Exception(e)
+
 
     def predict_answers(
         self,

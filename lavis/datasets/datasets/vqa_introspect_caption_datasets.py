@@ -92,7 +92,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
                             self.annotation.append(_sample)
                             
                             sub_question_id += 1
-                if sub_question_id >= 100: break
+                # if sub_question_id >= 100: break
         
         self.img_ids = {}
         n = 0
@@ -181,7 +181,7 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
                             self.annotation.append(_sample)
                             
                             sub_question_id += 1
-                if sub_question_id >= 20: break
+                if sub_question_id >= 50: break
         
         self.img_ids = {}
         n = 0
@@ -210,8 +210,8 @@ class VQAIntrospectCapEvalDataset(CaptionEvalDataset):
         
         image = self.vis_processor(image)
         # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
         # sub_question = self.text_processor(ann["sub_question"] + '</s>')    # add EOS token
+        text_input = _apply_VQAIntrospect_prompt(ann["main_question"])
         sub_question = ann["sub_question"]  # + '</s>'    # add EOS token
         
         _return = {
