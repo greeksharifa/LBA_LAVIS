@@ -104,12 +104,12 @@ class __DisplMixin:
 _prompt_file_path = "prompts.json"
 
 
-def _apply_VQAIntrospect_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
-    # logging.info('in _apply_VQAIntrospect_MultipleSubQ_prompt()')
+def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
+    # logging.info('in _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt()')
     
-    multiple_prompts = json.load(open(_prompt_file_path, "r"))["multiple"]
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
-    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
+    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
     sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
     text_input = multiple_prompts["init_prompt"].format(main_question)
@@ -126,8 +126,38 @@ def _apply_VQAIntrospect_MultipleSubQ_prompt(main_question, sub_question_list, s
     return text_input, text_output
 
 
+def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_question_list, sub_answer_list):
+    # logging.info('in _apply_VQAIntrospect_Reasoner_prompt()')
+    
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Reasoner"]
+    # generated sub_qa를 1~3개 비복원추출
+    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
+    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    
+    text_input = multiple_prompts["init_prompt"].format(main_question)
+    for i in range(0, sub_qa_pair_num):
+        index = sub_qa_indices[i]
+        if i > 0:
+            text_input += ', '
+        text_input += multiple_prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+    
+    text_output = main_answer
+    
+    return text_input, text_output
+
+
+def _apply_VQAIntrospect_Answerer_prompt(main_question, main_answer):
+    # logging.info('in _apply_VQAIntrospect_Answerer_prompt()')
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Answerer"]
+    
+    text_input = multiple_prompts["init_prompt"].format(main_question)
+    text_output = main_answer
+    
+    return text_input, text_output
+
+
 class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -138,7 +168,7 @@ class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
         
         # TODO: annotation 불러오기
         # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
-        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 100)
+        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths)#, 100)
         
         self.img_ids = {}
         n = 0
@@ -152,9 +182,12 @@ class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
+        self.prompt_type = prompt_type
+        
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectMultipleCapDataset: {len(self.annotation)}")
+        logging.info(f"VQAIntrospectMultipleCapDataset len: {len(self.annotation)}")
+        logging.info(f"prompt_type: {self.prompt_type}")
 
         
     def __getitem__(self, index):
@@ -167,11 +200,26 @@ class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
 
         image = self.vis_processor(image)
         # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        text_input, text_output = _apply_VQAIntrospect_MultipleSubQ_prompt(
-            ann["main_question"],
-            ann["sub_question_list"],
-            ann["sub_answer_list"],
-        )
+        if self.prompt_type == "Questioner_MultipleSubQ":
+            text_input, text_output = _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(
+                ann["main_question"],
+                ann["sub_question_list"],
+                ann["sub_answer_list"],
+            )
+        elif self.prompt_type == "Reasoner":
+            text_input, text_output = _apply_VQAIntrospect_Reasoner_prompt(
+                ann["main_question"],
+                ann["main_answer"],
+                ann["sub_question_list"],
+                ann["sub_answer_list"],
+            )
+        elif self.prompt_type == "Answerer":
+            text_input, text_output = _apply_VQAIntrospect_Answerer_prompt(
+                ann["main_question"],
+                ann["main_answer"],
+            )
+        else:
+            raise Exception("prompt_type must be specified in lavis.configs.datasets.vqa_introspect.<blabla>.yaml")
 
         return {
             "image": image,
@@ -181,7 +229,7 @@ class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
 
 
 class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -190,7 +238,7 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         
-        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 20)
+        self.annotation = _init_VQAIntrospectMultipleCapDataset(ann_paths, 50)
         
         self.img_ids = {}
         n = 0
@@ -204,9 +252,12 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
+        self.prompt_type = prompt_type
+        
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectMultipleCapEvalDataset: {len(self.annotation)}")
+        logging.info(f"VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}")
+        logging.info(f"prompt_type: {self.prompt_type}")
     
     
     def __getitem__(self, index):
@@ -219,11 +270,26 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
         
         image = self.vis_processor(image)
         # text_input = self.text_processor(_apply_VQAIntrospect_prompt(ann["main_question"]))
-        text_input, text_output = _apply_VQAIntrospect_MultipleSubQ_prompt(
-            ann["main_question"],
-            ann["sub_question_list"],
-            ann["sub_answer_list"],
-        )
+        if self.prompt_type == "Questioner_MultipleSubQ":
+            text_input, text_output = _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(
+                ann["main_question"],
+                ann["sub_question_list"],
+                ann["sub_answer_list"],
+            )
+        elif self.prompt_type == "Reasoner":
+            text_input, text_output = _apply_VQAIntrospect_Reasoner_prompt(
+                ann["main_question"],
+                ann["main_answer"],
+                ann["sub_question_list"],
+                ann["sub_answer_list"],
+            )
+        elif self.prompt_type == "Answerer":
+            text_input, text_output = _apply_VQAIntrospect_Answerer_prompt(
+                ann["main_question"],
+                ann["main_answer"],
+            )
+        else:
+            raise Exception("prompt_type must be specified in lavis.configs.datasets.vqa_introspect.<blabla>.yaml")
         
         _return = {
             "image": image,
@@ -235,7 +301,7 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
             # "sub_question_id": ann["sub_question_id"],
             "text_output": text_output,
         }
-        # print('_return:', _return)
+        # logging.info(f"_return: {_return}")
 
         return _return
 

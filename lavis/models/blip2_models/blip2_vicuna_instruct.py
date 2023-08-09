@@ -276,12 +276,12 @@ class Blip2VicunaInstruct(Blip2Base):
                 prompt = self.prompt
     
             if self._cnt == 0:
-                print('for first', '!' * 170)
+                logging.info('print only the very first in decode...' + '!' * 170)
                 self._cnt += 1
                 for key in samples.keys():
                     if key != "image":
-                        print(key, samples[key])
-                print('prompt:', prompt)
+                        logging.info(f"key: {key},\tvalue: {samples[key]}")
+                logging.info(f"prompt: {prompt}")
     
             image = samples["image"]
     

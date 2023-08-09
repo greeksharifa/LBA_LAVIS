@@ -18,7 +18,10 @@
     "after_prompt": " While creating the new sub-question, consider the following pairs of previously created (sub-question, corresponding answer). You have to ask something different from the questions created earlier. ",
     "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
   },
-  "Reasoning": {
+  "Answerer": {
+    "init_prompt": "Question: {} Short answer:"
+  },
+  "Reasoner": {
     "init_prompt": "Answer the main question '{}'. Here are some Q&A results to help you answer. ",
     "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
   }
