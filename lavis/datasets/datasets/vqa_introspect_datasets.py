@@ -7,15 +7,145 @@
 
 import os
 import json
+import random
 import logging
+from collections import OrderedDict
 
 from PIL import Image
+from PIL import ImageFile
 
-import torch
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-from lavis.datasets.datasets.vqa_datasets import VQADataset, VQAEvalDataset
+from lavis.datasets.datasets.caption_datasets import CaptionDataset, CaptionEvalDataset
+from lavis.common.registry import registry
 
-from collections import OrderedDict
+from colors import Colors
+
+COCOCapDataset = CaptionDataset
+
+
+def _init_VQAIntrospectSingleSubQ(ann_paths, max_sample_num=99999999):
+    """
+    set annotation of DataLoader
+    1 sample: (MQ, SQ)
+    Args:
+        ann_paths: list of annotation_file_path
+        max_sample_num: limit of the number of samples
+
+    Returns: annotation. about train=166927/val=71714 samples
+    """
+    annotation = []
+    
+    sub_question_id = 0
+    for ann_path in ann_paths:
+        logging.info(f"Loading {ann_path}")
+        json_data = json.load(open(ann_path, "r"))
+        
+        for main_question_id, value in json_data.items():
+            image_id = value["image_id"]
+            main_question = value["reasoning_question"]
+            main_answer = value["reasoning_answer_most_common"]
+            
+            sub_q_set = set()
+            
+            for introspect in value["introspect"]:
+                sub_qa_list = introspect["sub_qa"]
+                pred_q_type = introspect["pred_q_type"]
+                
+                for sub_qa in sub_qa_list:
+                    if sub_qa["sub_question"] in sub_q_set:
+                        pass  # 중복
+                    else:
+                        sub_q_set.add(sub_qa["sub_question"])
+                        _sample = {
+                            "image_id": image_id,
+                            "main_question_id": int(main_question_id),
+                            "main_question": main_question,
+                            "main_answer": main_answer,
+                            "sub_question_id": sub_question_id,
+                            "sub_question": sub_qa["sub_question"],
+                            "sub_answer": sub_qa["sub_answer"],
+                            "pred_q_type": pred_q_type,
+                        }
+                        annotation.append(_sample)
+                        
+                        sub_question_id += 1
+            if sub_question_id >= max_sample_num:
+                break
+    
+    return annotation
+
+
+def _init_VQAIntrospectMultipleSubQ(ann_paths, max_sample_num=99999999):
+    """
+    set annotation of DataLoader
+    1 sample: (MQ, [SQ_i])
+    Args:
+        ann_paths: list of annotation_file_path
+        max_sample_num: limit of the number of samples
+
+    Returns: annotation. about train=55799-720/val=21677-1116 samples
+    """
+    annotation = []
+    from collections import Counter
+    counter = Counter()
+    
+    sub_question_id = 0
+    for ann_path in ann_paths:
+        logging.info(f"Loading {ann_path}")
+        json_data = json.load(open(ann_path, "r"))
+        
+        for main_question_id, value in json_data.items():
+            image_id = value["image_id"]
+            main_question = value["reasoning_question"]
+            main_answer = value["reasoning_answer_most_common"]
+            
+            sub_q_set = set()
+            
+            sub_q_list = []
+            sub_a_list = []
+            sub_q_id_list = []
+            
+            pred_q_type_list = []
+            
+            for introspect in value["introspect"]:
+                sub_qa_list = introspect["sub_qa"]
+                pred_q_type = introspect["pred_q_type"]
+                
+                for sub_qa in sub_qa_list:
+                    if sub_qa["sub_question"] in sub_q_set:
+                        pass  # 중복
+                    else:
+                        sub_q_set.add(sub_qa["sub_question"])
+                        
+                        sub_q_list.append(sub_qa["sub_question"])
+                        sub_a_list.append(sub_qa["sub_answer"])
+                        pred_q_type_list.append(pred_q_type)
+                        
+                        sub_q_id_list.append(sub_question_id)
+                        sub_question_id += 1
+
+            counter[len(sub_q_set)] += 1
+            if len(sub_q_set) == 0:
+                continue
+            
+            _sample = {
+                "image_id": image_id,
+                "main_question_id": int(main_question_id),
+                "main_question": main_question,
+                "main_answer": main_answer,
+                "sub_question_id_list": sub_q_id_list,
+                "sub_question_list": sub_q_list,
+                "sub_answer_list": sub_a_list,
+                "pred_q_type_list": pred_q_type_list,
+            }
+            annotation.append(_sample)
+            
+            if len(annotation) >= max_sample_num:
+                break
+    
+    logging.info(f"counter: {sorted(list(counter.items()))}")
+    return annotation
 
 
 class __DisplMixin:
@@ -33,165 +163,217 @@ class __DisplMixin:
         )
 
 
-class VQAIntrospectDataset(VQADataset, __DisplMixin):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+# _prompt_file_path = os.path.join(registry.get_path("cache_root"), "coco_gt")
+_prompt_file_path = "prompts.json"
+
+
+# 1개의 sub-question 생성
+def _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(main_question, sub_question):
+    prompts = json.load(open(_prompt_file_path, "r"))["Questioner_SingleSubQ"]
+    prompt = random.choice(prompts)
+    
+    text_input = prompt.format(main_question)
+    text_output = sub_question
+    
+    return text_input, text_output
+
+
+# sequential하게 sub-question 생성
+def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
+    # logging.info('in _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt()')
+    
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
+    # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
+    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
+    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    
+    text_input = multiple_prompts["init_prompt"].format(main_question)
+    if sub_qa_pair_num > 1:
+        text_input += multiple_prompts["after_prompt"]
+        for i in range(1, sub_qa_pair_num):
+            index = sub_qa_indices[i]
+            if i > 1:
+                text_input += ', '
+            text_input += multiple_prompts["pair_prompt"].format(i, sub_question_list[index], i, sub_answer_list[index])
+    
+    text_output = sub_question_list[sub_qa_indices[0]]
+    
+    return text_input, text_output
+
+
+# 생성된 sub-qa들로 main-question에 대한 답변 생성
+def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_question_list, sub_answer_list):
+    # logging.info('in _apply_VQAIntrospect_Reasoner_prompt()')
+    
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Reasoner"]
+    # generated sub_qa를 1~3개 비복원추출
+    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
+    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    
+    text_input = multiple_prompts["init_prompt"].format(main_question)
+    for i in range(0, sub_qa_pair_num):
+        index = sub_qa_indices[i]
+        if i > 0:
+            text_input += ', '
+        text_input += multiple_prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+    
+    text_output = main_answer
+    
+    return text_input, text_output
+
+
+# question에 대한 답변 생성
+def _apply_VQAIntrospect_Answerer_prompt(sub_question, sub_answer):
+    # logging.info('in _apply_VQAIntrospect_Answerer_prompt()')
+    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Answerer"]
+    
+    text_input = multiple_prompts["init_prompt"].format(sub_question)
+    text_output = sub_answer
+    
+    return text_input, text_output
+
+
+def _get_text_input_output(prompt_type, ann, split="train"):
+    # logging.info('in _get_text_input_output()')
+    if prompt_type == "Questioner_SingleSubQ":
+        text_input, text_output = _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(
+            ann["main_question"],
+            ann["sub_question"] if split == "train" else '\n'.join(ann["sub_question_list"]),
+        )
+    elif prompt_type == "Questioner_MultipleSubQ":
+        text_input, text_output = _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(
+            ann["main_question"],
+            ann["sub_question_list"],
+            ann["sub_answer_list"],
+        )
+    elif prompt_type == "Reasoner":
+        text_input, text_output = _apply_VQAIntrospect_Reasoner_prompt(
+            ann["main_question"],
+            ann["main_answer"],
+            ann["sub_question_list"],
+            ann["sub_answer_list"],
+        )
+    elif prompt_type == "Answerer":
+        text_input, text_output = _apply_VQAIntrospect_Answerer_prompt(
+            ann["sub_question"],
+            ann["sub_answer"],
+        )
+    else:
+        raise Exception("prompt_type must be specified in lavis.configs.datasets.vqa_introspect.<blabla>.yaml")
+    
+    return text_input, text_output
+    
+
+class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
+        split (string): val or test
         """
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
-        logging.info('in datasets.datasets.vqa_introspect_datasets.py VQAIntrosectDataset class')
-        logging.info('vis_processor', vis_processor)
-        logging.info('text_processor', text_processor)
-        logging.info('vis_root', vis_root)
-        logging.info('ann_paths', ann_paths)
-        
         self.vis_root = vis_root
+        self.prompt_type = prompt_type
         
-        # TODO: annotation 불러오기
-        # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
-        self.annotation = []
-        _cnt = 0
-        for ann_path in ann_paths:
-            json_data = json.load(open(ann_path, "r"))
-            
-            for question_id, value in json_data.items():
-                _cnt += 1
-                # if _cnt > 50: break
-                image_id = value["image_id"]
-                main_question = value["reasoning_question"]
-                main_answer = value["reasoning_answer_most_common"]
-                
-                for introspect in value["introspect"]:
-                    sub_qa_list = introspect["sub_qa"]
-                    pred_q_type = introspect["pred_q_type"]
-                    
-                    for sub_qa in sub_qa_list:
-                        _sample = {
-                            "image_id": image_id,
-                            "question_id": question_id,
-                            "main_question": main_question,
-                            "main_answer": main_answer,
-                            "sub_question": sub_qa["sub_question"],
-                            "sub_answer": sub_qa["sub_answer"],
-                            "pred_q_type": pred_q_type,
-                        }
-                        self.annotation.append(_sample)
-                        
-        from pprint import pprint
-        logging.info('self.annotation[0]:')
-        pprint(self.annotation[0])
-
+        if prompt_type in ["Questioner_SingleSubQ", "Answerer"]:
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 100)
+        elif prompt_type in ["Questioner_MultipleSubQ", "Reasoner"]:
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 100)
+        
+        self.img_ids = {}
+        n = 0
+        for ann in self.annotation:
+            img_id = ann["image_id"]
+            # img_id = ann["main_question_id"]
+            if img_id not in self.img_ids.keys():
+                self.img_ids[img_id] = n
+                n += 1
+        
         self.vis_processor = vis_processor
         self.text_processor = text_processor
-
+        
         self._add_instance_ids()
+        
+        logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapDataset len: {len(self.annotation)}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
 
+        
     def __getitem__(self, index):
         ann = self.annotation[index]
-        
-        # train2014/COCO_train2014_000000265814.jpg
+
+        # train2014/COCO_train2014_000000216531.jpg
         image_path = os.path.join(self.vis_root, f'train2014/COCO_train2014_{ann["image_id"]:012}.jpg')
         # image_path = os.path.join(self.vis_root, ann["image"])
         image = Image.open(image_path).convert("RGB")
 
         image = self.vis_processor(image)
-        question = self.text_processor(ann["main_question"])
-
-        # answers = [ann["answer"]]
-        # weights = [1]
-
+        
+        text_input, text_output = _get_text_input_output(self.prompt_type, ann, "train")
+        
         return {
             "image": image,
-            "text_input": question,
-            "text_output": ann["sub_question"],
-            # "weights": weights,
+            "text_input": text_input,
+            "text_output": text_output,
         }
-    
-    def collater(self, samples):
-        image_list, question_list, answer_list = [], [], []
-
-        num_answers = []
-
-        for sample in samples:
-            image_list.append(sample["image"])
-            question_list.append(sample["text_input"])
 
 
-            answers = sample["text_output"]
-
-            answer_list.extend(answers)
-            num_answers.append(len(answers))
-
-        return {
-            "image": torch.stack(image_list, dim=0),
-            "text_input": question_list,
-            "text_output": answer_list,
-            # "weight": torch.Tensor(weight_list),
-            # "n_answers": torch.LongTensor(num_answers),
-        }
-    
-
-class VQAIntrospectEvalDataset(VQAEvalDataset, __DisplMixin):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
         """
-        vis_root (string): Root directory of images (e.g. gqa/images/)
+        vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
+        split (string): val or test
         """
+        # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
+        self.prompt_type = prompt_type
         
-        # TODO: annotation 불러오기
-        # TODO: naive: 1개의 main_Q, N개의 sub_q가 있다면 (main_Q, 각 sub_q) pair를 N개 생성
-        self.annotation = []
-        _cnt = 0
-        for ann_path in ann_paths:
-            json_data = json.load(open(ann_path, "r"))
-            
-            for question_id, value in json_data.items():
-                _cnt += 1
-                # if _cnt > 50: break
-                image_id = value["image_id"]
-                main_question = value["reasoning_question"]
-                main_answer = value["reasoning_answer_most_common"]
-                
-                for introspect in value["introspect"]:
-                    sub_qa_list = introspect["sub_qa"]
-                    pred_q_type = introspect["pred_q_type"]
-                    
-                    for sub_qa in sub_qa_list:
-                        _sample = {
-                            "image_id": image_id,
-                            "question_id": question_id,
-                            "main_question": main_question,
-                            "main_answer": main_answer,
-                            "sub_question": sub_qa["sub_question"],
-                            "sub_answer": sub_qa["sub_answer"],
-                            "pred_q_type": pred_q_type,
-                        }
-                        self.annotation.append(_sample)
-    
+        if prompt_type in ["Answerer"]:
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 20)
+        elif prompt_type in ["Questioner_SingleSubQ", "Questioner_MultipleSubQ", "Reasoner"]:
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 20)
+        
+        self.img_ids = {}
+        n = 0
+        for ann in self.annotation:
+            img_id = ann["image_id"]
+            # img_id = ann["main_question_id"]
+            if img_id not in self.img_ids.keys():
+                self.img_ids[img_id] = n
+                n += 1
+        
         self.vis_processor = vis_processor
         self.text_processor = text_processor
-
+        
         self._add_instance_ids()
-
+        
+        logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
+    
+    
     def __getitem__(self, index):
         ann = self.annotation[index]
-
+        
         # val2014/COCO_val2014_000000265814.jpg
         image_path = os.path.join(self.vis_root, f'val2014/COCO_val2014_{ann["image_id"]:012}.jpg')
         # image_path = os.path.join(self.vis_root, ann["image"])
         image = Image.open(image_path).convert("RGB")
-
+        
         image = self.vis_processor(image)
-        question = self.text_processor(ann["main_question"])
-
-
-        return {
+        
+        text_input, text_output = _get_text_input_output(self.prompt_type, ann, "eval")
+        
+        _return = {
             "image": image,
-            "text_input": question,
-            # "answer": answer,
-            "question_id": ann["question_id"],
+            "image_id": ann["image_id"],
+            "main_question_id": ann["main_question_id"],
             "instance_id": ann["instance_id"],
-            "sub_answer": ann["sub_answer"],
+            "text_input": text_input,
+            "prompt": text_input,
+            # "sub_question_id": ann["sub_question_id"],
+            "text_output": text_output,
         }
+        # logging.info(f"_return: {_return}")
+
+        return _return
+

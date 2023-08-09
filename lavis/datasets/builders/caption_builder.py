@@ -17,13 +17,17 @@ from lavis.datasets.datasets.video_caption_datasets import (
     VideoCaptionDataset,
     VideoCaptionEvalDataset,
 )
-from lavis.datasets.datasets.vqa_introspect_caption_datasets import (
-    VQAIntrospectCapDataset,
-    VQAIntrospectCapEvalDataset
-)
-from lavis.datasets.datasets.vqa_introspect_multiple_caption_datasets import (
-    VQAIntrospectMultipleCapDataset,
-    VQAIntrospectMultipleCapEvalDataset
+# from lavis.datasets.datasets.vqa_introspect_caption_datasets import (
+#     VQAIntrospectCapDataset,
+#     VQAIntrospectCapEvalDataset
+# )
+# from lavis.datasets.datasets.vqa_introspect_multiple_caption_datasets import (
+#     VQAIntrospectMultipleCapDataset,
+#     VQAIntrospectMultipleCapEvalDataset
+# )
+from lavis.datasets.datasets.vqa_introspect_datasets import (
+    VQAIntrospectQARCapDataset,
+    VQAIntrospectQARCapEvalDataset
 )
 
 
@@ -75,24 +79,35 @@ class VATEXCapBuilder(BaseDatasetBuilder):
         "default": "configs/datasets/vatex/defaults_cap.yaml",
     }
 
+#
+# @registry.register_builder("vqa_introspect_caption")
+# class VQAIntrospectCapBuilder(BaseDatasetBuilder):
+#     # print('in VQAIntrospectCapBuilder class')
+#     train_dataset_cls = VQAIntrospectCapDataset
+#     eval_dataset_cls = VQAIntrospectCapEvalDataset
+#
+#     DATASET_CONFIG_DICT = {
+#         "default": "configs/datasets/vqa_introspect/defaults_cap.yaml",
+#     }
+#
+#
+# @registry.register_builder("vqa_introspect_multiple_caption")
+# class VQAIntrospectMultipleCapBuilder(BaseDatasetBuilder):
+#     # print('in VQAIntrospectMultipleCapBuilder class')
+#     train_dataset_cls = VQAIntrospectMultipleCapDataset
+#     eval_dataset_cls = VQAIntrospectMultipleCapEvalDataset
+#
+#     DATASET_CONFIG_DICT = {
+#         "default": "configs/datasets/vqa_introspect/defaults_multiple_cap.yaml",
+#     }
 
-@registry.register_builder("vqa_introspect_caption")
-class VQAIntrospectCapBuilder(BaseDatasetBuilder):
-    # print('in VQAIntrospectCapBuilder class')
-    train_dataset_cls = VQAIntrospectCapDataset
-    eval_dataset_cls = VQAIntrospectCapEvalDataset
 
-    DATASET_CONFIG_DICT = {
-        "default": "configs/datasets/vqa_introspect/defaults_cap.yaml",
-    }
-
-
-@registry.register_builder("vqa_introspect_multiple_caption")
-class VQAIntrospectMultipleCapBuilder(BaseDatasetBuilder):
+@registry.register_builder("vqa_introspect_qar_caption")
+class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     # print('in VQAIntrospectMultipleCapBuilder class')
-    train_dataset_cls = VQAIntrospectMultipleCapDataset
-    eval_dataset_cls = VQAIntrospectMultipleCapEvalDataset
+    train_dataset_cls = VQAIntrospectQARCapDataset
+    eval_dataset_cls = VQAIntrospectQARCapEvalDataset
 
     DATASET_CONFIG_DICT = {
-        "default": "configs/datasets/vqa_introspect/defaults_multiple_cap.yaml",
+        "default": "configs/datasets/vqa_introspect/defaults.yaml",
     }

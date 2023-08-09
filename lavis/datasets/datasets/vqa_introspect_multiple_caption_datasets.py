@@ -19,6 +19,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from lavis.datasets.datasets.caption_datasets import CaptionDataset, CaptionEvalDataset
 from lavis.common.registry import registry
 
+from colors import Colors
+
 COCOCapDataset = CaptionDataset
 
 
@@ -81,7 +83,7 @@ def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
             if len(annotation) >= max_sample_num:
                 break
     
-    print('counter: ', counter)
+    logging.info(f"counter: {sorted(list(counter.items()))}")
     return annotation
 
 
@@ -186,8 +188,8 @@ class VQAIntrospectMultipleCapDataset(CaptionDataset, __DisplMixin):
         
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectMultipleCapDataset len: {len(self.annotation)}")
-        logging.info(f"prompt_type: {self.prompt_type}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapDataset len: {len(self.annotation)}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
 
         
     def __getitem__(self, index):
@@ -256,8 +258,8 @@ class VQAIntrospectMultipleCapEvalDataset(CaptionEvalDataset):
         
         self._add_instance_ids()
         
-        logging.info(f"VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}")
-        logging.info(f"prompt_type: {self.prompt_type}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
     
     
     def __getitem__(self, index):

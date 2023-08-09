@@ -12,7 +12,7 @@ from lavis.datasets.datasets.aok_vqa_datasets import AOKVQADataset, AOKVQAEvalDa
 from lavis.datasets.datasets.coco_vqa_datasets import COCOVQADataset, COCOVQAEvalDataset
 from lavis.datasets.datasets.vg_vqa_datasets import VGVQADataset
 from lavis.datasets.datasets.gqa_datasets import GQADataset, GQAEvalDataset
-from lavis.datasets.datasets.vqa_introspect_datasets import VQAIntrospectDataset, VQAIntrospectEvalDataset
+from lavis.datasets.datasets.vqa_introspect_vqa_datasets import VQAIntrospectDataset, VQAIntrospectEvalDataset
 
 
 @registry.register_builder("coco_vqa")

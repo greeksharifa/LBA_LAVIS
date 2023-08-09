@@ -290,7 +290,7 @@ class BaseTask:
         )
         final_result_file = os.path.join(result_dir, "%s.json" % filename)
 
-        json.dump(result, open(result_file, "w"))
+        json.dump(result, open(result_file, "w"), indent=4)     # ywjang: add indent=4
 
         if is_dist_avail_and_initialized():
             dist.barrier()
@@ -316,7 +316,7 @@ class BaseTask:
                         result_new.append(res)
                 result = result_new
 
-            json.dump(result, open(final_result_file, "w"))
+            json.dump(result, open(final_result_file, "w"), indent=4)     # ywjang: add indent=4
             print("result file saved to %s" % final_result_file)
 
         return final_result_file

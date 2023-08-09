@@ -12,6 +12,8 @@ import os
 import time
 from pathlib import Path
 
+from colors import Colors
+
 import torch
 import torch.distributed as dist
 import webdataset as wds
@@ -357,7 +359,7 @@ class RunnerBase:
             self._load_checkpoint(self.resume_ckpt_path)
 
         for cur_epoch in range(self.start_epoch, self.max_epoch):
-            logging.info("#" * 50 + "Start epoch {}".format(cur_epoch) + "#" * 50)
+            logging.info(Colors.BRIGHT_MAGENTA + "#" * 30 + "Start epoch {}".format(cur_epoch) + "#" * 30 + Colors.RESET)
             # training phase
             if not self.evaluate_only:
                 logging.info("Start training")
@@ -491,7 +493,7 @@ class RunnerBase:
         logging.info('$' * 160)
         logging.info('self.task.evaluation results:')
         from pprint import pprint
-        pprint(results)
+        pprint(results, width=200)
 
         if results is not None:
             return self.task.after_evaluation(

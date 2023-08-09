@@ -87,7 +87,7 @@ _prompt_file_path = "prompts.json"
 def _apply_VQAIntrospect_prompt(*tokens):
     prompts = json.load(open(_prompt_file_path, "r"))
     token_num = str(len(tokens))
-    prompt = random.choice(prompts[token_num]).strip()
+    prompt = random.choice(prompts[token_num])
     return prompt.format(*tokens)
 
 

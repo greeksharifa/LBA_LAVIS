@@ -12,9 +12,9 @@ model:
   freeze_vit: True
 
 datasets:
-  vqa_introspect_qar_caption: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
-  # @registry.register_builder("vqa_introspect_qar_caption")
-    #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
+  vqa_introspect_caption: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  # @registry.register_builder("vqa_introspect_caption")
+    # class VQAIntrospectCapBuilder(BaseDatasetBuilder):
     #     ...
     vis_processor:
         train:
@@ -50,11 +50,11 @@ run:
   warmup_lr: 1e-8
   warmup_steps: 32000
   weight_decay: 0.05
-  max_epoch: 2
-  batch_size_train: 2
+  max_epoch: 5
+  batch_size_train: 4
   batch_size_eval: 1
   num_workers: 4
-  accum_grad_iters: 64
+  accum_grad_iters: 32
   prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
 
   max_len: 128
