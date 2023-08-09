@@ -12,7 +12,10 @@ model:
   freeze_vit: True
 
 datasets:
-  vqa_introspect_caption: # name of the dataset builder
+  vqa_introspect_caption: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  # @registry.register_builder("vqa_introspect_caption")
+    # class VQAIntrospectCapBuilder(BaseDatasetBuilder):
+    #     ...
     vis_processor:
         train:
           name: "blip2_image_train"
@@ -33,7 +36,10 @@ datasets:
 run:
 #  task: vqa_introspect
 #  task: captioning
-  task: vqa_introspect_captioning
+  task: vqa_introspect_captioning # name of the registry_name of class in tasks/captioning.py
+  # @registry.register_task("vqa_introspect_captioning")
+  # class VQAIntrospectCaptionTask(CaptionTask):
+  # ...
 
   # optimizer
   # batch_size * accum_grad_iters = 128 or 256

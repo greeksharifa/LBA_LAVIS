@@ -78,7 +78,8 @@ def _init_VQAIntrospectMultipleCapDataset(ann_paths, max_sample_num=99999999):
             }
             annotation.append(_sample)
             
-            if len(sub_q_set) >= max_sample_num: break
+            if len(annotation) >= max_sample_num:
+                break
     
     print('counter: ', counter)
     return annotation
@@ -104,7 +105,7 @@ _prompt_file_path = "prompts.json"
 
 
 def _apply_VQAIntrospect_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
-    logging.info('in _apply_VQAIntrospect_MultipleSubQ_prompt()')
+    # logging.info('in _apply_VQAIntrospect_MultipleSubQ_prompt()')
     
     multiple_prompts = json.load(open(_prompt_file_path, "r"))["multiple"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출

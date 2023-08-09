@@ -101,7 +101,7 @@ class VQAIntrospectCapDataset(CaptionDataset, __DisplMixin):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         
-        self.annotation = _init_VQAIntrospectCapDataset(ann_paths, 100)
+        self.annotation = _init_VQAIntrospectCapDataset(ann_paths)
         
         self.img_ids = {}
         n = 0
