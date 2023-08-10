@@ -13,20 +13,20 @@ datasets:
       annotations:
         train:
           url:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_trainv1.0.json
+              - VQA-Introspect/VQAIntrospect_trainv1.0.json
           storage:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_trainv1.0.json
+              - VQA-Introspect/VQAIntrospect_trainv1.0.json
         val:
           url:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA-Introspect/VQAIntrospect_valv1.0.json
           storage:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA-Introspect/VQAIntrospect_valv1.0.json
 #              - aokvqa/annotations/specialized_vocab_train_lavis.json
               # - aokvqa/annotations/large_vocab_train_lavis.json
         test:
           url:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA-Introspect/VQAIntrospect_valv1.0.json
           storage:
-              - /home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA-Introspect/VQAIntrospect_valv1.0.json
       images:
           storage: coco/images/

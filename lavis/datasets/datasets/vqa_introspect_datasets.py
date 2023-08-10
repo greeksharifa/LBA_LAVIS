@@ -19,7 +19,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from lavis.datasets.datasets.caption_datasets import CaptionDataset, CaptionEvalDataset
 from lavis.common.registry import registry
 
-from colors import Colors
+from colors import Colors, print_sample
 
 COCOCapDataset = CaptionDataset
 
@@ -216,6 +216,8 @@ def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_questio
         if i > 0:
             text_input += ', '
         text_input += multiple_prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+    
+    text_input += multiple_prompts["final_prompt"].format(main_question)
     
     text_output = main_answer
     

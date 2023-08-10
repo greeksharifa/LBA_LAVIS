@@ -7,6 +7,7 @@
 
 import logging
 import os
+from colors import Colors, print_sample
 
 import torch
 import torch.distributed as dist
@@ -92,14 +93,14 @@ class BaseTask:
         print_freq = 10
 
         results = []
+        _cnt = 0
 
         for samples in metric_logger.log_every(data_loader, print_freq, header):
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             
-            # print('in base_task. evaluation()', '&' * 170)
-            # for key in samples.keys():
-            #     if key != "image":
-            #         print(key, samples[key])
+            if _cnt == 0:
+                _cnt += 1
+                print_sample(samples, msg="train sample: ", color=Colors.CYAN)
             """
             samples: {
                 'image': Tensor
@@ -226,6 +227,8 @@ class BaseTask:
             # In iter-based runner, we schedule the learning rate based on iterations.
             inner_epoch = start_iters // iters_per_epoch
             header = header + "; inner epoch [{}]".format(inner_epoch)
+            
+        _cnt = 0
 
         for i in metric_logger.log_every(range(iters_per_epoch), log_freq, header):
             # if using iter-based runner, we stop after iters_per_epoch iterations.
@@ -233,9 +236,9 @@ class BaseTask:
                 break
 
             samples = next(data_loader)
-            # for key in samples.keys():
-            #     if key != "image":
-            #         print(key, samples[key])
+            if _cnt == 0:
+                _cnt += 1
+                print_sample(samples, msg="train sample: ", color=Colors.BRIGHT_CYAN)
 
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             samples.update(

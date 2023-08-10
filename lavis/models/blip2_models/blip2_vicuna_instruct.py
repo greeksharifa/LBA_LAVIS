@@ -5,6 +5,8 @@ import logging
 import string
 from packaging import version
 
+from colors import Colors, print_sample
+
 import torch
 from torch.cuda.amp import autocast as autocast
 import torch.nn as nn
@@ -275,14 +277,6 @@ class Blip2VicunaInstruct(Blip2Base):
             else:
                 prompt = self.prompt
     
-            if self._cnt == 0:
-                logging.info('print only the very first in decode...' + '!' * 170)
-                self._cnt += 1
-                for key in samples.keys():
-                    if key != "image":
-                        logging.info(f"key: {key},\tvalue: {samples[key]}")
-                logging.info(f"prompt: {prompt}")
-    
             image = samples["image"]
     
             bs = image.size(0)
@@ -373,7 +367,12 @@ class Blip2VicunaInstruct(Blip2Base):
                 padding="longest",
                 return_tensors="pt"
             ).to(image.device)
-    
+            
+            if self._cnt == 0:
+                self._cnt += 1
+                print_sample(samples, msg='print only the very first in decode...', color=Colors.CYAN)
+                logging.info(Colors.BLUE + f"prompt: {prompt}" + Colors.RESET)
+                
             with self.maybe_autocast():
                 inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens.input_ids)
                 inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)

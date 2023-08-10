@@ -7,14 +7,15 @@
   "Questioner_MultipleSubQ": {
     "init_prompt": "Generate a sub-question about image, when main-question is '{}'.",
     "after_prompt": " While creating the new sub-question, consider the following pairs of previously created (sub-question, corresponding answer). You have to ask something different from the questions created earlier. ",
-    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
+    "pair_prompt": "sub-question-{}: '{}', sub-answer-{}: '{}'."
   },
   "Answerer": {
-    "init_prompt": "Question: {} Short answer:"
+    "init_prompt": "{}"
   },
   "Reasoner": {
-    "init_prompt": "Answer the main question '{}'. Here are some Q&A results to help you answer. ",
-    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
+    "init_prompt": "You have to answer the main-question: '{}'. You can use the following Q&A results to help you answer: ",
+    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')",
+    "final_prompt": " Now answer the main-question. {}"
   },
 
   "1": [

@@ -1,3 +1,5 @@
+import logging
+
 
 class Colors:
     BLACK = '\033[30m'
@@ -22,3 +24,11 @@ class Colors:
     BRIGHT_WHITE = '\033[97m'
     BRIGHT_END = '\033[0m'
     
+
+def print_sample(samples, msg="print sample...", color=Colors.BRIGHT_MAGENTA):
+    logging.info(color + msg + Colors.RESET)
+    for key in samples.keys():
+        if key != "image":
+            logging.info(color + f"key: {key},\tvalue: {samples[key]}" + Colors.RESET)
+            
+            
