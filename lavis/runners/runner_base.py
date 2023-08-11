@@ -493,7 +493,7 @@ class RunnerBase:
         logging.info('$' * 160)
         logging.info('self.task.evaluation first 5 results:')
         from pprint import pprint
-        pprint(results[:5], width=200)
+        pprint(results[:1], width=200)
 
         if results is not None:
             return self.task.after_evaluation(
