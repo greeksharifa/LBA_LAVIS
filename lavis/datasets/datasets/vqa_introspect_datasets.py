@@ -179,24 +179,36 @@ def _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(main_question, sub_questio
 
 
 # sequential하게 sub-question 생성
-def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list):
+def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list, split):
     # logging.info('in _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt()')
     
-    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
+    prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
     sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
     sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
-    text_input = multiple_prompts["init_prompt"].format(main_question)
+    text_input = prompts["init_prompt"].format(main_question)
     if sub_qa_pair_num > 1:
-        text_input += multiple_prompts["after_prompt"]
+        text_input += prompts["after_prompt"]
         for i in range(1, sub_qa_pair_num):
             index = sub_qa_indices[i]
             if i > 1:
                 text_input += ', '
-            text_input += multiple_prompts["pair_prompt"].format(i, sub_question_list[index], i, sub_answer_list[index])
+            if prompts["pair_prompt"].count('{}') == 4:
+                text_input += prompts["pair_prompt"].format(i, sub_question_list[index], i, sub_answer_list[index])
+            else:
+                text_input += prompts["pair_prompt"].format(i, sub_question_list[index])
+        else:
+            text_input += '.'
     
-    text_output = sub_question_list[sub_qa_indices[0]]
+    if split == 'train':
+        text_output = sub_question_list[sub_qa_indices[0]]
+    else:
+        text_output = set(sub_question_list)
+        for i in range(1, sub_qa_pair_num):
+            index = sub_qa_indices[i]
+            text_output.remove(sub_question_list[index])
+        text_output = '\n'.join(text_output)
     
     return text_input, text_output
 
@@ -205,19 +217,19 @@ def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_quest
 def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_question_list, sub_answer_list):
     # logging.info('in _apply_VQAIntrospect_Reasoner_prompt()')
     
-    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Reasoner"]
+    prompts = json.load(open(_prompt_file_path, "r"))["Reasoner"]
     # generated sub_qa를 1~3개 비복원추출
     sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
     sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
-    text_input = multiple_prompts["init_prompt"].format(main_question)
+    text_input = prompts["init_prompt"].format(main_question)
     for i in range(0, sub_qa_pair_num):
         index = sub_qa_indices[i]
         if i > 0:
             text_input += ', '
-        text_input += multiple_prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+        text_input += prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
     
-    text_input += multiple_prompts["final_prompt"].format(main_question)
+    text_input += prompts["final_prompt"].format(main_question)
     
     text_output = main_answer
     
@@ -227,9 +239,9 @@ def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_questio
 # question에 대한 답변 생성
 def _apply_VQAIntrospect_Answerer_prompt(sub_question, sub_answer):
     # logging.info('in _apply_VQAIntrospect_Answerer_prompt()')
-    multiple_prompts = json.load(open(_prompt_file_path, "r"))["Answerer"]
+    prompts = json.load(open(_prompt_file_path, "r"))["Answerer"]
     
-    text_input = multiple_prompts["init_prompt"].format(sub_question)
+    text_input = prompts["init_prompt"].format(sub_question)
     text_output = sub_answer
     
     return text_input, text_output
@@ -247,6 +259,7 @@ def _get_text_input_output(prompt_type, ann, split="train"):
             ann["main_question"],
             ann["sub_question_list"],
             ann["sub_answer_list"],
+            split,
         )
     elif prompt_type == "Reasoner":
         text_input, text_output = _apply_VQAIntrospect_Reasoner_prompt(
@@ -331,9 +344,9 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         self.prompt_type = prompt_type
         
         if prompt_type in ["Answerer"]:
-            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 20)
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 50)
         elif prompt_type in ["Questioner_SingleSubQ", "Questioner_MultipleSubQ", "Reasoner"]:
-            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 20)
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 50)
         
         self.img_ids = {}
         n = 0

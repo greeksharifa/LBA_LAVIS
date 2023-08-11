@@ -5,17 +5,22 @@
     "Write a sub-question about image, when main-question is '{}'."
   ],
   "Questioner_MultipleSubQ": {
-    "init_prompt": "Generate questions about image that will help answer the main question, when main-question is '{}'.",
+    "init_prompt": "Generate a sub-question about image, when main-question is '{}'.",
     "after_prompt": " While creating the new sub-question, ask something different from previously created sub-questions: ",
     "pair_prompt": "sub-question-{}: '{}'"
+  },
+  "Questioner_MultipleSubQ": {
+    "init_prompt": "Generate a sub-question about image, when main-question is '{}'.",
+    "after_prompt": " While creating the new sub-question, consider the following pairs of previously created (sub-question, corresponding answer). You have to ask something different from the questions created earlier. ",
+    "pair_prompt": "sub-question-{}: '{}', sub-answer-{}: '{}'."
   },
   "Answerer": {
     "init_prompt": "{}"
   },
   "Reasoner": {
-    "init_prompt": "Act as an expert Answerer. You have to answer the main-question: '{}'. You can use the following Q&A results to help you answer: ",
+    "init_prompt": "You have to answer the main-question: '{}'. You can use the following Q&A results to help you answer: ",
     "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')",
-    "final_prompt": ". Now answer the main-question. {}"
+    "final_prompt": " Now answer the main-question. {}"
   },
 
   "1": [

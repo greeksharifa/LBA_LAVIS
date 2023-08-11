@@ -272,7 +272,7 @@ class RunnerBase:
 
     @property
     def log_freq(self):
-        log_freq = self.config.run_cfg.get("log_freq", 50)
+        log_freq = self.config.run_cfg.get("log_freq", 100)
         return int(log_freq)
 
     @property
@@ -491,9 +491,9 @@ class RunnerBase:
         results = self.task.evaluation(model, data_loader)
         logging.info('self.task.evaluation done')
         logging.info('$' * 160)
-        logging.info('self.task.evaluation results:')
+        logging.info('self.task.evaluation first 5 results:')
         from pprint import pprint
-        pprint(results, width=200)
+        pprint(results[:5], width=200)
 
         if results is not None:
             return self.task.after_evaluation(

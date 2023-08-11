@@ -370,7 +370,7 @@ class Blip2VicunaInstruct(Blip2Base):
             
             if self._cnt == 0:
                 self._cnt += 1
-                print_sample(samples, msg='print only the very first in decode...', color=Colors.CYAN)
+                print_sample(samples, msg='in generate(), eval sample:', color=Colors.CYAN)
                 logging.info(Colors.BLUE + f"prompt: {prompt}" + Colors.RESET)
                 
             with self.maybe_autocast():

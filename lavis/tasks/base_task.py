@@ -100,7 +100,7 @@ class BaseTask:
             
             if _cnt == 0:
                 _cnt += 1
-                print_sample(samples, msg="train sample: ", color=Colors.CYAN)
+                print_sample(samples, msg="eval sample: ", color=Colors.CYAN)
             """
             samples: {
                 'image': Tensor
@@ -193,7 +193,7 @@ class BaseTask:
         lr_scheduler,
         scaler=None,
         start_iters=None,
-        log_freq=50,
+        log_freq=100,
         cuda_enabled=False,
         accum_grad_iters=1,
     ):

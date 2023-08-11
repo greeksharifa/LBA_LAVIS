@@ -192,5 +192,8 @@ def setup_logger():
         level=logging.INFO if dist_utils.is_main_process() else logging.WARN,
         # format="%(asctime)s [%(levelname)s] %(message)s",
         format="%(asctime)s [%(levelname)7s]in [%(funcName)20s() in %(filename)25s:%(lineno)3d]\t| %(message)s",
-        handlers=[logging.StreamHandler()],
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler("ywjang_log.txt", mode="a"),
+        ],
     )
