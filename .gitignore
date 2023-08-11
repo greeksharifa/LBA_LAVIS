@@ -1,6 +1,14 @@
 # PyCharm
 .idea/
 
+# Output
+lavis/ywjang_output_train/
+lavis/ywjang_output_test/
+lavis/ywjang_output_vqa_test/
+
+# Mac
+**/.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

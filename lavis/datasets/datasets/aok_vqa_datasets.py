@@ -74,6 +74,7 @@ class AOKVQAEvalDataset(VQAEvalDataset, __DisplMixin):
         self.vis_root = vis_root
 
         self.annotation = json.load(open(ann_paths[0]))
+        # self.annotation = self.annotation[:20]
 
         answer_list_path = ann_paths[1]
         if os.path.exists(answer_list_path):

@@ -8,13 +8,15 @@
 import logging
 import json
 import os
+from lavis.common.logger import setup_logger
+
 
 import lavis.common.dist_utils as dist_utils
 from lavis.common.registry import registry
 from lavis.common.vqa_tools.vqa import VQA
 from lavis.common.vqa_tools.vqa_eval import VQAEval
 from lavis.tasks.base_task import BaseTask
-
+from colors import Colors, print_sample
 
 @registry.register_task("vqa")
 class VQATask(BaseTask):
@@ -29,6 +31,8 @@ class VQATask(BaseTask):
         prompt="",
     ):
         super().__init__()
+        
+        setup_logger()
 
         self.num_beams = num_beams
         self.max_len = max_len
@@ -233,6 +237,10 @@ class GQATask(VQATask):
 @registry.register_task("aok_vqa")
 class AOKVQATask(VQATask):
     def valid_step(self, model, samples):
+        print_sample(samples, msg="AOK-VQA samples:", color=Colors.BRIGHT_YELLOW)
+        # print('\n' * 5)
+        # {'choice': ['plastic', 'paper', 'styrofoam', 'glass'], 'gt_ans': None, 'pred_ans': 'plastic',
+        # 'predicted_class': tensor([0, 3, 1, 2], device='cuda:3'), 'question_id': '289gdniVRHj3QAaLe27u6o'},
         answers = model.predict_answers(
             samples=samples,
             answer_list=self.answer_list,
@@ -242,15 +250,22 @@ class AOKVQATask(VQATask):
             min_len=self.min_len,
             num_ans_candidates=self.num_ans_candidates,
         )
+        pred_choice_idxs = model.predict_class(
+            samples=samples,
+            candidates=samples["choices"],
+            n_segments=1
+        ).cpu().numpy()
 
         pred_qa_pairs = []
 
         question_id = samples["question_id"]
         gt_answers = samples["direct_answers"]
+        correct_choice_idxs = samples["correct_choice_idx"]
 
-        for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+        for pred_answer, ques_id, gt_answer, pred_choice_idx, correct_choice_idx in zip(answers, question_id, gt_answers, pred_choice_idxs, correct_choice_idxs):
             pred_qa_pairs.append(
-                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
+                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer,
+                 "pred_choice_idx": int(pred_choice_idx[0]), "correct_choice_idx": correct_choice_idx}
             )
 
         return pred_qa_pairs
@@ -265,6 +280,7 @@ class AOKVQATask(VQATask):
 
         results = json.load(open(result_file, "r"))
         acc = []
+        mc_acc = []
 
         for res in results:
             if res["gt_ans"] is None:
@@ -279,9 +295,15 @@ class AOKVQATask(VQATask):
             vqa_acc = min(1.0, num_match / 3.0)
 
             acc.append(vqa_acc)
+            
+            pred_choice_idx = res["pred_choice_idx"]
+            correct_choice_idx = res["correct_choice_idx"]
+            mc_acc.append(1 if pred_choice_idx == correct_choice_idx else 0)
 
         accuracy = sum(acc) / len(acc) * 100
-        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+        mc_accuracy = sum(mc_acc) / len(mc_acc) * 100
+        metrics = {"agg_metrics": accuracy, "acc": accuracy, "mc_acc": mc_accuracy,
+                   "da_acc": accuracy}
 
         with open(
             os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
@@ -289,6 +311,7 @@ class AOKVQATask(VQATask):
             f.write(json.dumps(metrics) + "\n")
 
         logging.info(metrics)
+        print('metrics: ', metrics)
 
         return metrics
 
@@ -303,7 +326,7 @@ class AOKVQATask(VQATask):
         for res in results:
             result_leaderboard[res["question_id"]] = {
                 "direct_answer": res["pred_ans"],
-                "multiple_choice": "",
+                "multiple_choice": res["predicted_class"],  # "",
             }
 
         result_file = registry.get_path("result_dir") + "_leaderboard.json"

@@ -86,10 +86,10 @@ def main():
 
     setup_seeds(cfg)
 
+    cfg.pretty_print()
+    
     # set after init_distributed_mode() to only log on master.
     setup_logger()
-
-    # cfg.pretty_print()
 
     task = tasks.setup_task(cfg)
     datasets = task.build_datasets(cfg)
@@ -101,6 +101,10 @@ def main():
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )
     # import pudb;    pudb.set_trace()
+    
+    # set after init_distributed_mode() to only log on master.
+    # setup_logger(runner.output_dir)
+    
     runner.evaluate(skip_reload=True)
 
 

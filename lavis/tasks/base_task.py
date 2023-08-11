@@ -90,7 +90,7 @@ class BaseTask:
         metric_logger = MetricLogger(delimiter="  ")
         header = "Evaluation"
         # TODO make it configurable
-        print_freq = 10
+        print_freq = 100
 
         results = []
         _cnt = 0
