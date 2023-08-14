@@ -5,10 +5,11 @@
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
 
-import logging
 import argparse
+import logging
 import os
 import random
+import easydict
 
 import numpy as np
 import torch
@@ -72,6 +73,8 @@ def get_runner_class(cfg):
     return runner_cls
 
 
+
+
 def main():
     # logging.info('in captioning_base branch')
     # allow auto-dl completes on main process without timeout when using NCCL backend.
@@ -79,8 +82,16 @@ def main():
 
     # set before init_distributed_mode() to ensure the same job_id shared across all ranks.
     job_id = now()
+    
+    args_answerer = easydict.EasyDict({
+        "cfg_path": "instructBLIP_FT_vicuna7b_qar.yaml",
+        "options": [
+            "model.load_finetuned=True",
+            "model.finetuned=lavis/ywjang_output/best_models/20230810124_Answerer/checkpoint_best.pth",
+        ]
+    })
 
-    cfg = Config(parse_args())
+    cfg = Config(args_answerer)
 
     init_distributed_mode(cfg.run_cfg)
 
@@ -90,6 +101,9 @@ def main():
     
     # set after init_distributed_mode() to only log on master.
     setup_logger()
+    
+    # import pdb;    pdb.set_trace()
+
 
     task = tasks.setup_task(cfg)
     datasets = task.build_datasets(cfg)
@@ -100,10 +114,9 @@ def main():
     runner = get_runner_class(cfg)(
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )
-    # import pudb;    pudb.set_trace()
     
     # set after init_distributed_mode() to only log on master.
-    setup_logger(runner.output_dir)
+    # setup_logger(runner.output_dir)
     
     runner.evaluate(skip_reload=True)
 

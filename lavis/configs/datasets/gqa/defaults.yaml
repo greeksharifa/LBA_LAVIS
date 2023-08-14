@@ -13,8 +13,8 @@ datasets:
       annotations:
         train:
           url:
-              - /export/share/datasets/vision/GQA/questions1.2/train_all_questions/train_all_questions_0.json
-              - /export/share/datasets/vision/GQA/questions1.2/val_all_questions.json
+              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/aokvqa_v1p0_val.json
+              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/aokvqa/large_vocab_train_lavis.json
           storage:
               - gqa/annotations/train_all_questions_0.json
               - gqa/annotations/val_all_questions.json

@@ -1,40 +1,15 @@
 {
-  "Questioner_SingleSubQ": [
-    "Write a sub-question about image, when main-question is '{}'.",
-    "Write a informative sub-question about image, when main-question is '{}'.",
-    "Write a sub-question about image, when main-question is '{}'."
-  ],
   "Questioner_MultipleSubQ": {
-    "init_prompt": "Generate questions about image that will help answer the main question, when main-question is '{}'.",
-    "after_prompt": " While creating the new sub-question, ask something different from previously created sub-questions: ",
+    "init_prompt": "Generate 1 sub-question about image that will help answer the main question, when main-question is '{}'.",
+    "after_prompt": " Create a question that asks about different information than the following questions. ",
     "pair_prompt": "sub-question-{}: '{}'"
   },
   "Answerer": {
     "init_prompt": "{}"
   },
   "Reasoner": {
-    "init_prompt": "Act as an expert Answerer. You have to answer the main-question: '{}'. You can use the following Q&A results to help you answer: ",
-    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')",
-    "final_prompt": ". Now answer the main-question. {}"
-  },
-
-  "1": [
-    "Write a sub-question about image, when main-question is '{}'.",
-    "Write a informative sub-question about image, when main-question is '{}'.",
-    "Write a sub-question about image, when main-question is '{}'."
-  ],
-  "1_old": [
-    "Write a sub-question about image, when main-question is '{}'. sub-question:",
-    "Write a informative sub-question about image, when main-question is '{}'. sub-question:",
-    "Write a sub-question about image, when main-question is '{}'. sub-question:"
-  ],
-  "2": [
-    "Write a sub-question about concept '{}', when main-question is '{}'. sub-question:",
-    "Instruction: Given a picture, a question and a correct answer related the picture are provided. The answer can be inferred from the picture. The target(object) of question which is existed in the picture is important key to infer the answer. The additional information of object related question is helpful for answer the question more correctly. Therefore, our goal is to get new information related answer by asking a new question. Write an additional question to help to answer the original question correctly.\nQuestion: {}\nAnswer: {}"
-  ],
-  "multiple": {
-    "init_prompt": "Generate a sub-question about image, when main-question is '{}'.",
-    "after_prompt": " While creating the new sub-question, consider the following pairs of previously created (sub-question, corresponding answer). You have to ask something different from the questions created earlier. ",
-    "pair_prompt": "(sub-question-{}: '{}', sub-answer-{}: '{}')"
-  }
+        "init_prompt": "You have to answer the Q: '{}'. You can use the following Q&A results to help you answer: ",
+        "pair_prompt": "{} {}. ",
+        "final_prompt": " Based on the previously mentioned Q&A content and the image, answer the following question briefly. {} "
+    }
 }

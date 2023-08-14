@@ -236,11 +236,11 @@ class GQATask(VQATask):
 
 @registry.register_task("aok_vqa")
 class AOKVQATask(VQATask):
+    _cnt = 0
     def valid_step(self, model, samples):
-        print_sample(samples, msg="AOK-VQA samples:", color=Colors.BRIGHT_YELLOW)
-        # print('\n' * 5)
-        # {'choice': ['plastic', 'paper', 'styrofoam', 'glass'], 'gt_ans': None, 'pred_ans': 'plastic',
-        # 'predicted_class': tensor([0, 3, 1, 2], device='cuda:3'), 'question_id': '289gdniVRHj3QAaLe27u6o'},
+        # if AOKVQATask._cnt == 0:
+        #     AOKVQATask._cnt += 1
+        #     print_sample(samples, msg="AOK-VQA samples:", color=Colors.BRIGHT_YELLOW)
         answers = model.predict_answers(
             samples=samples,
             answer_list=self.answer_list,
@@ -261,11 +261,15 @@ class AOKVQATask(VQATask):
         question_id = samples["question_id"]
         gt_answers = samples["direct_answers"]
         correct_choice_idxs = samples["correct_choice_idx"]
+        choices = samples["choices"]
 
-        for pred_answer, ques_id, gt_answer, pred_choice_idx, correct_choice_idx in zip(answers, question_id, gt_answers, pred_choice_idxs, correct_choice_idxs):
+        for pred_answer, ques_id, gt_answer, pred_choice_idx_ndarray, correct_choice_idx, choice in zip(answers, question_id, gt_answers, pred_choice_idxs, correct_choice_idxs, choices):
+            pred_choice_idx = int(pred_choice_idx_ndarray[0])
             pred_qa_pairs.append(
                 {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer,
-                 "pred_choice_idx": int(pred_choice_idx[0]), "correct_choice_idx": correct_choice_idx}
+                 "pred_choice_idx": pred_choice_idx, "correct_choice_idx": correct_choice_idx,
+                 "predicted_class": choice[pred_choice_idx], "choices": choice,
+                 }
             )
 
         return pred_qa_pairs
@@ -302,7 +306,7 @@ class AOKVQATask(VQATask):
 
         accuracy = sum(acc) / len(acc) * 100
         mc_accuracy = sum(mc_acc) / len(mc_acc) * 100
-        metrics = {"agg_metrics": accuracy, "acc": accuracy, "mc_acc": mc_accuracy,
+        metrics = {"agg_metrics": accuracy, "mc_acc": mc_accuracy,  # "acc": accuracy,
                    "da_acc": accuracy}
 
         with open(

@@ -184,7 +184,8 @@ def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_quest
     
     prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
-    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
+    # sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
+    sub_qa_pair_num = min(1+3, len(sub_question_list))     # index 0은 text_output으로 사용
     sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
     text_input = prompts["init_prompt"].format(main_question)
@@ -223,11 +224,15 @@ def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_questio
     sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
     text_input = prompts["init_prompt"].format(main_question)
+    # text_input = ""
     for i in range(0, sub_qa_pair_num):
         index = sub_qa_indices[i]
-        if i > 0:
-            text_input += ', '
-        text_input += prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+        # if i > 0:
+        #     text_input += ', '
+        if prompts["pair_prompt"].count('{}') == 4:
+            text_input += prompts["pair_prompt"].format(i+1, sub_question_list[index], i+1, sub_answer_list[index])
+        else:
+            text_input += prompts["pair_prompt"].format(sub_question_list[index], sub_answer_list[index])
     
     text_input += prompts["final_prompt"].format(main_question)
     
@@ -291,9 +296,9 @@ class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
         self.prompt_type = prompt_type
         
         if prompt_type in ["Questioner_SingleSubQ", "Answerer"]:
-            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 100)
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths)#, 100)
         elif prompt_type in ["Questioner_MultipleSubQ", "Reasoner"]:
-            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 100)
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths)#, 100)
         
         self.img_ids = {}
         n = 0

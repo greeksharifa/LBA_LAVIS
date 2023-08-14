@@ -90,7 +90,7 @@ class BaseTask:
         metric_logger = MetricLogger(delimiter="  ")
         header = "Evaluation"
         # TODO make it configurable
-        print_freq = 100
+        print_freq = 20
 
         results = []
         _cnt = 0
@@ -123,6 +123,7 @@ class BaseTask:
                 }
             """
             eval_output = self.valid_step(model=model, samples=samples)
+            # import pudb; pudb.set_trace()
             results.extend(eval_output)
 
         if is_dist_avail_and_initialized():
