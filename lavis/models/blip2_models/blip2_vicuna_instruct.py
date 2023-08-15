@@ -59,8 +59,8 @@ class Blip2VicunaInstruct(Blip2Base):
         # logging.info(f"vit_precision: {vit_precision}")
         # logging.info(f"freeze_vit: {freeze_vit}")
         # logging.info(f"num_query_token: {num_query_token}")
-        # logging.info(f"llm_model: {llm_model}")
-        # logging.info(f"prompt: {prompt}")
+        # logging.info(Colors.BRIGHT_RED + f"llm_model: {llm_model}" + Colors.RESET)
+        logging.info(Colors.BRIGHT_RED + f"prompt: {prompt}" + Colors.RESET)
         # logging.info(f"max_txt_len: {max_txt_len}")
         # logging.info(f"max_output_txt_len: {max_output_txt_len}")
         # logging.info(f"apply_lemmatizer: {apply_lemmatizer}")
@@ -285,7 +285,15 @@ class Blip2VicunaInstruct(Blip2Base):
         length_penalty=1,
         num_captions=1,
         temperature=1,
+        # answerer=False,
     ):
+        # Answer output GT-sub-answer if possible
+        # if answerer:
+        #     import json
+        #     gt_data = json.load(open("/data/VQA-Introspect/VQAIntrospect_valv1.0.json", "r"))
+        #
+        #     return [GT answer]
+        
         prompt = None
         # try:
         self.llm_tokenizer.padding_side = "left"
@@ -412,9 +420,9 @@ class Blip2VicunaInstruct(Blip2Base):
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
-        if self._cnt < 3:
+        if self._cnt < 20:
             self._cnt += 1
-            print_sample(samples, output_text=output_text, msg='in generate(), eval sample:', color=Colors.GREEN)
+            print_sample(samples, output_text=output_text, msg=f'in generate(), eval sample: {self._cnt}', color=Colors.GREEN)
             # logging.info(Colors.BLUE + f"prompt: {prompt}" + Colors.RESET)
         
         return output_text
@@ -465,7 +473,7 @@ class Blip2VicunaInstruct(Blip2Base):
 
         samples["prompt"] = text_input
 
-        output_text = self.generate(
+        result = self.generate(
             samples,
             num_beams=num_beams,
             max_length=max_len,
@@ -473,10 +481,23 @@ class Blip2VicunaInstruct(Blip2Base):
             length_penalty=length_penalty
         )
 
+        # if "apply_lemmatizer" in samples.keys() and samples["apply_lemmatizer"]:
+        #     output_text = self._lemmatize(output_text)
+        #
+        # return output_text
+    
+        if type(result) == tuple:
+            output_text, sub_q_list, sub_a_list = result
+        else:
+            output_text, sub_q_list, sub_a_list = result, None, None
+
         if "apply_lemmatizer" in samples.keys() and samples["apply_lemmatizer"]:
             output_text = self._lemmatize(output_text)
 
-        return output_text
+        if sub_q_list is not None:
+            return output_text, sub_q_list, sub_a_list
+        else:
+            return output_text
 
     def predict_class(
         self,

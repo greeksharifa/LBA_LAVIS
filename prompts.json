@@ -1,15 +1,15 @@
 {
-  "Questioner_MultipleSubQ": {
-    "init_prompt": "Generate 1 sub-question about image that will help answer the main question, when main-question is '{}'.",
-    "after_prompt": " Create a question that asks about different information than the following questions. ",
-    "pair_prompt": "sub-question-{}: '{}'"
-  },
-  "Answerer": {
-    "init_prompt": "{}"
-  },
-  "Reasoner": {
-        "init_prompt": "You have to answer the Q: '{}'. You can use the following Q&A results to help you answer: ",
+    "Questioner_MultipleSubQ": {
+        "init_prompt": "Generate 1 sub-question about image that will help answer the main question, when main-question is '{}'.",
+        "after_prompt": " Create a question that asks about different information than the following questions. ",
+        "pair_prompt": "sub-question-{}: '{}'"
+    },
+    "Answerer": {
+        "init_prompt": "{}"
+    },
+    "Reasoner": {
+        "init_prompt": "Use following Q&A results to answer the main question. If it's not useful, just ignore it. ",
         "pair_prompt": "{} {}. ",
-        "final_prompt": " Based on the previously mentioned Q&A content and the image, answer the following question briefly. {} "
+        "final_prompt": "main-question: {} A:"
     }
 }

@@ -11,6 +11,8 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+
+from colors import Colors
 from lavis.common.dist_utils import download_cached_file, is_dist_avail_and_initialized
 from lavis.common.utils import get_abs_path, is_url
 from omegaconf import OmegaConf
@@ -32,7 +34,7 @@ class BaseModel(nn.Module):
 
         This should expect no mismatch in the model keys and the checkpoint keys.
         """
-        print('in lavis.models.base_model load_checkpoint(), url_or_filename:', url_or_filename)
+        print(Colors.BRIGHT_RED + 'in lavis.models.base_model load_checkpoint(), url_or_filename:', url_or_filename + Colors.RESET)
         if is_url(url_or_filename):
             cached_file = download_cached_file(
                 url_or_filename, check_hash=False, progress=True
@@ -51,7 +53,7 @@ class BaseModel(nn.Module):
         msg = self.load_state_dict(state_dict, strict=False)
 
         logging.info("Missing keys {}".format(msg.missing_keys))
-        logging.info("load checkpoint from %s" % url_or_filename)
+        logging.info(Colors.BRIGHT_RED + "load checkpoint from %s" % url_or_filename + Colors.RESET)
 
         return msg
 

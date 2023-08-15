@@ -18,6 +18,16 @@
     "init_prompt": "{}"
   },
   "Reasoner": {
+    "init_prompt": "You have to answer the main-question: '{}'. You can use the following Q&A results to help you answer: [",
+    "pair_prompt": "{} {}",
+    "final_prompt": "] Now answer the main-question. {}"
+  },
+  "Reasoner": {
+        "init_prompt": "Here are Q&A about image: ",
+        "pair_prompt": "{} {}. ",
+        "final_prompt": " Refer to the image and previous Q&A content, answer concisely. {} "
+    },
+  "Reasoner": {
     "init_prompt": "",
     "pair_prompt": "{}: {}. ",
     "final_prompt": "{}: "

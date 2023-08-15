@@ -37,52 +37,8 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
     Answerer = None
     finetuned = None
     prompts = None
+    base = dict()
     _cnt = 0
-    
-    # def from_config(cls, cfg):
-    #     vit_model = cfg.get("vit_model", "eva_clip_g")              # 'eva_clip_g'
-    #     img_size = cfg.get("image_size")                            # 224
-    #     num_query_token = cfg.get("num_query_token")                # 32
-    #     llm_model = cfg.get("llm_model")                            # '/home/ywjang/models/lmsys/vicuna-7b-v1.3'
-    #
-    #     drop_path_rate = cfg.get("drop_path_rate", 0)               # 0
-    #     use_grad_checkpoint = cfg.get("use_grad_checkpoint", False) # True
-    #     vit_precision = cfg.get("vit_precision", "fp16")            # 'fp16'
-    #     freeze_vit = cfg.get("freeze_vit", True)                    # True
-    #
-    #     prompt = cfg.get("prompt", "")                              # "Write a sub-question about image, when main-question is '{}'. sub-question:"
-    #     max_txt_len = cfg.get("max_txt_len", 128)                   # 128
-    #     max_output_txt_len = cfg.get("max_output_txt_len", 256)     # 256
-    #
-    #     apply_lemmatizer = cfg.get("apply_lemmatizer", False)       # False
-    #
-    #     qformer_text_input = cfg.get("qformer_text_input", True)    # True
-    #
-    #     model = cls(
-    #         vit_model=vit_model,
-    #         img_size=img_size,
-    #         drop_path_rate=drop_path_rate,
-    #         use_grad_checkpoint=use_grad_checkpoint,
-    #         vit_precision=vit_precision,
-    #         freeze_vit=freeze_vit,
-    #         num_query_token=num_query_token,
-    #         llm_model=llm_model,
-    #         prompt=prompt,
-    #         max_txt_len=max_txt_len,
-    #         max_output_txt_len=max_output_txt_len,
-    #         apply_lemmatizer=apply_lemmatizer,
-    #         qformer_text_input=qformer_text_input,
-    #     )
-    #
-    #     # if qformer_text_input:
-    #     #     # Hard-coded to load from BLIP-2 stage-1 pre-trained model (not ideal)
-    #     #     model.load_from_pretrained(
-    #     #         url_or_filename="https://storage.googleapis.com/sfr-vision-language-research/LAVIS/models/BLIP2/blip2_pretrained.pth"
-    #     #     )
-    #
-    #     model.load_checkpoint_from_config(cfg)
-    #
-    #     return model
     
     
     @staticmethod
@@ -90,6 +46,21 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         Blip2VicunaInstructQAR.Questioner = questioner
         Blip2VicunaInstructQAR.Answerer = answerer
         Blip2VicunaInstructQAR.finetuned = finetuned
+    
+        # base와 비교
+        base_json = json.load(open("lavis/ywjang_output_qar_test/20230815093/result/val_vqa_result.json", "r"))
+        
+        for elem in base_json:
+            question_id = elem["question_id"]
+            question = elem["question"]
+            gt_ans = elem["gt_ans"]
+            pred_ans = elem["pred_ans"]
+            
+            Blip2VicunaInstructQAR.base[question_id] = {
+                "question": question,
+                "gt_ans": gt_ans,
+                "base_pred_ans": pred_ans
+            }
     
     
     def set_prompts(self):
@@ -148,14 +119,14 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         # logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
         # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
         
-        if samples["image"].device != Blip2VicunaInstructQAR.Questioner.device:
+        if hasattr(Blip2VicunaInstructQAR.Questioner, "device") and samples["image"].device != Blip2VicunaInstructQAR.Questioner.device:
             Blip2VicunaInstructQAR.Questioner.to(samples["image"].device)
             logging.info(Colors.BRIGHT_MAGENTA + f"Questioner device move: {Blip2VicunaInstructQAR.Questioner.device}" + Colors.RESET)
-        if samples["image"].device != Blip2VicunaInstructQAR.Answerer.device:
+        if hasattr(Blip2VicunaInstructQAR.Answerer, "device") and samples["image"].device != Blip2VicunaInstructQAR.Answerer.device:
             Blip2VicunaInstructQAR.Answerer.to(samples["image"].device)
             logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device move: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
         
-        main_question = list(samples["prompt"])
+        main_question = list(samples["text_input"])
         # logging.info(Colors.BRIGHT_MAGENTA + f"main_question: {main_question}" + Colors.RESET)
         if isinstance(main_question, list):
             main_question = main_question[0]
@@ -167,22 +138,29 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         
         questioner_prompt = questioner_prompts["init_prompt"].format(main_question)
         
-        # sub_question_list = []
-        # sub_answer_list = []
+        sub_question_list = []
+        sub_answer_list = []
         
-        reasoner_prompt = ""
+        reasoner_prompt = reasoner_prompts["init_prompt"]
         if reasoner_prompts["init_prompt"].count('{}') == 1:
             reasoner_prompt = reasoner_prompts["init_prompt"].format(main_question)    # reasoner_prompt
+            
+        sub_qa_is_none = False
         
-        for i in range(1, 2+1):
+        for i in range(1, 1+1):
             # Questioner
             samples["prompt"] = questioner_prompt if i == 1 else questioner_prompt + '.'
             # print('i:', i, 'questioner samples["prompt"]:', samples["prompt"], sep='\t')
             sub_question = Blip2VicunaInstructQAR.Questioner.generate(samples)
+            if sub_question is None:
+                if i == 1:
+                    sub_qa_is_none = True
+                    # print('sub_question is None' + '!' * 400)
+                break
             # print('i:', i, 'sub_question:', sub_question, sep='\t')
             if isinstance(sub_question, list):
                 sub_question = sub_question[0]
-            # sub_question_list.append(sub_question)
+            sub_question_list.append(sub_question)
             if i == 1:
                 questioner_prompt += questioner_prompts["after_prompt"]
             else:
@@ -194,11 +172,13 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             samples["prompt"] = answerer_prompt
             # print('i:', i, 'answerer samples["prompt"]:', samples["prompt"], sep='\t')
 
-            sub_answer = Blip2VicunaInstructQAR.Answerer.generate(samples)
+            sub_answer = Blip2VicunaInstructQAR.Answerer.generate(samples)#, answerer=True)
             # print('i:', i, 'sub_answer:', sub_answer, sep='\t')
             if isinstance(sub_answer, list):
                 sub_answer = sub_answer[0]
-            # sub_answer_list.append(sub_answer)
+            if sub_answer.endswith('0' * 10):
+                sub_answer = ' '.join(sub_answer.split()[:-1])
+            sub_answer_list.append(sub_answer)
 
             # Reasoner
             if i > 1 and not reasoner_prompts["pair_prompt"].endswith('. '):
@@ -208,6 +188,9 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             else:
                 reasoner_prompt += reasoner_prompts["pair_prompt"].format(sub_question, sub_answer)
             
+        if sub_qa_is_none:
+            reasoner_prompt = ""
+        
         reasoner_prompt += reasoner_prompts["final_prompt"].format(main_question)
         samples["prompt"] = reasoner_prompt
         # prompt = None
@@ -341,16 +324,16 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
-        if Blip2VicunaInstructQAR._cnt < 3:
-            Blip2VicunaInstructQAR._cnt += 1
-            print_sample(samples, output_text=output_text, msg='in generate(), eval sample:', color=Colors.BLUE)
+        if Blip2VicunaInstructQAR._cnt < 20:
+            print_sample(samples, output_text=output_text, msg=f'in generate(), eval sample: {Blip2VicunaInstructQAR._cnt}', color=Colors.BLUE)
             # logging.info(Colors.CYAN + f"prompt: {prompt}" + Colors.RESET)
-        elif Blip2VicunaInstructQAR._cnt == 3:
-            Blip2VicunaInstructQAR._cnt += 1
+        elif Blip2VicunaInstructQAR._cnt == 20:
             print(Colors.BRIGHT_GREEN + "finetuned: " + json.dumps(Blip2VicunaInstructQAR.finetuned, indent=4) + Colors.RESET)
             print(Colors.BRIGHT_YELLOW + "prompts: \n" + json.dumps(self.prompts, indent=4) + Colors.RESET)
         
-        return output_text
+        Blip2VicunaInstructQAR._cnt += 1
+
+        return output_text, '\n'.join(sub_question_list), '\n'.join(sub_answer_list)
         #
         # except Exception as e:
         #     print_sample(samples, msg='in QAR generate(), ERROR OCCUR!' + '!' * 170, color=Colors.RED)

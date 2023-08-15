@@ -13,7 +13,7 @@ model:
   freeze_vit: True
 
 datasets:
-  aok_vqa: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  aok_vqa: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     #     ...
@@ -37,7 +37,9 @@ datasets:
 run:
 #  task: vqa_introspect
 #  task: captioning
-  task: aok_vqa # name of the registry_name of class in tasks/captioning.py
+#  task: vqa_introspect_qar_caption
+#  task: vqa_introspect_test_task # name of the registry_name of class in tasks/<blabla>.py
+  task: aok_vqa # name of the registry_name of class in tasks/<blabla>.py
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...
@@ -56,13 +58,13 @@ run:
   batch_size_eval: 1
   num_workers: 0
   accum_grad_iters: 16
-  prompt: "{}"
+  prompt: "Q: {} A:"
 
   max_len: 128
   min_len: 1
   num_beams: 5
 
-  seed: 42
+  seed: 48
   output_dir: "ywjang_output_qar_aok_vqa/"
 
   amp: True

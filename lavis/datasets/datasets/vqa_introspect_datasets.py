@@ -11,6 +11,7 @@ import random
 import logging
 from collections import OrderedDict
 
+import torch
 from PIL import Image
 from PIL import ImageFile
 
@@ -369,6 +370,38 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         
         logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}{Colors.RESET}")
         logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
+    
+    
+    def collater(self, samples):
+        (
+            image_list,
+            image_id_list,
+            main_question_id_list,
+            instance_id_list,
+            text_input_list,
+            prompt_list,
+            text_output_list,
+        ) = ([], [], [], [], [], [], [])
+
+        for sample in samples:
+            image_list.append(sample["image"])
+            image_id_list.append(sample["image_id"])
+            main_question_id_list.append(sample["main_question_id"])
+            instance_id_list.append(sample["instance_id"])
+            text_input_list.append(sample["text_input"])
+            prompt_list.append(sample["prompt"])
+            text_output_list.append(sample["text_output"])
+
+        return {
+            "image": torch.stack(image_list, dim=0),
+            "image_id": image_id_list,
+            "main_question_id": main_question_id_list,
+            "instance_id": instance_id_list,
+            "text_input": text_input_list,
+            "prompt": prompt_list,
+            # "sub_question_id": ann["sub_question_id"],
+            "text_output": text_output_list,
+        }
     
     
     def __getitem__(self, index):

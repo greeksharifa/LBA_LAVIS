@@ -12,7 +12,8 @@ from lavis.datasets.datasets.aok_vqa_datasets import AOKVQADataset, AOKVQAEvalDa
 from lavis.datasets.datasets.coco_vqa_datasets import COCOVQADataset, COCOVQAEvalDataset
 from lavis.datasets.datasets.vg_vqa_datasets import VGVQADataset
 from lavis.datasets.datasets.gqa_datasets import GQADataset, GQAEvalDataset
-from lavis.datasets.datasets.vqa_introspect_vqa_datasets import VQAIntrospectDataset, VQAIntrospectEvalDataset
+# from backups.vqa_introspect_vqa_datasets import VQAIntrospectDataset, VQAIntrospectEvalDataset
+from lavis.datasets.datasets.vqa_introspect_test_datasets import VQAIntrospectTestDataset, VQAIntrospectTestEvalDataset
 
 
 @registry.register_builder("coco_vqa")
@@ -59,11 +60,11 @@ class GQABuilder(BaseDatasetBuilder):
     }
 
     
-@registry.register_builder("vqa_introspect")
-class VQAIntrospectBuilder(BaseDatasetBuilder):
-    train_dataset_cls = VQAIntrospectDataset
-    eval_dataset_cls = VQAIntrospectEvalDataset
+@registry.register_builder("vqa_introspect_test")
+class VQAIntrospectTestBuilder(BaseDatasetBuilder):
+    train_dataset_cls = VQAIntrospectTestDataset      # dummy
+    eval_dataset_cls = VQAIntrospectTestEvalDataset
 
     DATASET_CONFIG_DICT = {
-        "default": "configs/datasets/vqa_introspect/defaults.yaml",
+        "default": "configs/datasets/vqa_introspect/defaults_test.yaml",
     }

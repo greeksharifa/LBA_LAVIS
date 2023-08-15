@@ -32,6 +32,7 @@ from lavis.datasets.builders.vqa_builder import (
     OKVQABuilder,
     VGVQABuilder,
     GQABuilder,
+    VQAIntrospectTestBuilder,
 )
 from lavis.datasets.builders.retrieval_builder import (
     MSRVTTRetrievalBuilder,
@@ -71,6 +72,7 @@ __all__ = [
     # "VQAIntrospectCapBuilder",
     # "VQAIntrospectMultipleCapBuilder",
     "VQAIntrospectQARCapBuilder",
+    "VQAIntrospectTestBuilder",
 ]
 
 

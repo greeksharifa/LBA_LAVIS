@@ -6,14 +6,15 @@
 model:
   arch: blip2_vicuna_instruct
   model_type: vicuna7b
-  load_finetuned: False # True False
-  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
+  load_finetuned: True # True False
+  finetuned: "/models/instruct_blip_vicuna7b_trimmed.pth"
 #  finetuned: "lavis/ywjang_output/best_models/20230810124_Answerer/checkpoint_best.pth"
+#  finetuned: "lavis/ywjang_output/best_models/20230812163_Reasoner_epoch50/checkpoint_best.pth"
   use_grad_checkpoint: True
   freeze_vit: True
 
 datasets:
-  aok_vqa: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  vqa_introspect_test: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     #     ...
@@ -37,7 +38,8 @@ datasets:
 run:
 #  task: vqa_introspect
 #  task: captioning
-  task: aok_vqa # name of the registry_name of class in tasks/captioning.py
+#  task: vqa_introspect_qar_caption
+  task: vqa_introspect_test_task # name of the registry_name of class in tasks/<blabla>.py
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...
@@ -56,7 +58,7 @@ run:
   batch_size_eval: 1
   num_workers: 0
   accum_grad_iters: 16
-  prompt: "{}"
+  prompt: "Q: {} A:"
 
   max_len: 128
   min_len: 1

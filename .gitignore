@@ -1,10 +1,14 @@
 # PyCharm
 .idea/
 
+# Data
+data/VQAv2/
+
 # Output
 lavis/ywjang_output_train/
 lavis/ywjang_output_test/
 lavis/ywjang_output_vqa_test/
+lavis/ywjang_output*/
 
 # Mac
 **/.DS_Store
