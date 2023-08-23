@@ -100,19 +100,20 @@ class Colors:
     BRIGHT_END = '\033[0m'
 
 
-def _get_model(finetuned, prompt_type, prompts):
-    model_arch = "blip2_vicuna_instruct_qar" if prompt_type == "Reasoner" else "blip2_vicuna_instruct"
+def _get_model(finetuned, role, prompts):
+    model_arch = "blip2_vicuna_instruct_qar" if role == "Reasoner" else "blip2_vicuna_instruct"
     args = easydict.EasyDict({
         "cfg_path": "instructBLIP_FT_vicuna7b_qar.yaml",
         "options": [
             "model.load_finetuned=True",
-            f"model.finetuned={finetuned[prompt_type]}",
-            f"model.arch={model_arch}"
+            f"model.finetuned={finetuned[role]}",
+            f"model.arch={model_arch}",
+            f"model.role={role}",
         ]
     })
     cfg = Config(args)
     
-    if prompt_type == "Reasoner":
+    if role == "Reasoner":
         init_distributed_mode(cfg.run_cfg)
         # set after init_distributed_mode() to only log on master.
         setup_logger()
@@ -123,7 +124,7 @@ def _get_model(finetuned, prompt_type, prompts):
     datasets = task.build_datasets(cfg)
     model = task.build_model(cfg)
     
-    print(Colors.BRIGHT_RED + f"Loading finetuned model from {finetuned[prompt_type]}" + Colors.RESET)
+    print(Colors.BRIGHT_RED + f"Loading finetuned model from {finetuned[role]}" + Colors.RESET)
     print(Colors.BRIGHT_GREEN + "finetuned: " + json.dumps(finetuned, indent=4) + Colors.RESET)
     print(Colors.BRIGHT_YELLOW + "prompts: \n" + json.dumps(prompts, indent=4) + Colors.RESET)
     
@@ -192,8 +193,8 @@ def main():
         # "Answerer": f"{best_model_dir}20230810124_Answerer/checkpoint_best.pth",
         "Answerer": "/models/instruct_blip_vicuna7b_trimmed.pth",
         
-        "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
-        # "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
+        # "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
+        "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230812163_Reasoner_epoch50/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230810074_Reasoner/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230812113_Reasoner_simpleprompt_epoch10/checkpoint_best.pth",
@@ -201,11 +202,11 @@ def main():
     
     Reasoner, (task, datasets, cfg) = _get_model(
         finetuned=finetuned,
-        prompt_type="Reasoner",
+        role="Reasoner",
         prompts=prompts
     )
     
-    Reasoner.set_prompts()
+    # Reasoner.set_prompts()
     print(Colors.RED + "set_prompts done." + Colors.RESET)
 
     if GT_SUB_QA:
@@ -214,12 +215,12 @@ def main():
     else:
         Questioner, _ = _get_model(
             finetuned=finetuned,
-            prompt_type="Questioner",
+            role="Questioner",
             prompts=prompts
         )
         Answerer, _ = _get_model(
             finetuned=finetuned,
-            prompt_type="Answerer",
+            role="Answerer",
             prompts=prompts
         )
     

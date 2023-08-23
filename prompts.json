@@ -8,7 +8,7 @@
         "init_prompt": "{}"
     },
     "Reasoner": {
-        "init_prompt": "Use following Q&A results to answer the main question. If it's not useful, just ignore it. ",
+        "init_prompt": "Let's work this out in a step by step way to be sure we have the right answer. Use following Q&A results to answer the main question. If it's not useful, just ignore it. ",
         "pair_prompt": "{} {}. ",
         "final_prompt": "main-question: {} A:"
     }

@@ -26,10 +26,49 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
-## instructBLIP Fine-Tuning을 위한 수정사항
+## InstructBLIP Fine-Tuning을 위한 수정사항(VQA-Introspect)
 
-- task 추가: `lavis/tasks/captioning.py`
+- https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
+- 참고: qar(Questioner-Answerer-Reasoner)은 이전 이름으로 추후 (SQ_InstructBLIP로) 변경 예정
+- 아래 내용은 InstructBLIP-vicuna7b를 수정하고 새로운 dataset, task를 정의한 경우에 대한 내용
+- 새로운 task 추가(vqa_introspect_captioning): `lavis/tasks/captioning.py` or `lavis/tasks/vqa.py`
+  - `__init__.py`에도 등록(위 사이트 참조)
+- 새로운 데이터셋 추가(vqa_introspect_qar_caption)
+  - sub_qa를 불러오는 방식에 따라 2가지로 구분함
+  - `lavis/datasets/datasets/vqa_introspect_datasets.py`: role(Q, A, R)에 따라 sub_qa를 불러오는 방식이 다름
+    - 원래는 prompt 적용을 모델 안에서 하는 것이 맞으나 임시로 이렇게 작성
+  - `lavis/datasets/datasets/vqa_introspect_datasets_test.py`: 최종 모델인 SQ_InstructBLIP을 테스트하기 위한 데이터셋
+  - dataset builder(`lavis/datasets/builders/vqa_builder.py, __init__.py`)에도 등록 완료
+  - dataset config yaml 파일로 새로 생성하여 등록(`lavis/configs/datasets/vqa_introspect/defaults.yaml`)
 - configs(yaml) 파일 수정: `./instructBLIP_FT_vicuna7b.yaml`
+  - baseline model test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_test.yaml`
+  - SQ_InstructBLIP 모델 test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_qar.yaml`
+  - yaml 파일의 datasets나 task만 변경해도 되지만 빠른 테스트를 위하 파일을 분리한 것. 합쳐도 상관 없음
+  - 주의할 점:
+    - yaml 파일의 `datasets:` 아래의 데이터셋 이름은 dataset builder의 register 이름과 일치(class 이름 아님)
+    - dataset은 여러 개 지정 가능
+    - `run: task:`는 `tasks/<blabla>.py`의 원하는 task와 register 이름과 일치
+- 모델 수정(`blip2_vicuna_instruct.py, blip2_vicuna_instruct_qar.py`)
+  - `lavis/models/blip2_models/blip2_vicuna_instruct.py` 수정:
+    - model role(Questioner, Answerer, or Reasoner) 추가
+    - sq_prompts 추가: role 별로 적용하는 prompts가 다를 수 있음(추가 예정)
+    - log를 위한 cnt 추가
+  - `lavis/models/blip2_models/blip2_vicuna_instruct_qar.py` 수정:
+    - Questioner-Answerer-Reasoner framework를 generate() 함수에서 구현
+    - module weight 통합 시 deprecate 시킬 예정
+- 학습: `train.py / train.sh`, baseline test: `test.py / test.sh`, SQ_Instruct test: `test_qar.py / test_qar.sh`
+- `./prompts.json`에 현재 SQ_InstructBLIP에 적용할 prompt 저장
+- 데이터 root 폴더는 `lavis/configs/default.yaml`에서 지정
+- KT의 보안에 의해 huggingface 등에서 모델 다운로드가 안 되므로 모델을 local에 다운로드하여 사용하기 위한 코드 변경:
+  - `lavis/models/eva_vit.py`
+  - `lavis/models/blip2_models/blip2.py`
+  - `lavis/models/blip2_models/blip2_vicuna_instruct.py`
+  - `lavis/configs/models/blip2/blip2_instruct_vicuna7b.yaml`
+  - 추가로 기존 데이터셋(ex. A-OKVQA) 등을 사용할 때에도 그에 맞는 `configs/datasets/이름`에 들어가서 경로 수정해주어야 함
+- 기타
+  - `init_distributed_mode(cfg.run_cfg)` 바로 다음에 `setup_logger()`을 위치시켜야 `logging.info()`가 제대로 작동
+  - evaluate(test) 할 때는 `runner.train()` 대신 `runner.evaluate(skip_reload=True)`을 사용
+  - yaml 파일의 `output_dir:`은 `lavis/` 폴더 아래에 저장됨
 
 ywjang 수정:
 

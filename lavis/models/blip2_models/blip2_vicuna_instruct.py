@@ -1,6 +1,7 @@
 """
 Requires Transformer 4.28 and above, implementation may change according the Llama implementation
 """
+import json
 import logging
 import string
 from packaging import version
@@ -48,6 +49,7 @@ class Blip2VicunaInstruct(Blip2Base):
         max_output_txt_len=256,
         apply_lemmatizer=False,
         qformer_text_input=True,
+        role=None,
     ):
         super().__init__()
         
@@ -102,10 +104,10 @@ class Blip2VicunaInstruct(Blip2Base):
         self.llm_model = LlamaForCausalLM.from_pretrained(
             llm_model, torch_dtype=torch.float16
         )
-        # self.llm_tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-        # self.llm_tokenizer.add_special_tokens({'bos_token': '</s>'})
-        # self.llm_tokenizer.add_special_tokens({'eos_token': '</s>'})
-        # self.llm_tokenizer.add_special_tokens({'unk_token': '</s>'})
+        self.llm_tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        self.llm_tokenizer.add_special_tokens({'bos_token': '</s>'})
+        self.llm_tokenizer.add_special_tokens({'eos_token': '</s>'})
+        self.llm_tokenizer.add_special_tokens({'unk_token': '</s>'})
         # logging.info('%' * 170)
         # logging.info('pad\tbos\teos\tunk\t835')
         # logging.info(self.llm_tokenizer(self.llm_tokenizer.pad_token, add_special_tokens=False).input_ids[0])
@@ -142,7 +144,9 @@ class Blip2VicunaInstruct(Blip2Base):
         
         self._cnt = 0
         self.reasoner_prompt_done_cnt = 0
-        self.prompts = None
+        self.sq_prompts = json.load(open("prompts.json", "r"))
+        self.role = role
+        logging.info(f'self.role:{self.role}')
 
     def concat_text_input_output(self, input_ids, input_atts, output_ids, output_atts):
         input_part_targets_len = []
@@ -278,16 +282,8 @@ class Blip2VicunaInstruct(Blip2Base):
         length_penalty=1,
         num_captions=1,
         temperature=1,
-        # answerer=False,
     ):
-        # Answer output GT-sub-answer if possible
-        # if answerer:
-        #     import json
-        #     gt_data = json.load(open("/data/VQA-Introspect/VQAIntrospect_valv1.0.json", "r"))
-        #
-        #     return [GT answer]
-        
-        prompt = None
+        # prompt = None
         # try:
         self.llm_tokenizer.padding_side = "left"
         
@@ -413,8 +409,8 @@ class Blip2VicunaInstruct(Blip2Base):
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
-        if self._cnt < 2000:
-            self._cnt += 1
+        self._cnt += 1
+        if self._cnt % 1000 == 0:
             print_sample(samples, output_text=output_text, msg=f'in generate(), eval sample: {self._cnt}', color=Colors.GREEN)
             # logging.info(Colors.BLUE + f"prompt: {prompt}" + Colors.RESET)
         
@@ -772,6 +768,8 @@ class Blip2VicunaInstruct(Blip2Base):
         apply_lemmatizer = cfg.get("apply_lemmatizer", False)       # False
 
         qformer_text_input = cfg.get("qformer_text_input", True)    # True
+        
+        role = cfg.get("role", None)                                # 'Questioner', 'Answerer', 'Reasoner'
 
         model = cls(
             vit_model=vit_model,
@@ -787,6 +785,7 @@ class Blip2VicunaInstruct(Blip2Base):
             max_output_txt_len=max_output_txt_len,
             apply_lemmatizer=apply_lemmatizer,
             qformer_text_input=qformer_text_input,
+            role=role,
         )
 
         # if qformer_text_input:

@@ -36,7 +36,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
     Questioner = None
     Answerer = None
     finetuned = None
-    prompts = None
+    # prompts = None
     base = dict()
     _cnt = 0
     
@@ -63,31 +63,28 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             }
     
     
-    def set_prompts(self):
-        _prompt_file_path = "prompts.json"
-        self.prompts = json.load(open(_prompt_file_path, "r"))
-        # Blip2VicunaInstructQAR.reasoner_prompt_done_cnt = 0
-
-
-    def set_new_reasoner_prompt(self, new_reasoner_prompt):
-        self.prompts["Reasoner"].update(new_reasoner_prompt)
-        print('self.prompts["Reasoner"]:', self.prompts["Reasoner"])
-
-    def update_reasoner_prompt(self):
-        print(Colors.BRIGHT_RED + str(self.reasoner_prompt_done_cnt) + Colors.RESET)
-        if dist_utils.is_main_process():
-            _prompts = json.load(open("prompts.json", "r"))
-            if len(_prompts["Reasoner_test"]) >= self.reasoner_prompt_done_cnt:
-                self.prompts["Reasoner"].update(
-                    _prompts["Reasoner_test"][self.reasoner_prompt_done_cnt]
-                )
-                self.reasoner_prompt_done_cnt += 1
-                print(Colors.BRIGHT_YELLOW + '\nupdated! self.prompts["Reasoner"]:' + str(json.dumps(self.prompts["Reasoner"], indent=4)) + Colors.RESET)
-                return True
-            else:
-                return False
-            
-        return False
+    # dummy
+    # def set_new_reasoner_prompt(self, new_reasoner_prompt):
+    #     self.sq_prompts["Reasoner"].update(new_reasoner_prompt)
+    #     print('self.sq_prompts["Reasoner"]:', self.sq_prompts["Reasoner"])
+    #
+    # def update_reasoner_prompt(self):
+    #     print(Colors.BRIGHT_RED + str(self.reasoner_prompt_done_cnt) + Colors.RESET)
+    #     if dist_utils.is_main_process():
+    #         _prompts = json.load(open("prompts.json", "r"))
+    #         if len(_prompts["Reasoner_test"]) >= self.reasoner_prompt_done_cnt:
+    #             self.sq_prompts["Reasoner"].update(
+    #                 _prompts["Reasoner_test"][self.reasoner_prompt_done_cnt]
+    #             )
+    #             self.reasoner_prompt_done_cnt += 1
+    #             print(Colors.BRIGHT_YELLOW + '\nupdated! self.sq_prompts["Reasoner"]:' + str(json.dumps(self.sq_prompts["Reasoner"], indent=4)) + Colors.RESET)
+    #             return True
+    #         else:
+    #             return False
+    #
+    #     return False
+    
+    
     @torch.no_grad()
     def generate(
         self,
@@ -132,9 +129,9 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             main_question = main_question[0]
         # logging.info(Colors.BRIGHT_MAGENTA + f"main_question: {main_question}" + Colors.RESET)
         
-        questioner_prompts = self.prompts["Questioner_MultipleSubQ"]
-        answerer_prompts = self.prompts["Answerer"]
-        reasoner_prompts = self.prompts["Reasoner"]
+        questioner_prompts = self.sq_prompts["Questioner_MultipleSubQ"]
+        answerer_prompts = self.sq_prompts["Answerer"]
+        reasoner_prompts = self.sq_prompts["Reasoner"]
         
         questioner_prompt = questioner_prompts["init_prompt"].format(main_question)
         
@@ -193,17 +190,9 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         
         reasoner_prompt += reasoner_prompts["final_prompt"].format(main_question)
         samples["prompt"] = reasoner_prompt
-        # prompt = None
-        # self.Questioner.generate
-        # assert False, "Wow! " * 100
         # try:
         self.llm_tokenizer.padding_side = "left"
         
-        # if "prompt" in samples.keys():
-        #     prompt = samples["prompt"]
-        # else:
-        #     prompt = self.prompt
-
         image = samples["image"]
 
         bs = image.size(0)
@@ -215,17 +204,8 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             
         # logging.info(Colors.BLUE + f"Prompt: {prompt}" + Colors.RESET)
         
-        
-        # For TextCaps
-        if "ocr_tokens" in samples.keys() and "{}" in reasoner_prompt[0]:
-            reasoner_prompt = [p.format(', '.join(samples['ocr_tokens'][i][:30])) for i, p in enumerate(reasoner_prompt)]
-
         query_tokens = self.query_tokens.expand(bs, -1, -1)
         if self.qformer_text_input:
-            # remove ocr tokens in q_former (for eval textvqa)
-            # qformer_prompt = prompt
-            # qformer_prompt = ['Question: ' + qp.split(' Question: ')[1] for qp in qformer_prompt]
-
             text_Qformer = self.tokenizer(
                 reasoner_prompt,
                 padding='longest',
@@ -320,7 +300,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
                 num_return_sequences=num_captions,
             )
 
-        outputs[outputs == 0] = 2 # convert output id 0 to 2 (eos_token_id)
+        outputs[outputs == 0] = 2   # convert output id 0 to 2 (eos_token_id)
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
@@ -329,7 +309,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             # logging.info(Colors.CYAN + f"prompt: {prompt}" + Colors.RESET)
         elif Blip2VicunaInstructQAR._cnt == 20:
             print(Colors.BRIGHT_GREEN + "finetuned: " + json.dumps(Blip2VicunaInstructQAR.finetuned, indent=4) + Colors.RESET)
-            print(Colors.BRIGHT_YELLOW + "prompts: \n" + json.dumps(self.prompts, indent=4) + Colors.RESET)
+            print(Colors.BRIGHT_YELLOW + "prompts: \n" + json.dumps(self.sq_prompts, indent=4) + Colors.RESET)
         
         Blip2VicunaInstructQAR._cnt += 1
 
