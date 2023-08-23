@@ -324,7 +324,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
-        if Blip2VicunaInstructQAR._cnt < 20:
+        if Blip2VicunaInstructQAR._cnt < 2000:
             print_sample(samples, output_text=output_text, msg=f'in generate(), eval sample: {Blip2VicunaInstructQAR._cnt}', color=Colors.BLUE)
             # logging.info(Colors.CYAN + f"prompt: {prompt}" + Colors.RESET)
         elif Blip2VicunaInstructQAR._cnt == 20:
@@ -333,7 +333,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         
         Blip2VicunaInstructQAR._cnt += 1
 
-        return output_text, '\n'.join(sub_question_list), '\n'.join(sub_answer_list)
+        return output_text, ['\n'.join(sub_question_list)], ['\n'.join(sub_answer_list)]
         #
         # except Exception as e:
         #     print_sample(samples, msg='in QAR generate(), ERROR OCCUR!' + '!' * 170, color=Colors.RED)

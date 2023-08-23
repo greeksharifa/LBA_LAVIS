@@ -14,7 +14,8 @@ model:
   freeze_vit: True
 
 datasets:
-  vqa_introspect_test: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
+#  vqa_introspect_test: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
+  aok_vqa: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     #     ...
@@ -39,7 +40,8 @@ run:
 #  task: vqa_introspect
 #  task: captioning
 #  task: vqa_introspect_qar_caption
-  task: vqa_introspect_test_task # name of the registry_name of class in tasks/<blabla>.py
+#  task: vqa_introspect_test_task # name of the registry_name of class in tasks/<blabla>.py
+  task: aok_vqa # name of the registry_name of class in tasks/<blabla>.py
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...

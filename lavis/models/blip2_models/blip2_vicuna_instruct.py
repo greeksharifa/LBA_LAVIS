@@ -102,20 +102,17 @@ class Blip2VicunaInstruct(Blip2Base):
         self.llm_model = LlamaForCausalLM.from_pretrained(
             llm_model, torch_dtype=torch.float16
         )
-        self.llm_tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-        self.llm_tokenizer.add_special_tokens({'bos_token': '</s>'})
-        self.llm_tokenizer.add_special_tokens({'eos_token': '</s>'})
-        self.llm_tokenizer.add_special_tokens({'unk_token': '</s>'})
+        # self.llm_tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        # self.llm_tokenizer.add_special_tokens({'bos_token': '</s>'})
+        # self.llm_tokenizer.add_special_tokens({'eos_token': '</s>'})
+        # self.llm_tokenizer.add_special_tokens({'unk_token': '</s>'})
         # logging.info('%' * 170)
-        logging.info('pad\tbos\teos\tunk\t835')
-        logging.info(self.llm_tokenizer(self.llm_tokenizer.pad_token, add_special_tokens=False).input_ids[0])
-        logging.info(self.llm_tokenizer(self.llm_tokenizer.bos_token, add_special_tokens=False).input_ids[0])
-        logging.info(self.llm_tokenizer(self.llm_tokenizer.eos_token, add_special_tokens=False).input_ids[0])
-        logging.info(self.llm_tokenizer(self.llm_tokenizer.unk_token, add_special_tokens=False).input_ids[0])
-        # for i in range(10):
-        #     for j in range(10):
-        #         logging.info(10*i+j, '\t', self.llm_tokenizer.decode([10*i+j]))
-        logging.info(self.llm_tokenizer.decode([835]))
+        # logging.info('pad\tbos\teos\tunk\t835')
+        # logging.info(self.llm_tokenizer(self.llm_tokenizer.pad_token, add_special_tokens=False).input_ids[0])
+        # logging.info(self.llm_tokenizer(self.llm_tokenizer.bos_token, add_special_tokens=False).input_ids[0])
+        # logging.info(self.llm_tokenizer(self.llm_tokenizer.eos_token, add_special_tokens=False).input_ids[0])
+        # logging.info(self.llm_tokenizer(self.llm_tokenizer.unk_token, add_special_tokens=False).input_ids[0])
+        # logging.info(self.llm_tokenizer.decode([835]))
         # logging.info('%' * 170)
 
         # self.llm_tokenizer.pad_token = self.llm_tokenizer.unk_token
@@ -172,10 +169,6 @@ class Blip2VicunaInstruct(Blip2Base):
         return llm_tokens, input_part_targets_len
 
     def forward(self, samples):
-        # print('-----------------')
-        # print(samples["text_input"])
-        # print(samples["text_output"])
-        # print('-----------------')
 
         image = samples["image"]
         with self.maybe_autocast():
@@ -420,7 +413,7 @@ class Blip2VicunaInstruct(Blip2Base):
         output_text = self.llm_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         output_text = [text.strip() for text in output_text]
         
-        if self._cnt < 20:
+        if self._cnt < 2000:
             self._cnt += 1
             print_sample(samples, output_text=output_text, msg=f'in generate(), eval sample: {self._cnt}', color=Colors.GREEN)
             # logging.info(Colors.BLUE + f"prompt: {prompt}" + Colors.RESET)

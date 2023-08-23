@@ -13,6 +13,7 @@ model:
   freeze_vit: True
 
 datasets:
+#  vqa_introspect_test: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
   aok_vqa: # name of the registry_name of dataset builder, in lavis/datasets/builders/<blabla>.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):

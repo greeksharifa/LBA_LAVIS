@@ -189,11 +189,11 @@ def main():
         # "Questioner": f"{best_model_dir}20230810150_Questioner_MultipleSubQ_epoch10/checkpoint_best.pth",
         "Questioner": f"{best_model_dir}20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth",
         
-        "Answerer": f"{best_model_dir}20230810124_Answerer/checkpoint_best.pth",
-        # "Answerer": "/models/instruct_blip_vicuna7b_trimmed.pth",
+        # "Answerer": f"{best_model_dir}20230810124_Answerer/checkpoint_best.pth",
+        "Answerer": "/models/instruct_blip_vicuna7b_trimmed.pth",
         
-        # "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
-        "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
+        "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
+        # "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230812163_Reasoner_epoch50/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230810074_Reasoner/checkpoint_best.pth",
         # "Reasoner": f"{best_model_dir}20230812113_Reasoner_simpleprompt_epoch10/checkpoint_best.pth",
