@@ -26,7 +26,11 @@ from lavis.datasets.builders.classification_builder import (
     SNLIVisualEntailmentBuilder,
 )
 from lavis.datasets.builders.imagefolder_builder import ImageNetBuilder
-from lavis.datasets.builders.video_qa_builder import MSRVTTQABuilder, MSVDQABuilder
+from lavis.datasets.builders.video_qa_builder import (
+    MSRVTTQABuilder,
+    MSVDQABuilder,
+    DramaQAEvalBuilder,
+)
 from lavis.datasets.builders.vqa_builder import (
     COCOVQABuilder,
     OKVQABuilder,
@@ -73,6 +77,7 @@ __all__ = [
     # "VQAIntrospectMultipleCapBuilder",
     "VQAIntrospectQARCapBuilder",
     "VQAIntrospectTestBuilder",
+    "DramaQAEvalBuilder",
 ]
 
 

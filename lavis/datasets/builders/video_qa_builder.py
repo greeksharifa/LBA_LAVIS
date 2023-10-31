@@ -42,3 +42,14 @@ class MSVDQABuilder(VideoQABuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/msvd/defaults_qa.yaml",
     }
+
+
+@registry.register_builder("dramaqa_eval")
+class DramaQAEvalBuilder(VideoQABuilder):
+    # train_dataset_cls = VQAIntrospectTestDataset      # dummy
+    # eval_dataset_cls = VQAIntrospectTestEvalDataset
+
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/dramaqa/defaults_test.yaml",
+    }
+    

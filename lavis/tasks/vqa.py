@@ -344,7 +344,7 @@ class AOKVQATask(VQATask):
         logging.info(f"Saved results for leaderboard evaluation at {result_file}")
 
 
-@registry.register_task("dramaqa_eval")
+@registry.register_task("dramaqa_eval_task")
 class DramaQAEvalTask(VQATask):
     def valid_step(self, model, samples):
         """
