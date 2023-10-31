@@ -31,7 +31,7 @@ model:
   # generation configs
 #  prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
 #  prompt: "{}"
-  prompt: "Q: {} A:"
+  prompt: "DramaQA Prompt. Q: {} A:"
 
 
 preprocess:

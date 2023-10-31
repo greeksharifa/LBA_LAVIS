@@ -13,6 +13,8 @@ from lavis.datasets.datasets.multimodal_classification_datasets import (
     MultimodalClassificationDataset,
 )
 
+from colors import Colors, print_color
+
 
 class __DisplMixin:
     def displ_item(self, index):
@@ -47,6 +49,8 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
         ), f"class_labels of {__class__.__name__} is not built yet."
 
         ann = self.annotation[index]
+        
+        print_color(msg="in class VideoQADataset", color=Colors.BRIGHT_RED)
 
         vname = ann["video"]
         vpath = os.path.join(self.vis_root, vname)
@@ -68,5 +72,6 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         super().__init__(vis_processor, text_processor, vis_root, ann_paths)
 
     def __getitem__(self, index):
+        print_color(msg="DramaQAEvalDataset __getitem__() is not implemented yet.", color=Colors.BRIGHT_RED)
         assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
         

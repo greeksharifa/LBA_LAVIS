@@ -26,6 +26,9 @@ class Colors:
     BRIGHT_WHITE = '\033[97m'
     BRIGHT_END = '\033[0m'
     
+def print_color(msg, color=Colors.BRIGHT_MAGENTA):
+    logging.info(color + msg + Colors.RESET)
+
 
 def print_sample(samples, output_text="", msg="print sample...", color=Colors.BRIGHT_MAGENTA):
     # if dist_utils.is_main_process():
