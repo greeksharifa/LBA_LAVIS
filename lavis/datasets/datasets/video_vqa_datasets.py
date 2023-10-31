@@ -72,6 +72,51 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         super().__init__(vis_processor, text_processor, vis_root, ann_paths)
 
     def __getitem__(self, index):
+        
         print_color(msg="DramaQAEvalDataset __getitem__() is not implemented yet.", color=Colors.BRIGHT_RED)
+        # print("self.annotation[index]:", self.annotation[index])
+        # print("len(self.annotation):", len(self.annotation))
+        # self.annotation[index]: {
+        #   'videoType': 'scene',
+        #   'answers': [
+        #       'Since Dokyung wanted to kick the old man.',
+        #       'Just because Dokyung wanted to buy some snacks from the old man.',
+        #       "Because Dokyung tried to give Dokyung's umbrella to the old man.",
+        #       'As Dokyung wanted to take the clothes away from the old man.',
+        #       'It was because Dokyung wanted to run away from Haeyoung1.'
+        #   ],
+        #   'vid': 'AnotherMissOh17_001_0000',
+        #   'qid': 13041,
+        #   'shot_contained': [25, 49],
+        #   'q_level_mem': 3,
+        #   'que': 'Why did Dokyung go to the old man?',
+        #   'q_level_logic': 4,
+        #   'instance_id': '0'
+        # }
+        # len(self.annotation): 4019
+        ann = self.annotation[index]
+        
+        print_color(msg="in class DramaQAEvalDataset", color=Colors.BRIGHT_RED)
+        
+        vname = ann["vid"]
+        # TODO: 경로 수정
+        vpath = os.path.join(self.vis_root, vname)
+        print_color(msg="vname: {}".format(vname), color=Colors.BRIGHT_RED)
+        print_color(msg="vpath: {}".format(vpath), color=Colors.BRIGHT_RED)
+        
+        frms = self.vis_processor(vpath)
+        question = self.text_processor(ann["que"])
+        # print_color(msg="frms    : {}".format(frms), color=Colors.BRIGHT_RED)
+        # print_color(msg="question: {}".format(question), color=Colors.BRIGHT_RED)
+
         assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
+
+        return {
+            "video": frms,
+            "text_input": question,
+            "answers": self._get_answer_label(ann["answer"]),
+            "question_id": ann["question_id"],
+            "instance_id": ann["instance_id"],
+        }
+        
         
