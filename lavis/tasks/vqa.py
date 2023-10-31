@@ -344,6 +344,52 @@ class AOKVQATask(VQATask):
         logging.info(f"Saved results for leaderboard evaluation at {result_file}")
 
 
+@registry.register_task("dramaqa_eval")
+class DramaQAEvalTask(VQATask):
+    def valid_step(self, model, samples):
+        """
+        
+        Args:
+            model:
+            samples:
+
+        Returns:
+
+        """
+        # TODO: DramaQA: edit this function to return the predicted answers
+        answers = model.predict_answers(
+            samples=samples,
+            answer_list=self.answer_list,
+            inference_method=self.inference_method,
+            num_beams=self.num_beams,
+            max_len=self.max_len,
+            min_len=self.min_len,
+            num_ans_candidates=self.num_ans_candidates,
+        )
+        pred_qa_pairs = []
+
+        question_id = samples["question_id"]
+        gt_answers = samples["answer"]
+
+        for answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+            ques_id = int(ques_id.item())
+            pred_qa_pairs.append({"question_id": ques_id, "pred_ans": answer, "gt_ans": gt_answer})
+
+        return pred_qa_pairs
+
+    @dist_utils.main_process
+    def _report_metrics(self, result_file, split):
+        """
+        Args:
+            result_file:
+            split:
+
+        Returns:
+
+        """
+        assert False, "DramaQA: Not implemented yet"
+        pass
+
 @registry.register_task("vqa_introspect_test_task")
 class VQAIntrospectTestTask(VQATask):
         _cnt = 0

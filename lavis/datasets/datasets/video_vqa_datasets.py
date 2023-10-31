@@ -61,3 +61,12 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
             "question_id": ann["question_id"],
             "instance_id": ann["instance_id"],
         }
+
+
+class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+        super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+
+    def __getitem__(self, index):
+        assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
+        

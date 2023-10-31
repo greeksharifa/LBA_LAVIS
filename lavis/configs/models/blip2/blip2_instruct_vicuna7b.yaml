@@ -8,6 +8,7 @@ model:
   load_finetuned: False
   load_pretrained: True
 
+#  pretrained: "https://storage.googleapis.com/sfr-vision-language-research/LAVIS/models/InstructBLIP/instruct_blip_vicuna7b_trimmed.pth"
 #  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
 #  finetuned: ""
 
@@ -23,7 +24,8 @@ model:
 
   # path to Vicuna checkpoint
 #  llm_model: "./llm/vicuna-7b"
-  llm_model: "/models/lmsys/vicuna-7b-v1.1"
+#  llm_model: "/models/lmsys/vicuna-7b-v1.1"
+  llm_model: "/home/ywjang/models/lmsys/vicuna-7b-v1.1"
 #  llm_model: "/home/ywjang/models/eachadea/vicuna-7b-1.1"
 
   # generation configs
