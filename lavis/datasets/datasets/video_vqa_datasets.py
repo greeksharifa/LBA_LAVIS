@@ -4,10 +4,13 @@
  SPDX-License-Identifier: BSD-3-Clause
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
-
+import glob
 import json
 import os
 from collections import OrderedDict
+
+import torch
+from PIL import Image
 
 from lavis.datasets.datasets.multimodal_classification_datasets import (
     MultimodalClassificationDataset,
@@ -98,24 +101,56 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         
         print_color(msg="in class DramaQAEvalDataset", color=Colors.BRIGHT_RED)
         
-        vname = ann["vid"]
+
+        # image_path = os.path.join(self.vis_root, ann["image"])
+        # image = Image.open(image_path).convert("RGB")
+        
+        image_path_list = []
+        
         # TODO: 경로 수정
-        vpath = os.path.join(self.vis_root, vname)
-        print_color(msg="vname: {}".format(vname), color=Colors.BRIGHT_RED)
+        vname = ann["vid"] # AnotherMissOh17_001_0000
+        
+        
+        if vname.endswith("0000"): # scene
+            vpath = os.path.join(self.vis_root, vname[:-5].replace('_', '/'))
+            for shot in glob.glob(vpath + "/*"):
+                for frm in glob.glob(shot + "/*"):
+                    image_path_list.append(frm)
+                    break
+        else: # shot
+            vpath = os.path.join(self.vis_root, vname)
+            for frm in glob.glob(vpath + "/*"):
+                image_path_list.append(frm)
+        
+        print_color(msg="image_list: {}, {}".format(len(image_path_list), image_path_list[0]), color=Colors.BRIGHT_RED)
+        # shot_contained = ann["shot_contained"]
+        # print_color(msg="vname: {}".format(vname), color=Colors.BRIGHT_RED)
         print_color(msg="vpath: {}".format(vpath), color=Colors.BRIGHT_RED)
         
-        frms = self.vis_processor(vpath)
+        frms = None
+        for image_path in image_path_list:
+            image = Image.open(image_path).convert("RGB")
+            # print_color(msg="image_path: {}".format(image_path), color=Colors.BRIGHT_RED)
+            image = self.vis_processor(image)
+            # print_color(msg="image: {}".format(image.shape), color=Colors.BRIGHT_RED)
+            if frms is None:
+                frms = image.unsqueeze(0).unsqueeze(2)
+            else:
+                frms = torch.cat((frms, image.unsqueeze(0).unsqueeze(2)), dim=2)
+                
+        
+        # frms = self.vis_processor(vpath)
+        print_color(msg="frms    : {}, {}".format(type(frms), frms.shape), color=Colors.BRIGHT_RED)
         question = self.text_processor(ann["que"])
-        # print_color(msg="frms    : {}".format(frms), color=Colors.BRIGHT_RED)
-        # print_color(msg="question: {}".format(question), color=Colors.BRIGHT_RED)
+        print_color(msg="question: {}".format(question), color=Colors.BRIGHT_RED)
 
-        assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
+        # assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
 
         return {
             "video": frms,
             "text_input": question,
-            "answers": self._get_answer_label(ann["answer"]),
-            "question_id": ann["question_id"],
+            "answers": self._get_answer_label(ann["answers"]),
+            "question_id": ann["qid"],
             "instance_id": ann["instance_id"],
         }
         

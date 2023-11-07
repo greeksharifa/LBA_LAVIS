@@ -6,7 +6,7 @@ import logging
 import string
 from packaging import version
 
-from colors import Colors, print_sample
+from colors import Colors, print_sample, print_color
 
 import torch
 from torch.cuda.amp import autocast as autocast
@@ -322,6 +322,8 @@ class Blip2VicunaInstruct(Blip2Base):
             Qformer_atts = torch.cat([query_atts, text_Qformer.attention_mask], dim=1)
 
         # For video data
+        # print_color(msg="image.shape: {}".format(image.shape), color=Colors.BRIGHT_RED)
+        # VQA-Introspect: 1, 3, 224, 224
         if image.dim() == 5:
             inputs_llm, atts_llm = [], []
             for j in range(image.size(2)):
