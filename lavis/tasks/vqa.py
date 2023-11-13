@@ -402,18 +402,37 @@ class DramaQAEvalTask(VQATask):
         # util.pytorch_cos_sim(embedding_1, embedding_2)
         ## tensor([[0.6003]])
         pred_answers = []
-        for answer, candidates in zip(answers, samples["answer_list"]):
+        print('answers:', answers)
+        print('samples["answer_list"]:', samples["answer_list"])
+        # answers: list of string. [batch_size]
+        # samples["answer_list"]: [5, batch_size]
+        # [['It was because Haeyoung1 tried to give some money to Dokyung.', '...'],
+        #  ['This was because Haeyoung1 tried to take a rest in the street.', '...'],
+        #  ['Since Haeyoung1 tried to buy a car for Dokyung.', '...'],
+        #  ['Because Haeyoung1 tried to recall the time the two shared in the alley.', '...'],
+        #  ['Since Haeyoung1 tried to study hard to pass the exam.', '...']]
+        for b in range(len(answers)):
+            answer = answers[b]
             embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
-            similarity = []
-            for candidate in candidates:
+            similarity_list = []
+            for i in range(5):
+                candidate = samples["answer_list"][i][b]
                 embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
-                similarity.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
-            # pre_answers.append(candidates[similarity.index(max(similarity))])
-            pred_answers.append(similarity.index(max(similarity)))
+                similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+            pred_index = similarity_list.index(max(similarity_list))
+            pred_answers.append(pred_index)
+        
+        # for answer, candidates in zip(answers, samples["answer_list"]):
+        #     embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
+        #     similarity = []
+        #     for candidate in candidates:
+        #         embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
+        #         similarity.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+        #     # pre_answers.append(candidates[similarity.index(max(similarity))])
+        #     pred_answers.append(similarity.index(max(similarity)))
             print('answer:', answer)
-            print('candidates:', candidates)
-            print('similarity:', similarity)
-            print('pred_answers:', similarity.index(max(similarity)), '\t', candidates[similarity.index(max(similarity))])
+            print('similarity_list:', similarity_list)
+            print('pred_answers:', pred_index, '\t', samples["answer_list"][pred_index][b])
             print()
 
         question_id = samples["question_id"]
