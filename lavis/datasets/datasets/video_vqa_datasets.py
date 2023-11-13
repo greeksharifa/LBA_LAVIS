@@ -75,8 +75,6 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         super().__init__(vis_processor, text_processor, vis_root, ann_paths)
 
     def __getitem__(self, index):
-        
-        print_color(msg="DramaQAEvalDataset __getitem__() is not implemented yet.", color=Colors.BRIGHT_RED)
         # print("self.annotation[index]:", self.annotation[index])
         # print("len(self.annotation):", len(self.annotation))
         # self.annotation[index]: {
@@ -99,9 +97,8 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         # len(self.annotation): 4019
         ann = self.annotation[index]
         
-        print_color(msg="in class DramaQAEvalDataset", color=Colors.BRIGHT_RED)
+        # print_color(msg="in class DramaQAEvalDataset", color=Colors.BRIGHT_RED)
         
-
         # image_path = os.path.join(self.vis_root, ann["image"])
         # image = Image.open(image_path).convert("RGB")
         
@@ -118,14 +115,14 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
                     image_path_list.append(frm)
                     break
         else: # shot
-            vpath = os.path.join(self.vis_root, vname)
+            vpath = os.path.join(self.vis_root, vname.replace('_', '/'))
             for frm in glob.glob(vpath + "/*"):
                 image_path_list.append(frm)
         
-        print_color(msg="image_list: {}, {}".format(len(image_path_list), image_path_list[0]), color=Colors.BRIGHT_RED)
+        # print_color(msg="image_list: {}, {}".format(len(image_path_list), image_path_list[0]), color=Colors.BRIGHT_RED)
         # shot_contained = ann["shot_contained"]
         # print_color(msg="vname: {}".format(vname), color=Colors.BRIGHT_RED)
-        print_color(msg="vpath: {}".format(vpath), color=Colors.BRIGHT_RED)
+        # print_color(msg="vpath: {}".format(vpath), color=Colors.BRIGHT_RED)
         
         frms = None
         for image_path in image_path_list:
@@ -133,23 +130,46 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
             # print_color(msg="image_path: {}".format(image_path), color=Colors.BRIGHT_RED)
             image = self.vis_processor(image)
             # print_color(msg="image: {}".format(image.shape), color=Colors.BRIGHT_RED)
-            if frms is None:
-                frms = image.unsqueeze(0).unsqueeze(2)
-            else:
-                frms = torch.cat((frms, image.unsqueeze(0).unsqueeze(2)), dim=2)
+            
+            # 1
+            frms = image#.unsqueeze(0)
+            break
+            # 2
+            # if frms is None:
+            #     frms = image.unsqueeze(0).unsqueeze(2)
+            # else:
+            #     frms = torch.cat((frms, image.unsqueeze(0).unsqueeze(2)), dim=2)
                 
-        
         # frms = self.vis_processor(vpath)
-        print_color(msg="frms    : {}, {}".format(type(frms), frms.shape), color=Colors.BRIGHT_RED)
-        question = self.text_processor(ann["que"])
-        print_color(msg="question: {}".format(question), color=Colors.BRIGHT_RED)
+        # print_color(msg="frms    : {}, {}".format(type(frms), frms.shape), color=Colors.BRIGHT_RED)
+        # question = self.text_processor(ann["que"])
+        # print_color(msg="question: {}".format(question), color=Colors.BRIGHT_RED)
 
         # assert False, "DramaQAEvalDataset __getitem__() is not implemented yet."
-
+        
+        # print('self.class_labels;', self.class_labels)
+        # print('len(self.class_labels);', len(self.class_labels))
+        # print('type(self.class_labels);', type(self.class_labels))
+        '''
+        self.class_labels; {'1': 1, '2': 2, '3': 3, '4': 4, '5': 5}
+        len(self.class_labels); 5
+        type(self.class_labels); <class 'dict'>
+        '''
+        
+        question = ann["que"]
+        text_input = ""
+        text_input += "Choose a number of answer from the following question.\n"
+        for i, cand in enumerate(ann["answers"]):
+            text_input += "{}. {}\n".format(i, cand)
+        text_input += "Question: {}\n".format(question)
+        text_input += "Answer:"
+        
         return {
-            "video": frms,
-            "text_input": question,
-            "answers": self._get_answer_label(ann["answers"]),
+            "image": frms,
+            "text_input": text_input, #question,
+            # "answers": self._get_answer_label(ann["correct_idx"]), # answer list가 아니라 answer 하나만 들어가야 함
+            "answer": ann["correct_idx"],
+            "answer_list": ann["answers"],
             "question_id": ann["qid"],
             "instance_id": ann["instance_id"],
         }

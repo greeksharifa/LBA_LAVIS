@@ -17,6 +17,8 @@ from lavis.common.vqa_tools.vqa import VQA
 from lavis.common.vqa_tools.vqa_eval import VQAEval
 from lavis.tasks.base_task import BaseTask
 from colors import Colors, print_sample
+from sentence_transformers import SentenceTransformer, util
+
 
 @registry.register_task("vqa")
 class VQATask(BaseTask):
@@ -346,6 +348,29 @@ class AOKVQATask(VQATask):
 
 @registry.register_task("dramaqa_eval_task")
 class DramaQAEvalTask(VQATask):
+    def __init__(
+            self,
+            num_beams,
+            max_len,
+            min_len,
+            evaluate,
+            num_ans_candidates,
+            inference_method="rank",
+            prompt="",
+    ):
+        super().__init__(
+            num_beams=num_beams,
+            max_len=max_len,
+            min_len=min_len,
+            evaluate=evaluate,
+            num_ans_candidates=num_ans_candidates,
+            inference_method=inference_method,
+            prompt=prompt,
+        )
+        # cache_dir = os.path.join("/home/ywjang/models", "sentence-transformers/all-MiniLM-L6-v2")
+        # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', cache_dir=cache_dir)
+        self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    
     def valid_step(self, model, samples):
         """
         
@@ -367,13 +392,37 @@ class DramaQAEvalTask(VQATask):
             num_ans_candidates=self.num_ans_candidates,
         )
         pred_qa_pairs = []
+        
+        # sentences = ["I'm happy", "I'm full of happiness"]
+        #
+        # # Compute embedding for both lists
+        # embedding_1 = model.encode(sentences[0], convert_to_tensor=True)
+        # embedding_2 = model.encode(sentences[1], convert_to_tensor=True)
+        #
+        # util.pytorch_cos_sim(embedding_1, embedding_2)
+        ## tensor([[0.6003]])
+        pred_answers = []
+        for answer, candidates in zip(answers, samples["answer_list"]):
+            embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
+            similarity = []
+            for candidate in candidates:
+                embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
+                similarity.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+            # pre_answers.append(candidates[similarity.index(max(similarity))])
+            pred_answers.append(similarity.index(max(similarity)))
+            print('answer:', answer)
+            print('candidates:', candidates)
+            print('similarity:', similarity)
+            print('pred_answers:', similarity.index(max(similarity)), '\t', candidates[similarity.index(max(similarity))])
+            print()
 
         question_id = samples["question_id"]
         gt_answers = samples["answer"]
 
-        for answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+        # for answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+        for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
             ques_id = int(ques_id.item())
-            pred_qa_pairs.append({"question_id": ques_id, "pred_ans": answer, "gt_ans": gt_answer})
+            pred_qa_pairs.append({"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer})
 
         return pred_qa_pairs
 
@@ -387,8 +436,37 @@ class DramaQAEvalTask(VQATask):
         Returns:
 
         """
-        assert False, "DramaQA: Not implemented yet"
-        pass
+        # assert False, "DramaQA: _report_metrics() Not implemented yet"
+        # logging.info("DramaQA: _report_metrics() Not implemented yet")
+        results = json.load(open(result_file, "r"))
+        acc = []
+        # mc_acc = []
+        for res in results:
+            if res["gt_ans"] is None:
+                # prepare test results for leaderboard evaluation
+                self._save_result_leaderboard(results)
+                return
+            
+            pred = res["pred_ans"]
+            gt_ans = res["gt_ans"]
+            
+            vqa_acc = 1.0 if pred == gt_ans else 0.0
+            
+            acc.append(vqa_acc)
+        
+        accuracy = sum(acc) / len(acc) * 100
+        metrics = {"agg_metrics": accuracy, "da_acc": accuracy},  # "acc": accuracy,
+        
+        with open(
+                os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+        ) as f:
+            f.write(json.dumps(metrics) + "\n")
+        
+        logging.info(metrics)
+        print('metrics: ', metrics)
+        
+        return metrics
+
 
 @registry.register_task("vqa_introspect_test_task")
 class VQAIntrospectTestTask(VQATask):
