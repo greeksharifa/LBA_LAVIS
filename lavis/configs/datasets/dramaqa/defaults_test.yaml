@@ -25,9 +25,14 @@ datasets:
               - AnotherMissOh/AnotherMissOhQA_val_set.json
         test:
           url:
-              - AnotherMissOh/AnotherMissOhQA_test_set.json
+              - AnotherMissOh/AnotherMissOhQA_val_set.json
           storage:
-              - AnotherMissOh/AnotherMissOhQA_test_set.json
+              - AnotherMissOh/AnotherMissOhQA_val_set.json
+#        test:
+#          url:
+#              - AnotherMissOh/AnotherMissOhQA_test_set.json
+#          storage:
+#              - AnotherMissOh/AnotherMissOhQA_test_set.json
         ans2label:
           url: AnotherMissOh/ans2label.json
           storage: AnotherMissOh/ans2label.json

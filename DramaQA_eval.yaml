@@ -5,8 +5,8 @@
 
 model:
   arch: blip2_vicuna_instruct
-  model_type: vicuna7b
-  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
+  model_type: vicuna13b
+  pretrained: "/home/ywjang/models/InstructBLIP/instruct_blip_vicuna13b_trimmed.pth"
   load_finetuned: False
   use_grad_checkpoint: True
   freeze_vit: True
