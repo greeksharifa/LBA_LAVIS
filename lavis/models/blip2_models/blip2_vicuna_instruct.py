@@ -283,6 +283,9 @@ class Blip2VicunaInstruct(Blip2Base):
         num_captions=1,
         temperature=1,
     ):
+        # logging.info("In blip2_vicuna_instruct.py Generate:")
+        # logging.info(Colors.BRIGHT_MAGENTA + f"Model device: {self.llm_model.device}" + Colors.RESET)
+        # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
         # prompt = None
         # try:
         self.llm_tokenizer.padding_side = "left"
@@ -293,7 +296,7 @@ class Blip2VicunaInstruct(Blip2Base):
             prompt = self.prompt
 
         image = samples["image"]
-
+        
         bs = image.size(0)
 
         if isinstance(prompt, str):
