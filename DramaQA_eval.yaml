@@ -52,7 +52,7 @@ run:
   weight_decay: 0.05
   max_epoch: 50
   batch_size_train: 8
-  batch_size_eval: 2
+  batch_size_eval: 1
   num_workers: 0
   accum_grad_iters: 16
   prompt: "{}"

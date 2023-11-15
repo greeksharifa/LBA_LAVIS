@@ -4,10 +4,11 @@
  # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
 model:
-  arch: blip2_vicuna_instruct
-  model_type: vicuna13b
-  pretrained: "/home/ywjang/models/InstructBLIP/instruct_blip_vicuna13b_trimmed.pth"
-  load_finetuned: False
+  arch: blip2_vicuna_instruct_sq
+  model_type: vicuna7b
+#  pretrained: "/home/ywjang/models/InstructBLIP/instruct_blip_vicuna13b_trimmed.pth"
+  finetuned: "lavis/ywjang_output/best_models/20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth"
+  load_finetuned: True
   use_grad_checkpoint: True
   freeze_vit: True
 

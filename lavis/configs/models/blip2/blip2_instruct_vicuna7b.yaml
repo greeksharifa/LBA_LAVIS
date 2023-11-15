@@ -31,7 +31,7 @@ model:
   # generation configs
 #  prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
 #  prompt: "{}"
-  prompt: "DramaQA blip2_instruct_vicuna7b Prompt. Q: {} A:"
+  prompt: "blip2_instruct_vicuna7b.yaml Prompt. Q: {} A:"
 
 
 preprocess:
