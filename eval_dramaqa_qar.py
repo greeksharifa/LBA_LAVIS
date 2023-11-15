@@ -191,7 +191,7 @@ def main():
         "Questioner": f"{best_model_dir}20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth",
         
         # "Answerer": f"{best_model_dir}20230810124_Answerer/checkpoint_best.pth",
-        "Answerer": "/models/instruct_blip_vicuna7b_trimmed.pth",
+        "Answerer": "models/instruct_blip_vicuna7b_trimmed.pth",
         
         # "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
         "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
@@ -221,12 +221,13 @@ def main():
             role="Questioner",
             prompts=prompts
         )
-        Answerer, _ = _get_model(
-            user_args=args,
-            finetuned=finetuned,
-            role="Answerer",
-            prompts=prompts
-        )
+        Answerer = Questioner
+        # Answerer, _ = _get_model(
+        #     user_args=args,
+        #     finetuned=finetuned,
+        #     role="Answerer",
+        #     prompts=prompts
+        # )
     
     Reasoner.set_questioner_and_answerer(Questioner, Answerer, finetuned)
     logging.info(Colors.YELLOW + "set_questioner_and_answerer done." + Colors.RESET)

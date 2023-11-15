@@ -157,12 +157,12 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
         '''
         
         question = ann["que"]
-        text_input = ""
-        text_input += "Choose a number of answer from the following question.\n"
-        for i, cand in enumerate(ann["answers"]):
-            text_input += "{}. {}\n".format(i, cand)
-        text_input += "Question: {}\n".format(question)
-        text_input += "Answer:"
+        # text_input = ""
+        # text_input += "Choose a number of answer from the following question.\n"
+        # for i, cand in enumerate(ann["answers"]):
+        #     text_input += "{}. {}\n".format(i, cand)
+        # text_input += "Question: {}\n".format(question)
+        # text_input += "Answer:"
         
         return {
             "image": frms,

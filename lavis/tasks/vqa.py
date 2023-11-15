@@ -18,7 +18,7 @@ from lavis.common.vqa_tools.vqa_eval import VQAEval
 from lavis.tasks.base_task import BaseTask
 from colors import Colors, print_sample
 from sentence_transformers import SentenceTransformer, util
-
+from torch import nn
 
 @registry.register_task("vqa")
 class VQATask(BaseTask):
@@ -369,7 +369,11 @@ class DramaQAEvalTask(VQATask):
         )
         # cache_dir = os.path.join("/home/ywjang/models", "sentence-transformers/all-MiniLM-L6-v2")
         # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', cache_dir=cache_dir)
-        self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+        logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+        self.cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
+        self._cnt = 0
     
     def valid_step(self, model, samples):
         """
@@ -411,6 +415,13 @@ class DramaQAEvalTask(VQATask):
         #  ['Since Haeyoung1 tried to buy a car for Dokyung.', '...'],
         #  ['Because Haeyoung1 tried to recall the time the two shared in the alley.', '...'],
         #  ['Since Haeyoung1 tried to study hard to pass the exam.', '...']]
+        import tqdm
+        def nop(it, *a, **k):
+            return it
+        
+        tqdm.tqdm = nop
+        logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+        
         for b in range(len(answers)):
             answer = answers[b]
             embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
@@ -418,7 +429,12 @@ class DramaQAEvalTask(VQATask):
             for i in range(5):
                 candidate = samples["answer_list"][i][b]
                 embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
-                similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+                # similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+                if self._cnt < 2:
+                    print('embedding_answer.shape:', embedding_answer.shape)
+                    print('embedding_candidate.shape:', embedding_candidate.shape)
+                    self._cnt += 1
+                similarity_list.append(self.cos_sim(embedding_answer, embedding_candidate))
             pred_index = similarity_list.index(max(similarity_list))
             pred_answers.append(pred_index)
         
