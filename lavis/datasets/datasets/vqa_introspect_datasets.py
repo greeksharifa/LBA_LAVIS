@@ -20,7 +20,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 from lavis.datasets.datasets.caption_datasets import CaptionDataset, CaptionEvalDataset
 from lavis.common.registry import registry
 
-from colors import Colors, print_sample
+from colors import Colors, print_sample, print_color
 
 COCOCapDataset = CaptionDataset
 
@@ -295,6 +295,7 @@ class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
         self.prompt_type = prompt_type
+        print_color(msg=f"prompt_type: {prompt_type}", color=Colors.BRIGHT_MAGENTA)
         
         if prompt_type in ["Questioner_SingleSubQ", "Answerer"]:
             self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths)#, 100)

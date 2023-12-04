@@ -99,6 +99,11 @@ class Blip2VicunaInstruct(Blip2Base):
         else:
             self.Qformer.resize_token_embeddings(len(self.tokenizer))
         self.Qformer.cls = None
+        
+        # from transformers import AutoModelForCausalLM, AutoTokenizer
+        # llm_model = "mistralai/Mistral-7B-Instruct-v0.1"
+        # self.llm_tokenizer = AutoTokenizer.from_pretrained(llm_model, use_fast=False, truncation_side="left", cache_dir=f"/data2/{llm_model}")
+        # self.llm_model = AutoModelForCausalLM.from_pretrained(llm_model, torch_dtype=torch.float16, cache_dir=f"/data2/{llm_model}")
 
         self.llm_tokenizer = LlamaTokenizer.from_pretrained(llm_model, use_fast=False, truncation_side="left")
         self.llm_model = LlamaForCausalLM.from_pretrained(

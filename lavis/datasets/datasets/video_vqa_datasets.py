@@ -170,6 +170,7 @@ class DramaQAEvalDataset(VideoQADataset, __DisplMixin):
             # "answers": self._get_answer_label(ann["correct_idx"]), # answer list가 아니라 answer 하나만 들어가야 함
             "answer": ann["correct_idx"],
             "answer_list": ann["answers"],
+            "gt_ans": ann["answers"][ann["correct_idx"]],
             "question_id": ann["qid"],
             "instance_id": ann["instance_id"],
         }
