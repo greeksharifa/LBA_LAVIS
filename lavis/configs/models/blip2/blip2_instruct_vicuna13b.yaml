@@ -25,7 +25,7 @@ model:
   llm_model: "/home/ywjang/models/lmsys/vicuna-13b-v1.1"
 
   # generation configs
-  prompt: "DramaQA blip2_instruct_vicuna13b Prompt. Q: {} A:"
+  prompt: "blip2_instruct_vicuna13b.yaml Prompt. Q: {} A:"
 
 
 preprocess:

@@ -4,16 +4,15 @@
  # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
 model:
-  arch: blip2_vicuna_instruct_sq
-  model_type: vicuna13b
-#  pretrained: "/home/ywjang/models/InstructBLIP/instruct_blip_vicuna13b_trimmed.pth"
-  finetuned: "lavis/ywjang_output/best_models/20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth"
-  load_finetuned: True
+  arch: blip2_vicuna_instruct
+  model_type: vicuna7b
+  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
+  load_finetuned: False
   use_grad_checkpoint: True
   freeze_vit: True
 
 datasets:
-  dramaqa_eval: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  vqa_introspect_qar_caption: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     #     ...
@@ -37,7 +36,7 @@ datasets:
 run:
 #  task: vqa_introspect
 #  task: captioning
-  task: dramaqa_eval_task # name of the registry_name of class in tasks/captioning.py
+  task: vqa_introspect_captioning # name of the registry_name of class in tasks/captioning.py
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...
@@ -62,7 +61,7 @@ run:
   min_len: 1
   num_beams: 5
 
-  seed: 20231120
+  seed: 42
   output_dir: "ywjang_output_train/"
 
   amp: True

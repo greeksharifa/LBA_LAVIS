@@ -25,6 +25,7 @@ model:
   # path to Vicuna checkpoint
 #  llm_model: "./llm/vicuna-7b"
 #  llm_model: "/models/lmsys/vicuna-7b-v1.1"
+#  llm_model: "/home/ywjang/models/mistralai/Mistral-7B-Instruct-v0.1"
   llm_model: "/home/ywjang/models/lmsys/vicuna-7b-v1.1"
 #  llm_model: "/home/ywjang/models/eachadea/vicuna-7b-1.1"
 
