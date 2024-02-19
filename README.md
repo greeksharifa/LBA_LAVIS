@@ -58,7 +58,7 @@
         - `text_input`: 입력 prompt
             - 구체적인 형식은 ./prompts.json 및 해당 코드 참고
         - `text_output`: 타겟 출력
-        - `text_input`, `text_output`은 `prompt_type`이 `“questioner”`, `“answerer”`, 혹은 `“reasoner”`인지에 따라 형식이 결정되며 prompt_type은 랜덤하게 설정됨
+        - `text_input`, `text_output`은 `prompt_type`이 `“questioner”`, `“answerer”`, 혹은 `“reasoner”`인지에 따라 형식이 결정되며 `prompt_type`은 랜덤하게 설정됨
             - `“questioner”`: 입력 이미지와 main question, (선택적으로) sub QA 예시를 `text_input`으로써 모델이 sub-question을 생성하도록 `text_output`이 결정됨
             - `“answerer”`: 입력 이미지와 main question, (선택적으로) sub QA 예시, 답변해야 할 sub-question을 `text_input`으로써 모델이 sub-answer를 생성하도록 `text_output`이 결정됨
             - `“reasoner”`: 입력 이미지와 main question, (1개 이상의) sub QA를 `text_input`으로써 모델이 main answer을 생성하도록 `text_output`이 결정됨
@@ -66,6 +66,14 @@
     - `lavis/tasks/vqa.py`
     - `SentenceTransformer`로 모델의 최종 출력과 각 답안의 embedding을 cosine similarity로 비교하여 정확도를 평가
 
+### 기타 수정 사항
+  - `Blip2VicunaInstructSQ`
+    - `lavis/models/blip2_models/blip2_vicuna_instruct_SQ.py`
+    - Inference 시 sub-question 출력의 다양성을 위해 다음의 설정을 사용
+      - `sub_question_kwargs["use_nucleus_sampling"] = True`
+      - `sub_question_kwargs["temperature"] = 2.0`
+      - `"questioner"` 단계에서만 해당 변경된 세팅을 사용하며 나머지 단계에서는 기존 세팅을 사용
+        - `"answerer"`, `"reasoner"`의 sub-answer와 main answer는 높은 확률을 가진 답변을 주는 것을 강조하기 위해
 ## InstructBLIP Fine-Tuning을 위한 수정사항(VQA-Introspect)
 
 - https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
