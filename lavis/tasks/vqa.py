@@ -346,6 +346,220 @@ class AOKVQATask(VQATask):
         logging.info(f"Saved results for leaderboard evaluation at {result_file}")
 
 
+@registry.register_task("dramaqa_sq_task")
+class DramaQASQTask(VQATask):
+    def __init__(
+            self,
+            num_beams,
+            max_len,
+            min_len,
+            evaluate,
+            num_ans_candidates,
+            inference_method="rank",
+            prompt="",
+    ):
+        super().__init__(
+            num_beams=num_beams,
+            max_len=max_len,
+            min_len=min_len,
+            evaluate=evaluate,
+            num_ans_candidates=num_ans_candidates,
+            inference_method=inference_method,
+            prompt=prompt,
+        )
+        # cache_dir = os.path.join("/home/ywjang/models", "sentence-transformers/all-MiniLM-L6-v2")
+        # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', cache_dir=cache_dir)
+        # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+        logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+        self.cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
+        self._cnt = 0
+    
+    def valid_step(self, model, samples):
+        """
+        
+        Args:
+            model:
+            samples:
+
+        Returns:
+
+        """
+        # TODO: DramaQA: edit this function to return the predicted answers
+        raw_outputs = model.predict_answers(
+            samples=samples,
+            answer_list=self.answer_list,
+            inference_method=self.inference_method,
+            num_beams=self.num_beams,
+            max_len=self.max_len,
+            min_len=self.min_len,
+            num_ans_candidates=self.num_ans_candidates,
+        )
+        answers = raw_outputs[0] if type(raw_outputs) == tuple else raw_outputs
+        pred_qa_pairs = []
+        
+        # sentences = ["I'm happy", "I'm full of happiness"]
+        #
+        # # Compute embedding for both lists
+        # embedding_1 = model.encode(sentences[0], convert_to_tensor=True)
+        # embedding_2 = model.encode(sentences[1], convert_to_tensor=True)
+        #
+        # util.pytorch_cos_sim(embedding_1, embedding_2)
+        ## tensor([[0.6003]])
+        pred_answers = []
+        print('answers:', answers)
+        print('samples["answer_list"]:', samples["answer_list"])
+        # answers: list of string. [batch_size]
+        # samples["answer_list"]: [5, batch_size]
+        # [['It was because Haeyoung1 tried to give some money to Dokyung.', '...'],
+        #  ['This was because Haeyoung1 tried to take a rest in the street.', '...'],
+        #  ['Since Haeyoung1 tried to buy a car for Dokyung.', '...'],
+        #  ['Because Haeyoung1 tried to recall the time the two shared in the alley.', '...'],
+        #  ['Since Haeyoung1 tried to study hard to pass the exam.', '...']]
+        import tqdm
+        def nop(it, *a, **k):
+            return it
+        
+        tqdm.tqdm = nop
+        logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+        
+        for b in range(len(answers)):
+            answer = answers[b]
+            embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
+            similarity_list = []
+            for i in range(5):
+                candidate = samples["answer_list"][i][b]
+                embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
+                # similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+                if self._cnt < 2:
+                    print('embedding_answer.shape:', embedding_answer.shape)
+                    print('embedding_candidate.shape:', embedding_candidate.shape)
+                    self._cnt += 1
+                similarity_list.append(self.cos_sim(embedding_answer, embedding_candidate))
+            pred_index = similarity_list.index(max(similarity_list))
+            pred_answers.append(pred_index)
+        
+        # for answer, candidates in zip(answers, samples["answer_list"]):
+        #     embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
+        #     similarity = []
+        #     for candidate in candidates:
+        #         embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
+        #         similarity.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+        #     # pre_answers.append(candidates[similarity.index(max(similarity))])
+        #     pred_answers.append(similarity.index(max(similarity)))
+            print('answer:', answer)
+            print('similarity_list:', similarity_list)
+            print('pred_answers:', pred_index, '\t', samples["answer_list"][pred_index][b])
+            print()
+
+        question_id = samples["question_id"]
+        gt_answers = samples["answer"]
+
+        # for answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+        for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
+            ques_id = int(ques_id.item())
+            pred_qa_pairs.append({"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer, "raw_outputs": raw_outputs})
+
+        return pred_qa_pairs
+    
+
+    def evaluation(self, model, data_loader, cuda_enabled=True):
+        from lavis.common.logger import MetricLogger
+        from lavis.datasets.data_utils import prepare_sample
+        
+        import time
+
+        def s2hms(seconds):
+            # Calculate hours, minutes, and seconds
+            hours = int(seconds // 3600)
+            minutes = int((seconds % 3600) // 60)
+            remaining_seconds = int(seconds % 60)
+
+            # Format the result as a string
+            result = "{:02}:{:02}:{:02}".format(hours, minutes, remaining_seconds)
+
+            return result
+
+        metric_logger = MetricLogger(delimiter="  ")
+        header = "Evaluation"
+        # TODO make it configurable
+        print_freq = 20
+
+        results = []
+        _cnt = 0
+
+        start_time = time.time()
+
+        for batch_index, samples in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+            samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
+            
+            if _cnt == 0:
+                _cnt += 1
+                print_sample(samples, msg="eval sample: ", color=Colors.CYAN)
+            eval_output = self.valid_step(model=model, samples=samples)
+            # import pudb; pudb.set_trace()
+            results.extend(eval_output)
+
+            time_passed = time.time() - start_time
+            average_interval = time_passed / (batch_index + 1)
+            estimated_total = average_interval * len(data_loader)
+
+            time_left_debug = f'{s2hms(time_passed)} : {s2hms(estimated_total - time_passed)}'
+            print(time_left_debug)
+
+            with open(os.path.join(registry.get_path("output_dir"), "result/debug.json"), "a") as pseudo_json_file:
+                debug_pred_qa_pairs = [{k: v.detach().cpu().numpy() if hasattr(v, 'numpy') else v for k, v in entry.items()} for entry in eval_output]
+                debug_pred_qa_pairs = [{k: v.tolist() if hasattr(v, 'tolist') else v for k, v in entry.items()} for entry in eval_output]
+                json.dump(debug_pred_qa_pairs, pseudo_json_file)
+                pseudo_json_file.write(f',\n# {time_left_debug}\n')
+
+        # if is_dist_avail_and_initialized():
+        #     dist.barrier()
+
+        return results
+
+    @dist_utils.main_process
+    def _report_metrics(self, result_file, split):
+        """
+        Args:
+            result_file:
+            split:
+
+        Returns:
+
+        """
+        # assert False, "DramaQA: _report_metrics() Not implemented yet"
+        # logging.info("DramaQA: _report_metrics() Not implemented yet")
+        results = json.load(open(result_file, "r"))
+        acc = []
+        # mc_acc = []
+        for res in results:
+            if res["gt_ans"] is None:
+                # prepare test results for leaderboard evaluation
+                self._save_result_leaderboard(results)
+                return
+            
+            pred = res["pred_ans"]
+            gt_ans = res["gt_ans"]
+            
+            vqa_acc = 1.0 if pred == gt_ans else 0.0
+            
+            acc.append(vqa_acc)
+        
+        accuracy = sum(acc) / len(acc) * 100
+        metrics = {"agg_metrics": accuracy, "da_acc": accuracy},  # "acc": accuracy,
+        
+        with open(
+                os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+        ) as f:
+            f.write(json.dumps(metrics) + "\n")
+        
+        logging.info(metrics)
+        print('metrics: ', metrics)
+        
+        return metrics
+
+
 @registry.register_task("dramaqa_eval_task")
 class DramaQAEvalTask(VQATask):
     def __init__(

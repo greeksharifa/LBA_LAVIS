@@ -20,6 +20,140 @@ from lavis.models.blip2_models.blip2_vicuna_instruct import Blip2VicunaInstruct
 
 @registry.register_model("blip2_vicuna_instruct_sq")
 class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
+    def __init__(
+        self,
+        vit_model="eva_clip_g",
+        img_size=224,
+        drop_path_rate=0,
+        use_grad_checkpoint=False,
+        vit_precision="fp16",
+        freeze_vit=True,
+        num_query_token=32,
+        llm_model="",
+        prompt="",
+        max_txt_len=128,
+        max_output_txt_len=256,
+        apply_lemmatizer=False,
+        qformer_text_input=True,
+        role=None,
+    ):
+        super().__init__(
+            vit_model=vit_model,
+            img_size=img_size,
+            drop_path_rate=drop_path_rate,
+            use_grad_checkpoint=use_grad_checkpoint,
+            vit_precision=vit_precision,
+            freeze_vit=freeze_vit,
+            num_query_token=num_query_token,
+            llm_model=llm_model,
+            prompt=prompt,
+            max_txt_len=max_txt_len,
+            max_output_txt_len=max_output_txt_len,
+            apply_lemmatizer=apply_lemmatizer,
+            qformer_text_input=qformer_text_input,
+            role=role
+        )
+
+        self.num_sub_questions = 2
+        self.return_sub_qa = True
+
+    def forward(self, samples):
+
+        image = samples["image"]
+        with self.maybe_autocast():
+            image_embeds = self.ln_vision(self.visual_encoder(image))
+        image_atts = torch.ones(image_embeds.size()[:-1], dtype=torch.long).to(image.device)
+
+        bs = image.size(0)
+
+        query_tokens = self.query_tokens.expand(image_embeds.shape[0], -1, -1)
+        if self.qformer_text_input:
+            text_Qformer = self.tokenizer(
+                samples["text_input"],
+                padding='longest',
+                truncation=True,
+                max_length=self.max_txt_len,
+                return_tensors="pt",
+            ).to(image.device)
+            query_atts = torch.ones(query_tokens.size()[:-1], dtype=torch.long).to(image.device)
+            Qformer_atts = torch.cat([query_atts, text_Qformer.attention_mask],dim=1)
+
+            query_output = self.Qformer.bert(
+                text_Qformer.input_ids,
+                attention_mask=Qformer_atts,
+                query_embeds=query_tokens,
+                encoder_hidden_states=image_embeds,
+                encoder_attention_mask=image_atts,
+                return_dict=True,
+            )
+        else:
+            query_output = self.Qformer.bert(
+                query_embeds=query_tokens,
+                encoder_hidden_states=image_embeds,
+                encoder_attention_mask=image_atts,
+                return_dict=True,
+            )
+
+        inputs_llm = self.llm_proj(query_output.last_hidden_state[:,:query_tokens.size(1),:])
+        atts_llm = torch.ones(inputs_llm.size()[:-1], dtype=torch.long).to(image.device)
+
+        self.llm_tokenizer.padding_side = "right"
+        self.llm_tokenizer.truncation_side = 'left'
+        text_input_tokens = self.llm_tokenizer(
+            samples['text_input'],
+            return_tensors="pt",
+            padding="longest",
+            truncation=True,
+            max_length=self.max_txt_len,
+        ).to(image.device)
+
+        self.llm_tokenizer.truncation_side = 'right'
+        text_output_tokens = self.llm_tokenizer(
+            [t + self.llm_tokenizer.eos_token for t in samples['text_output']],
+            return_tensors="pt",
+            padding="longest",
+            truncation=True,
+            max_length=self.max_output_txt_len,
+        ).to(image.device)
+
+        llm_tokens, input_part_targets_len = self.concat_text_input_output(
+            text_input_tokens.input_ids,
+            text_input_tokens.attention_mask,
+            text_output_tokens.input_ids,
+            text_output_tokens.attention_mask,
+        )
+
+        # do not apply loss to the padding
+        targets = llm_tokens['input_ids'].masked_fill(
+            llm_tokens['input_ids'] == self.llm_tokenizer.pad_token_id, -100
+        )
+
+        # do not apply loss to the text input (i.e., instruction)
+        for i, l in enumerate(input_part_targets_len):
+            targets[i][:l] = -100
+
+        # do not apply loss to the query tokens
+        empty_targets = (
+            torch.ones(atts_llm.size(), dtype=torch.long).to(image.device).fill_(-100)
+        )
+        targets = torch.cat([empty_targets, targets], dim=1)
+
+        inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens['input_ids'])
+        inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)
+        attention_mask = torch.cat([atts_llm, llm_tokens['attention_mask']], dim=1)
+
+        with self.maybe_autocast():
+            outputs = self.llm_model(
+                inputs_embeds=inputs_embeds,
+                attention_mask=attention_mask,
+                return_dict=True,
+                labels=targets,
+            )
+
+        loss = outputs.loss
+
+        return {"loss": loss}
+
     @torch.no_grad()
     def generate(
             self,
@@ -34,6 +168,22 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
             num_captions=1,
             temperature=1,
     ):
+        super_kwargs = {
+            "use_nucleus_sampling": use_nucleus_sampling,
+            "num_beams": num_beams,
+            "max_length": max_length,
+            "min_length": min_length,
+            "top_p": top_p,
+            "repetition_penalty": repetition_penalty,
+            "length_penalty": length_penalty,
+            "num_captions": num_captions,
+            "temperature": temperature,
+        }
+
+        sub_question_kwargs = super_kwargs.copy()
+        sub_question_kwargs["use_nucleus_sampling"] = True
+        sub_question_kwargs["temperature"] = 2.0
+
         # logging.info("In Blip2VicunaInstructSQ.py Generate:")
         # logging.info(Colors.BRIGHT_MAGENTA + f"Model device: {self.llm_model.device}" + Colors.RESET)
         # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
@@ -58,11 +208,11 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
         
         sub_qa_is_none = False
         
-        for i in range(1, 1 + 1):
+        for i in range(1, 1 + self.num_sub_questions):
             # Questioner
             samples["prompt"] = questioner_prompt if i == 1 else questioner_prompt + '.'
             print('i:', i, 'questioner samples["prompt"]:', samples["prompt"], sep='\t')
-            sub_question = super().generate(samples) #self._generate(samples)
+            sub_question = super().generate(samples, **sub_question_kwargs) #self._generate(samples)
             if sub_question is None:
                 if i == 1:
                     sub_qa_is_none = True
@@ -84,7 +234,7 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
             answerer_prompt = answerer_prompts["init_prompt"].format(sub_question)
             samples["prompt"] = answerer_prompt
             print('i:', i, 'answerer samples["prompt"]:', samples["prompt"], sep='\t')
-            sub_answer = super().generate(samples) #self._generate(samples)  # , answerer=True)
+            sub_answer = super().generate(samples, **super_kwargs) #self._generate(samples)  # , answerer=True)
             if isinstance(sub_answer, list):
                 sub_answer = sub_answer[0]
             print('i:', i, 'sub_answer:', sub_answer, sep='\t')
@@ -108,9 +258,11 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
         samples["prompt"] = reasoner_prompt
         print('reasoner samples["prompt"]:', samples["prompt"], sep='\t')
         
-        output_text = super().generate(samples)
+        output_text = super().generate(samples, **super_kwargs)
         print('output_text:', output_text, sep='\t')
         
+        if self.return_sub_qa:
+            return output_text, sub_question_list, sub_answer_list
         return output_text
     
     

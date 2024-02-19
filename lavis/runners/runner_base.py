@@ -377,7 +377,7 @@ class RunnerBase:
                 for split_name in self.valid_splits:
                     logging.info("Evaluating on {}.".format(split_name))
 
-                    val_log = self.eval_epoch(
+                    val_log, = self.eval_epoch(
                         split_name=split_name, cur_epoch=cur_epoch
                     )
                     print('val_log:', val_log)
@@ -414,10 +414,14 @@ class RunnerBase:
                 if not self.evaluate_only:
                     self._save_checkpoint(cur_epoch, is_best=False)
 
+            # HACK: saving checkpoint every epoch
+            self._save_checkpoint(cur_epoch, is_best=False)
+
             if self.evaluate_only:
                 break
 
-            dist.barrier()
+            # TODO: distributed processing
+            # dist.barrier()
 
         # testing phase:
         test_epoch = "best" if len(self.valid_splits) > 0 else cur_epoch

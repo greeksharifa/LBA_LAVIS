@@ -442,12 +442,12 @@ class Blip2VicunaInstruct(Blip2Base):
         samples,
         num_beams=5,
         inference_method="generate",
-        max_len=10,
+        max_len=256,
         min_len=1,
         num_ans_candidates=128,
         answer_list=None,
         prompt="",
-        length_penalty=0,
+        length_penalty=1.0,
         **kwargs
     ):
         if isinstance(samples["text_input"], str):
@@ -477,7 +477,7 @@ class Blip2VicunaInstruct(Blip2Base):
             num_beams=num_beams,
             max_length=max_len,
             min_length=min_len,
-            length_penalty=length_penalty
+            length_penalty=length_penalty,
         )
 
         # if "apply_lemmatizer" in samples.keys() and samples["apply_lemmatizer"]:

@@ -29,6 +29,7 @@ from lavis.datasets.builders.imagefolder_builder import ImageNetBuilder
 from lavis.datasets.builders.video_qa_builder import (
     MSRVTTQABuilder,
     MSVDQABuilder,
+    DramaQASQBuilder,
     DramaQAEvalBuilder,
 )
 from lavis.datasets.builders.vqa_builder import (
@@ -77,6 +78,7 @@ __all__ = [
     # "VQAIntrospectMultipleCapBuilder",
     "VQAIntrospectQARCapBuilder",
     "VQAIntrospectTestBuilder",
+    "DramaQASQBuilder",
     "DramaQAEvalBuilder",
 ]
 

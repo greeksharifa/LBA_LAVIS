@@ -7,13 +7,14 @@ model:
   arch: blip2_vicuna_instruct_sq
   model_type: vicuna7b
 #  pretrained: "/home/ywjang/models/InstructBLIP/instruct_blip_vicuna13b_trimmed.pth"
-  finetuned: "/home/ywjang/LBA_LAVIS/lavis/ywjang_output/best_models/20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth"
+#   finetuned: "/home/hsgo/LBA_LAVIS/lavis/ywjang_output_train/20231207111/checkpoint_31.pth"
+  finetuned: "/home/hsgo/LBA_LAVIS/lavis/ywjang_output_train/20231207111/checkpoint_63.pth"
   load_finetuned: True
   use_grad_checkpoint: True
   freeze_vit: True
 
 datasets:
-  dramaqa_eval: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  dramaqa_sq: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
   # @registry.register_builder("vqa_introspect_qar_caption")
     #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
     #     ...
@@ -37,7 +38,7 @@ datasets:
 run:
 #  task: vqa_introspect
 #  task: captioning
-  task: dramaqa_eval_task # name of the registry_name of class in tasks/captioning.py
+  task: dramaqa_sq_task # name of the registry_name of class in tasks/captioning.py
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...
@@ -51,7 +52,7 @@ run:
   warmup_lr: 1e-8
   warmup_steps: 16000
   weight_decay: 0.05
-  max_epoch: 50
+  max_epoch: 10
   batch_size_train: 8
   batch_size_eval: 1
   num_workers: 0

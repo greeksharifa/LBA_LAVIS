@@ -8,7 +8,7 @@
 from lavis.common.registry import registry
 from lavis.common.utils import get_cache_path
 from lavis.datasets.builders.base_dataset_builder import BaseDatasetBuilder
-from lavis.datasets.datasets.video_vqa_datasets import VideoQADataset, DramaQAEvalDataset
+from lavis.datasets.datasets.video_vqa_datasets import VideoQADataset, DramaQASQDataset, DramaQAEvalDataset
 
 
 class VideoQABuilder(BaseDatasetBuilder):
@@ -41,6 +41,16 @@ class MSRVTTQABuilder(VideoQABuilder):
 class MSVDQABuilder(VideoQABuilder):
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/msvd/defaults_qa.yaml",
+    }
+
+
+@registry.register_builder("dramaqa_sq")
+class DramaQASQBuilder(VideoQABuilder):
+    train_dataset_cls = DramaQASQDataset
+    eval_dataset_cls = DramaQASQDataset
+
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/dramaqa/defaults_sq.yaml",
     }
 
 

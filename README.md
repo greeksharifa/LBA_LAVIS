@@ -26,6 +26,46 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
+## DramaQA sub QA 데이터셋 생성 관련
+### 개선 가능한 부분
+- 성능 평가에서 `SentenceTransformer` (ST)의 embedding 비교를 통한 모델 answer 결정 대신 각 답안에 대한 Perplexity를 평가하여 그 중 가장 낮은 답안을 모델의 answer로 정한다.
+  - 기존 ST의 embedding을 이용하는 방식
+    - ST 모델로 인한 추가적인 연산이 필요
+    - ST 모델의 성능에 의존한다는 한계
+    - 모델의 answer가 주어진 답안 중 어떠한 것과도 관련이 없다면 (모델의 answer가 틀리지 않더라도) 이 방식으로 평가하는 것이 의미가 없음
+  - Perplexity는 모델이 생각하는 각 답안의 확률과 직접적인 연관이 있기 때문에 더 직접적인 정확도 평가가 가능함
+  - 각 답안을 `text_output`으로 준 각 loss와 동치하므로 구현이 간단하다
+- 단일 이미지 입력이 아닌 이미지 시퀀스 (비디오) 입력
+  - Causal relationship과 관련된 질문을 답할 수 있게 함
+  - 카메라 전환, occlusion 등으로 단일 프레임에는 포착되지 않는 정보를 retrieve 할 수 있음
+- PEFT (Parameter-Efficient Fine-Tuning)을 통한 fine tuning
+  - 적은 학습 시간에 높은 일반화 성능을 내도록 fine tuning 가능
+  - 일정 수준의 오버피팅 방지
+  - 적용 예시: Prefix tuning, LoRA 등
+
+### 기존에 지향하던 연구 방향
+- 비디오를 입력으로 각종 모델 (BLIP, SAM 등)을 통하여 Scene Graph를 생성하여 해당 Scene Graph를 기반으로 sub QA를 생성하며 질의응답에 대한 추론을 진행하는 방법론
+- 구상하였던 Scene Graph 생성 방식과 거의 동일한 논문 존재
+  - https://arxiv.org/abs/2310.01356
+- 시간 및 결과 성능 부족으로 진행 중단
+
+### 주요 클래스
+- `DramaQASQDataset`
+    - `lavis/datasets/datasets/video_vqa_datasets.py`
+    - 모델에 전달될 입력, 타겟 출력 반환
+    - 반환값
+        - `image`: 입력 이미지, 현재는 비디오 클립의 전체 프레임 중 랜덤한 프레임 하나를 가져옴
+        - `text_input`: 입력 prompt
+            - 구체적인 형식은 ./prompts.json 및 해당 코드 참고
+        - `text_output`: 타겟 출력
+        - `text_input`, `text_output`은 `prompt_type`이 `“questioner”`, `“answerer”`, 혹은 `“reasoner”`인지에 따라 형식이 결정되며 prompt_type은 랜덤하게 설정됨
+            - `“questioner”`: 입력 이미지와 main question, (선택적으로) sub QA 예시를 `text_input`으로써 모델이 sub-question을 생성하도록 `text_output`이 결정됨
+            - `“answerer”`: 입력 이미지와 main question, (선택적으로) sub QA 예시, 답변해야 할 sub-question을 `text_input`으로써 모델이 sub-answer를 생성하도록 `text_output`이 결정됨
+            - `“reasoner”`: 입력 이미지와 main question, (1개 이상의) sub QA를 `text_input`으로써 모델이 main answer을 생성하도록 `text_output`이 결정됨
+- `DramaQASQTask`
+    - `lavis/tasks/vqa.py`
+    - `SentenceTransformer`로 모델의 최종 출력과 각 답안의 embedding을 cosine similarity로 비교하여 정확도를 평가
+
 ## InstructBLIP Fine-Tuning을 위한 수정사항(VQA-Introspect)
 
 - https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
