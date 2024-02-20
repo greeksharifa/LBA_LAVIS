@@ -47,8 +47,7 @@ run:
   # ...
 
   full_evaluation: True
-  # main_answer_inference: "perplexity" # "perplexity" or "sample"
-  main_answer_inference: "sample"
+  main_answer_inference: "perplexity" # "perplexity" or "sample"
 
   # optimizer
   # batch_size * accum_grad_iters = 128 or 256

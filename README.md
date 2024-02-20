@@ -28,17 +28,17 @@
 
 ## DramaQA sub QA 데이터셋 생성 관련
 ### 개선 가능한 부분
-- 성능 평가에서 `SentenceTransformer` (ST)의 embedding 비교를 통한 모델 answer 결정 대신 각 답안에 대한 Perplexity를 평가하여 그 중 가장 낮은 답안을 모델의 answer로 정한다.
+- [x] 성능 평가에서 `SentenceTransformer` (ST)의 embedding 비교를 통한 모델 answer 결정 대신 각 답안에 대한 Perplexity를 평가하여 그 중 가장 낮은 답안을 모델의 answer로 정한다.
   - 기존 ST의 embedding을 이용하는 방식
     - ST 모델로 인한 추가적인 연산이 필요
     - ST 모델의 성능에 의존한다는 한계
     - 모델의 answer가 주어진 답안 중 어떠한 것과도 관련이 없다면 (모델의 answer가 틀리지 않더라도) 이 방식으로 평가하는 것이 의미가 없음
   - Perplexity는 모델이 생각하는 각 답안의 확률과 직접적인 연관이 있기 때문에 더 직접적인 정확도 평가가 가능함
   - 각 답안을 `text_output`으로 준 각 loss와 동치하므로 구현이 간단하다
-- 단일 이미지 입력이 아닌 이미지 시퀀스 (비디오) 입력
+- [ ] 단일 이미지 입력이 아닌 이미지 시퀀스 (비디오) 입력
   - Causal relationship과 관련된 질문을 답할 수 있게 함
   - 카메라 전환, occlusion 등으로 단일 프레임에는 포착되지 않는 정보를 retrieve 할 수 있음
-- PEFT (Parameter-Efficient Fine-Tuning)을 통한 fine tuning
+- [ ] PEFT (Parameter-Efficient Fine-Tuning)을 통한 fine tuning
   - 적은 학습 시간에 높은 일반화 성능을 내도록 fine tuning 가능
   - 일정 수준의 오버피팅 방지
   - 적용 예시: Prefix tuning, LoRA 등
@@ -64,7 +64,11 @@
             - `“reasoner”`: 입력 이미지와 main question, (1개 이상의) sub QA를 `text_input`으로써 모델이 main answer을 생성하도록 `text_output`이 결정됨
 - `DramaQASQTask`
     - `lavis/tasks/vqa.py`
-    - `SentenceTransformer`로 모델의 최종 출력과 각 답안의 embedding을 cosine similarity로 비교하여 정확도를 평가
+    - yaml cfg에서 `run:` 아래 `main_answer_inference` 필드가 `"perplexity"` 혹은 `"sample"` 인지에 따라 정확도 평가 방식이 다름
+    - `main_answer_inference: "perplexity"`
+      - 각 main answer 답안에 대한 Perplexity를 구하여 가장 낮은 답안으로 정확도를 평가
+    - `main_answer_inference: "sample"`
+      - `SentenceTransformer`로 모델의 최종 출력과 각 답안의 embedding을 cosine similarity로 비교하여 정확도를 평가
 
 ### 기타 수정 사항
   - `Blip2VicunaInstructSQ`
