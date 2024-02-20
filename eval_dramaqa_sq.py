@@ -82,21 +82,6 @@ def main():
     datasets = task.build_datasets(cfg)
     model = task.build_model(cfg)
 
-    # HACK: forced full evaluation
-    for dataset_name, dataset in datasets.items():
-        for split_name, split_dataset in dataset.items():
-            if hasattr(split_dataset, 'full_evaluation'):
-                split_dataset.full_evaluation = True
-                print(f'dataset {dataset_name} split {split_name}: full_evaluation={split_dataset.full_evaluation}')
-
-    # HACK
-    if hasattr(model, 'num_sub_questions'):
-        model.num_sub_questions = 2
-        print(f'model: num_sub_questions={model.num_sub_questions}')
-    if hasattr(model, 'return_sub_qa'):
-        model.return_sub_qa = True
-        print(f'model: return_sub_qa={model.return_sub_qa}')
-
     runner = RunnerBase(
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )

@@ -58,6 +58,7 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
         self.return_sub_qa = True
 
     def forward(self, samples):
+        samples = samples.copy()
 
         image = samples["image"]
         with self.maybe_autocast():
@@ -107,52 +108,62 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
             max_length=self.max_txt_len,
         ).to(image.device)
 
-        self.llm_tokenizer.truncation_side = 'right'
-        text_output_tokens = self.llm_tokenizer(
-            [t + self.llm_tokenizer.eos_token for t in samples['text_output']],
-            return_tensors="pt",
-            padding="longest",
-            truncation=True,
-            max_length=self.max_output_txt_len,
-        ).to(image.device)
+        if 'multi_text_output' in samples:
+            multi_text_output = samples['multi_text_output']
+        else:
+            multi_text_output = [samples['text_output']]
 
-        llm_tokens, input_part_targets_len = self.concat_text_input_output(
-            text_input_tokens.input_ids,
-            text_input_tokens.attention_mask,
-            text_output_tokens.input_ids,
-            text_output_tokens.attention_mask,
-        )
+        llm_outputs = []
+        for text_output in multi_text_output:
+            samples['text_output'] = text_output
 
-        # do not apply loss to the padding
-        targets = llm_tokens['input_ids'].masked_fill(
-            llm_tokens['input_ids'] == self.llm_tokenizer.pad_token_id, -100
-        )
+            self.llm_tokenizer.truncation_side = 'right'
+            text_output_tokens = self.llm_tokenizer(
+                [t + self.llm_tokenizer.eos_token for t in samples['text_output']],
+                return_tensors="pt",
+                padding="longest",
+                truncation=True,
+                max_length=self.max_output_txt_len,
+            ).to(image.device)
 
-        # do not apply loss to the text input (i.e., instruction)
-        for i, l in enumerate(input_part_targets_len):
-            targets[i][:l] = -100
-
-        # do not apply loss to the query tokens
-        empty_targets = (
-            torch.ones(atts_llm.size(), dtype=torch.long).to(image.device).fill_(-100)
-        )
-        targets = torch.cat([empty_targets, targets], dim=1)
-
-        inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens['input_ids'])
-        inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)
-        attention_mask = torch.cat([atts_llm, llm_tokens['attention_mask']], dim=1)
-
-        with self.maybe_autocast():
-            outputs = self.llm_model(
-                inputs_embeds=inputs_embeds,
-                attention_mask=attention_mask,
-                return_dict=True,
-                labels=targets,
+            llm_tokens, input_part_targets_len = self.concat_text_input_output(
+                text_input_tokens.input_ids,
+                text_input_tokens.attention_mask,
+                text_output_tokens.input_ids,
+                text_output_tokens.attention_mask,
             )
 
-        loss = outputs.loss
+            # do not apply loss to the padding
+            targets = llm_tokens['input_ids'].masked_fill(
+                llm_tokens['input_ids'] == self.llm_tokenizer.pad_token_id, -100
+            )
 
-        return {"loss": loss}
+            # do not apply loss to the text input (i.e., instruction)
+            for i, l in enumerate(input_part_targets_len):
+                targets[i][:l] = -100
+
+            # do not apply loss to the query tokens
+            empty_targets = (
+                torch.ones(atts_llm.size(), dtype=torch.long).to(image.device).fill_(-100)
+            )
+            targets = torch.cat([empty_targets, targets], dim=1)
+
+            inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens['input_ids'])
+            inputs_embeds = torch.cat([inputs_llm, inputs_embeds], dim=1)
+            attention_mask = torch.cat([atts_llm, llm_tokens['attention_mask']], dim=1)
+
+            with self.maybe_autocast():
+                outputs = self.llm_model(
+                    inputs_embeds=inputs_embeds,
+                    attention_mask=attention_mask,
+                    return_dict=True,
+                    labels=targets,
+                )
+                llm_outputs.append(outputs)
+
+        if 'multi_text_output' in samples:
+            return {"loss": [llm_output.loss for llm_output in llm_outputs]}
+        return {"loss": llm_outputs[0].loss}
 
     @torch.no_grad()
     def generate(
@@ -167,7 +178,10 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
             length_penalty=1,
             num_captions=1,
             temperature=1,
+            main_answer_inference="perplexity",
     ):
+        samples = samples.copy()
+
         super_kwargs = {
             "use_nucleus_sampling": use_nucleus_sampling,
             "num_beams": num_beams,
@@ -257,13 +271,89 @@ class Blip2VicunaInstructSQ(Blip2VicunaInstruct):
         reasoner_prompt += reasoner_prompts["final_prompt"].format(main_question)
         samples["prompt"] = reasoner_prompt
         print('reasoner samples["prompt"]:', samples["prompt"], sep='\t')
-        
-        output_text = super().generate(samples, **super_kwargs)
-        print('output_text:', output_text, sep='\t')
-        
+
+        if main_answer_inference == "perplexity":
+            bs = samples["image"].size(0)
+
+            prompt = samples["prompt"]
+            if isinstance(prompt, str):
+                prompt = [prompt] * bs
+                
+            samples["text_input"] = prompt
+            samples["multi_text_output"] = samples["answer_list"]
+            model_output = self(samples)
+            candidate_score = model_output["loss"]
+            scores = candidate_score
+
+            main_answers = [""] * bs
+            optimal_scores = [1e10] * bs
+
+            for answer_candidate, score in zip(samples["answer_list"], scores):
+                score = score.reshape(-1).cpu().numpy().tolist()
+                print(*zip(answer_candidate, score))
+
+                for batch_index in range(bs):
+                    if score[batch_index] < optimal_scores[batch_index]:
+                        main_answers[batch_index] = answer_candidate[batch_index]
+                        optimal_scores[batch_index] = score[batch_index]
+
+            output_text = main_answers
+
+            # output_text = ["test"] * bs
+        elif main_answer_inference == "sample":
+            output_text = super().generate(samples, **super_kwargs)
+            print('output_text:', output_text, sep='\t')
+        else:
+            raise NotImplementedError
+
         if self.return_sub_qa:
             return output_text, sub_question_list, sub_answer_list
         return output_text
+    
+    def predict_answers(
+        self,
+        samples,
+        num_beams=5,
+        inference_method="generate",
+        max_len=256,
+        min_len=1,
+        num_ans_candidates=128,
+        answer_list=None,
+        prompt="",
+        length_penalty=1.0,
+        main_answer_inference="perplexity",
+        **kwargs
+    ):
+        samples = samples.copy()
+
+        if isinstance(samples["text_input"], str):
+            samples["text_input"] = [samples["text_input"]]
+            
+        text_input = samples["text_input"]
+
+        samples["prompt"] = text_input
+
+        result = self.generate(
+            samples,
+            num_beams=num_beams,
+            max_length=max_len,
+            min_length=min_len,
+            length_penalty=length_penalty,
+            main_answer_inference=main_answer_inference,
+        )
+
+        if type(result) == tuple:
+            output_text, sub_q_list, sub_a_list = result
+        else:
+            output_text, sub_q_list, sub_a_list = result, None, None
+
+        if "apply_lemmatizer" in samples.keys() and samples["apply_lemmatizer"]:
+            output_text = self._lemmatize(output_text)
+
+        if sub_q_list is not None:
+            return output_text, sub_q_list, sub_a_list
+        else:
+            return output_text
     
     
     # @torch.no_grad()

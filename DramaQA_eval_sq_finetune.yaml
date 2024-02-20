@@ -13,6 +13,9 @@ model:
   use_grad_checkpoint: True
   freeze_vit: True
 
+  num_sub_questions: 2
+  return_sub_qa: True
+
 datasets:
   dramaqa_sq: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
   # @registry.register_builder("vqa_introspect_qar_caption")
@@ -42,6 +45,10 @@ run:
   # @registry.register_task("vqa_introspect_captioning")
   # class VQAIntrospectCaptionTask(CaptionTask):
   # ...
+
+  full_evaluation: True
+  # main_answer_inference: "perplexity" # "perplexity" or "sample"
+  main_answer_inference: "sample"
 
   # optimizer
   # batch_size * accum_grad_iters = 128 or 256

@@ -349,14 +349,16 @@ class AOKVQATask(VQATask):
 @registry.register_task("dramaqa_sq_task")
 class DramaQASQTask(VQATask):
     def __init__(
-            self,
-            num_beams,
-            max_len,
-            min_len,
-            evaluate,
-            num_ans_candidates,
-            inference_method="rank",
-            prompt="",
+        self,
+        num_beams,
+        max_len,
+        min_len,
+        evaluate,
+        num_ans_candidates,
+        inference_method="rank",
+        prompt="",
+        full_evaluation=False,
+        main_answer_inference="perplexity",
     ):
         super().__init__(
             num_beams=num_beams,
@@ -367,13 +369,84 @@ class DramaQASQTask(VQATask):
             inference_method=inference_method,
             prompt=prompt,
         )
+
+        self.full_evaluation = full_evaluation
+        self.main_answer_inference = main_answer_inference
+        assert self.main_answer_inference in ["perplexity", "sample"]
+
         # cache_dir = os.path.join("/home/ywjang/models", "sentence-transformers/all-MiniLM-L6-v2")
         # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', cache_dir=cache_dir)
         # self.sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-        self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+        self.sentence_transformer = None # SentenceTransformer('all-MiniLM-L6-v2')
         logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
         self.cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
         self._cnt = 0
+
+    @classmethod
+    def setup_task(cls, cfg):
+        run_cfg = cfg.run_cfg
+
+        num_beams = run_cfg.get("num_beams", 3)
+        max_len = run_cfg.get("max_len", 10)
+        min_len = run_cfg.get("min_len", 1)
+
+        evaluate = run_cfg.get("evaluate", False)
+
+        inference_method = run_cfg.get("inference_method", "rank")
+        num_ans_candidates = run_cfg.get("num_ans_candidates", 128)
+        prompt = run_cfg.get("prompt", "")
+        logging.info(Colors.BRIGHT_RED + "in setup_task(), prompt: " + prompt + Colors.RESET)
+
+        full_evaluation = run_cfg.get("full_evaluation", None)
+        main_answer_inference = run_cfg.get("main_answer_inference", "perplexity")
+
+        return cls(
+            num_beams=num_beams,
+            max_len=max_len,
+            min_len=min_len,
+            evaluate=evaluate,
+            num_ans_candidates=num_ans_candidates,
+            inference_method=inference_method,
+            prompt=prompt,
+            full_evaluation=full_evaluation,
+            main_answer_inference=main_answer_inference,
+        )
+    
+    def build_datasets(self, cfg):
+        datasets = super().build_datasets(cfg)
+
+        if self.full_evaluation is not None:
+            full_eval_datasets = []
+            for dataset_name, dataset in datasets.items():
+                for split_name, split_dataset in dataset.items():
+                    if hasattr(split_dataset, 'full_evaluation'):
+                        full_eval_datasets.append((dataset_name, split_name, split_dataset))
+
+            assert len(full_eval_datasets) > 0, '`full_evaluation` had no effect.'
+            for dataset_name, split_name, split_dataset in full_eval_datasets:
+                split_dataset.full_evaluation = self.full_evaluation
+                print(f'dataset {dataset_name} split {split_name}: full_evaluation={split_dataset.full_evaluation}')
+
+        return datasets
+    
+    def build_model(self, cfg):
+        model = super().build_model(cfg)
+
+        model_cfg = cfg.model_cfg
+
+        num_sub_questions = model_cfg.get("num_sub_questions", None)
+        return_sub_qa = model_cfg.get("return_sub_qa", None)
+
+        if num_sub_questions is not None:
+            assert hasattr(model, 'num_sub_questions'), 'model has no attribute named `num_sub_questions`.'
+            model.num_sub_questions = num_sub_questions
+            print(f'model: num_sub_questions={model.num_sub_questions}')
+        if return_sub_qa is not None:
+            assert hasattr(model, 'return_sub_qa'), 'model has no attribute named `return_sub_qa`.'
+            model.return_sub_qa = return_sub_qa
+            print(f'model: return_sub_qa={model.return_sub_qa}')
+
+        return model
     
     def valid_step(self, model, samples):
         """
@@ -394,6 +467,7 @@ class DramaQASQTask(VQATask):
             max_len=self.max_len,
             min_len=self.min_len,
             num_ans_candidates=self.num_ans_candidates,
+            main_answer_inference=self.main_answer_inference,
         )
         answers = raw_outputs[0] if type(raw_outputs) == tuple else raw_outputs
         pred_qa_pairs = []
@@ -425,18 +499,31 @@ class DramaQASQTask(VQATask):
         
         for b in range(len(answers)):
             answer = answers[b]
-            embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
-            similarity_list = []
-            for i in range(5):
-                candidate = samples["answer_list"][i][b]
-                embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
-                # similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
-                if self._cnt < 2:
-                    print('embedding_answer.shape:', embedding_answer.shape)
-                    print('embedding_candidate.shape:', embedding_candidate.shape)
-                    self._cnt += 1
-                similarity_list.append(self.cos_sim(embedding_answer, embedding_candidate))
-            pred_index = similarity_list.index(max(similarity_list))
+            answer_candidates = [answer_candidate[b] for answer_candidate in samples["answer_list"]]
+
+            if answer in answer_candidates:
+                pred_index = answer_candidates.index(answer)
+            else:
+                if self.sentence_transformer is None:
+                    print('no exact match found. initializing SentenceTransformer..')
+                    self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+
+                embedding_answer = self.sentence_transformer.encode(answer, convert_to_tensor=True)
+                similarity_list = []
+                for i in range(5):
+                    candidate = samples["answer_list"][i][b]
+                    embedding_candidate = self.sentence_transformer.encode(candidate, convert_to_tensor=True)
+                    # similarity_list.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
+                    if self._cnt < 2:
+                        print('embedding_answer.shape:', embedding_answer.shape)
+                        print('embedding_candidate.shape:', embedding_candidate.shape)
+                        self._cnt += 1
+                    similarity_list.append(self.cos_sim(embedding_answer, embedding_candidate))
+                pred_index = similarity_list.index(max(similarity_list))
+                
+                print('answer:', answer)
+                print('similarity_list:', similarity_list)
+
             pred_answers.append(pred_index)
         
         # for answer, candidates in zip(answers, samples["answer_list"]):
@@ -447,9 +534,10 @@ class DramaQASQTask(VQATask):
         #         similarity.append(util.pytorch_cos_sim(embedding_answer, embedding_candidate)[0])
         #     # pre_answers.append(candidates[similarity.index(max(similarity))])
         #     pred_answers.append(similarity.index(max(similarity)))
-            print('answer:', answer)
-            print('similarity_list:', similarity_list)
             print('pred_answers:', pred_index, '\t', samples["answer_list"][pred_index][b])
+
+            gt_index = int(samples["answer"][b])
+            print('gt_answers:', gt_index, '\t', samples["answer_list"][gt_index][b])
             print()
 
         question_id = samples["question_id"]
