@@ -5,6 +5,7 @@ from pprint import pprint
 import argparse
 
 from api_chatgpt import *
+from utils import get_image_path
 
 
 def main(args):
@@ -71,6 +72,8 @@ def main(args):
         json.dump(response_data, open(filename, 'w'), indent=4)
         with open(filename.replace('.json', '.txt'), 'w') as f:
             f.write(response_data['choices'][0]['message']['content'])
+            
+        print('Saved to', filename)
 
 
 def get_args():

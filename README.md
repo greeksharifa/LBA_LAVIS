@@ -20,5 +20,10 @@
 
 ```bash
 cd generate_subqa
+
+# Description + Knowledge Graph
 python generate.py --prompt_path="prompts/subqa_240314.txt"
+
+# plus vision(3 frames per 1 mainQA)
+python generate.py --prompt_path="prompts/subqa_240314.txt" --vision --vision_detail=low --max_vision_num=3 --output_dir="your_output_dir_path"
 ```
