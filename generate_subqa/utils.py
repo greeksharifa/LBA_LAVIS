@@ -3,6 +3,17 @@ import glob
 import numpy as np
 
 
+def get_scripts(args):
+    pass
+
+def get_script_from_vid(args, scripts, vid):
+    script_path = os.path.join(args.root_dir, f"AnotherMissOh_scripts/{vid}.txt")
+    with open(script_path, 'r') as f:
+        script = f.read()
+    return script
+
+
+
 def get_image_path(args, sample):
     # shot이면 그 가운데 frame 1장 선택, scene이면 그 가운데 shot 1개 선택
     # 단, 현재는 scene에 대해서만 sub_qa를 만들 계획이므로 애초에 qa(sample)에는 scene만 존재함
