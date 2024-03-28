@@ -1,17 +1,36 @@
+import json
 import os
 import glob
 import numpy as np
 
 
 def get_scripts(args):
-    pass
-
-def get_script_from_vid(args, scripts, vid):
-    script_path = os.path.join(args.root_dir, f"AnotherMissOh_scripts/{vid}.txt")
-    with open(script_path, 'r') as f:
-        script = f.read()
-    return script
-
+    speech_path = os.path.join(args.root_dir, args.speech_path, 'DramaCap_train_script.json')
+    script_list = json.load(open(speech_path, 'r'))
+    scripts = {}
+    for sample in script_list:
+        try:
+            vid = sample["vid"]
+            # if not vid.endswith('0000'):    continue
+            description = sample["desc"]
+            subs = ''
+            if sample["subtitle"] == ".":
+                continue
+            else:
+                for sub in sample["subtitle"]["contained_subs"]:
+                    if subs != '':
+                        subs += '\n'
+                    subs += f'{sub["speaker"]}: {sub["utter"].strip()}'
+                
+            scripts[vid] = {
+                "subs:": subs,
+                "description": description,
+            }
+        except:
+            from pprint import pprint
+            pprint(sample, width=200)
+    
+    return scripts
 
 
 def get_image_path(args, sample):
