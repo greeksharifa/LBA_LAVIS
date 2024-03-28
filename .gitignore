@@ -1,3 +1,9 @@
+# private
+generate_subqa/api_key.json
+
+# cache
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

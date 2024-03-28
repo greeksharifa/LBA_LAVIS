@@ -89,6 +89,8 @@ def get_args():
     parser = argparse.ArgumentParser(description='OpenAI ChatGPT')
 
     parser.add_argument('--openai_api_key', type=str, default=OPENAI_API_KEY)
+    # model
+    parser.add_argument('--model', type=str, default="gpt-4-turbo-preview")
 
     parser.add_argument('--root_dir', type=str, default="/data1/AnotherMissOh/")
     parser.add_argument('--prompt_path', type=str, default="path_to_your_prompt_path") #"prompts/subqa_240325.txt")
@@ -101,8 +103,6 @@ def get_args():
     parser.add_argument('--debug', action='store_true', default=False)
     
     args = parser.parse_args()
-    
-    args.model = "gpt-4-vision-preview" if args.vision else "gpt-4-turbo-preview" # "gpt-3.5-turbo" 
 
     return args
 
