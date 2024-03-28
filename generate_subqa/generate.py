@@ -1,25 +1,10 @@
-import requests
 import os
 import json
 import datetime
 from pprint import pprint
 import argparse
 
-
-def call_chat_api(args, prompt):
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {args.openai_api_key}"
-    }
-    payload = {
-        "model": args.model,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": args.max_tokens,
-        "temperature": args.temperature,
-    }
-    response = requests.post(url, headers=headers, json=payload)
-    return response.json()
+from api_chatgpt import *
 
 
 def main(args):
@@ -58,7 +43,11 @@ def main(args):
     if args.debug:
         response_data = {'id': 'chatcmpl-92brhs39ADx4sqOkypr7BE0F45OnA', 'object': 'chat.completion', 'created': 1710409237, 'model': 'gpt-4-0125-preview', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': "Given the answer and the details provided, let's create 10 supporting questions that logically lead to the understanding of the scene, step by step, focusing on the characters, their relationships, and the events:\n\n1. Who is Haeyoung1 in relation to Deogi and Kyungsu?\n2. What significant event does Haeyoung1 announce to Deogi and Kyungsu?\n3. How is Deogi related to Kyungsu?\n4. Can you list the roles or titles Haeyoung1 holds in relation to other characters mentioned?\n5. What action did Haeyoung1 take before delivering the news to Deogi and Kyungsu?\n6. Who were the recipients of Haeyoung1's news?\n7. What was the content of Haeyoung1's announcement?\n8. How might Deogi's role as the mother influence her reaction to Haeyoung1's announcement?\n9. Considering the relationships and roles, how could Kyungsu's position as Haeyoung1's father affect his response to the news?\n10. Why is the information about Haeyoung1's announcement significant to understanding the scene's context and the characters' reactions?\n\nThese questions guide through the characters' relationships, their roles, and the events leading up to the scene to grasp the complexity and the emotional weight of Haeyoung1's announcement, alongside providing context to Deogi's assumed responsibilities, which led to the given answer."}, 'logprobs': None, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 523, 'completion_tokens': 301, 'total_tokens': 824}, 'system_fingerprint': 'fp_31c0f205d1'}
     else:
-        response_data = call_chat_api(args.model, prompt)
+        if args.vision:
+            image_paths = get_image_path(args, qas[0])
+            response_data = call_vision_api(args, prompt, image_paths)
+        else:
+            response_data = call_chat_api(args.model, prompt)
 
     print('-' * 120)
     print('content:', response_data['choices'][0]['message']['content'], sep='\n')
@@ -75,6 +64,7 @@ def main(args):
         dump_data = response_data
         dump_data.update(vars(args))
         dump_data.update({'prompt': prompt})
+        dump_data.update({'used_frames': image_paths})
         
         filename = args.output_dir + f'{time_str}_{args.model}.json'
         
@@ -89,8 +79,6 @@ def get_args():
     parser = argparse.ArgumentParser(description='OpenAI ChatGPT')
 
     parser.add_argument('--openai_api_key', type=str, default=OPENAI_API_KEY)
-    # model
-    parser.add_argument('--model', type=str, default="gpt-4-turbo-preview")
 
     parser.add_argument('--root_dir', type=str, default="/data1/AnotherMissOh/")
     parser.add_argument('--prompt_path', type=str, default="path_to_your_prompt_path") #"prompts/subqa_240325.txt")
@@ -99,11 +87,18 @@ def get_args():
     parser.add_argument('--max_tokens', type=int, default=1500) # max output token
     parser.add_argument('--temperature', type=float, default=0.)
     
+    # vision
+    parser.add_argument('--vision', action='store_true', default=False)
+    parser.add_argument('--vision_detail', type=str, default="low", choices=["low", "high"]) 
+    parser.add_argument('--max_vision_num', type=int, default=1)
+    
     # debug
     parser.add_argument('--debug', action='store_true', default=False)
     
     args = parser.parse_args()
 
+    args.model = "gpt-4-vision-preview" if args.vision else "gpt-4-turbo-preview" # "gpt-3.5-turbo" 
+    
     return args
 
 

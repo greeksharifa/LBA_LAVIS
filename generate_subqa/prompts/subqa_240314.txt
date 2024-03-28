@@ -1,0 +1,7 @@
+With the given information below, please generate 10 subQAs which those subQAs can drive to the given main QAs. 
+scene description: "{scene_description}"
+knowledge graph: {knowledge_graph}
+character information: {character_information}
+main Question: {main_Q}
+main Answer: {main_A}
+Please generate in list of dict format: ```json[subQ: ..., subA: ...]```
