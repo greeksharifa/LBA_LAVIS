@@ -3,6 +3,7 @@ import json
 import datetime
 from pprint import pprint
 import argparse
+import random
 
 from api_chatgpt import *
 from utils import *
@@ -11,9 +12,13 @@ from utils import *
 def main(args):
     prompt_format = open(args.prompt_path, 'r').read().strip()
 
-    episodes = open(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_integrated_train_episode.json.rows', 'r', encoding='utf8').readlines() 
+    # episodes = open(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_integrated_train_episode.json.rows', 'r', encoding='utf8').readlines() 
     # print(type(episodes[0].strip()))
-    episode_0 = json.loads(episodes[0].strip())
+    # episode_0 = json.loads(episodes[0].strip())
+    # episodes = json_rows2json(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_integrated_train_episode.json.rows')
+    episodes = load_and_merge_jsons(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_{split}_onlyscene_wo_kg.json')
+    # pprint(episodes)
+    # assert False
     # print(episode_0)
     # print('*' * 200)
     # episode_0 = {'Haeyoung1': ["daughter of Deogi", "daughter of Kyungsu", "niece of Jeongsuk", "ex-girlfriend of Taejin", "friend of Haeyoung2", "best friend of Heeran"], 'Deogi': ["mother of Haeyoung1", "sister-in-law with Jeongsuk", "wife of Kyungsu"], 'Kyungsu': ["father of Haeyoung1", "husband of Haeyoung1", "brother of Jeongsuk"], "Sukyung": ["sister of Dokyung", "sister of Hun", "daughter of Jiya", "superior of Haeyoung1"], 'Dokyung': ["brother of Sukyung", "brother of Hun", "son of Jiya", "ex-boyfriend of Haeyoung2"], 'Hun': ["brother of Dokyung", "brother of Sukyung", "son of Jiya", "work with Dokyung"], 'Jinsang': ["best friend of Dokyung", "lawyer"], 'Taejin': ["ex-boyfriend of Haeyoung1", "CEO"], 'Haeyoung2': ["ex-girlfriend of Dokyung"], 'Chairman': ["investor of Taejin", "in a relationship with Jiya"], 'Anna': ["girlfriend of Hun"], 'Heeran': ["best friend of Haeyoung1", "program director", "work with Dokyung"], 'Gitae': ["work with Dokyung"], 'Sangseok': ["work with Dokyung"], 'Yijoon': ["work with Dokyung"]}
@@ -25,26 +30,36 @@ def main(args):
         # print(qas[i]["vid"])
         
     scripts = None
+    prompt = None
     if args.speech:
         scripts = get_scripts(args)
 
-    scene_f = open(os.path.join(args.root_dir, 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows'), 'r', encoding='utf8') 
+    # scene_f = open(os.path.join(args.root_dir, 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows'), 'r', encoding='utf8').readlines()
+    scene_f = json_rows2json(args.root_dir + 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows')
+    
+    idx = random.randint(0, len(scene_f))
+    
     for i, data in enumerate(scene_f):
-        # print(scene.strip())
+        if i != idx:
+            continue
+        print('data:', data)
+        eposide_num, scene_num, shot_num = get_info_from_vid(data["scene_id"])
         scene = json.loads(data.strip())
         scene_description = scene["scene_description"]
         knowledge_graph = scene["knowledge_graph"]
-        character_information = episode_0
+        character_information = episodes[eposide_num]["characters"]
         main_Q = qas[i]["que"]
         main_A = qas[i]["answers"][qas[0]["correct_idx"]]
         if args.speech:
             script = scripts[qas[i]["vid"]]
             pprint(script, width=200)
-            assert False
+            prompt = prompt_format.format(scene_description=scene_description, knowledge_graph=knowledge_graph, character_information=character_information, 
+                                    script=script["subs"], main_Q=main_Q, main_A=main_A)
         else:
             prompt = prompt_format.format(scene_description=scene_description, knowledge_graph=knowledge_graph, character_information=character_information, 
                                     main_Q=main_Q, main_A=main_A)
-        print('que:', qas[i]["que"], '\n')
+        print('main_Q:', main_Q, '\n')
+        print('main_A:', main_A, '\n')
         print('prompt:', prompt, sep='\n')
         
         break
@@ -60,13 +75,13 @@ def main(args):
             response_data = call_chat_api(args.model, prompt)
 
 
+    # print('-' * 120)
+    print('response_data:', response_data, sep='\n')
     print('-' * 120)
     print('content:', response_data['choices'][0]['message']['content'], sep='\n')
 
-    print('-' * 120)
-    print('response_data:', response_data, sep='\n')
-    print('-' * 60)
-    pprint(response_data, width=200)
+    # print('-' * 60)
+    # pprint(response_data, width=200)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d_%H:%M:%S")
@@ -76,13 +91,14 @@ def main(args):
         dump_data = response_data
         dump_data.update(vars(args))
         dump_data.update({'prompt': prompt})
-        dump_data.update({'used_frames': image_paths})
         
-        filename = args.output_dir + f'{time_str}_{args.model}'
+        filename = args.output_dir + f'{time_str}_{args.model}_{args.prompt_path.split("/")[-1].replace(".txt", "")}'
         if args.vision:
-            filename += '_vision'
+            dump_data.update({'used_frames': image_paths})
+            # filename += '_vision'
         if args.speech:
-            filename += '_speech'
+            dump_data.update({'used_script': script["subs"]})
+            # filename += '_speech'
         filename += '.json'
         
         json.dump(response_data, open(filename, 'w'), indent=4)
@@ -90,6 +106,7 @@ def main(args):
             f.write(response_data['choices'][0]['message']['content'])
             
         print('-' * 120, '\nSaved to', filename)
+        print('que:', qas[i]["que"], '\n')
 
 
 def get_args():
