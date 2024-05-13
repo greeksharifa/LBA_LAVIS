@@ -166,6 +166,7 @@ class BlipImageTrainProcessor(BlipImageBaseProcessor):
 @registry.register_processor("blip_image_eval")
 class BlipImageEvalProcessor(BlipImageBaseProcessor):
     def __init__(self, image_size=384, mean=None, std=None):
+        print('BlipImageEvalProcessor __init__', image_size, mean, std)
         super().__init__(mean=mean, std=std)
 
         self.transform = transforms.Compose(

@@ -293,6 +293,14 @@ class BaseTask:
             result_dir, "%s_rank%d.json" % (filename, get_rank())
         )
         final_result_file = os.path.join(result_dir, "%s.json" % filename)
+        for r in result:
+            try:
+                r['gt_ans'] = r['gt_ans'].item()
+            except:
+                if type(r['text_output']) == str:
+                    r['gt_ans'] = r['text_output']
+                else:
+                    r['gt_ans'] = r['text_output'].item()
 
         json.dump(result, open(result_file, "w"), indent=4)     # ywjang: add indent=4
 

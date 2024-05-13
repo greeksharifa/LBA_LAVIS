@@ -8,3 +8,4 @@ env:
   # cache_root: "cache"
   # For internal use with persistent storage
   cache_root: "/home/ywjang/data"
+#  cache_model_root: "/home/ywjang/models"

@@ -1,0 +1,79 @@
+ # Copyright (c) 2022, salesforce.com, inc.
+ # All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause
+ # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+
+model:
+  arch: blip2_vicuna_instruct
+  model_type: vicuna7b
+  load_finetuned: True
+  pretrained: "/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth"
+  finetuned: "lavis/ywjang_output/best_models/20230810155_Reasoner_epoch10/checkpoint_best.pth"
+  use_grad_checkpoint: True
+  freeze_vit: True
+
+datasets:
+  vqa_introspect_qar_caption: # name of the registry_name of dataset builder, in lavis/datasets/builders/caption_builder.py
+  # @registry.register_builder("vqa_introspect_qar_caption")
+    #class VQAIntrospectQARCapBuilder(BaseDatasetBuilder):
+    #     ...
+    vis_processor:
+        train:
+          name: "blip2_image_train"
+          image_size: 224 #364
+        eval:
+          name: "blip_image_eval"
+          image_size: 224 #364
+    text_processor:
+        train:
+          name: "blip_question"
+#          prompt: "a photo of "
+        eval:
+          name: "blip_question"
+    # build_info:
+    #     images:
+    #         storage: '/export/share/datasets/vision/coco/images/'
+
+run:
+#  task: vqa_introspect
+#  task: captioning
+  task: vqa_introspect_captioning # name of the registry_name of class in tasks/captioning.py
+  # @registry.register_task("vqa_introspect_captioning")
+  # class VQAIntrospectCaptionTask(CaptionTask):
+  # ...
+
+  # optimizer
+  # batch_size * accum_grad_iters = 128 or 256
+  # batch_size * warmup_steps = 128k or 256k
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-5
+  min_lr: 0
+  warmup_lr: 1e-8
+  warmup_steps: 2000
+  weight_decay: 0.05
+  max_epoch: 10
+  batch_size_train: 8
+  batch_size_eval: 1
+  num_workers: 0
+  accum_grad_iters: 16
+  prompt: "Write a sub-question about image, when main-question is '{}'. sub-question:"
+
+  max_len: 128
+  min_len: 1
+  num_beams: 5
+
+  seed: 42
+  output_dir: "ywjang_output_test/"
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: True
+  train_splits: ["train"]
+  valid_splits: ["val"]
+  test_splits: ["val"]
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: True

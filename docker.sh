@@ -1,0 +1,1 @@
+docker run -it --gpus all --name LBA_LAVIS --shm-size 64G -i -t -p 22 -p 6006 -p 8888 -p 8889 -v /data1:/data -v /data2:/models -v /home/ywjang/LBA_LAVIS:/workspace/LBA_LAVIS pytorch/pytorch:latest /bin/bash

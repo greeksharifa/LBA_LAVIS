@@ -22,10 +22,10 @@ model:
   num_query_token: 32
 
   # path to Vicuna checkpoint
-  llm_model: "./llm/vicuna-13b"
+  llm_model: "/home/ywjang/models/lmsys/vicuna-13b-v1.1"
 
   # generation configs
-  prompt: ""
+  prompt: "blip2_instruct_vicuna13b.yaml Prompt. Q: {} A:"
 
 
 preprocess:

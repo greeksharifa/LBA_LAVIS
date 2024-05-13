@@ -48,19 +48,19 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         Blip2VicunaInstructQAR.finetuned = finetuned
     
         # base와 비교
-        base_json = json.load(open("lavis/ywjang_output_qar_test/20230815093/result/val_vqa_result.json", "r"))
-        
-        for elem in base_json:
-            question_id = elem["question_id"]
-            question = elem["question"]
-            gt_ans = elem["gt_ans"]
-            pred_ans = elem["pred_ans"]
-            
-            Blip2VicunaInstructQAR.base[question_id] = {
-                "question": question,
-                "gt_ans": gt_ans,
-                "base_pred_ans": pred_ans
-            }
+        # base_json = json.load(open("lavis/ywjang_output_qar_test/20230815093/result/val_vqa_result.json", "r"))
+        #
+        # for elem in base_json:
+        #     question_id = elem["question_id"]
+        #     question = elem["question"]
+        #     gt_ans = elem["gt_ans"]
+        #     pred_ans = elem["pred_ans"]
+        #
+        #     Blip2VicunaInstructQAR.base[question_id] = {
+        #         "question": question,
+        #         "gt_ans": gt_ans,
+        #         "base_pred_ans": pred_ans
+        #     }
     
     
     # dummy
@@ -99,8 +99,6 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         num_captions=1,
         temperature=1,
     ):
-        # print('*' * 400)
-        # print('samples: ', samples)
         """{
         'image': Tensor
         'text_input': ['what type vehicle does the person taking this picture own?'],
@@ -111,10 +109,10 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         'direct_answers': [None],
         'prompt': ['what type vehicle does the person taking this picture own?']
         }"""
-        # logging.info("In QAR Generate:")
-        # logging.info(Colors.BRIGHT_MAGENTA + f"Questioner device: {Blip2VicunaInstructQAR.Questioner.device}" + Colors.RESET)
-        # logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
-        # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
+        logging.info("In QAR Generate:")
+        logging.info(Colors.BRIGHT_MAGENTA + f"Questioner device: {Blip2VicunaInstructQAR.Questioner.device}" + Colors.RESET)
+        logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
+        logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
         
         if hasattr(Blip2VicunaInstructQAR.Questioner, "device") and samples["image"].device != Blip2VicunaInstructQAR.Questioner.device:
             Blip2VicunaInstructQAR.Questioner.to(samples["image"].device)

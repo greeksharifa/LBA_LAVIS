@@ -6,7 +6,7 @@ import logging
 import string
 from packaging import version
 
-from colors import Colors, print_sample
+from colors import Colors, print_sample, print_color
 
 import torch
 from torch.cuda.amp import autocast as autocast
@@ -99,6 +99,11 @@ class Blip2VicunaInstruct(Blip2Base):
         else:
             self.Qformer.resize_token_embeddings(len(self.tokenizer))
         self.Qformer.cls = None
+        
+        # from transformers import AutoModelForCausalLM, AutoTokenizer
+        # llm_model = "mistralai/Mistral-7B-Instruct-v0.1"
+        # self.llm_tokenizer = AutoTokenizer.from_pretrained(llm_model, use_fast=False, truncation_side="left", cache_dir=f"/data2/{llm_model}")
+        # self.llm_model = AutoModelForCausalLM.from_pretrained(llm_model, torch_dtype=torch.float16, cache_dir=f"/data2/{llm_model}")
 
         self.llm_tokenizer = LlamaTokenizer.from_pretrained(llm_model, use_fast=False, truncation_side="left")
         self.llm_model = LlamaForCausalLM.from_pretrained(
@@ -283,6 +288,9 @@ class Blip2VicunaInstruct(Blip2Base):
         num_captions=1,
         temperature=1,
     ):
+        # logging.info("In blip2_vicuna_instruct.py Generate:")
+        # logging.info(Colors.BRIGHT_MAGENTA + f"Model device: {self.llm_model.device}" + Colors.RESET)
+        # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
         # prompt = None
         # try:
         self.llm_tokenizer.padding_side = "left"
@@ -293,7 +301,7 @@ class Blip2VicunaInstruct(Blip2Base):
             prompt = self.prompt
 
         image = samples["image"]
-
+        
         bs = image.size(0)
 
         if isinstance(prompt, str):
@@ -322,6 +330,8 @@ class Blip2VicunaInstruct(Blip2Base):
             Qformer_atts = torch.cat([query_atts, text_Qformer.attention_mask], dim=1)
 
         # For video data
+        # print_color(msg="image.shape: {}".format(image.shape), color=Colors.BRIGHT_RED)
+        # VQA-Introspect: 1, 3, 224, 224
         if image.dim() == 5:
             inputs_llm, atts_llm = [], []
             for j in range(image.size(2)):
