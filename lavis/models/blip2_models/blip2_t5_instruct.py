@@ -290,12 +290,17 @@ class Blip2T5Instruct(Blip2Base):
         num_captions=1,
         temperature=1,
     ):
+        print('self.prompt:', type(self.prompt), self.prompt)
         if "prompt" in samples.keys():
             prompt = samples["prompt"]
+        elif "main_question" in samples.keys():
+            prompt = self.prompt.LBA
         else:
-            prompt = self.prompt
+            prompt = self.prompt.baseline
+        print('-' * 160, '\nprompt:', type(prompt), prompt)
 
         image = samples["image"]
+        print('image: ', image.shape)
 
         bs = image.size(0)
 
@@ -307,6 +312,18 @@ class Blip2T5Instruct(Blip2Base):
         # For TextCaps
         if "ocr_tokens" in samples.keys() and "{}" in prompt[0]:
             prompt = [p.format(', '.join(samples['ocr_tokens'][i][:30])) for i, p in enumerate(prompt)]
+            
+        # LBA TODO: for Recomposer
+        # e.g. prompt = prompt.format(samples["sub_question"], samples["sub_answer"])
+        
+        if "main_question" in samples.keys():# and "{}" in prompt[0]:
+            # prompt = prompt.LBA
+            print('LBA main_question:', samples["main_question"])
+            prompt = [p.format(main_question=samples["main_question"][i]) for i, p in enumerate(prompt)]
+        
+            print('LBA prompt:', prompt)
+        else:
+            print('prompt:', prompt)
 
         query_tokens = self.query_tokens.expand(bs, -1, -1)
         if self.qformer_text_input:
@@ -409,6 +426,12 @@ class Blip2T5Instruct(Blip2Base):
             output_text = self.t5_tokenizer.batch_decode(
                 outputs, skip_special_tokens=True
             )
+            
+        print('outputs:', outputs.shape)
+        # print('self.t5_tokenizer:', self.t5_tokenizer)
+        from temp2 import calculate_sentence_confidence
+        confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, prompt, output_text)
+        print('confidence:', confidence)
 
         return output_text
 

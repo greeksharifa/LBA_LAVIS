@@ -25,7 +25,11 @@ model:
   t5_model: "google/flan-t5-xl"
 
   # generation configs
-  prompt: ""
+  prompt: 
+    baseline: "Question : {main_question}? Short answer :"
+    LBA: "You have to answer the following instructions. `Main-question` is `{main_question}`. 1. What is the insufficent information to answer the `{main_question}`? 2. Generate one `Sub-question` about insufficent information to get more information. 3. What is the answer to `Sub-question`? 4. What is the answer to `{main_question}`?"
+    # LBA: "Context : {sub_question}? {sub_answer}. Question : {main_question}? Short answer :"
+  # "Context : is the sky blue? no. are there clouds in the sky? yes. Question : what weather is likely? Short answer : rain\nContext : {sub_question}? {sub_answer}. Question : {main_question}? Short answer :"
 
 
 preprocess:
