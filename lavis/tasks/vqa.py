@@ -477,3 +477,19 @@ class DisCRNTask(VQATask):
         logging.info(metrics)
 
         return metrics
+
+
+@registry.register_task("vqa_introspect")
+class VQAIntrospectTask(VQATask):
+    def valid_step(self, model, samples):
+        answers = model.predict_answers(
+            samples=samples,
+            answer_list=self.answer_list,
+            inference_method=self.inference_method,
+            num_beams=self.num_beams,
+            max_len=self.max_len,
+            min_len=self.min_len,
+            num_ans_candidates=self.num_ans_candidates,
+            prompt=self.prompt,
+        )
+        pred_qa_pairs = []
