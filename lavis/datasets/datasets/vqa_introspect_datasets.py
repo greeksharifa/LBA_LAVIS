@@ -1,5 +1,7 @@
-import os
+from collections import OrderedDict
 import json
+import os
+import torch
 import random
 
 from PIL import Image
@@ -23,8 +25,38 @@ class VQAIntrospectEvalDataset(VQADataset):
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
+        
+        self.split = "val"
+        if "train" in ann_paths[0]:
+            self.split = "train"
+        elif "test" in ann_paths[0]:
+            self.split = "test"
 
         self._add_instance_ids()
+        
+    def collater(self, samples):
+        (
+            image_list,
+            text_input_list,
+            question_id_list,
+            # instance_id_list,
+            reasoning_answer_most_common_list,
+        ) = ([], [], [], []) # ([], [], [], [], [], [], [])
+
+        for sample in samples:
+            image_list.append(sample["image"])
+            text_input_list.append(sample["text_input"])
+            question_id_list.append(sample["question_id"])
+            # instance_id_list.append(sample["instance_id"])
+            reasoning_answer_most_common_list.append(sample["reasoning_answer_most_common"])
+
+        return {
+            "image": torch.stack(image_list, dim=0),
+            "text_input": text_input_list,
+            "question_id": question_id_list,
+            # "instance_id": instance_id_list,
+            "reasoning_answer_most_common": reasoning_answer_most_common_list,
+        }
 
     def __getitem__(self, index):
         """
@@ -49,21 +81,23 @@ class VQAIntrospectEvalDataset(VQADataset):
             ]
         }
         """
-        assert False, "*" * 160 + "\nTODO: Imgospect dataset does not support __getitem__"
         ann = self.annotation[index]
+        # self.vis_root : /data1/coco/images. 
+        # lavis/configs/default.yaml의 cache_root + lavis/configs/datasets/vqa_introspect/defaults.yaml의 images.storage
 
-        image_path = os.path.join(self.vis_root, ann["image"])
+        # /data1/coco/images/val2014/COCO_val2014_000000284623.jpg
+        image_path = os.path.join(self.vis_root, f'{self.split}2014', f'COCO_{self.split}2014_000000{ann["image_id"]:06}.jpg')
+        # print('image_path : ', image_path)
         image = Image.open(image_path).convert("RGB")
 
         image = self.vis_processor(image)
-        question = self.text_processor(ann["question"])
+        text_input = self.text_processor(ann["reasoning_question"])
+        reasoning_answer_most_common = self.text_processor(ann["reasoning_answer_most_common"])
 
-        answers = [ann["answer"]]
-        weights = [1]
 
         return {
             "image": image,
-            "text_input": question,
-            "answers": answers,
-            "weights": weights,
+            "text_input": text_input,
+            "question_id": ann["question_id"],
+            "reasoning_answer_most_common": reasoning_answer_most_common,
         }

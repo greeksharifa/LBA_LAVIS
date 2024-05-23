@@ -493,3 +493,45 @@ class VQAIntrospectTask(VQATask):
             prompt=self.prompt,
         )
         pred_qa_pairs = []
+        
+        
+        question_id = samples["question_id"]
+        gt_answers = samples["reasoning_answer_most_common"]
+
+        for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+            pred_qa_pairs.append(
+                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
+            )
+
+        return pred_qa_pairs
+
+    @dist_utils.main_process
+    def _report_metrics(self, result_file, split):
+        """
+        Implementing accuracy computation for AOKVQA, see
+        https://github.com/allenai/aokvqa/blob/main/evaluation/eval_predictions.py#L45 for details.
+        """
+        # TODO add evaluation for multi-choice
+        # assert False, "TODO!"
+
+        results = json.load(open(result_file, "r"))
+        acc = []
+
+        for res in results:
+            # if res["gt_ans"] is None:
+            #     # prepare test results for leaderboard evaluation
+            #     self._save_result_leaderboard(results)
+            #     return
+            acc.append(res["pred_ans"] == res["gt_ans"])
+
+        accuracy = sum(acc) / len(acc) * 100
+        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+
+        with open(
+            os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+        ) as f:
+            f.write(json.dumps(metrics) + "\n")
+
+        logging.info(metrics)
+
+        return metrics

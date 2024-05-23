@@ -23,7 +23,7 @@ datasets:
     #         storage: "/export/share/datasets/vision/GQA/images/"
 
 run:
-  task: vqa
+  task: vqa_introspect
   # optimization-specific
   batch_size_train: 16
   batch_size_eval: 64
@@ -34,7 +34,7 @@ run:
   min_len: 1
   num_beams: 5
   inference_method: "generate"
-  prompt: "Question: {} Short answer:"
+  prompt: "Question: {} Short answer:" # tasks/*.py의 setup_task에서 사용
 
   seed: 42
   output_dir: "output/LBA/VQA-Introspect"

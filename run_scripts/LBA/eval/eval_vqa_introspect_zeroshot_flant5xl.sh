@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=2,3,4,5 python -m torch.distributed.run --nproc_per_node=4 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml 
