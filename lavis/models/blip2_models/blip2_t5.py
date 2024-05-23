@@ -257,7 +257,7 @@ class Blip2T5(Blip2Base):
         length_penalty=-1,
         **kwargs
     ):
-        image = samples["image"]
+        image = samples["image"] # torch.Size([bs, 3, 224, 224])
         with self.maybe_autocast():
             image_embeds = self.ln_vision(self.visual_encoder(image))
         image_embeds = image_embeds.float()
@@ -279,7 +279,23 @@ class Blip2T5(Blip2Base):
         if isinstance(samples["text_input"], str):
             samples["text_input"] = [samples["text_input"]]
         if prompt:
-            text_input = [prompt.format(question) for question in samples["text_input"]]
+            # text_input = [prompt.format(question) for question in samples["text_input"]]
+            '''# 중복 제거하고 하나의 MQ 당 SQ 개수
+            Generate in train split...
+            [(0, 720), (1, 2153), (2, 10558), (3, 35434), (4, 6313), (5, 1111), (6, 197), (7, 32), (8, 1)]
+            Generate in val split...
+            [(0, 1116), (1, 2761), (2, 5305), (3, 10938), (4, 2200), (5, 412), (6, 54), (7, 7)]
+            '''
+            if "sub_qas" in samples.keys():
+                sub_qa_prompt = "Context : is the sky blue? no. are there clouds in the sky? yes. Question : what weather is likely? Short answer : rain  Context : {sub_question}? {sub_answer}. Question : {main_question}? Short answer : "
+                text_input = []
+                for main_question, sub_qas in zip(samples["text_input"], samples["sub_qas"]):
+                    if len(sub_qas) == 0:
+                        text_input.append(prompt.format(main_question))
+                    else:
+                        text_input.append(sub_qa_prompt.format(sub_question=sub_qas[0][0], sub_answer=sub_qas[0][1], main_question=main_question))
+            else:
+                text_input = [prompt.format(question) for question in samples["text_input"]]
         else:
             text_input = samples["text_input"]
 

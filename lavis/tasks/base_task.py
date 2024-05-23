@@ -288,7 +288,7 @@ class BaseTask:
                         result_new.append(res)
                 result = result_new
 
-            json.dump(result, open(final_result_file, "w"))
+            json.dump(result, open(final_result_file, "w"), indent=4)
             print("result file saved to %s" % final_result_file)
 
         return final_result_file
