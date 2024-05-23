@@ -19,6 +19,8 @@ from lavis.models.blip2_models.blip2 import Blip2Base, disabled_train
 from lavis.models.blip2_models.modeling_t5 import T5Config, T5ForConditionalGeneration
 from transformers.modeling_outputs import BaseModelOutput
 
+from confidence import calculate_sentence_confidence
+
 
 @registry.register_model("blip2_t5_instruct")
 class Blip2T5Instruct(Blip2Base):
@@ -429,7 +431,6 @@ class Blip2T5Instruct(Blip2Base):
             
         print('outputs:', outputs.shape)
         # print('self.t5_tokenizer:', self.t5_tokenizer)
-        from temp2 import calculate_sentence_confidence
         confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, prompt, output_text)
         print('confidence:', confidence)
 
