@@ -15,6 +15,7 @@ from lavis.datasets.datasets.gqa_datasets import GQADataset, GQAEvalDataset, GQA
 from lavis.datasets.datasets.iconqa_datasets import IconQADataset, IconQAEvalDataset, IconQAInstructDataset
 from lavis.datasets.datasets.ocr_datasets import OCRVQADataset, OCRVQAInstructDataset
 from lavis.datasets.datasets.vizwiz_vqa_datasets import VizWizEvalDataset
+from lavis.datasets.datasets.vqa_introspect_datasets import VQAIntrospectEvalDataset
 
 @registry.register_builder("coco_vqa")
 class COCOVQABuilder(BaseDatasetBuilder):
@@ -149,4 +150,11 @@ class VizWizVQABuilder(BaseDatasetBuilder):
     DATASET_CONFIG_DICT = {"default": "configs/datasets/vizwiz/defaults.yaml"}
 
 
+    
+@registry.register_builder("vqa_introspect")
+class VQAIntrospectBuilder(BaseDatasetBuilder):
+    # train_dataset_cls = VQAIntrospectDataset
+    eval_dataset_cls = VQAIntrospectEvalDataset
 
+    DATASET_CONFIG_DICT = {"default": "configs/datasets/vqa_introspect/defaults.yaml"}
+    

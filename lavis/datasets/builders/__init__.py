@@ -81,7 +81,8 @@ from lavis.datasets.builders.vqa_builder import (
     ScienceQAInstructBuilder,
     OCRVQABuilder,
     OCRVQAInstructBuilder,
-    VizWizVQABuilder
+    VizWizVQABuilder,
+    VQAIntrospectBuilder,
 )
 from lavis.datasets.builders.retrieval_builder import (
     MSRVTTRetrievalBuilder,
@@ -175,6 +176,7 @@ __all__ = [
     "ObjaverseQABuilder",
     "MusicAVQABuilder",
     "ESC50ClassificationBuilder",
+    "VQAIntrospectBuilder",
 
     ## Instruction Builders
     "AOKVQAInstructBuilder",
