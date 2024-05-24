@@ -496,7 +496,7 @@ class VQALBATask(VQATask):
         ques_files=dict(),
         anno_files=dict(),
         valid_splits=['val'],
-        surprisal_threshold=1e-5
+        # surprisal_threshold=1e-5,
     ):
         super().__init__(
             num_beams=num_beams,
@@ -513,7 +513,7 @@ class VQALBATask(VQATask):
         )
         
         # LBA
-        self.surprisal_threshold = surprisal_threshold
+        # self.surprisal_threshold = surprisal_threshold
 
     @classmethod
     def setup_task(cls, cfg):
@@ -537,7 +537,7 @@ class VQALBATask(VQATask):
         valid_splits = run_cfg.get("valid_splits", ["val"])
         
         # LBA
-        surprisal_threshold = run_cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
+        # surprisal_threshold = run_cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
         
 
         return cls(
@@ -552,13 +552,14 @@ class VQALBATask(VQATask):
             ques_files=ques_files,
             anno_files=anno_files,
             valid_splits=valid_splits,
-            surprisal_threshold=surprisal_threshold
+            # surprisal_threshold=surprisal_threshold
         )
 
 @registry.register_task("vqa_introspect")
-class VQAIntrospectTask(VQALBATask):
+# class VQAIntrospectTask(VQALBATask):
+class VQAIntrospectTask(VQATask):
     def valid_step(self, model, samples):
-        answers = model.predict_answers(
+        answers = model.predict_answers_by_lba(
             samples=samples,
             answer_list=self.answer_list,
             inference_method=self.inference_method,

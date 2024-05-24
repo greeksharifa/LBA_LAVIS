@@ -2,8 +2,11 @@ import torch
 from transformers import T5ForConditionalGeneration, T5TokenizerFast
 
 def calculate_sentence_confidence(model, tokenizer, input_texts, generated_texts):
-    print("input_text: ", input_texts)
-    print("generated_text: ", generated_texts)
+    # print("input_text: ", input_texts)
+    # print("generated_text: ", generated_texts)
+    
+    # LBA TODO: 생성된 text에 대해서만 confidence를 계산하도록 수정
+    
     if type(input_texts) == str:
         input_texts = list(input_texts)
     if type(generated_texts) == str:

@@ -49,4 +49,4 @@ run:
   distributed: True
 
   # LBA
-  surprisal_threshold: 11.81
+  # surprisal_threshold: 11.81
