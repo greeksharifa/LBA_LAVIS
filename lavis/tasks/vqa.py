@@ -482,8 +482,81 @@ class DisCRNTask(VQATask):
         return metrics
 
 
+class VQALBATask(VQATask):
+    def __init__(
+        self,
+        num_beams,
+        max_len,
+        min_len,
+        evaluate,
+        num_ans_candidates,
+        inference_method="rank",
+        prompt="",
+        sample_id_key = "",
+        ques_files=dict(),
+        anno_files=dict(),
+        valid_splits=['val'],
+        surprisal_threshold=1e-5
+    ):
+        super().__init__(
+            num_beams=num_beams,
+            max_len=max_len,
+            min_len=min_len,
+            evaluate=evaluate,
+            num_ans_candidates=num_ans_candidates,
+            inference_method=inference_method,
+            prompt=prompt,
+            sample_id_key = sample_id_key,
+            ques_files=ques_files,
+            anno_files=anno_files,
+            valid_splits=valid_splits,
+        )
+        
+        # LBA
+        self.surprisal_threshold = surprisal_threshold
+
+    @classmethod
+    def setup_task(cls, cfg):
+        run_cfg = cfg.run_cfg
+
+        num_beams = run_cfg.get("num_beams", 3)
+        max_len = run_cfg.get("max_len", 10)
+        min_len = run_cfg.get("min_len", 1)
+
+        evaluate = run_cfg.get("evaluate", False)
+
+        inference_method = run_cfg.get("inference_method", "rank")
+        num_ans_candidates = run_cfg.get("num_ans_candidates", 128)
+
+        prompt = run_cfg.get("prompt", "")
+
+        # generalize to non coco data
+        sample_id_key = run_cfg.get("sample_id_key", "instance_id")
+        ques_files = run_cfg.get("ques_files", dict())
+        anno_files = run_cfg.get("anno_files", dict())
+        valid_splits = run_cfg.get("valid_splits", ["val"])
+        
+        # LBA
+        surprisal_threshold = run_cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
+        
+
+        return cls(
+            num_beams=num_beams,
+            max_len=max_len,
+            min_len=min_len,
+            evaluate=evaluate,
+            num_ans_candidates=num_ans_candidates,
+            inference_method=inference_method,
+            prompt=prompt,
+            sample_id_key = sample_id_key,
+            ques_files=ques_files,
+            anno_files=anno_files,
+            valid_splits=valid_splits,
+            surprisal_threshold=surprisal_threshold
+        )
+
 @registry.register_task("vqa_introspect")
-class VQAIntrospectTask(VQATask):
+class VQAIntrospectTask(VQALBATask):
     def valid_step(self, model, samples):
         answers = model.predict_answers(
             samples=samples,
@@ -528,18 +601,19 @@ class VQAIntrospectTask(VQATask):
         
         # --------------------------------------------------------------------------------------
         # exact match with reasoning_answer_most_common
-        # acc = []
+        '''
+        acc = []
 
-        # for res in results:
-        #     # if res["gt_ans"] is None:
-        #     #     # prepare test results for leaderboard evaluation
-        #     #     self._save_result_leaderboard(results)
-        #     #     return
-        #     acc.append(res["pred_ans"] == res["gt_ans"])
+        for res in results:
+            # if res["gt_ans"] is None:
+            #     # prepare test results for leaderboard evaluation
+            #     self._save_result_leaderboard(results)
+            #     return
+            acc.append(res["pred_ans"] == res["gt_ans"])
 
-        # accuracy = sum(acc) / len(acc) * 100
-        # metrics = {"agg_metrics": accuracy, "acc": accuracy}
-        
+        accuracy = sum(acc) / len(acc) * 100
+        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+        '''
         # --------------------------------------------------------------------------------------
         # original vqa evaluation
         acc = []
@@ -554,7 +628,7 @@ class VQAIntrospectTask(VQATask):
             pred = res["pred_ans"]
             gt_ans = res["gt_ans"]
             if i<10:
-                print(f'{i:5} | pred: {pred:15s} | gt_ans: {gt_ans}')
+                print(f'{i:5} | pred: {pred:12s} | gt_ans: {gt_ans}')
 
             num_match = sum([pred == gt for gt in gt_ans])
             vqa_acc = min(1.0, num_match / 3.0)

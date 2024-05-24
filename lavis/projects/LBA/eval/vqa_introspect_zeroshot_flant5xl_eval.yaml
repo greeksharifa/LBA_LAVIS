@@ -47,3 +47,6 @@ run:
   world_size: 1
   dist_url: "env://"
   distributed: True
+
+  # LBA
+  surprisal_threshold: 11.81
