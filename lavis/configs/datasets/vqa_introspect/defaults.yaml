@@ -21,8 +21,10 @@ datasets:
         val:
           url:
               - VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA/v2/v2_mscoco_val2014_annotations.json
           storage:
               - VQA-Introspect/VQAIntrospect_valv1.0.json
+              - VQA/v2/v2_mscoco_val2014_annotations.json
 #              - aokvqa/annotations/specialized_vocab_train_lavis.json
               # - aokvqa/annotations/large_vocab_train_lavis.json
         # test:

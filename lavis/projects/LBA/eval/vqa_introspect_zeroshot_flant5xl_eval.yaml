@@ -5,7 +5,7 @@
 
 # Overall Accuracy is: 43.98
 model:
-  arch: blip2_t5
+  arch: blip2_t5_lba
   model_type: pretrain_flant5xl
   use_grad_checkpoint: False
 

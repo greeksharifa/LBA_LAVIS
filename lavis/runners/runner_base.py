@@ -346,9 +346,10 @@ class RunnerBase:
         return train_dataloader
 
     def setup_output_dir(self):
-        lib_root = Path(registry.get_path("library_root"))
+        # lib_root = Path(registry.get_path("library_root"))
+        repo_root = Path(registry.get_path("repo_root"))
 
-        output_dir = lib_root / self.config.run_cfg.output_dir / self.job_id
+        output_dir = repo_root / self.config.run_cfg.output_dir / self.job_id
         result_dir = output_dir / "result"
 
         output_dir.mkdir(parents=True, exist_ok=True)

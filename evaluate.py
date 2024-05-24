@@ -12,6 +12,8 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 
+from omegaconf import OmegaConf
+
 import lavis.tasks as tasks
 from lavis.common.config import Config
 from lavis.common.dist_utils import get_rank, init_distributed_mode
@@ -76,7 +78,7 @@ def main():
     # set after init_distributed_mode() to only log on master.
     setup_logger()
 
-    cfg.pretty_print()
+    cfg.pretty_print()    
 
     task = tasks.setup_task(cfg)
     datasets = task.build_datasets(cfg)
@@ -86,6 +88,8 @@ def main():
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )
     runner.evaluate(skip_reload=True)
+    
+    OmegaConf.save(config=cfg.config, f=runner.output_dir / "config.yaml")
 
 
 if __name__ == "__main__":

@@ -207,6 +207,9 @@ def convert_to_coco_gt(data, outpath_questions, outpath_annotations, split, samp
     questions_data = {'info':"", 'task_type':"", 'data_type':"", 'license':"", 'data_subtype':"", 'questions':[]}
     annotations_data = {'info':"", 'task_type':"", 'data_type':"", 'license':"", 'data_subtype':"", 'annotations':[]}
     print("Generating ground truth annotations...")
+    # print(data.keys(), outpath_questions, outpath_annotations, split, sample_id_key)
+    # dict_keys(['val']) /data1/vqa_introspect_gt/vqa_introspect_val_questions.json 
+    # /data1/vqa_introspect_gt/vqa_introspect_val_annotations.json val instance_id
     for ann in tqdm(data[split]):
         if ann == None:
             continue
@@ -496,12 +499,19 @@ class VQAIntrospectTask(VQATask):
         
         
         question_id = samples["question_id"]
-        gt_answers = samples["reasoning_answer_most_common"]
+        
+        # --------------------------------------------------------------------------------------
+        # exact match with reasoning_answer_most_common
+        # gt_answers = samples["reasoning_answer_most_common"]
+        # --------------------------------------------------------------------------------------
+        # exact match with reasoning_answer_most_common
+        gt_answers = samples["gt_ans"]
 
         for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
             pred_qa_pairs.append(
                 {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
             )
+            
 
         return pred_qa_pairs
 
@@ -515,14 +525,41 @@ class VQAIntrospectTask(VQATask):
         # assert False, "TODO!"
 
         results = json.load(open(result_file, "r"))
+        
+        # --------------------------------------------------------------------------------------
+        # exact match with reasoning_answer_most_common
+        # acc = []
+
+        # for res in results:
+        #     # if res["gt_ans"] is None:
+        #     #     # prepare test results for leaderboard evaluation
+        #     #     self._save_result_leaderboard(results)
+        #     #     return
+        #     acc.append(res["pred_ans"] == res["gt_ans"])
+
+        # accuracy = sum(acc) / len(acc) * 100
+        # metrics = {"agg_metrics": accuracy, "acc": accuracy}
+        
+        # --------------------------------------------------------------------------------------
+        # original vqa evaluation
         acc = []
 
-        for res in results:
-            # if res["gt_ans"] is None:
-            #     # prepare test results for leaderboard evaluation
-            #     self._save_result_leaderboard(results)
-            #     return
-            acc.append(res["pred_ans"] == res["gt_ans"])
+        for i, res in enumerate(results):
+            '''
+            if res["gt_ans"] is None:
+                # prepare test results for leaderboard evaluation
+                self._save_result_leaderboard(results)
+                return
+            '''
+            pred = res["pred_ans"]
+            gt_ans = res["gt_ans"]
+            if i<10:
+                print(f'{i:5} | pred: {pred:15s} | gt_ans: {gt_ans}')
+
+            num_match = sum([pred == gt for gt in gt_ans])
+            vqa_acc = min(1.0, num_match / 3.0)
+
+            acc.append(vqa_acc)
 
         accuracy = sum(acc) / len(acc) * 100
         metrics = {"agg_metrics": accuracy, "acc": accuracy}
