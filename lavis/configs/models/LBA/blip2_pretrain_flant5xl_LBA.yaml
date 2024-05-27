@@ -27,10 +27,9 @@ model:
   prompt: ""
 
   # LBA
+  decomposition: True
   decomposer_name: "self"
   surprisal_threshold: 5 # 11.81
-
-  
 
 
 preprocess:

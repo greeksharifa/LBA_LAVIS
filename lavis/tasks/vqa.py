@@ -559,6 +559,7 @@ class VQALBATask(VQATask):
 # class VQAIntrospectTask(VQALBATask):
 class VQAIntrospectTask(VQATask):
     def valid_step(self, model, samples):
+        # print('self.prompt in task instance:', self.prompt)
         answers = model.predict_answers_by_lba(
             samples=samples,
             answer_list=self.answer_list,
@@ -569,6 +570,8 @@ class VQAIntrospectTask(VQATask):
             num_ans_candidates=self.num_ans_candidates,
             prompt=self.prompt,
         )
+        pred_answers = answers["pred_answers"]
+        
         pred_qa_pairs = []
         
         
@@ -578,13 +581,30 @@ class VQAIntrospectTask(VQATask):
         # exact match with reasoning_answer_most_common
         # gt_answers = samples["reasoning_answer_most_common"]
         # --------------------------------------------------------------------------------------
-        # exact match with reasoning_answer_most_common
+        # original vqa evaluation
         gt_answers = samples["gt_ans"]
 
-        for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
-            pred_qa_pairs.append(
-                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
-            )
+        if "confidences" in answers:
+            output_texts = answers["original_output_texts"]
+            output_lba_texts = answers["output_lba_texts"]
+            confidences = answers["confidences"]
+            for output_text, output_lba_text, pred_answer, ques_id, gt_answer, confidence in zip(output_texts, output_lba_texts, pred_answers, question_id, gt_answers, confidences):
+                pred_qa_pairs.append(
+                    {
+                        "question_id": ques_id, 
+                        "confidence": confidence,
+                        "original_output_text": output_text,
+                        "pred_ans": pred_answer, 
+                        "output_lba_text": output_lba_text, 
+                        "gt_ans": ','.join(gt_answer),
+                    }
+                )
+        else:
+
+            for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
+                pred_qa_pairs.append(
+                    {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": ','.join(gt_answer)}
+                )
             
 
         return pred_qa_pairs
@@ -627,7 +647,7 @@ class VQAIntrospectTask(VQATask):
                 return
             '''
             pred = res["pred_ans"]
-            gt_ans = res["gt_ans"]
+            gt_ans = res["gt_ans"].split(',')
             if i<10:
                 print(f'{i:5} | pred: {pred:12s} | gt_ans: {gt_ans}')
 
