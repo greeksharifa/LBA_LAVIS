@@ -77,6 +77,14 @@ class BaseModel(nn.Module):
             model_type in cls.PRETRAINED_MODEL_CONFIG_DICT
         ), "Unknown model type {}".format(model_type)
         return get_abs_path(cls.PRETRAINED_MODEL_CONFIG_DICT[model_type])
+    
+    
+    @classmethod
+    def get_lba_prompt(cls, prompt_type):
+        assert (
+            prompt_type in cls.LBA_PROMPT
+        ), "Unknown prompt type {}".format(prompt_type)
+        return cls.LBA_PROMPT[prompt_type]
 
     def load_checkpoint_from_config(self, cfg, **kwargs):
         """

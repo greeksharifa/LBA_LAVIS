@@ -1,3 +1,63 @@
+# pip install accelerate
+import torch
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+model_names = [
+    # "google/flan-t5-small",
+    # "google/flan-t5-base",
+    # "google/flan-t5-large",
+    # "google/flan-t5-xl",
+    "google/flan-t5-xxl",
+]
+
+for model_name in model_names:
+    tokenizer = T5Tokenizer.from_pretrained(model_name)
+    tokenizer.pad_token = tokenizer.eos_token
+    model = T5ForConditionalGeneration.from_pretrained(
+        model_name, device_map="auto",
+        # torch_dtype=torch.float16,
+        load_in_4bit=True,
+    )
+
+    input_texts = [
+        "translate English to German: How old are you?",
+        "A list of colors: red, blue", 
+        "Portugal is",
+    ]
+    input_ids = tokenizer(input_texts, return_tensors="pt", padding=True).to("cuda")
+
+    outputs = model.generate(**input_ids, max_length=200)
+    print(outputs)
+    print(tokenizer.batch_decode(outputs, skip_special_tokens=True))
+
+from time import sleep
+for i in range(15):
+    print(i)
+    sleep(1)
+    
+assert False, "Done!"
+
+'''
+>>> from transformers import AutoTokenizer, AutoModelForCausalLM
+
+>>> model = AutoModelForCausalLM.from_pretrained(
+...     "mistralai/Mistral-7B-v0.1", device_map="auto", load_in_4bit=True
+... )
+>>> tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.1", padding_side="left")
+>>> tokenizer.pad_token = tokenizer.eos_token  # Most LLMs don't have a pad token by default
+>>> model_inputs = tokenizer(
+...     ["A list of colors: red, blue", "Portugal is"], return_tensors="pt", padding=True
+... ).to("cuda")
+>>> generated_ids = model.generate(**model_inputs)
+>>> tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+['A list of colors: red, blue, green, yellow, orange, purple, pink,',
+'Portugal is a country in southwestern Europe, on the Iber']
+'''
+
+
+
+
+
 import torch
 from PIL import Image
 # setup device to use
