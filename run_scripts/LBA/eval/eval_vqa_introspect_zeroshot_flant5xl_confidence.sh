@@ -1,0 +1,5 @@
+python -m torch.distributed.run --nproc_per_node=6 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml --options model.decomposer_name="google/flan-t5-small" model.surprisal_threshold=0.00001
+python -m torch.distributed.run --nproc_per_node=6 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml --options model.decomposer_name="google/flan-t5-base" model.surprisal_threshold=0.00001
+python -m torch.distributed.run --nproc_per_node=6 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml --options model.decomposer_name="google/flan-t5-large" model.surprisal_threshold=0.00001
+python -m torch.distributed.run --nproc_per_node=6 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml --options model.decomposer_name="google/flan-t5-xl" model.surprisal_threshold=0.00001
+python -m torch.distributed.run --nproc_per_node=6 evaluate.py --cfg-path lavis/projects/LBA/eval/vqa_introspect_zeroshot_flant5xl_eval.yaml --options model.decomposer_name="google/flan-t5-xxl" model.surprisal_threshold=0.00001
