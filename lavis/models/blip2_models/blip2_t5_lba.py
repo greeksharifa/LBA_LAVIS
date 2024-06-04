@@ -169,21 +169,7 @@ class Blip2T5LBA(Blip2T5):
             )
             
         output_texts_origin, confidences = _predict_answers(samples)
-        '''
-        output_texts, confidences = self.predict_answers(
-            samples,
-            num_beams=num_beams,
-            inference_method=inference_method,
-            max_len=max_len,
-            min_len=min_len,
-            num_ans_candidates=num_ans_candidates,
-            answer_list=answer_list,
-            prompt=prompt,
-            length_penalty=length_penalty,
-            recomposition=False,
-            **kwargs
-        )
-        '''
+
         if self.decomposition == False: # baseline
             return {
                 'pred_answers': output_texts_origin
@@ -201,6 +187,7 @@ class Blip2T5LBA(Blip2T5):
                 # generate sub_question (decomposition)
                 decomposer_prompt = self.get_lba_prompt("decomposer")
                 text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
+                
                 if self.decomposer_name == "self":  # Image+Text
                     sub_questions, _ = _predict_answers(samples, prompt_type="decomposition")
                 else:                               # Only Text
@@ -221,17 +208,11 @@ class Blip2T5LBA(Blip2T5):
                 # generate main_answer (recomposition)
                 samples_for_main_answer = samples.copy()
                 _sub_qas = []
+                
                 for sub_question, sub_answer in zip(sub_questions, sub_answers):
                     _sub_qas.append([(sub_question, sub_answer)])   # _sub_qas shape: [bs, 1, 2]
+                
                 samples_for_main_answer["sub_qas"] = _sub_qas 
-                '''
-                # print('sub_questions                      len:', len(sub_questions))
-                # print('sub_questions:', sub_questions)
-                # print('sub_answers                        len:', len(sub_answers))
-                # print('sub_answers:', sub_answers)
-                # print('samples_for_main_answer["sub_qas"] len:', len(samples_for_main_answer["sub_qas"]))
-                # print('samples_for_main_answer["sub_qas"][:2]:', samples_for_main_answer["sub_qas"][:2])
-                '''
                 output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
                     
                 
@@ -241,9 +222,7 @@ class Blip2T5LBA(Blip2T5):
                 'confidences': confidences,
             }
             
-
         
-    
     def predict_answers(
         self,
         samples,

@@ -582,16 +582,16 @@ class VQAIntrospectTask(VQATask):
         gt_answers = samples["gt_ans"]
 
         if "confidences" in answers:
-            output_texts = answers["original_output_texts"]
-            output_lba_texts = answers["output_lba_texts"]
+            output_texts_origin = answers["output_texts_origin"]
+            output_texts_lba = answers["output_texts_lba"]
             confidences = answers["confidences"]
-            for output_text, output_lba_text, ques_id, gt_answer, confidence in zip(output_texts, output_lba_texts, question_id, gt_answers, confidences):
+            for output_text_origin, output_text_lba, ques_id, gt_answer, confidence in zip(output_texts_origin, output_texts_lba, question_id, gt_answers, confidences):
                 pred_qa_pairs.append(
                     {
                         "question_id": ques_id, 
                         "confidence": confidence,
-                        "original_output_text": output_text,
-                        "output_lba_text": output_lba_text, 
+                        "output_text_origin": output_text_origin,
+                        "output_text_lba": output_text_lba, 
                         "gt_ans": ','.join(gt_answer),
                     }
                 )
