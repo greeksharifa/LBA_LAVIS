@@ -600,7 +600,6 @@ class VQAIntrospectTask(VQATask):
                     }
                 )
         else:
-
             for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
                 pred_qa_pairs.append(
                     {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": ','.join(gt_answer)}
@@ -619,7 +618,8 @@ class VQAIntrospectTask(VQATask):
         # assert False, "TODO!"
 
         results = json.load(open(result_file, "r"))
-        
+        results.sort(key=lambda x: x["confidence"])
+            
         # --------------------------------------------------------------------------------------
         # exact match with reasoning_answer_most_common
         '''
@@ -638,6 +638,7 @@ class VQAIntrospectTask(VQATask):
         # --------------------------------------------------------------------------------------
         # original vqa evaluation
         acc = []
+        acc_by_tau = 0.0
 
         for i, res in enumerate(results):
             '''
@@ -646,6 +647,7 @@ class VQAIntrospectTask(VQATask):
                 self._save_result_leaderboard(results)
                 return
             '''
+            original_output_text = res["original_output_text"]
             pred = res["pred_ans"]
             gt_ans = res["gt_ans"].split(',')
             if i<10:
@@ -653,11 +655,53 @@ class VQAIntrospectTask(VQATask):
 
             num_match = sum([pred == gt for gt in gt_ans])
             vqa_acc = min(1.0, num_match / 3.0)
-
             acc.append(vqa_acc)
+            
+            num_match_by_tau = sum([original_output_text == gt for gt in gt_ans])
+            vqa_acc_by_tau = min(1.0, num_match_by_tau / 3.0)
+            acc_by_tau += vqa_acc_by_tau
+
 
         accuracy = sum(acc) / len(acc) * 100
-        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+        
+        correct_num_by_tau = [acc_by_tau]
+        max_num_by_tau = acc_by_tau
+        max_arg_confidence = 0
+        for i, res in enumerate(results):
+            original_output_text = res["original_output_text"]
+            output_lba_text = res["output_lba_text"]
+            gt_ans = res["gt_ans"].split(',')
+            
+            original_num_match = sum([original_output_text == gt for gt in gt_ans])
+            original_vqa_acc = min(1.0, original_num_match / 3.0)
+            lba_num_match = sum([output_lba_text == gt for gt in gt_ans])
+            lba_vqa_acc = min(1.0, lba_num_match / 3.0)
+            
+            score_change = lba_vqa_acc - original_vqa_acc
+            new_num = correct_num_by_tau[-1] + score_change
+            if new_num > max_num_by_tau:
+                max_num_by_tau = new_num
+                max_arg_confidence = res["confidence"]
+                max_arg_confidence_percentile = i / len(results) * 100
+                
+            correct_num_by_tau.append(new_num)
+            
+        accuracy_by_tau = [c / len(results) * 100 for c in correct_num_by_tau]
+        
+        import matplotlib.pyplot as plt
+        plt.plot([i / len(results) for i, _ in enumerate(accuracy_by_tau)], accuracy_by_tau)
+        plt.xlabel('Confidence Percentile')
+        plt.ylabel('Accuracy')
+        plt.xticks([0, 25, 50, 75, 100])
+        plt.savefig(os.path.join(registry.get_path("output_dir"), "accuracy_by_tau.png"))
+        
+        metrics = {
+            "agg_metrics": accuracy, 
+            "acc": accuracy, 
+            "max_acc_by_tau": max(accuracy_by_tau), 
+            "max_arg_confidence": max_arg_confidence,
+            "max_arg_confidence_percentile": max_arg_confidence_percentile,
+        }
 
         with open(
             os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
