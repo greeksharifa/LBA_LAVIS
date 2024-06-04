@@ -337,7 +337,7 @@ Generate in val split...
                         text_input.append(prompt.format(main_question))
                     else:
                         # LBA TODO: 현재 첫번째 sub_qa만 고정적으로 사용함
-                        assert isinstance(sub_qas[0], tuple), f"type of sub_qas[0] is {type(sub_qas[0])}."
+                        assert not isinstance(sub_qas[0], str), f"type of sub_qas[0] is {type(sub_qas[0])}."
                         assert len(sub_qas[0]) == 2, f"len of sub_qas[0] is {len(sub_qas[0])}."
                         sub_question, sub_answer = sub_qas[0]
                         sub_question = sub_question.rstrip('?')

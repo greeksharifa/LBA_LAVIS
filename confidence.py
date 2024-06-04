@@ -5,8 +5,6 @@ def calculate_sentence_confidence(model, tokenizer, input_texts, generated_texts
     # print("input_text: ", input_texts)
     # print("generated_text: ", generated_texts)
     
-    # LBA TODO: 생성된 text에 대해서만 confidence를 계산하도록 수정
-    
     if type(input_texts) == str:
         input_texts = list(input_texts)
     if type(generated_texts) == str:
@@ -25,10 +23,6 @@ def calculate_sentence_confidence(model, tokenizer, input_texts, generated_texts
         # Generate attention mask
         attention_mask = torch.ones(combined_ids.shape, dtype=torch.long)
         
-        # print(input_ids.device)
-        # print(attention_mask.device)
-        # print(combined_ids.device)
-        # print(model.device)
         input_ids = input_ids.to(model.device)
         attention_mask = attention_mask.to(model.device)
         combined_ids = combined_ids.to(model.device)
@@ -41,7 +35,7 @@ def calculate_sentence_confidence(model, tokenizer, input_texts, generated_texts
         logits = outputs.logits
         log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
         
-        # Get the log probabilities for the generated tokens
+        # Get the log probabilities for the generated tokens only
         generated_log_probs = []
         for i in range(len(input_ids[0]), combined_ids.size(1)):
             token_id = combined_ids[0, i].item()

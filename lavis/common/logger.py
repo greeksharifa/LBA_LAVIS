@@ -187,14 +187,38 @@ class AttrDict(dict):
         self.__dict__ = self
 
 
+from colors import Colors
+# Define a custom logging formatter that adds color based on the log level
+class ColorFormatter(logging.Formatter):
+    COLOR_MAP = {
+        logging.DEBUG: Colors.BLUE,
+        logging.INFO: Colors.GREEN,
+        logging.WARNING: Colors.YELLOW,
+        logging.ERROR: Colors.RED,
+        logging.CRITICAL: Colors.MAGENTA
+    }
+
+    def format(self, record):
+        log_color = self.COLOR_MAP.get(record.levelno, Colors.WHITE)
+        formatted_message = super().format(record)
+        return f"{log_color}{formatted_message}{Colors.RESET_ALL}"
+
+# Create a custom handler that uses the ColorFormatter
+class ColorHandler(logging.StreamHandler):
+    def __init__(self):
+        super().__init__()
+        self.setFormatter(ColorFormatter("%(asctime)s [%(levelname)5s]in [%(funcName)20s() in %(pathname)40s:%(lineno)3d]\t| %(message)s"))
+
+
 def setup_logger():
     logging.basicConfig(
         level=logging.INFO if dist_utils.is_main_process() else logging.WARN,
-        format="%(asctime)s [%(levelname)s] %(message)s",
+        # format="%(asctime)s [%(levelname)s] %(message)s",
         format="%(asctime)s [%(levelname)5s]in [%(funcName)20s() in %(pathname)40s:%(lineno)3d]\t| %(message)s",
         # handlers=[
-        #     logging.StreamHandler(),
-        #     logging.FileHandler(os.path.join(output_dir, "ywjang_log.txt"), mode="a"),
+        #     # logging.StreamHandler(),
+        #     ColorHandler(),
+        #     # logging.FileHandler(os.path.join(output_dir, "ywjang_log.txt"), mode="a"),
         # ],
         handlers=[logging.StreamHandler()],
     )
