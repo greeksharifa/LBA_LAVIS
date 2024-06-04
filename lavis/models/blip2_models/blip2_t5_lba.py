@@ -31,7 +31,14 @@ class Blip2T5LBA(Blip2T5):
     
     LBA_PROMPT = {
         "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.  Context: {sub_question}? {sub_answer}. Question: {main_question} Short answer: ",
-        "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question: "
+        "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question: ",
+        
+        "K1": "What is a missing information about who or what a person or thing is?", # Identity
+        "K2": "What is a missing information about inclusion relationships of {entity}?", # Class
+        "K3": "What is a missing information about properties or feature of {entity}?", # Attributes
+        "K4": "What is a missing information about the number of {entity}?", # Quantities
+        "K5": "What is a missing information about spatial relations among {entity}?", # Spatial
+        "K7": "What is a missing information about detailed information of {entity}?", # Contents
     }
     
     __cnt = 0
@@ -52,6 +59,7 @@ class Blip2T5LBA(Blip2T5):
         decomposition=True,
         decomposer_name="self",
         surprisal_threshold=1e-5,
+        decompose_using_GT=False,
     ):
         super().__init__(
             vit_model=vit_model,
@@ -66,7 +74,8 @@ class Blip2T5LBA(Blip2T5):
             max_txt_len=max_txt_len,
             apply_lemmatizer=apply_lemmatizer,
         )
-        
+
+        assert decomposition in ["K-type", "zero-shot", False], f"decomposition should be one of ['K-type', 'zero-shot', False], but got {decomposition}."
         self.decomposition = decomposition
         
         self.decomposer_name = decomposer_name
@@ -83,6 +92,9 @@ class Blip2T5LBA(Blip2T5):
         
         self.surprisal_threshold = surprisal_threshold
         print('surprisal_threshold:', surprisal_threshold)
+        
+        self.decompose_using_GT = decompose_using_GT
+        print('decompose_using_GT:', decompose_using_GT)
     
     
     @classmethod
@@ -105,6 +117,7 @@ class Blip2T5LBA(Blip2T5):
         # LBA
         decomposition = cfg.get("decomposition", True)
         decomposer_name = cfg.get("decomposer_name", "self")
+        decompose_using_GT = cfg.get("decompose_using_GT", False)
         surprisal_threshold = cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
 
         model = cls(
@@ -122,6 +135,7 @@ class Blip2T5LBA(Blip2T5):
             decomposition=decomposition,
             decomposer_name=decomposer_name,
             surprisal_threshold=surprisal_threshold,
+            decompose_using_GT=decompose_using_GT,
         )
         model.load_checkpoint_from_config(cfg)
 
@@ -140,7 +154,7 @@ class Blip2T5LBA(Blip2T5):
         length_penalty=-1,
         **kwargs
     ):
-        def _predict_answers(_samples, _recomposition):
+        def _predict_answers(_samples, prompt_type="default", prompt=prompt):
             return self.predict_answers(
                 samples=_samples,
                 num_beams=num_beams,
@@ -151,10 +165,10 @@ class Blip2T5LBA(Blip2T5):
                 answer_list=answer_list,
                 prompt=prompt,
                 length_penalty=length_penalty,
-                recomposition=_recomposition,
+                prompt_type=prompt_type,
             )
             
-        output_texts, confidences = _predict_answers(samples, _recomposition=False)
+        output_texts_origin, confidences = _predict_answers(samples)
         '''
         output_texts, confidences = self.predict_answers(
             samples,
@@ -170,118 +184,63 @@ class Blip2T5LBA(Blip2T5):
             **kwargs
         )
         '''
-        
-        if self.decomposition:
-            if self.decomposer_name == "self":
-                output_lba_texts, lba_confidences = _predict_answers(samples, _recomposition=True)
-                '''
-                output_lba_texts, lba_confidences = self.predict_answers(
-                    samples,
-                    num_beams=num_beams,
-                    inference_method=inference_method,
-                    max_len=max_len,
-                    min_len=min_len,
-                    num_ans_candidates=num_ans_candidates,
-                    answer_list=answer_list,
-                    prompt=prompt,
-                    length_penalty=length_penalty,
-                    recomposition=True,
-                    **kwargs
-                )
-                '''
-            else:
-                # LBA TODO: decomposer model로 predict
-                # device = samples["image"].device
+        if self.decomposition == False: # baseline
+            return {
+                'pred_answers': output_texts_origin
+            }
+        else:    
+            if self.decomposition == "K-type":
+                pass
+            elif self.decomposition == "GT":
+                # sub_qa 생성 생략
+                # generate main_answer (recomposition)
+                output_texts_lba, _ = _predict_answers(samples, prompt_type="recomposition")
+            elif self.decomposition == "zero-shot":
                 device = self.decomposer_model.device
                 
                 # generate sub_question (decomposition)
                 decomposer_prompt = self.get_lba_prompt("decomposer")
-                # print('decomposer_prompt:', decomposer_prompt)
                 text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
-                # if prompt:
-                #     text_input = [prompt.format(question) for question in samples["text_input"]]
-                # else:
-                #     text_input = samples["text_input"]
-                
-                input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
-                # print('input_ids device:', input_ids.device)
-                # print('self.decomposer_model device:', self.decomposer_model.device)
-                # print('self.decomposer_model device:', next(self.decomposer_model.parameters()).device)
-                outputs = self.decomposer_model.generate(input_ids)
-                sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-                assert len(sub_questions) == len(samples["text_input"]), "sub_questions length mismatch!"
+                if self.decomposer_name == "self":  # Image+Text
+                    sub_questions, _ = _predict_answers(samples, prompt_type="decomposition")
+                else:                               # Only Text
+                    input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
+                    '''
+                    # print('input_ids device:', input_ids.device)
+                    # print('self.decomposer_model device:', self.decomposer_model.device)
+                    # print('self.decomposer_model device:', next(self.decomposer_model.parameters()).device)
+                    '''
+                    outputs = self.decomposer_model.generate(input_ids)
+                    sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
                 
                 # generate sub_answer
                 samples_for_sub_answer = samples.copy()
                 samples_for_sub_answer["text_input"] = sub_questions
-                sub_answers, _ = _predict_answers(samples_for_sub_answer, _recomposition=False)
-                assert len(sub_answers) == len(samples["text_input"]), "sub_answers length mismatch!"
-                '''
-                sub_answers, _ = self.predict_answers(
-                    samples_for_sub_answer,
-                    num_beams=num_beams,
-                    inference_method=inference_method,
-                    max_len=max_len,
-                    min_len=min_len,
-                    num_ans_candidates=num_ans_candidates,
-                    answer_list=answer_list,
-                    prompt=prompt,
-                    length_penalty=length_penalty,
-                    recomposition=False,
-                    **kwargs
-                )
-                '''
+                sub_answers, _ = _predict_answers(samples_for_sub_answer)
                 
-                # generate main_answer (recomposition) import pdb; pdb.set_trace()
+                # generate main_answer (recomposition)
                 samples_for_main_answer = samples.copy()
                 _sub_qas = []
                 for sub_question, sub_answer in zip(sub_questions, sub_answers):
-                    _sub_qas.append([(sub_question, sub_answer)])
-                samples_for_main_answer["sub_qas"] = _sub_qas #list(zip(sub_questions, sub_answers))
-                # [bs, 2] -> [bs, 1, 2]
-                assert len(samples_for_main_answer["sub_qas"]) == len(samples["text_input"]), "samples_for_main_answer length mismatch!"
+                    _sub_qas.append([(sub_question, sub_answer)])   # _sub_qas shape: [bs, 1, 2]
+                samples_for_main_answer["sub_qas"] = _sub_qas 
+                '''
                 # print('sub_questions                      len:', len(sub_questions))
                 # print('sub_questions:', sub_questions)
                 # print('sub_answers                        len:', len(sub_answers))
                 # print('sub_answers:', sub_answers)
                 # print('samples_for_main_answer["sub_qas"] len:', len(samples_for_main_answer["sub_qas"]))
                 # print('samples_for_main_answer["sub_qas"][:2]:', samples_for_main_answer["sub_qas"][:2])
-                output_lba_texts, lba_confidences = _predict_answers(samples_for_main_answer, _recomposition=True)
-                assert len(output_lba_texts) == len(samples["text_input"]), "output_lba_texts length mismatch!"
+                '''
+                output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
+                    
                 
-            
-            change_cnt = 0
-            
-            return_text = []
-            for i, (output_text, confidence, output_lba_text, lba_confidence) in enumerate(zip(output_texts, confidences, output_lba_texts, lba_confidences)):
-                if confidence < 1 / (2 ** self.surprisal_threshold):
-                    change_cnt += 1
-                    return_text.append(output_lba_text)
-                    # print(f'confidence change: {confidence:.6f} -> {confidence_lba:.6f}')
-                else:
-                    return_text.append(output_text)
-            #     if i < 2:
-            #         print('self.decomposer_name:', self.decomposer_name)
-            #         if self.decomposer_name != "self":
-            #             print(f'main_question: {samples["text_input"][i]}')
-            #             print(f'sub_question : {sub_questions[i]}')
-            #             print(f'sub_answer   : {sub_answers[i]}')
-            #         print(f'text: {output_text:15s}, \t text_lba: {output_lba_text:15s}')
-            # print('avg confidence    :', sum(confidences) / len(confidences))
-            # print('avg confidence_lba:', sum(lba_confidences) / len(lba_confidences))
-            # print(f'change_cnt: {change_cnt} / {len(output_texts)}')
-            
             return {
-                'original_output_texts': output_texts,
-                'output_lba_texts': output_lba_texts,
-                'pred_answers': return_text,
+                'output_texts_origin': output_texts_origin,
+                'output_texts_lba': output_texts_lba,
                 'confidences': confidences,
             }
-        else:
-            return {
-                'pred_answers': output_texts
-            }
-        
+            
 
         
     
@@ -296,7 +255,7 @@ class Blip2T5LBA(Blip2T5):
         answer_list=None,
         prompt="",
         length_penalty=-1,
-        recomposition=True,
+        prompt_type="default",
         **kwargs
     ):
         image = samples["image"] # torch.Size([bs, 3, 224, 224])
@@ -321,12 +280,11 @@ class Blip2T5LBA(Blip2T5):
         if isinstance(samples["text_input"], str):
             samples["text_input"] = [samples["text_input"]]
         if prompt:
-            if recomposition:
-                # sub_qa_prompt = Blip2T5LBA.LBA_PROMPT["recomposer"]
+            if prompt_type == "recomposition":
                 recomposer_prompt = self.get_lba_prompt("recomposer")
                 text_input = []
                 for main_question, sub_qas in zip(samples["text_input"], samples["sub_qas"]):
-                    if len(sub_qas) == 0:
+                    if len(sub_qas) == 0: # GT에 sub_qa가 없는 경우가 있음
                         '''
 # 중복 제거하고 하나의 MQ 당 SQ 개수
 Generate in train split...
@@ -343,31 +301,10 @@ Generate in val split...
                         sub_question = sub_question.rstrip('?')
                         sub_answer = sub_answer.rstrip('.')
                         text_input.append(recomposer_prompt.format(sub_question=sub_question, sub_answer=sub_answer, main_question=main_question))
-                        
-                        """if isinstance(sub_qas[0], str):
-                            assert "sub_qas[0] is str. NOOO)"
-                        try:
-                            text_input.append(recomposer_prompt.format(sub_question=sub_qas[0][0], sub_answer=sub_qas[0][1], main_question=main_question))
-                            print('main_question:', main_question)
-                            print('sub_qas:', type(sub_qas), len(sub_qas), sub_qas)
-                            print('sub_qas[0]:', type(sub_qas[0]), len(sub_qas[0]), sub_qas[0])
-                        except IndexError as e:
-                            print('>' * 400)
-                            print('text_input:', text_input)
-                            print('main_question:', main_question)
-                            print('sub_qas:', type(sub_qas), len(sub_qas), sub_qas)
-                            print('sub_qas[0]:', type(sub_qas[0]), len(sub_qas[0]), sub_qas[0])
-                            print(e)
-                            '''
-                            sub_qas: <class 'tuple'> 2 ('0', '')
-                            sub_qas[0]: <class 'str'> 1 0
-                            string index out of range'''
-                            print('<' * 400)
-                            import json
-                            json.dump(sub_qas, open('indexerror_samples.json', 'w'), indent=4)
-                            assert False, "No!"
-                        """
-            else:
+            elif prompt_type == "decomposition":
+                decomposer_prompt = self.get_lba_prompt("decomposer")
+                text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
+            else: # prompt_type == "default"
                 text_input = [prompt.format(question) for question in samples["text_input"]]
         else:
             text_input = samples["text_input"]
@@ -402,14 +339,6 @@ Generate in val split...
         if self._apply_lemmatizer:
             output_text = self._lemmatize(output_text)
             
-        
-        # print('outputs:', outputs.shape)
-        # print('self.t5_tokenizer:', self.t5_tokenizer)
         confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, text_input, output_text)
-        # print('confidence:', sep='\t')
-        # for c in confidence:
-        #     print(f'{c:.6f}', sep=' ')
-        # print()
-
 
         return output_text, confidence

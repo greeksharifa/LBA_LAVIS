@@ -34,7 +34,7 @@ run:
   min_len: 1
   num_beams: 5
   inference_method: "generate"
-  prompt: "Question: {} Short answer:" # 실제 사용되는 prompt. tasks/*.py의 setup_task에서 사용
+  prompt: "Question: {} Short answer: " # 실제 사용되는 prompt. tasks/*.py의 setup_task에서 사용
 
   seed: 42
   output_dir: "output/LBA/VQA-Introspect"
