@@ -17,6 +17,8 @@ from lavis.models.blip2_models.blip2 import Blip2Base, disabled_train
 # from lavis.models.blip2_models.modeling_t5 import T5Config, T5ForConditionalGeneration
 from lavis.models.blip2_models.blip2_t5 import Blip2T5
 
+import nltk
+
 from confidence import calculate_sentence_confidence
 
 @registry.register_model("blip2_t5_lba")
@@ -32,16 +34,17 @@ class Blip2T5LBA(Blip2T5):
     LBA_PROMPT = {
         "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.  Context: {sub_question}? {sub_answer}. Question: {main_question} Short answer: ",
         "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question: ",
-        
-        "K1": "What is a missing information about who or what a person or thing is?", # Identity
-        "K2": "What is a missing information about inclusion relationships of {entity}?", # Class
-        "K3": "What is a missing information about properties or feature of {entity}?", # Attributes
-        "K4": "What is a missing information about the number of {entity}?", # Quantities
-        "K5": "What is a missing information about spatial relations among {entity}?", # Spatial
-        "K7": "What is a missing information about detailed information of {entity}?", # Contents
+        # What is a missing information about ...
+        "K-type-0": "What is the who or what a person or thing is?", # Identity
+        "K-type-1": "What is the inclusion relationships of {entity}?", # Class
+        "K-type-2": "What is the properties or feature of {entity}?", # Attributes
+        "K-type-3": "What is the the number of {entity}?", # Quantities
+        "K-type-4": "What is the spatial relations among {entity}?", # Spatial
+        "K-type-5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
     }
     
     __cnt = 0
+    __cnt2 = 0
     
     def __init__(
         self,
@@ -75,11 +78,11 @@ class Blip2T5LBA(Blip2T5):
             apply_lemmatizer=apply_lemmatizer,
         )
 
-        assert decomposition in ["K-type", "zero-shot", False], f"decomposition should be one of ['K-type', 'zero-shot', False], but got {decomposition}."
+        assert decomposition in ["K-type", "zero-shot", "GT", False], f"decomposition should be one of ['K-type', 'zero-shot', 'GT', False], but got {decomposition}."
         self.decomposition = decomposition
         
         self.decomposer_name = decomposer_name
-        if decomposition and decomposer_name != "self":
+        if decomposition in ["zero-shot"] and decomposer_name != "self":
             # LBA TODO: load decomposer model like flan_t5_base (not blip2)
             self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
             self.decomposer_model = T5ForConditionalGeneration.from_pretrained(
@@ -141,6 +144,15 @@ class Blip2T5LBA(Blip2T5):
 
         return model
     
+    
+    @classmethod
+    def get_lba_prompt(cls, prompt_type):
+        assert (
+            prompt_type in cls.LBA_PROMPT
+        ), "Unknown prompt type {}".format(prompt_type)
+        return cls.LBA_PROMPT[prompt_type]
+    
+    
     def predict_answers_by_lba(
         self,
         samples,
@@ -176,7 +188,94 @@ class Blip2T5LBA(Blip2T5):
             }
         else:    
             if self.decomposition == "K-type":
-                pass
+                # sub_question 생성 생략: K-type은 sub-question이 entity를 제외하면 정해져 있음
+                # generate sub_answer
+                sub_questions_list, sub_answers_list, confidences_list = [], [], [] # [bs, # of K, len(str)]
+                K = len(Blip2T5LBA.LBA_PROMPT) - 2 # K1 ~ KN
+                for k in range(K):
+                    prompt_type=f"K-type-{k}"
+                    samples_for_sub_answer = samples.copy()
+
+                    k_type_prompt = self.get_lba_prompt(prompt_type)
+                
+                    if prompt_type == "K-type-0": # no need to get entity
+                        sub_questions = [k_type_prompt] * len(samples["text_input"])
+                    else:
+                        sub_questions = []
+                        for question in samples["text_input"]:
+                            tokens = nltk.word_tokenize(question)
+                            tagged = nltk.pos_tag(tokens)
+                            # Perform named entity recognition
+                            entities = nltk.ne_chunk(tagged)
+                            
+                            entity_name = None
+                            for subtree in entities:
+                                if isinstance(subtree, nltk.Tree):
+                                    entity_name = " ".join([token for token, pos in subtree.leaves()])
+                                    entity_type = subtree.label()
+                                    break
+                            else: # get the last noun or last word token in case of no named entity in question
+                                nouns = [word for word, pos in tagged if pos in ['NN', 'NNS', 'NNP', 'NNPS']]
+                                entity_name = nouns[-1] if len(nouns) > 0 else tokens[-2]
+                            
+                            assert isinstance(entity_name, str), f"entity_name is not str but {type(entity_name)}."
+                            sub_questions.append(k_type_prompt.format(entity=entity_name))
+                    
+                    samples_for_sub_answer["text_input"] = sub_questions
+                    sub_answers, confidences = _predict_answers(samples_for_sub_answer, prompt_type=prompt_type, prompt="") # K1 ~ KN
+
+                    sub_questions_list.append(sub_questions)
+                    sub_answers_list.append(sub_answers)
+                    confidences_list.append(confidences)
+                    
+                # get argmax sub_answer except sub_answer is blank
+                batch_size = len(sub_answers_list[0])
+                max_indices = []
+                for i in range(batch_size):
+                    # confidences = [confidences_list[k][i] for k in range(K)]
+                    # max_index = confidences.index(max(confidences))
+                    # max_indices.append(max_index)
+                    confidences = [confidences_list[k][i] for k in range(K)]
+                    sorted_confidences = sorted(confidences, reverse=True)
+                    ranks = [confidences.index(c) for c in sorted_confidences]
+                    
+                    for rank in ranks:
+                        if sub_answers_list[rank][i] != "":
+                            max_index = rank
+                            break
+                    else:
+                        max_index = ranks[0]
+                        sub_answers_list[max_index][i] = "None"
+                    
+                    max_indices.append(max_index)
+                
+                if Blip2T5LBA.__cnt2 < 4:
+                    print('\n')
+                    Blip2T5LBA.__cnt2 += 1
+                    print('max_indices:', max_indices)
+                    for i, max_index in enumerate(max_indices):
+                        if i>=4: break
+                        print(f'\ni: {i}, \tmax_index: {max_index}')
+                        for k in range(6):
+                            print(f'[{k}][{i}]: {confidences_list[k][i]:.6f} | {sub_answers_list[k][i]:<20s} | {sub_questions_list[k][i]:80s}')
+                            
+                    # for i, max_index in enumerate(max_indices):
+                    #     print(f'sub_questions_list[{max_index}][{i}]:', sub_questions_list[max_index][i])
+                    #     print(f'sub_answers_list[{max_index}][{i}]:', sub_answers_list[max_index][i])
+                    #     print(f'confidences_list[{max_index}][{i}]:', confidences_list[max_index][i])
+                
+                # generate main_answer (recomposition)
+                samples_for_main_answer = samples.copy()
+                _sub_qas = [] # _sub_qas shape: [bs, 1, 2]
+                
+                for i, max_index in enumerate(max_indices):
+                    _sub_qas.append([(sub_questions_list[max_index][i], sub_answers_list[max_index][i])])   
+                
+                samples_for_main_answer["sub_qas"] = _sub_qas
+                output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
+                
+                del samples_for_sub_answer, samples_for_main_answer
+                
             elif self.decomposition == "GT":
                 # sub_qa 생성 생략
                 # generate main_answer (recomposition)
@@ -185,12 +284,11 @@ class Blip2T5LBA(Blip2T5):
                 device = self.decomposer_model.device
                 
                 # generate sub_question (decomposition)
-                decomposer_prompt = self.get_lba_prompt("decomposer")
-                text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
-                
                 if self.decomposer_name == "self":  # Image+Text
                     sub_questions, _ = _predict_answers(samples, prompt_type="decomposition")
                 else:                               # Only Text
+                    decomposer_prompt = self.get_lba_prompt("decomposer")
+                    text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
                     input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
                     '''
                     # print('input_ids device:', input_ids.device)
@@ -214,7 +312,7 @@ class Blip2T5LBA(Blip2T5):
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas 
                 output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
-                    
+                
                 
             return {
                 'output_texts_origin': output_texts_origin,
@@ -283,7 +381,7 @@ Generate in val split...
             elif prompt_type == "decomposition":
                 decomposer_prompt = self.get_lba_prompt("decomposer")
                 text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
-            else: # prompt_type == "default"
+            else: # prompt_type == "default" or prompt_type.startswith("K")
                 text_input = [prompt.format(question) for question in samples["text_input"]]
         else:
             text_input = samples["text_input"]

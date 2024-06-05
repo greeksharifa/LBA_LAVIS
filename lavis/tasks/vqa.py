@@ -644,17 +644,17 @@ class VQAIntrospectTask(VQATask):
                 self._save_result_leaderboard(results)
                 return
             '''
-            output_texts_origin = res["output_texts_origin"]
+            output_text_origin = res["output_text_origin"]
             # pred = res["pred_ans"]
             gt_ans = res["gt_ans"].split(',')
             if i<10:
-                print(f'{i:5} | output_texts_origin: {output_texts_origin:12s} | gt_ans: {gt_ans}')
+                print(f'{i:5} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
             '''
             # num_match = sum([pred == gt for gt in gt_ans])
             # vqa_acc = min(1.0, num_match / 3.0)
             # acc.append(vqa_acc)
             '''
-            num_match = sum([output_texts_origin == gt for gt in gt_ans])
+            num_match = sum([output_text_origin == gt for gt in gt_ans])
             vqa_acc = min(1.0, num_match / 3.0)
             correct_num += vqa_acc
 
@@ -666,11 +666,11 @@ class VQAIntrospectTask(VQATask):
         max_arg_confidence = 0.
         max_arg_confidence_percentile = 0.
         for i, res in enumerate(results):
-            output_texts_origin = res["output_texts_origin"]
-            output_text_lba = res["output_texts_lba"]
+            output_text_origin = res["output_text_origin"]
+            output_text_lba = res["output_text_lba"]
             gt_ans = res["gt_ans"].split(',')
             
-            original_num_match = sum([output_texts_origin == gt for gt in gt_ans])
+            original_num_match = sum([output_text_origin == gt for gt in gt_ans])
             original_vqa_acc = min(1.0, original_num_match / 3.0)
             lba_num_match = sum([output_text_lba == gt for gt in gt_ans])
             lba_vqa_acc = min(1.0, lba_num_match / 3.0)
