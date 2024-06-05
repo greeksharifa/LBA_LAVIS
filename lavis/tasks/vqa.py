@@ -635,6 +635,9 @@ class VQAIntrospectTask(VQATask):
         # --------------------------------------------------------------------------------------
         # original vqa evaluation
         # acc = []
+        acc_origin_list = []
+        acc_lba_list = []
+        
         correct_num = 0.0
 
         for i, res in enumerate(results):
@@ -645,21 +648,30 @@ class VQAIntrospectTask(VQATask):
                 return
             '''
             output_text_origin = res["output_text_origin"]
+            output_text_lba = res["output_text_lba"]
             # pred = res["pred_ans"]
             gt_ans = res["gt_ans"].split(',')
             if i<10:
-                print(f'{i:5} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
+                print(f'{i:2} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
             '''
             # num_match = sum([pred == gt for gt in gt_ans])
             # vqa_acc = min(1.0, num_match / 3.0)
             # acc.append(vqa_acc)
             '''
-            num_match = sum([output_text_origin == gt for gt in gt_ans])
-            vqa_acc = min(1.0, num_match / 3.0)
-            correct_num += vqa_acc
+            num_match_origin = sum([output_text_origin == gt for gt in gt_ans])
+            vqa_acc_origin = min(1.0, num_match_origin / 3.0)
+            acc_origin_list.append(vqa_acc_origin)
+            
+            num_match_lba = sum([output_text_lba == gt for gt in gt_ans])
+            vqa_acc_lba = min(1.0, num_match_lba / 3.0)
+            acc_lba_list.append(vqa_acc_lba)
 
+        # E_CR, E_IC: Error Correction raio / Error Induction ratio
+        e_cr = sum([1 if acc_lba > acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len(acc_origin_list) * 100
+        e_ic = sum([1 if acc_lba < acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len(acc_origin_list) * 100
 
         # accuracy = sum(acc) / len(acc) * 100
+        correct_num = sum(acc_origin_list)
         
         correct_num_by_tau = [correct_num]
         max_num_by_tau = correct_num
@@ -700,6 +712,8 @@ class VQAIntrospectTask(VQATask):
             "max_acc_by_tau": max(accuracy_by_tau), 
             "max_arg_confidence": max_arg_confidence,
             "max_arg_confidence_percentile": max_arg_confidence_percentile,
+            "E_CR": e_cr,
+            "E_IC": e_ic,
         }
 
         with open(

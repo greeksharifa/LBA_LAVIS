@@ -1,6 +1,7 @@
 # demo / temp
 temp.sh
 temp/
+run_scripts/LBA/eval/multiple_launch.sh
 
 # data / model
 llm/

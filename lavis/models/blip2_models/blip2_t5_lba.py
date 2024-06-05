@@ -188,7 +188,7 @@ class Blip2T5LBA(Blip2T5):
             }
         else:    
             if self.decomposition == "K-type":
-                # sub_question 생성 생략: K-type은 sub-question이 entity를 제외하면 정해져 있음
+                # sub_question 생성: 모델 실행하지 않음. K-type은 sub-question이 entity를 제외하면 정해져 있음
                 # generate sub_answer
                 sub_questions_list, sub_answers_list, confidences_list = [], [], [] # [bs, # of K, len(str)]
                 K = len(Blip2T5LBA.LBA_PROMPT) - 2 # K1 ~ KN
@@ -232,9 +232,6 @@ class Blip2T5LBA(Blip2T5):
                 batch_size = len(sub_answers_list[0])
                 max_indices = []
                 for i in range(batch_size):
-                    # confidences = [confidences_list[k][i] for k in range(K)]
-                    # max_index = confidences.index(max(confidences))
-                    # max_indices.append(max_index)
                     confidences = [confidences_list[k][i] for k in range(K)]
                     sorted_confidences = sorted(confidences, reverse=True)
                     ranks = [confidences.index(c) for c in sorted_confidences]
@@ -249,7 +246,7 @@ class Blip2T5LBA(Blip2T5):
                     
                     max_indices.append(max_index)
                 
-                if Blip2T5LBA.__cnt2 < 4:
+                if Blip2T5LBA.__cnt2 < 2:
                     print('\n')
                     Blip2T5LBA.__cnt2 += 1
                     print('max_indices:', max_indices)
@@ -257,7 +254,7 @@ class Blip2T5LBA(Blip2T5):
                         if i>=4: break
                         print(f'\ni: {i}, \tmax_index: {max_index}')
                         for k in range(6):
-                            print(f'[{k}][{i}]: {confidences_list[k][i]:.6f} | {sub_answers_list[k][i]:<20s} | {sub_questions_list[k][i]:80s}')
+                            print(f'[{k}][{i}]: {confidences_list[k][i]:.6f} | {sub_questions_list[k][i]:80s} | {sub_answers_list[k][i]:40s}')
                             
                     # for i, max_index in enumerate(max_indices):
                     #     print(f'sub_questions_list[{max_index}][{i}]:', sub_questions_list[max_index][i])
@@ -281,20 +278,16 @@ class Blip2T5LBA(Blip2T5):
                 # generate main_answer (recomposition)
                 output_texts_lba, _ = _predict_answers(samples, prompt_type="recomposition")
             elif self.decomposition == "zero-shot":
-                device = self.decomposer_model.device
                 
                 # generate sub_question (decomposition)
                 if self.decomposer_name == "self":  # Image+Text
                     sub_questions, _ = _predict_answers(samples, prompt_type="decomposition")
                 else:                               # Only Text
+                    device = self.decomposer_model.device
                     decomposer_prompt = self.get_lba_prompt("decomposer")
+                    
                     text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
                     input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
-                    '''
-                    # print('input_ids device:', input_ids.device)
-                    # print('self.decomposer_model device:', self.decomposer_model.device)
-                    # print('self.decomposer_model device:', next(self.decomposer_model.parameters()).device)
-                    '''
                     outputs = self.decomposer_model.generate(input_ids)
                     sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
                 
