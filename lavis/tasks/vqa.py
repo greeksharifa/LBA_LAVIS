@@ -700,6 +700,7 @@ class VQAIntrospectTask(VQATask):
         
         import matplotlib.pyplot as plt
         plt.plot([i / len(results) * 100 for i, _ in enumerate(accuracy_by_tau)], accuracy_by_tau)
+        plt.title(f'E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
         plt.xlabel('Confidence Percentile')
         plt.ylabel('Accuracy')
         plt.xticks([0, 25, 50, 75, 100])
