@@ -29,7 +29,6 @@ model:
   # LBA
   decomposition: "zero-shot" # "K-type": 동국대 방식, "zero-shot": previous work 방식, "GT": sub_qa를 GT로 사용, False: decomposition 안함.
   decomposer_name: "self"
-  decompose_using_GT: False
 
 
 preprocess:

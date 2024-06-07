@@ -32,8 +32,8 @@ class Blip2T5LBA(Blip2T5):
     }
     
     LBA_PROMPT = {
-        "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.  Context: {sub_question}? {sub_answer}. Question: {main_question} Short answer: ",
-        "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question: ",
+        "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain. Context: {sub_question}? {sub_answer}. Question: {main_question} Short answer:",
+        "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:",
         # What is a missing information about ...
         "K-type-0": "What is the who or what a person or thing is?", # Identity
         "K-type-1": "What is the inclusion relationships of {entity}?", # Class
@@ -62,7 +62,6 @@ class Blip2T5LBA(Blip2T5):
         decomposition=True,
         decomposer_name="self",
         surprisal_threshold=1e-5,
-        decompose_using_GT=False,
     ):
         super().__init__(
             vit_model=vit_model,
@@ -96,8 +95,6 @@ class Blip2T5LBA(Blip2T5):
         self.surprisal_threshold = surprisal_threshold
         print('surprisal_threshold:', surprisal_threshold)
         
-        self.decompose_using_GT = decompose_using_GT
-        print('decompose_using_GT:', decompose_using_GT)
     
     
     @classmethod
@@ -120,7 +117,6 @@ class Blip2T5LBA(Blip2T5):
         # LBA
         decomposition = cfg.get("decomposition", True)
         decomposer_name = cfg.get("decomposer_name", "self")
-        decompose_using_GT = cfg.get("decompose_using_GT", False)
         surprisal_threshold = cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
 
         model = cls(
@@ -138,7 +134,6 @@ class Blip2T5LBA(Blip2T5):
             decomposition=decomposition,
             decomposer_name=decomposer_name,
             surprisal_threshold=surprisal_threshold,
-            decompose_using_GT=decompose_using_GT,
         )
         model.load_checkpoint_from_config(cfg)
 
@@ -181,6 +176,7 @@ class Blip2T5LBA(Blip2T5):
             )
             
         output_texts_origin, confidences = _predict_answers(samples)
+        batch_size = len(samples["text_input"])
 
         if self.decomposition == False: # baseline
             return {
@@ -229,7 +225,7 @@ class Blip2T5LBA(Blip2T5):
                     confidences_list.append(confidences)
                     
                 # get argmax sub_answer except sub_answer is blank
-                batch_size = len(sub_answers_list[0])
+                # batch_size = len(sub_answers_list[0])
                 max_indices = []
                 for i in range(batch_size):
                     confidences = [confidences_list[k][i] for k in range(K)]
@@ -246,12 +242,12 @@ class Blip2T5LBA(Blip2T5):
                     
                     max_indices.append(max_index)
                 
-                if Blip2T5LBA.__cnt2 < 2:
+                if Blip2T5LBA.__cnt2 < 1:
                     print('\n')
                     Blip2T5LBA.__cnt2 += 1
                     print('max_indices:', max_indices)
                     for i, max_index in enumerate(max_indices):
-                        if i>=4: break
+                        if i>=2: break
                         print(f'\ni: {i}, \tmax_index: {max_index}')
                         for k in range(6):
                             print(f'[{k}][{i}]: {confidences_list[k][i]:.6f} | {sub_questions_list[k][i]:80s} | {sub_answers_list[k][i]:40s}')
@@ -260,7 +256,28 @@ class Blip2T5LBA(Blip2T5):
                     #     print(f'sub_questions_list[{max_index}][{i}]:', sub_questions_list[max_index][i])
                     #     print(f'sub_answers_list[{max_index}][{i}]:', sub_answers_list[max_index][i])
                     #     print(f'confidences_list[{max_index}][{i}]:', confidences_list[max_index][i])
+                '''
+                    
+                # generate new sub_question
+                samples_for_sub_answer = samples.copy()
+                sub_questions = []
+                for i in range(batch_size):
+                    sub_question = self.get_lba_prompt(f"K-type-{max_indices[i]}").format(entity="'"+sub_answers_list[max_indices[i]][i]+"'")
+                    samples_for_sub_answer["text_input"][i] = sub_question
+                    sub_questions.append(sub_question)
+                sub_answers, _ = _predict_answers(samples_for_sub_answer, prompt="") # K1 ~ KN
                 
+                # generate main_answer (recomposition)
+                samples_for_main_answer = samples.copy()
+                _sub_qas = [] # _sub_qas shape: [bs, 1, 2]
+                
+                for i, max_index in enumerate(max_indices):
+                    _sub_qas.append([(sub_questions[i], sub_answers[i])])   
+                
+                samples_for_main_answer["sub_qas"] = _sub_qas
+                output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
+                                
+                '''
                 # generate main_answer (recomposition)
                 samples_for_main_answer = samples.copy()
                 _sub_qas = [] # _sub_qas shape: [bs, 1, 2]
@@ -270,13 +287,18 @@ class Blip2T5LBA(Blip2T5):
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas
                 output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
-                
                 del samples_for_sub_answer, samples_for_main_answer
                 
             elif self.decomposition == "GT":
                 # sub_qa 생성 생략
                 # generate main_answer (recomposition)
                 output_texts_lba, _ = _predict_answers(samples, prompt_type="recomposition")
+                _sub_qas = []
+                for i in range(batch_size):
+                    if len(samples["sub_qas"][i]) == 0:
+                        _sub_qas.append([(None, None)])
+                    else:
+                        _sub_qas.append([(samples["sub_qas"][i][0][0], samples["sub_qas"][i][0][1])])
             elif self.decomposition == "zero-shot":
                 
                 # generate sub_question (decomposition)
@@ -311,6 +333,7 @@ class Blip2T5LBA(Blip2T5):
                 'output_texts_origin': output_texts_origin,
                 'output_texts_lba': output_texts_lba,
                 'confidences': confidences,
+                'sub_qas': _sub_qas,
             }
             
         

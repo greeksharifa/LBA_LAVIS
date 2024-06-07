@@ -585,6 +585,23 @@ class VQAIntrospectTask(VQATask):
             output_texts_origin = answers["output_texts_origin"]
             output_texts_lba = answers["output_texts_lba"]
             confidences = answers["confidences"]
+            sub_qas = answers["sub_qas"]
+            
+            batch_size = len(samples["question_id"])
+            for i in range(batch_size):
+                # print(f'report_metrics(): {i:3d}, sub_qas[i]: {sub_qas[i]}')
+                pred_qa_pairs.append(
+                    {
+                        "question_id": question_id[i], 
+                        "confidence": confidences[i],
+                        "output_text_origin": output_texts_origin[i],
+                        "output_text_lba": output_texts_lba[i], 
+                        "gt_ans": ','.join(gt_answers[i]),
+                        "sub_q": sub_qas[i][0][0],
+                        "sub_a": sub_qas[i][0][1],
+                    }
+                )
+            '''
             for output_text_origin, output_text_lba, ques_id, gt_answer, confidence in zip(output_texts_origin, output_texts_lba, question_id, gt_answers, confidences):
                 pred_qa_pairs.append(
                     {
@@ -595,6 +612,7 @@ class VQAIntrospectTask(VQATask):
                         "gt_ans": ','.join(gt_answer),
                     }
                 )
+            '''
         else:
             pred_answers = answers["pred_answers"]
             for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
