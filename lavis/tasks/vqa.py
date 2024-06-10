@@ -18,6 +18,8 @@ from lavis.common.vqa_tools.vqa import VQA
 from lavis.common.vqa_tools.vqa_eval import VQAEval
 from lavis.tasks.base_task import BaseTask
 
+from collections import OrderedDict
+
 
 @registry.register_task("vqa")
 class VQATask(BaseTask):
@@ -558,6 +560,9 @@ class VQALBATask(VQATask):
 @registry.register_task("vqa_introspect")
 # class VQAIntrospectTask(VQALBATask):
 class VQAIntrospectTask(VQATask):
+    
+    __cnt = 0
+    
     def valid_step(self, model, samples):
         # print('self.prompt in task instance:', self.prompt)
         answers = model.predict_answers_by_lba(
@@ -574,6 +579,7 @@ class VQAIntrospectTask(VQATask):
         pred_qa_pairs = []
         
         question_id = samples["question_id"]
+        questions = samples["text_input"]
         # --------------------------------------------------------------------------------------
         # exact match with reasoning_answer_most_common
         # gt_answers = samples["reasoning_answer_most_common"]
@@ -590,17 +596,22 @@ class VQAIntrospectTask(VQATask):
             batch_size = len(samples["question_id"])
             for i in range(batch_size):
                 # print(f'report_metrics(): {i:3d}, sub_qas[i]: {sub_qas[i]}')
-                pred_qa_pairs.append(
-                    {
-                        "question_id": question_id[i], 
-                        "confidence": confidences[i],
-                        "output_text_origin": output_texts_origin[i],
-                        "output_text_lba": output_texts_lba[i], 
-                        "gt_ans": ','.join(gt_answers[i]),
-                        "sub_q": sub_qas[i][0][0],
-                        "sub_a": sub_qas[i][0][1],
-                    }
-                )
+                new_pair = OrderedDict({
+                    "question_id": question_id[i], 
+                    "question": questions[i],
+                    "confidence": confidences[i],
+                    "output_text_origin": output_texts_origin[i],
+                    "output_text_lba": output_texts_lba[i], 
+                    "gt_ans": ','.join(gt_answers[i]),
+                    "sub_q": sub_qas[i][0][0],
+                    "sub_a": sub_qas[i][0][1],
+                })
+                pred_qa_pairs.append(new_pair)
+                if VQAIntrospectTask.__cnt < 10:
+                    VQAIntrospectTask.__cnt += 1
+                    from pprint import pprint
+                    print('new_pair:')
+                    pprint(new_pair, width=300)
             '''
             for output_text_origin, output_text_lba, ques_id, gt_answer, confidence in zip(output_texts_origin, output_texts_lba, question_id, gt_answers, confidences):
                 pred_qa_pairs.append(
@@ -657,6 +668,7 @@ class VQAIntrospectTask(VQATask):
         acc_lba_list = []
         
         correct_num = 0.0
+        cr, ic = [], []
 
         for i, res in enumerate(results):
             '''
@@ -683,6 +695,14 @@ class VQAIntrospectTask(VQATask):
             num_match_lba = sum([output_text_lba == gt for gt in gt_ans])
             vqa_acc_lba = min(1.0, num_match_lba / 3.0)
             acc_lba_list.append(vqa_acc_lba)
+            
+            if vqa_acc_origin < vqa_acc_lba:    # wrong -> right
+                cr.append(res)
+            elif vqa_acc_origin > vqa_acc_lba:  # right -> wrong
+                ic.append(res)
+                
+        json.dump(cr, open(os.path.join(registry.get_path("output_dir"), "wrong_to_right.json"), "w"), indent=4)
+        json.dump(ic, open(os.path.join(registry.get_path("output_dir"), "right_to_wrong.json"), "w"), indent=4)
 
         # E_CR, E_IC: Error Correction raio / Error Induction ratio
         e_cr = sum([1 if acc_lba > acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len(acc_origin_list) * 100
@@ -743,3 +763,14 @@ class VQAIntrospectTask(VQATask):
         logging.info(metrics)
 
         return metrics
+
+    # @staticmethod
+    # def save_result(result, result_dir, filename, remove_duplicate=""):
+    #     result_file = super(VQAIntrospectTask).save_result(result, result_dir, filename, remove_duplicate)
+        
+    #     results = json.load(open(result_file, "r"))
+    #     results.sort(key=lambda x: x["confidence"])
+        
+    #     wrong_to_rights = []
+        
+    #     return result_file

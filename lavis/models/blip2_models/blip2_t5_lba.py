@@ -36,10 +36,10 @@ class Blip2T5LBA(Blip2T5):
         "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:",
         # What is a missing information about ...
         "K-type-0": "What is the who or what a person or thing is?", # Identity
-        "K-type-1": "What is the inclusion relationships of {entity}?", # Class
+        # "K-type-1": "What is the inclusion relationships of {entity}?", # Class
         "K-type-2": "What is the properties or feature of {entity}?", # Attributes
-        "K-type-3": "What is the the number of {entity}?", # Quantities
-        "K-type-4": "What is the spatial relations among {entity}?", # Spatial
+        # "K-type-3": "What is the the number of {entity}?", # Quantities
+        # "K-type-4": "What is the spatial relations among {entity}s?", # Spatial
         "K-type-5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
     }
     
@@ -188,8 +188,11 @@ class Blip2T5LBA(Blip2T5):
                 # generate sub_answer
                 sub_questions_list, sub_answers_list, confidences_list = [], [], [] # [bs, # of K, len(str)]
                 K = len(Blip2T5LBA.LBA_PROMPT) - 2 # K1 ~ KN
-                for k in range(K):
-                    prompt_type=f"K-type-{k}"
+                # for k in range(K):
+                for prompt_type in Blip2T5LBA.LBA_PROMPT.keys():
+                    if prompt_type == "recomposer" or prompt_type == "decomposer":
+                        continue
+                    # prompt_type=f"K-type-{k}"
                     samples_for_sub_answer = samples.copy()
 
                     k_type_prompt = self.get_lba_prompt(prompt_type)
@@ -212,25 +215,25 @@ class Blip2T5LBA(Blip2T5):
                                     break
                             else: # get the last noun or last word token in case of no named entity in question
                                 nouns = [word for word, pos in tagged if pos in ['NN', 'NNS', 'NNP', 'NNPS']]
-                                entity_name = nouns[-1] if len(nouns) > 0 else tokens[-2]
+                                entity_name = nouns[0] if len(nouns) > 0 else tokens[-2]
                             
                             assert isinstance(entity_name, str), f"entity_name is not str but {type(entity_name)}."
                             sub_questions.append(k_type_prompt.format(entity=entity_name))
                     
                     samples_for_sub_answer["text_input"] = sub_questions
-                    sub_answers, confidences = _predict_answers(samples_for_sub_answer, prompt_type=prompt_type, prompt="") # K1 ~ KN
+                    sub_answers, _confidences = _predict_answers(samples_for_sub_answer, prompt_type=prompt_type, prompt="") # K1 ~ KN
 
                     sub_questions_list.append(sub_questions)
                     sub_answers_list.append(sub_answers)
-                    confidences_list.append(confidences)
+                    confidences_list.append(_confidences)
                     
                 # get argmax sub_answer except sub_answer is blank
                 # batch_size = len(sub_answers_list[0])
                 max_indices = []
                 for i in range(batch_size):
-                    confidences = [confidences_list[k][i] for k in range(K)]
-                    sorted_confidences = sorted(confidences, reverse=True)
-                    ranks = [confidences.index(c) for c in sorted_confidences]
+                    _confidences = [confidences_list[k][i] for k in range(K)]
+                    sorted_confidences = sorted(_confidences, reverse=True)
+                    ranks = [_confidences.index(c) for c in sorted_confidences]
                     
                     for rank in ranks:
                         if sub_answers_list[rank][i] != "":
@@ -249,7 +252,7 @@ class Blip2T5LBA(Blip2T5):
                     for i, max_index in enumerate(max_indices):
                         if i>=2: break
                         print(f'\ni: {i}, \tmax_index: {max_index}')
-                        for k in range(6):
+                        for k in range(K):
                             print(f'[{k}][{i}]: {confidences_list[k][i]:.6f} | {sub_questions_list[k][i]:80s} | {sub_answers_list[k][i]:40s}')
                             
                     # for i, max_index in enumerate(max_indices):
