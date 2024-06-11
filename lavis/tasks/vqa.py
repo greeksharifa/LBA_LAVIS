@@ -664,8 +664,7 @@ class VQAIntrospectTask(VQATask):
         # --------------------------------------------------------------------------------------
         # original vqa evaluation
         # acc = []
-        acc_origin_list = []
-        acc_lba_list = []
+        acc_origin_list, acc_lba_list = [], []
         
         correct_num = 0.0
         cr, ic = [], []
@@ -705,15 +704,15 @@ class VQAIntrospectTask(VQATask):
         json.dump(ic, open(os.path.join(registry.get_path("output_dir"), "right_to_wrong.json"), "w"), indent=4)
 
         # E_CR, E_IC: Error Correction raio / Error Induction ratio
-        e_cr = sum([1 if acc_lba > acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len(acc_origin_list) * 100
-        e_ic = sum([1 if acc_lba < acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len(acc_origin_list) * 100
+        e_cr = sum([1 if acc_lba > acc_origin and acc_origin < 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len([1 if acc < 0.5 else 0 for acc in acc_origin_list]) * 100
+        e_ic = sum([1 if acc_lba < acc_origin and acc_origin > 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / len([1 if acc > 0.5 else 0 for acc in acc_origin_list]) * 100
 
         # accuracy = sum(acc) / len(acc) * 100
         correct_num = sum(acc_origin_list)
         
         correct_num_by_tau = [correct_num]
         max_num_by_tau = correct_num
-        max_arg_confidence = 0.
+        max_arg_confidence = -1e10
         max_arg_confidence_percentile = 0.
         for i, res in enumerate(results):
             output_text_origin = res["output_text_origin"]
@@ -747,12 +746,12 @@ class VQAIntrospectTask(VQATask):
         metrics = {
             # "agg_metrics": accuracy, 
             # "acc": accuracy, 
-            "acc_origin": correct_num / len(results) * 100,
-            "max_acc_by_tau": max(accuracy_by_tau), 
-            "max_arg_confidence": max_arg_confidence,
-            "max_arg_confidence_percentile": max_arg_confidence_percentile,
-            "E_CR": e_cr,
-            "E_IC": e_ic,
+            "acc_origin": f'{correct_num / len(results) * 100:.3f}',
+            "max_acc_by_tau": f'{max(accuracy_by_tau):.3f}', 
+            "max_arg_confidence": f'{max_arg_confidence:.6f}',
+            "max_arg_confidence_percentile": f'{max_arg_confidence_percentile:.3f}%',
+            "E_CR": f'{e_cr:.2f}%',
+            "E_IC": f'{e_ic:.2f}%',
         }
 
         with open(

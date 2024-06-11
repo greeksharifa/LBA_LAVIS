@@ -61,7 +61,6 @@ class Blip2T5LBA(Blip2T5):
         apply_lemmatizer=False,
         decomposition=True,
         decomposer_name="self",
-        surprisal_threshold=1e-5,
     ):
         super().__init__(
             vit_model=vit_model,
@@ -91,11 +90,6 @@ class Blip2T5LBA(Blip2T5):
                 # device_map="auto",
             ).to(self.t5_model.device)
                 
-        
-        self.surprisal_threshold = surprisal_threshold
-        print('surprisal_threshold:', surprisal_threshold)
-        
-    
     
     @classmethod
     def from_config(cls, cfg):
@@ -112,12 +106,11 @@ class Blip2T5LBA(Blip2T5):
         prompt = cfg.get("prompt", "")
         max_txt_len = cfg.get("max_txt_len", 32)
 
-        apply_lemmatizer = cfg.get("apply_lemmatizer", False)
+        apply_lemmatizer = cfg.get("apply_lemmatizer", True)
         
         # LBA
         decomposition = cfg.get("decomposition", True)
         decomposer_name = cfg.get("decomposer_name", "self")
-        surprisal_threshold = cfg.get("surprisal_threshold", 1e-5) # meaning of default value: almost always generate sub-q
 
         model = cls(
             vit_model=vit_model,
@@ -133,7 +126,6 @@ class Blip2T5LBA(Blip2T5):
             apply_lemmatizer=apply_lemmatizer,
             decomposition=decomposition,
             decomposer_name=decomposer_name,
-            surprisal_threshold=surprisal_threshold,
         )
         model.load_checkpoint_from_config(cfg)
 
@@ -427,14 +419,20 @@ Generate in val split...
                 max_new_tokens=max_len,
                 min_length=min_len,
                 length_penalty=length_penalty,
-            )
+                return_dict_in_generate=True,
+                output_scores=True,
+            )   # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
+            confidences = outputs['sequences_scores'].tolist()
+            # import pdb
+            # pdb.set_trace()
             output_text = self.t5_tokenizer.batch_decode(
-                outputs, skip_special_tokens=True
+                outputs['sequences'], skip_special_tokens=True, 
             )
 
         if self._apply_lemmatizer:
             output_text = self._lemmatize(output_text)
+        output_text = [text.lower() for text in output_text]
             
-        confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, text_input, output_text)
+        # confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, text_input, output_text)
 
-        return output_text, confidence
+        return output_text, confidences

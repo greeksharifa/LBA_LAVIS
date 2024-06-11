@@ -50,7 +50,8 @@ class VQAIntrospectEvalDataset(VQADataset):
             sub_qas = []
             for introspect in v["introspect"]:
                 sub_qa_list = introspect["sub_qa"]
-                # pred_q_type = introspect["pred_q_type"]
+                if introspect["pred_q_type"] == "invalid":
+                    continue
                 for sub_qa in sub_qa_list:
                     if sub_qa["sub_answer"] == 'yea':
                         sub_qa["sub_answer"] = 'yes'
@@ -68,6 +69,8 @@ class VQAIntrospectEvalDataset(VQADataset):
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
+        import spacy
+        self.lemmatizer = spacy.load("en_core_web_sm")
         
         self.split = "val"
         if "train" in ann_paths[0]:
@@ -141,7 +144,18 @@ class VQAIntrospectEvalDataset(VQADataset):
 
         image = self.vis_processor(image)
         text_input = self.text_processor(ann["reasoning_question"])
+        # text_input = ann["reasoning_question"]
         reasoning_answer_most_common = self.text_processor(ann["reasoning_answer_most_common"])
+        
+        # # lemmatize the question
+        # doc = self.lemmatizer(text_input)
+        # words = []
+        # for token in doc:
+        #     if token.pos_ in ["NOUN", "VERB"]:
+        #         words.append(token.lemma_)
+        #     else:
+        #         words.append(token.text)
+        # text_input = " ".join(words)
 
         return {
             "image": image,
