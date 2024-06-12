@@ -21,7 +21,7 @@ datasets:
           name: "blip_question"
     build_info:
         images:
-            storage: "/export/share/datasets/vision/GQA/images/"
+            storage: "/data1/gqa/images/"
 
 run:
   task: gqa

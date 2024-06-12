@@ -153,12 +153,12 @@ class Blip2T5LBA(Blip2T5):
         length_penalty=-1,
         **kwargs
     ):
-        def _predict_answers(_samples, prompt_type="default", prompt=prompt):
+        def _predict_answers(_samples, prompt_type="default", prompt=prompt, _max_len=max_len):
             return self.predict_answers(
                 samples=_samples,
                 num_beams=num_beams,
                 inference_method=inference_method,
-                max_len=max_len,
+                max_len=_max_len,
                 min_len=min_len,
                 num_ans_candidates=num_ans_candidates,
                 answer_list=answer_list,
@@ -298,14 +298,15 @@ class Blip2T5LBA(Blip2T5):
                 
                 # generate sub_question (decomposition)
                 if self.decomposer_name == "self":  # Image+Text
-                    sub_questions, _ = _predict_answers(samples, prompt_type="decomposition")
+                    sub_questions, _ = _predict_answers(samples, prompt_type="decomposition", _max_len=20)
                 else:                               # Only Text
                     device = self.decomposer_model.device
                     decomposer_prompt = self.get_lba_prompt("decomposer")
                     
                     text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
                     input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
-                    outputs = self.decomposer_model.generate(input_ids)
+                    # outputs = self.decomposer_model.generate(input_ids)
+                    outputs = self.decomposer_model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_token=20)
                     sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
                 
                 # generate sub_answer
@@ -403,18 +404,37 @@ class Blip2T5LBA(Blip2T5):
         with self.maybe_autocast(dtype=torch.bfloat16):
             inputs_embeds = self.t5_model.encoder.embed_tokens(input_tokens.input_ids)
             inputs_embeds = torch.cat([inputs_t5, inputs_embeds], dim=1)
-
-            outputs = self.t5_model.generate(
-                inputs_embeds=inputs_embeds,
-                attention_mask=encoder_atts,
-                do_sample=False,
-                num_beams=num_beams,
-                max_new_tokens=max_len,
-                min_length=min_len,
-                length_penalty=length_penalty,
-                return_dict_in_generate=True,
-                output_scores=True,
-            )   # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
+            
+            # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
+            if prompt_type == "decomposition":
+                outputs = self.t5_model.generate(
+                    inputs_embeds=inputs_embeds,
+                    attention_mask=encoder_atts,
+                    max_new_tokens=max_len,
+                    min_length=min_len,
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                    
+                    do_sample=True,
+                    num_beams=num_beams,
+                    length_penalty=1.0,
+                    top_p=0.95, 
+                    temperature=1.0, 
+                    repetition_penalty=1.0,
+                )
+            else:   
+                outputs = self.t5_model.generate(
+                    inputs_embeds=inputs_embeds,
+                    attention_mask=encoder_atts,
+                    do_sample=False,
+                    num_beams=num_beams,
+                    max_new_tokens=max_len,
+                    min_length=min_len,
+                    length_penalty=length_penalty,
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                )   
+            
             confidences = outputs['sequences_scores'].tolist()
             # import pdb
             # pdb.set_trace()

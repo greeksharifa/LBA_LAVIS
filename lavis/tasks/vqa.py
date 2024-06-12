@@ -193,11 +193,11 @@ class VQATask(BaseTask):
                     "question_id": question_id[i], 
                     "question": questions[i],
                     "confidence": confidences[i],
-                    "output_text_origin": output_texts_origin[i],
-                    "output_text_lba": output_texts_lba[i], 
-                    "gt_ans": ','.join(gt_answers[i]),
                     "sub_q": sub_qas[i][0][0],
                     "sub_a": sub_qas[i][0][1],
+                    "output_text_origin": output_texts_origin[i],
+                    "output_text_lba": output_texts_lba[i], 
+                    "gt_ans": ','.join(gt_answers[i]) if type(gt_answers[i]) == list else gt_answers[i],
                 })
                 pred_qa_pairs.append(new_pair)
                 if self._counts['new_pair'] < 10:
@@ -316,6 +316,11 @@ class VQATask(BaseTask):
         results.sort(key=lambda x: x["confidence"])
         
         vqa_tool = VQAEval() if use_vqa_tool else None
+        print('result_file:', result_file)
+        print('len(results):', len(results))
+        print('vqa_acc:', vqa_acc)
+        print('use_vqa_tool:', use_vqa_tool)
+        print('vqa_tool:', vqa_tool)
         
         acc_origin_list, acc_lba_list = [], []
         
@@ -331,8 +336,8 @@ class VQATask(BaseTask):
             '''
             output_text_origin = res["output_text_origin"]
             output_text_lba = res["output_text_lba"]
-            # pred = res["pred_ans"]
-            gt_ans = res["gt_ans"].split(',')
+            gt_ans = res["gt_ans"].split(',') if vqa_acc else res["gt_ans"]
+            print('gt_ans:', type(gt_ans), gt_ans)
             if i<10:
                 print(f'{i:2} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
             '''
@@ -365,7 +370,7 @@ class VQATask(BaseTask):
         for i, res in enumerate(results):
             output_text_origin = res["output_text_origin"]
             output_text_lba = res["output_text_lba"]
-            gt_ans = res["gt_ans"].split(',')
+            gt_ans = res["gt_ans"].split(',') if vqa_acc else res["gt_ans"]
             
             vqa_acc_origin, vqa_acc_lba = self._get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc=vqa_acc, vqa_tool=vqa_tool)
             
