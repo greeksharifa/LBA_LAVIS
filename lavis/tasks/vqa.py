@@ -57,6 +57,10 @@ class VQATask(BaseTask):
         self.sample_id_key = sample_id_key
 
         self.valid_splits = valid_splits
+        
+        self._counts = {
+            'new_pair': 0,
+        }
 
     @classmethod
     def setup_task(cls, cfg):
@@ -153,6 +157,76 @@ class VQATask(BaseTask):
 
         return pred_qa_pairs
 
+    def valid_step_lba(self, model, samples, gt_answers_key):
+        answers = model.predict_answers_by_lba(
+            samples=samples,
+            answer_list=self.answer_list,
+            inference_method=self.inference_method,
+            num_beams=self.num_beams,
+            max_len=self.max_len,
+            min_len=self.min_len,
+            num_ans_candidates=self.num_ans_candidates,
+            prompt=self.prompt,
+        )
+        
+        pred_qa_pairs = []
+        
+        question_id = samples["question_id"]
+        questions = samples["text_input"]
+        # --------------------------------------------------------------------------------------
+        # exact match with reasoning_answer_most_common
+        # gt_answers = samples["reasoning_answer_most_common"]
+        # --------------------------------------------------------------------------------------
+        # original vqa evaluation
+        gt_answers = samples[gt_answers_key]
+
+        if "confidences" in answers:
+            output_texts_origin = answers["output_texts_origin"]
+            output_texts_lba = answers["output_texts_lba"]
+            confidences = answers["confidences"]
+            sub_qas = answers["sub_qas"]
+            
+            batch_size = len(samples["question_id"])
+            for i in range(batch_size):
+                # print(f'report_metrics(): {i:3d}, sub_qas[i]: {sub_qas[i]}')
+                new_pair = OrderedDict({
+                    "question_id": question_id[i], 
+                    "question": questions[i],
+                    "confidence": confidences[i],
+                    "output_text_origin": output_texts_origin[i],
+                    "output_text_lba": output_texts_lba[i], 
+                    "gt_ans": ','.join(gt_answers[i]),
+                    "sub_q": sub_qas[i][0][0],
+                    "sub_a": sub_qas[i][0][1],
+                })
+                pred_qa_pairs.append(new_pair)
+                if self._counts['new_pair'] < 10:
+                    self._counts['new_pair'] += 1
+                    from pprint import pprint
+                    print('new_pair:')
+                    pprint(new_pair, width=300)
+            '''
+            for output_text_origin, output_text_lba, ques_id, gt_answer, confidence in zip(output_texts_origin, output_texts_lba, question_id, gt_answers, confidences):
+                pred_qa_pairs.append(
+                    {
+                        "question_id": ques_id, 
+                        "confidence": confidence,
+                        "output_text_origin": output_text_origin,
+                        "output_text_lba": output_text_lba, 
+                        "gt_ans": ','.join(gt_answer),
+                    }
+                )
+            '''
+        else:
+            pred_answers = answers["pred_answers"]
+            for pred_answer, ques_id, gt_answer in zip(pred_answers, question_id, gt_answers):
+                pred_qa_pairs.append(
+                    {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": ','.join(gt_answer)}
+                )
+            
+
+        return pred_qa_pairs
+
     def after_evaluation(self, val_result, split_name, **kwargs):
         result_file = self.save_result(
             val_result,
@@ -203,6 +277,137 @@ class VQATask(BaseTask):
                 f.write(json.dumps(metrics) + "\n")
         return metrics
 
+    @staticmethod
+    def _get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc:bool, vqa_tool:VQAEval=None):
+        """
+        vqa_acc=True: use vqa acc, else exact match
+        """
+        if vqa_acc:
+            num_match_origin = sum([output_text_origin == gt for gt in gt_ans])
+            vqa_acc_origin = min(1.0, num_match_origin / 3.0)
+            num_match_lba = sum([output_text_lba == gt for gt in gt_ans])
+            vqa_acc_lba = min(1.0, num_match_lba / 3.0)
+            
+            return vqa_acc_origin, vqa_acc_lba
+        else:
+            if vqa_tool:
+                output_text_origin = vqa_tool.processPunctuation(output_text_origin)
+                output_text_origin = vqa_tool.processDigitArticle(output_text_origin)
+                output_text_lba = vqa_tool.processPunctuation(output_text_lba)
+                output_text_lba = vqa_tool.processDigitArticle(output_text_lba)
+                gt_ans = vqa_tool.processPunctuation(gt_ans)
+                gt_ans = vqa_tool.processDigitArticle(gt_ans)
+                
+            return output_text_origin == gt_ans, output_text_lba == gt_ans
+    
+    @staticmethod
+    def _get_e_cr_e_ic(acc_origin_list, acc_lba_list, vqa_acc:bool):
+        if vqa_acc:
+            e_cr = sum([1 if acc_lba > acc_origin and acc_origin < 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc < 0.5 else 0 for acc in acc_origin_list]) * 100
+            e_ic = sum([1 if acc_lba < acc_origin and acc_origin > 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc > 0.5 else 0 for acc in acc_origin_list]) * 100
+        else:
+            e_cr = sum([1 if acc_lba and not acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if not acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+            e_ic = sum([1 if not acc_lba and acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+        return e_cr, e_ic
+
+    @dist_utils.main_process
+    def _report_metrics_lba(self, result_file, split, vqa_acc:bool, use_vqa_tool:bool):
+        results = json.load(open(result_file, "r"))
+        results.sort(key=lambda x: x["confidence"])
+        
+        vqa_tool = VQAEval() if use_vqa_tool else None
+        
+        acc_origin_list, acc_lba_list = [], []
+        
+        correct_num = 0.0
+        cr, ic = [], []
+
+        for i, res in enumerate(results):
+            '''
+            if res["gt_ans"] is None:
+                # prepare test results for leaderboard evaluation
+                self._save_result_leaderboard(results)
+                return
+            '''
+            output_text_origin = res["output_text_origin"]
+            output_text_lba = res["output_text_lba"]
+            # pred = res["pred_ans"]
+            gt_ans = res["gt_ans"].split(',')
+            if i<10:
+                print(f'{i:2} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
+            '''
+            # num_match = sum([pred == gt for gt in gt_ans])
+            # vqa_acc = min(1.0, num_match / 3.0)
+            # acc.append(vqa_acc)
+            '''
+            vqa_acc_origin, vqa_acc_lba = self._get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc=vqa_acc, vqa_tool=vqa_tool)
+            acc_origin_list.append(vqa_acc_origin)
+            acc_lba_list.append(vqa_acc_lba)
+            
+            if vqa_acc_origin < vqa_acc_lba:    # wrong -> right
+                cr.append(res)
+            elif vqa_acc_origin > vqa_acc_lba:  # right -> wrong
+                ic.append(res)
+                
+        json.dump(cr, open(os.path.join(registry.get_path("output_dir"), "wrong_to_right.json"), "w"), indent=4)
+        json.dump(ic, open(os.path.join(registry.get_path("output_dir"), "right_to_wrong.json"), "w"), indent=4)
+
+        # E_CR, E_IC: Error Correction raio / Error Induction ratio
+        e_cr, e_ic = self._get_e_cr_e_ic(acc_origin_list, acc_lba_list, vqa_acc=vqa_acc)
+        
+        # accuracy = sum(acc) / len(acc) * 100
+        correct_num = sum(acc_origin_list)
+        
+        correct_num_by_tau = [correct_num]
+        max_num_by_tau = correct_num
+        max_arg_confidence = -1e10
+        max_arg_confidence_percentile = 0.
+        for i, res in enumerate(results):
+            output_text_origin = res["output_text_origin"]
+            output_text_lba = res["output_text_lba"]
+            gt_ans = res["gt_ans"].split(',')
+            
+            vqa_acc_origin, vqa_acc_lba = self._get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc=vqa_acc, vqa_tool=vqa_tool)
+            
+            score_change = vqa_acc_lba - vqa_acc_origin
+            new_num = correct_num_by_tau[-1] + score_change
+            if new_num > max_num_by_tau:
+                max_num_by_tau = new_num
+                max_arg_confidence = res["confidence"]
+                max_arg_confidence_percentile = (i+1) / len(results) * 100
+                
+            correct_num_by_tau.append(new_num)
+            
+        accuracy_by_tau = [c / len(results) * 100 for c in correct_num_by_tau]
+        
+        import matplotlib.pyplot as plt
+        plt.plot([i / len(results) * 100 for i, _ in enumerate(accuracy_by_tau)], accuracy_by_tau)
+        plt.title(f'E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
+        plt.xlabel('Confidence Percentile')
+        plt.ylabel('Accuracy')
+        plt.xticks([0, 25, 50, 75, 100])
+        plt.savefig(os.path.join(registry.get_path("output_dir"), "accuracy_by_tau.png"))
+        
+        metrics = {
+            "acc_origin": f'{correct_num / len(results) * 100:.3f}',
+            "max_acc_by_tau": f'{max(accuracy_by_tau):.3f}', 
+            "max_arg_confidence": f'{max_arg_confidence:.6f}',
+            "max_arg_confidence_percentile": f'{max_arg_confidence_percentile:.3f}%',
+            "E_CR": f'{e_cr:.2f}%',
+            "E_IC": f'{e_ic:.2f}%',
+        }
+
+        with open(
+            os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+        ) as f:
+            f.write(json.dumps(metrics) + "\n")
+
+        logging.info(metrics)
+
+        return metrics
+
+        
+
 def convert_to_coco_gt(data, outpath_questions, outpath_annotations, split, sample_id_key):
     if split not in data:
         return
@@ -241,6 +446,8 @@ def convert_to_coco_gt(data, outpath_questions, outpath_annotations, split, samp
 @registry.register_task("aok_vqa")
 class AOKVQATask(VQATask):
     def valid_step(self, model, samples):
+        return self.valid_step_lba(model, samples, "direct_answers")
+        '''
         answers = model.predict_answers(
             samples=samples,
             answer_list=self.answer_list,
@@ -262,13 +469,14 @@ class AOKVQATask(VQATask):
             )
 
         return pred_qa_pairs
+        '''
 
     @dist_utils.main_process
     def _report_metrics(self, result_file, split):
+        return self._report_metrics_lba(result_file, split, vqa_acc=True, use_vqa_tool=False)
         """
         Implementing accuracy computation for AOKVQA, see
         https://github.com/allenai/aokvqa/blob/main/evaluation/eval_predictions.py#L45 for details.
-        """
         # TODO add evaluation for multi-choice
 
         results = json.load(open(result_file, "r"))
@@ -299,6 +507,8 @@ class AOKVQATask(VQATask):
         logging.info(metrics)
 
         return metrics
+        """
+        
 
     @dist_utils.main_process
     def _save_result_leaderboard(self, results):
@@ -326,6 +536,8 @@ class AOKVQATask(VQATask):
 @registry.register_task("gqa")
 class GQATask(VQATask):
     def valid_step(self, model, samples):
+        return self.valid_step_lba(model, samples, "answer")
+        '''
         answers = model.predict_answers(
             samples=samples,
             answer_list=self.answer_list,
@@ -346,6 +558,7 @@ class GQATask(VQATask):
             pred_qa_pairs.append({"question_id": ques_id, "pred_ans": answer, "gt_ans": gt_answer})
 
         return pred_qa_pairs
+        '''
     
     def build_datasets(self, cfg):
         datasets = BaseTask.build_datasets(self,cfg)
@@ -369,9 +582,9 @@ class GQATask(VQATask):
         
     @dist_utils.main_process
     def _report_metrics(self, result_file, split):
+        return self._report_metrics_lba(result_file, split, vqa_acc=False, use_vqa_tool=True)
         """
         TODO: add other evaluation metrics for GQA
-        """
 
         results = json.load(open(result_file, "r"))
         acc = []
@@ -409,6 +622,7 @@ class GQATask(VQATask):
         logging.info(metrics)
 
         return metrics
+        """
 
 
 @registry.register_task("discrn_qa")
@@ -564,6 +778,8 @@ class VQAIntrospectTask(VQATask):
     __cnt = 0
     
     def valid_step(self, model, samples):
+        return self.valid_step_lba(model, samples, "gt_ans")
+        """
         # print('self.prompt in task instance:', self.prompt)
         answers = model.predict_answers_by_lba(
             samples=samples,
@@ -633,13 +849,14 @@ class VQAIntrospectTask(VQATask):
             
 
         return pred_qa_pairs
+        """
 
     @dist_utils.main_process
     def _report_metrics(self, result_file, split):
+        return self._report_metrics_lba(result_file, split, vqa_acc=True, use_vqa_tool=False)
         """
         Implementing accuracy computation for AOKVQA, see
         https://github.com/allenai/aokvqa/blob/main/evaluation/eval_predictions.py#L45 for details.
-        """
         # TODO add evaluation for multi-choice
         # assert False, "TODO!"
 
@@ -762,14 +979,4 @@ class VQAIntrospectTask(VQATask):
         logging.info(metrics)
 
         return metrics
-
-    # @staticmethod
-    # def save_result(result, result_dir, filename, remove_duplicate=""):
-    #     result_file = super(VQAIntrospectTask).save_result(result, result_dir, filename, remove_duplicate)
-        
-    #     results = json.load(open(result_file, "r"))
-    #     results.sort(key=lambda x: x["confidence"])
-        
-    #     wrong_to_rights = []
-        
-    #     return result_file
+        """

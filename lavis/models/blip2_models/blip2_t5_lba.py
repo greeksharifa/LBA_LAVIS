@@ -373,21 +373,14 @@ class Blip2T5LBA(Blip2T5):
                 text_input = []
                 for main_question, sub_qas in zip(samples["text_input"], samples["sub_qas"]):
                     if len(sub_qas) == 0: # GT에 sub_qa가 없는 경우가 있음
-                        '''
-# 중복 제거하고 하나의 MQ 당 SQ 개수
-Generate in train split...
-[(0, 720), (1, 2153), (2, 10558), (3, 35434), (4, 6313), (5, 1111), (6, 197), (7, 32), (8, 1)]
-Generate in val split...
-[(0, 1116), (1, 2761), (2, 5305), (3, 10938), (4, 2200), (5, 412), (6, 54), (7, 7)]
-                        '''
                         text_input.append(prompt.format(main_question))
                     else:
                         # LBA TODO: 현재 첫번째 sub_qa만 고정적으로 사용함
                         assert not isinstance(sub_qas[0], str), f"type of sub_qas[0] is {type(sub_qas[0])}."
                         assert len(sub_qas[0]) == 2, f"len of sub_qas[0] is {len(sub_qas[0])}."
                         sub_question, sub_answer = sub_qas[0]
-                        sub_question = sub_question.rstrip('?')
-                        sub_answer = sub_answer.rstrip('.')
+                        sub_question = sub_question.rstrip('?').strip()
+                        sub_answer = sub_answer.rstrip('.').strip()
                         text_input.append(recomposer_prompt.format(sub_question=sub_question, sub_answer=sub_answer, main_question=main_question))
             elif prompt_type == "decomposition":
                 decomposer_prompt = self.get_lba_prompt("decomposer")
