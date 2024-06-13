@@ -51,7 +51,7 @@ model:
   freeze_video: True
   freeze_audio: True
   num_query_token: 32
-  llm_model: "/path/to/vicuna-13b"
+  llm_model: "/data2/vicuna_lmsys/vicuna-13b-v1.1/"
   prompt:  ""
   max_txt_len: 128
   max_output_txt_len: 256

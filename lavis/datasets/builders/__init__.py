@@ -61,7 +61,8 @@ from lavis.datasets.builders.video_qa_builder import (
     MSRVTTQAInstructBuilder,
     MSVDQAInstructBuilder,
     MusicAVQABuilder,
-    MusicAVQAInstructBuilder
+    MusicAVQAInstructBuilder,
+    DramaQABuilder,
 )
 
 from lavis.datasets.builders.vqa_builder import (
@@ -177,6 +178,7 @@ __all__ = [
     "MusicAVQABuilder",
     "ESC50ClassificationBuilder",
     "VQAIntrospectBuilder",
+    "DramaQABuilder",
 
     ## Instruction Builders
     "AOKVQAInstructBuilder",

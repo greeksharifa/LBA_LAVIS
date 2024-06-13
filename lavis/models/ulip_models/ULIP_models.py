@@ -219,17 +219,17 @@ def ULIP_PointBERT(ulip_v=2):
                             
     ## TODO: setup config
     if ulip_v == 2:
-        cached_file = '/export/share/lxue/shared_models/ULIP-2/objaverse_shapenet_k_5/ULIP-2_pointbert_last.pt'
+        cached_file = '/data2/ULIP/ULIP-2_pointbert_last.pt'
     elif ulip_v == 1:
-        cached_file = '/export/share/lxue/shared_models/ULIP-1/objaverse/ULIP-1_pointbert_last.pt'
+        cached_file = '/data2/ULIP-1/objaverse/ULIP-1_pointbert_last.pt'
     elif ulip_v == 'shapenet':
-        cached_file = '/export/share/lxue/shared_models/ULIP-1/objaverse_shapenet/checkpoint_last.pt'
+        cached_file = '/data2/ULIP-1/objaverse_shapenet/checkpoint_last.pt'
     elif ulip_v == 'objaverse_k_1':
-        cached_file = '/export/share/lxue/shared_models/ULIP-2/objaverse_k_1/checkpoint_last.pt'
+        cached_file = '/data2/ULIP-2/objaverse_k_1/checkpoint_last.pt'
     elif ulip_v == 'objaverse_shapenet_k_1':
-        cached_file = '/export/share/lxue/shared_models/ULIP-2/objaverse_shapenet_k_1/checkpoint_last.pt'
+        cached_file = '/data2/ULIP-2/objaverse_shapenet_k_1/checkpoint_last.pt'
     elif ulip_v == "ulip2_scaledup":
-        cached_file = "/export/share/lxue/shared_models/ULIP-2/objaverse_shapenet_k_1_scaled_up/checkpoint_last.pt"
+        cached_file = "/data2/ULIP-2/objaverse_shapenet_k_1_scaled_up/checkpoint_last.pt"
     # url = "https://storage.cloud.google.com/sfr-ulip-code-release-research/pretrained_models/ckpt_zero-sho_classification/checkpoint_pointbert.pt"
     # cached_file = download_cached_file(
     #     url, check_hash=False, progress=True

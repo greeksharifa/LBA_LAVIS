@@ -82,3 +82,31 @@ class VideoQAInstructDataset(VideoQADataset):
             ## add weight to use with vqa eval script
             "weight": [1.]
         }
+
+
+class DramaQAEvalDataset(VideoQADataset):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+        super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+        print("DramaQAEvalDataset")
+        print('vis_processor : ', vis_processor)
+        print('text_processor : ', text_processor)
+        print('vis_root : ', vis_root)
+        print('ann_paths : ', ann_paths)
+        print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
+        
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+
+        vname = ann["video"]
+        vpath = os.path.join(self.vis_root, vname)
+
+        frms = self.vis_processor(vpath)
+        question = self.text_processor(ann["question"])
+
+        return {
+            "video": frms,
+            "text_input": question,
+            "answer": ann["answer"],
+            "question_id": ann["question_id"],
+            "instance_id": ann["instance_id"],
+        }

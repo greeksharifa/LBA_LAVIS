@@ -8,7 +8,7 @@
 from lavis.common.registry import registry
 from lavis.common.utils import get_cache_path
 from lavis.datasets.builders.base_dataset_builder import BaseDatasetBuilder, MultiModalDatasetBuilder
-from lavis.datasets.datasets.video_vqa_datasets import VideoQADataset, VideoQAInstructDataset
+from lavis.datasets.datasets.video_vqa_datasets import VideoQADataset, VideoQAInstructDataset, DramaQAEvalDataset
 from lavis.datasets.datasets.music_avqa import MusicAVQAInstructDataset, MusicAVQADataset
 
 
@@ -75,3 +75,16 @@ class MusicAVQAInstructBuilder(MultiModalDatasetBuilder):
     eval_dataset_cls = MusicAVQAInstructDataset
 
     DATASET_CONFIG_DICT = {"default": "configs/datasets/music_avqa/defaults_mm_qa_instruct.yaml"}
+    
+@registry.register_builder("dramaqa")
+class DramaQABuilder(VideoQABuilder):
+    # train_dataset_cls = DramaQADataset
+    eval_dataset_cls = DramaQAEvalDataset
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/dramaqa/defaults_qa.yaml",
+    }
+    
+    def build(self):
+        datasets = BaseDatasetBuilder.build(self)
+
+        return datasets

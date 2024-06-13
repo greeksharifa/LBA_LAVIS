@@ -6,6 +6,7 @@ run_scripts/LBA/eval/multiple_launch.sh
 # data / model
 llm/
 data/
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
