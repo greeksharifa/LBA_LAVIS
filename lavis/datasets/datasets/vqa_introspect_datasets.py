@@ -47,7 +47,7 @@ class VQAIntrospectEvalDataset(VQADataset):
         
         self.annotation = []
         for k, v in vqa_introspect_annotation.items(): # add question_id(str) and sub_qas(list of list: [N_i,2]) to each sample
-            sub_qas = []
+            gt_sub_qas = []
             for introspect in v["introspect"]:
                 sub_qa_list = introspect["sub_qa"]
                 if introspect["pred_q_type"] == "invalid":
@@ -55,12 +55,12 @@ class VQAIntrospectEvalDataset(VQADataset):
                 for sub_qa in sub_qa_list:
                     if sub_qa["sub_answer"] == 'yea':
                         sub_qa["sub_answer"] = 'yes'
-                    sub_qas.append(
+                    gt_sub_qas.append(
                         (sub_qa["sub_question"], sub_qa["sub_answer"])
                     )
-            sub_qas = list(set(sub_qas))
+            gt_sub_qas = list(set(gt_sub_qas))
             v.update({
-                "sub_qas": sub_qas,
+                "gt_sub_qas": gt_sub_qas,
                 "question_id": k,
                 "gt_ans": vqav2_answers[k]
             })
@@ -87,7 +87,7 @@ class VQAIntrospectEvalDataset(VQADataset):
             question_id_list,
             # instance_id_list,
             reasoning_answer_most_common_list,
-            sub_qas_list,
+            gt_sub_qas_list,
             gt_ans_list,
         ) = ([], [], [], [], [], []) # ([], [], [], [], [], [], [])
 
@@ -97,7 +97,7 @@ class VQAIntrospectEvalDataset(VQADataset):
             question_id_list.append(sample["question_id"])
             # instance_id_list.append(sample["instance_id"])
             reasoning_answer_most_common_list.append(sample["reasoning_answer_most_common"])
-            sub_qas_list.append(sample["sub_qas"])
+            gt_sub_qas_list.append(sample["gt_sub_qas"])
             gt_ans_list.append(sample["gt_ans"])
 
         return {
@@ -106,7 +106,7 @@ class VQAIntrospectEvalDataset(VQADataset):
             "question_id": question_id_list,
             # "instance_id": instance_id_list,
             "reasoning_answer_most_common": reasoning_answer_most_common_list,
-            "sub_qas": sub_qas_list, # list: [bs, N_i, 2]
+            "gt_sub_qas": gt_sub_qas_list, # list: [bs, N_i, 2]
             "gt_ans": gt_ans_list, # list: [bs, 10]
         }
 
@@ -162,6 +162,6 @@ class VQAIntrospectEvalDataset(VQADataset):
             "text_input": text_input,
             "question_id": ann["question_id"],
             "reasoning_answer_most_common": reasoning_answer_most_common,
-            "sub_qas": ann["sub_qas"],
+            "gt_sub_qas": ann["gt_sub_qas"],
             "gt_ans": ann["gt_ans"], # vqav2 answers list of str(len=10)
         }

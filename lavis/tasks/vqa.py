@@ -337,7 +337,6 @@ class VQATask(BaseTask):
             output_text_origin = res["output_text_origin"]
             output_text_lba = res["output_text_lba"]
             gt_ans = res["gt_ans"].split(',') if vqa_acc else res["gt_ans"]
-            print('gt_ans:', type(gt_ans), gt_ans)
             if i<10:
                 print(f'{i:2} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
             '''
@@ -985,3 +984,24 @@ class VQAIntrospectTask(VQATask):
 
         return metrics
         """
+
+'''
+outputs = blip2.generate(
+    pixel_values=pixel_values,
+    input_ids=input_ids,
+    attention_mask=attention_mask,
+    do_sample=False,
+    num_beams=5,
+    max_new_tokens=10,
+    min_length=1,
+    length_penalty=-1,
+    return_dict_in_generate=True,
+    output_scores=True,
+)
+
+output_text = blip2_tokenizer.batch_decode(
+    outputs.sequences, skip_special_tokens=True
+)
+
+output_scores = torch.exp(outputs.sequences_scores)
+'''

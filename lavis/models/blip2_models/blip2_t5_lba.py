@@ -32,7 +32,7 @@ class Blip2T5LBA(Blip2T5):
     }
     
     LBA_PROMPT = {
-        "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain. Context: {sub_question}? {sub_answer}. Question: {main_question} Short answer:",
+        "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question} Short answer:",
         "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:",
         # What is a missing information about ...
         "K-type-0": "What is the who or what a person or thing is?", # Identity
@@ -287,13 +287,14 @@ class Blip2T5LBA(Blip2T5):
             elif self.decomposition == "GT":
                 # sub_qa 생성 생략
                 # generate main_answer (recomposition)
+                samples["sub_qas"] = samples.pop("gt_sub_qas")
                 output_texts_lba, _ = _predict_answers(samples, prompt_type="recomposition")
                 _sub_qas = []
                 for i in range(batch_size):
-                    if len(samples["sub_qas"][i]) == 0:
+                    if len(samples["gt_sub_qas"][i]) == 0:
                         _sub_qas.append([(None, None)])
                     else:
-                        _sub_qas.append([(samples["sub_qas"][i][0][0], samples["sub_qas"][i][0][1])])
+                        _sub_qas.append([(samples["gt_sub_qas"][i][0][0], samples["gt_sub_qas"][i][0][1])])
             elif self.decomposition == "zero-shot":
                 
                 # generate sub_question (decomposition)
@@ -433,14 +434,14 @@ class Blip2T5LBA(Blip2T5):
                     length_penalty=length_penalty,
                     return_dict_in_generate=True,
                     output_scores=True,
-                )   
+                )
             
-            confidences = outputs['sequences_scores'].tolist()
             # import pdb
             # pdb.set_trace()
             output_text = self.t5_tokenizer.batch_decode(
                 outputs['sequences'], skip_special_tokens=True, 
             )
+            confidences = torch.exp(outputs['sequences_scores']).tolist()
 
         if self._apply_lemmatizer:
             output_text = self._lemmatize(output_text)
