@@ -17,7 +17,7 @@ from lavis.tasks.vqa import VQATask, GQATask, AOKVQATask, DisCRNTask, VQAIntrosp
 from lavis.tasks.vqa_reading_comprehension import VQARCTask, GQARCTask
 from lavis.tasks.dialogue import DialogueTask
 from lavis.tasks.text_to_image_generation import TextToImageGenerationTask
-
+from lavis.tasks.videoqa import VideoQATask
 
 def setup_task(cfg):
     assert "task" in cfg.run_cfg, "Task name must be provided."
@@ -45,5 +45,6 @@ __all__ = [
     "DialogueTask",
     "TextToImageGenerationTask",
     "DisCRNTask",
-    "VQAIntrospectTask"
+    "VQAIntrospectTask",
+    "VideoQATask",
 ]
