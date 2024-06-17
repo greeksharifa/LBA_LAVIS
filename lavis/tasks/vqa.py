@@ -185,6 +185,7 @@ class VQATask(BaseTask):
             output_texts_lba = answers["output_texts_lba"]
             confidences = answers["confidences"]
             sub_qas = answers["sub_qas"]
+            used_text_input = answers["used_text_input"]
             
             batch_size = len(samples["question_id"])
             for i in range(batch_size):
@@ -198,6 +199,7 @@ class VQATask(BaseTask):
                     "output_text_origin": output_texts_origin[i],
                     "output_text_lba": output_texts_lba[i], 
                     "gt_ans": ','.join(gt_answers[i]) if type(gt_answers[i]) == list else gt_answers[i],
+                    "used_text_input": used_text_input[i],
                 })
                 pred_qa_pairs.append(new_pair)
                 if self._counts['new_pair'] < 10:
@@ -326,6 +328,8 @@ class VQATask(BaseTask):
         
         correct_num = 0.0
         cr, ic = [], []
+        bins = [[0] for _ in range(101)]
+        len_results = len(results)
 
         for i, res in enumerate(results):
             '''
@@ -338,7 +342,7 @@ class VQATask(BaseTask):
             output_text_lba = res["output_text_lba"]
             gt_ans = res["gt_ans"].split(',') if vqa_acc else res["gt_ans"]
             if i<10:
-                print(f'{i:2} | output_text_origin: {output_text_origin:12s} | gt_ans: {gt_ans}')
+                print(f'{i:2} | output_text_origin: {output_text_origin:12s} | output_text_lba: {output_text_lba:12s} | gt_ans: {gt_ans}')
             '''
             # num_match = sum([pred == gt for gt in gt_ans])
             # vqa_acc = min(1.0, num_match / 3.0)
@@ -347,6 +351,8 @@ class VQATask(BaseTask):
             vqa_acc_origin, vqa_acc_lba = self._get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc=vqa_acc, vqa_tool=vqa_tool)
             acc_origin_list.append(vqa_acc_origin)
             acc_lba_list.append(vqa_acc_lba)
+            bin_key = i // (len_results // 100 + 1)
+            bins[bin_key].append(vqa_acc_origin)
             
             if vqa_acc_origin < vqa_acc_lba:    # wrong -> right
                 cr.append(res)
@@ -385,12 +391,22 @@ class VQATask(BaseTask):
         accuracy_by_tau = [c / len(results) * 100 for c in correct_num_by_tau]
         
         import matplotlib.pyplot as plt
-        plt.plot([i / len(results) * 100 for i, _ in enumerate(accuracy_by_tau)], accuracy_by_tau)
+        plt.subplot(2, 1, 1)
+        plt.plot([i / len(results) * 100 for i, _ in enumerate(accuracy_by_tau)], accuracy_by_tau, color='b')
         plt.title(f'E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
         plt.xlabel('Confidence Percentile')
         plt.ylabel('Accuracy')
         plt.xticks([0, 25, 50, 75, 100])
         plt.savefig(os.path.join(registry.get_path("output_dir"), "accuracy_by_tau.png"))
+        
+        plt.subplot(2, 1, 2)
+        acc_bin = [sum(bin) / len(bin) for bin in bins]
+        plt.plot([i for i in range(101)], acc_bin, color='r')
+        plt.title('acc for 100 bins')
+        plt.xlabel('bins')
+        plt.ylabel('Accuracy')
+        plt.xticks([0, 25, 50, 75, 101])
+        plt.savefig(os.path.join(registry.get_path("output_dir"), "acc_bin.png"))
         
         metrics = {
             "acc_origin": f'{correct_num / len(results) * 100:.3f}',

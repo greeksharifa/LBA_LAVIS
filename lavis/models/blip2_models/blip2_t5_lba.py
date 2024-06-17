@@ -167,7 +167,8 @@ class Blip2T5LBA(Blip2T5):
                 prompt_type=_prompt_type,
             )
             
-        output_texts_origin, confidences = _predict_answers(samples)
+        results = _predict_answers(samples)
+        output_texts_origin, confidences = results['output_text'], results['confidences']
         batch_size = len(samples["text_input"])
 
         if self.decomposition == False: # baseline
@@ -213,7 +214,8 @@ class Blip2T5LBA(Blip2T5):
                             sub_questions.append(k_type_prompt.format(entity=entity_name))
                     
                     samples_for_sub_answer["text_input"] = sub_questions
-                    sub_answers, _confidences = _predict_answers(samples_for_sub_answer, _prompt_type=prompt_type, _prompt="") # K1 ~ KN
+                    results = _predict_answers(samples_for_sub_answer, _prompt_type=prompt_type, _prompt="") # K1 ~ KN
+                    sub_answers, _confidences = results['output_text'], results['confidences']
 
                     sub_questions_list.append(sub_questions)
                     sub_answers_list.append(sub_answers)
@@ -281,14 +283,15 @@ class Blip2T5LBA(Blip2T5):
                     _sub_qas.append([(sub_questions_list[max_index][i], sub_answers_list[max_index][i])])   
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas
-                output_texts_lba, _ = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
+                output_texts_lba = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")['output_text']
                 del samples_for_sub_answer, samples_for_main_answer
                 
             elif self.decomposition == "GT":
                 # sub_qa 생성 생략
                 # generate main_answer (recomposition)
                 samples["sub_qas"] = samples.pop("gt_sub_qas")
-                output_texts_lba, _ = _predict_answers(samples, _prompt_type="recomposition")
+                results = _predict_answers(samples, _prompt_type="recomposition")
+                output_texts_lba, used_text_input = results['output_text'], results['text_input']
                 _sub_qas = []
                 for i in range(batch_size):
                     if len(samples["gt_sub_qas"][i]) == 0:
@@ -299,7 +302,7 @@ class Blip2T5LBA(Blip2T5):
                 
                 # generate sub_question (decomposition)
                 if self.decomposer_name == "self":  # Image+Text
-                    sub_questions, _ = _predict_answers(samples, _prompt_type="decomposition", _max_len=20)
+                    sub_questions = _predict_answers(samples, _prompt_type="decomposition", _max_len=50)['output_text']
                 else:                               # Only Text
                     device = self.decomposer_model.device
                     decomposer_prompt = self.get_lba_prompt("decomposer")
@@ -313,7 +316,7 @@ class Blip2T5LBA(Blip2T5):
                 # generate sub_answer
                 samples_for_sub_answer = samples.copy()
                 samples_for_sub_answer["text_input"] = sub_questions
-                sub_answers, _ = _predict_answers(samples_for_sub_answer)
+                sub_answers = _predict_answers(samples_for_sub_answer)['output_text']
                 
                 # generate main_answer (recomposition)
                 samples_for_main_answer = samples.copy()
@@ -323,7 +326,8 @@ class Blip2T5LBA(Blip2T5):
                     _sub_qas.append([(sub_question, sub_answer)])   # _sub_qas shape: [bs, 1, 2]
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas 
-                output_texts_lba, _ = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
+                results = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
+                output_texts_lba, used_text_input = results['output_text'], results['text_input']
                 
                 
             return {
@@ -331,6 +335,7 @@ class Blip2T5LBA(Blip2T5):
                 'output_texts_lba': output_texts_lba,
                 'confidences': confidences,
                 'sub_qas': _sub_qas,
+                'used_text_input': used_text_input,
             }
             
         
@@ -449,4 +454,9 @@ class Blip2T5LBA(Blip2T5):
             
         # confidence = calculate_sentence_confidence(self.t5_model, self.t5_tokenizer, text_input, output_text)
 
-        return output_text, confidences
+        return {
+            "output_text": output_text,
+            "confidences": confidences,
+            "text_input": text_input,
+        }
+        # return output_text, confidences
