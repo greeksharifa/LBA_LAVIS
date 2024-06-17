@@ -26,9 +26,13 @@ from lavis.tasks.vqa import VQATask
 @registry.register_task("videoqa")
 class VideoQATask(VQATask):
     def valid_step(self, model, samples):
+        # print('|', end='')
+        return super().valid_step(model, samples)
         return self.valid_step_lba(model, samples, "answer")
         
     @dist_utils.main_process
     def _report_metrics(self, result_file, split):
+        print("_report_metrics: result_file:", result_file, "split:", split)
+        return super()._report_metrics(result_file, split)
         return self._report_metrics_lba(result_file, split, vqa_acc=False, use_vqa_tool=False)
 

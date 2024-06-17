@@ -86,7 +86,41 @@ class VideoQAInstructDataset(VideoQADataset):
 
 class DramaQAEvalDataset(VideoQADataset):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
-        super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+        # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+        
+        self.vis_root = vis_root
+        self.annotation = []
+        
+        vid_error_list = []
+        
+        for ann_path in ann_paths:
+            with open(ann_path, "r") as f:
+                loaded = json.load(f)
+                len_loaded = len(loaded)
+                for i, sample in enumerate(loaded):
+                    vid = sample["vid"]
+                    print(f'\r{i:6d}/{len_loaded:6d} : {vid}', end='')
+                    if vid in ["AnotherMissOh14_017_0000", "AnotherMissOh14_017_0520", "AnotherMissOh14_017_0521", "AnotherMissOh14_017_0522"]:
+                        continue
+                    if os.path.isfile(os.path.join(vis_root, f'{vid}.mp4')):
+                        try:
+                            frms = vis_processor(os.path.join(vis_root, f'{vid}.mp4'))
+                            # import pdb
+                            # pdb.set_trace()
+                            self.annotation.append(sample)
+                        except Exception as e:
+                            print('\nvideo processing error:', vid)
+                            vid_error_list.append(vid)
+                            # assert False, "No!"
+                        
+        print('\n\nvid_error_list:', vid_error_list)
+        # json.dump(vid_error_list, open('vid_error_list.json', 'w'))
+        
+        self.vis_processor = vis_processor
+        self.text_processor = text_processor
+
+        self._add_instance_ids()
+        
         print("DramaQAEvalDataset")
         print('vis_processor : ', vis_processor)
         print('text_processor : ', text_processor)
@@ -94,19 +128,24 @@ class DramaQAEvalDataset(VideoQADataset):
         print('ann_paths : ', ann_paths)
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
         
+        
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        vname = ann["video"]
-        vpath = os.path.join(self.vis_root, vname)
+        vname = ann["vid"]
+        vpath = os.path.join(self.vis_root, f'{vname}.mp4')
 
-        frms = self.vis_processor(vpath)
-        question = self.text_processor(ann["question"])
+        try:
+            frms = self.vis_processor(vpath)
+        except Exception as e:
+            print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
+            assert False, e
+        question = self.text_processor(ann["que"])
 
         return {
             "video": frms,
             "text_input": question,
-            "answer": ann["answer"],
-            "question_id": ann["question_id"],
+            "answer": ann["answers"][ann["correct_idx"]],
+            "question_id": ann["qid"],
             "instance_id": ann["instance_id"],
         }

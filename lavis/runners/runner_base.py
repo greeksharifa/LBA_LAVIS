@@ -488,7 +488,6 @@ class RunnerBase:
             dataset=self.datasets[split_name],
         )
         results = self.task.evaluation(model, data_loader)
-
         if results is not None:
             return self.task.after_evaluation(
                 val_result=results,

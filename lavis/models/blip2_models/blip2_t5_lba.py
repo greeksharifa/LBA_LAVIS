@@ -153,7 +153,7 @@ class Blip2T5LBA(Blip2T5):
         length_penalty=-1,
         **kwargs
     ):
-        def _predict_answers(_samples, prompt_type="default", prompt=prompt, _max_len=max_len):
+        def _predict_answers(_samples, _prompt_type="default", _prompt=prompt, _max_len=max_len):
             return self.predict_answers(
                 samples=_samples,
                 num_beams=num_beams,
@@ -162,9 +162,9 @@ class Blip2T5LBA(Blip2T5):
                 min_len=min_len,
                 num_ans_candidates=num_ans_candidates,
                 answer_list=answer_list,
-                prompt=prompt,
+                prompt=_prompt,
                 length_penalty=length_penalty,
-                prompt_type=prompt_type,
+                prompt_type=_prompt_type,
             )
             
         output_texts_origin, confidences = _predict_answers(samples)
@@ -213,7 +213,7 @@ class Blip2T5LBA(Blip2T5):
                             sub_questions.append(k_type_prompt.format(entity=entity_name))
                     
                     samples_for_sub_answer["text_input"] = sub_questions
-                    sub_answers, _confidences = _predict_answers(samples_for_sub_answer, prompt_type=prompt_type, prompt="") # K1 ~ KN
+                    sub_answers, _confidences = _predict_answers(samples_for_sub_answer, _prompt_type=prompt_type, _prompt="") # K1 ~ KN
 
                     sub_questions_list.append(sub_questions)
                     sub_answers_list.append(sub_answers)
@@ -281,14 +281,14 @@ class Blip2T5LBA(Blip2T5):
                     _sub_qas.append([(sub_questions_list[max_index][i], sub_answers_list[max_index][i])])   
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas
-                output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
+                output_texts_lba, _ = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
                 del samples_for_sub_answer, samples_for_main_answer
                 
             elif self.decomposition == "GT":
                 # sub_qa 생성 생략
                 # generate main_answer (recomposition)
                 samples["sub_qas"] = samples.pop("gt_sub_qas")
-                output_texts_lba, _ = _predict_answers(samples, prompt_type="recomposition")
+                output_texts_lba, _ = _predict_answers(samples, _prompt_type="recomposition")
                 _sub_qas = []
                 for i in range(batch_size):
                     if len(samples["gt_sub_qas"][i]) == 0:
@@ -299,7 +299,7 @@ class Blip2T5LBA(Blip2T5):
                 
                 # generate sub_question (decomposition)
                 if self.decomposer_name == "self":  # Image+Text
-                    sub_questions, _ = _predict_answers(samples, prompt_type="decomposition", _max_len=20)
+                    sub_questions, _ = _predict_answers(samples, _prompt_type="decomposition", _max_len=20)
                 else:                               # Only Text
                     device = self.decomposer_model.device
                     decomposer_prompt = self.get_lba_prompt("decomposer")
@@ -323,7 +323,7 @@ class Blip2T5LBA(Blip2T5):
                     _sub_qas.append([(sub_question, sub_answer)])   # _sub_qas shape: [bs, 1, 2]
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas 
-                output_texts_lba, _ = _predict_answers(samples_for_main_answer, prompt_type="recomposition")
+                output_texts_lba, _ = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
                 
                 
             return {
@@ -439,9 +439,9 @@ class Blip2T5LBA(Blip2T5):
             # import pdb
             # pdb.set_trace()
             output_text = self.t5_tokenizer.batch_decode(
-                outputs['sequences'], skip_special_tokens=True, 
+                outputs.sequences, skip_special_tokens=True, 
             )
-            confidences = torch.exp(outputs['sequences_scores']).tolist()
+            confidences = torch.exp(outputs.sequences_scores).tolist()
 
         if self._apply_lemmatizer:
             output_text = self._lemmatize(output_text)

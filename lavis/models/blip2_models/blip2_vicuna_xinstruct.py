@@ -76,6 +76,7 @@ class Blip2VicunaXInstruct(Blip2Base):
         "audio": " audio: ",
     }
 
+
     def __init__(
         self,
 
@@ -487,6 +488,8 @@ class Blip2VicunaXInstruct(Blip2Base):
         self.remove_start=remove_start
         if self.projection_only:
             self.qformer_text_input=False
+            
+        self._cnt = 0
 
     def concat_text_input_output(self, input_ids, input_atts, output_ids, output_atts):
         input_part_targets_len = []
@@ -1521,6 +1524,15 @@ class Blip2VicunaXInstruct(Blip2Base):
         length_penalty=-1,
         **kwargs
         ):
+        if self._cnt < 2:
+            self._cnt += 1
+            print("predict_answers")
+            for k, v in samples.items():
+                if type(v) == torch.Tensor:
+                    print(k, '\t:\t', v.size())
+                else:
+                    print(k, '\t:\t', v)
+        
         if samples == None or samples == {}:
             return None
 

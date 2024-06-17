@@ -81,6 +81,7 @@ run:
   evaluate: True
   # train_splits: ["train"]
   valid_splits: ["val"]
+  test_splits: ["val"]
 
 
   device: "cuda"
