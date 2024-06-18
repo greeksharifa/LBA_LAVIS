@@ -80,9 +80,9 @@ class Blip2T5LBA(Blip2T5):
         assert decomposition in ["K-type", "zero-shot", "GT", False], f"decomposition should be one of ['K-type', 'zero-shot', 'GT', False], but got {decomposition}."
         self.decomposition = decomposition
         
-        self.decomposer_name = f'google/flan-t5-{decomposer_name}'
+        self.decomposer_name = decomposer_name 
         if decomposition in ["zero-shot"] and decomposer_name != "self":
-            # LBA TODO: load decomposer model like flan_t5_base (not blip2)
+            self.decomposer_name = f'google/flan-t5-{decomposer_name}'
             self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
             self.decomposer_model = T5ForConditionalGeneration.from_pretrained(
                 self.decomposer_name, 
