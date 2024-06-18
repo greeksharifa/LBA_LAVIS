@@ -33,6 +33,7 @@ class Blip2T5LBA(Blip2T5):
     
     LBA_PROMPT = {
         "recomposer": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question} Short answer:",
+        # "recomposer": "Context: are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question} Short answer:",
         "decomposer": "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:",
         # What is a missing information about ...
         "K-type-0": "What is the who or what a person or thing is?", # Identity
@@ -79,7 +80,7 @@ class Blip2T5LBA(Blip2T5):
         assert decomposition in ["K-type", "zero-shot", "GT", False], f"decomposition should be one of ['K-type', 'zero-shot', 'GT', False], but got {decomposition}."
         self.decomposition = decomposition
         
-        self.decomposer_name = decomposer_name
+        self.decomposer_name = f'google/flan-t5-{decomposer_name}'
         if decomposition in ["zero-shot"] and decomposer_name != "self":
             # LBA TODO: load decomposer model like flan_t5_base (not blip2)
             self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
@@ -310,7 +311,7 @@ class Blip2T5LBA(Blip2T5):
                     text_input = [decomposer_prompt.format(main_question=main_question) for main_question in samples["text_input"]]
                     input_ids = self.decomposer_tokenizer(text_input, padding="longest", return_tensors="pt").input_ids.to(device)
                     # outputs = self.decomposer_model.generate(input_ids)
-                    outputs = self.decomposer_model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_token=20)
+                    outputs = self.decomposer_model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_tokens=50)
                     sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
                 
                 # generate sub_answer
