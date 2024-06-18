@@ -26,7 +26,7 @@ datasets:
 #             storage: '/export/share/datasets/vision/coco/images/'
 
 run:
-  task: vqa
+  task: ok_vqa
   # optimization-specific
   batch_size_train: 16
   batch_size_eval: 64

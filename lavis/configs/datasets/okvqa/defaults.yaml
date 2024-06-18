@@ -25,13 +25,13 @@ datasets:
           url:
               # TODO make this order insensitive
               - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/okvqa_val_eval.json
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/okvqa_answer_list_train.json
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/OpenEnded_mscoco_val2014_questions.json
-              - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/mscoco_val2014_annotations.json
+              # - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/okvqa_answer_list_train.json
+              # - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/OpenEnded_mscoco_val2014_questions.json
+              # - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/mscoco_val2014_annotations.json
           storage:
               - okvqa/annotations/vqa_val_eval.json
-              - okvqa/annotations/answer_list.json
-              - okvqa/annotations/OpenEnded_mscoco_val2014_questions.json
-              - okvqa/annotations/mscoco_val2014_annotations.json
+              # - okvqa/annotations/answer_list.json
+              # - okvqa/annotations/OpenEnded_mscoco_val2014_questions.json
+              # - okvqa/annotations/mscoco_val2014_annotations.json
       images:
           storage: coco/images/

@@ -5,6 +5,9 @@
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
 
+import os
+from PIL import Image
+
 import torch
 
 from lavis.datasets.datasets.base_dataset import BaseDataset
@@ -53,3 +56,42 @@ class VQAEvalDataset(BaseDataset):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
         super().__init__(vis_processor, text_processor, vis_root, ann_paths)
 
+
+class OKVQAEvalDataset(VQAEvalDataset):
+    def collater(self, samples):
+        (
+            image_list,
+            text_input_list,
+            question_id_list,
+            # instance_id_list,
+            gt_ans_list,
+        ) = ([], [], [], [])
+        
+        for sample in samples:
+            image_list.append(sample["image"])
+            text_input_list.append(sample["text_input"])
+            question_id_list.append(sample["question_id"])
+            gt_ans_list.append(sample["gt_ans"])
+            
+        return {
+            "image": torch.stack(image_list, dim=0),
+            "text_input": text_input_list,
+            "question_id": question_id_list,
+            "gt_ans": gt_ans_list, # list: [bs, 10]
+        }
+    
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+
+        image_path = os.path.join(self.vis_root, ann["image"])
+        image = Image.open(image_path).convert("RGB")
+
+        image = self.vis_processor(image)
+        text_input = self.text_processor(ann["question"])
+
+        return {
+            "image": image,
+            "text_input": text_input,
+            "question_id": ann["question_id"],
+            "gt_ans": ann["answer"], # vqav2 answers list of str(len=10)
+        }

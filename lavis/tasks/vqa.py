@@ -469,7 +469,17 @@ def convert_to_coco_gt(data, outpath_questions, outpath_annotations, split, samp
     json.dump(annotations_data, open(outpath_annotations, 'w'))
     print(f"Saved annotation data at {outpath_annotations}")
 
-        
+
+
+@registry.register_task("ok_vqa")
+class OKVQATask(VQATask):
+    def valid_step(self, model, samples):
+        return self.valid_step_lba(model, samples, "gt_ans")
+    
+    @dist_utils.main_process
+    def _report_metrics(self, result_file, split):
+        return self._report_metrics_lba(result_file, split, vqa_acc=True, use_vqa_tool=False)
+    
 
 @registry.register_task("aok_vqa")
 class AOKVQATask(VQATask):
