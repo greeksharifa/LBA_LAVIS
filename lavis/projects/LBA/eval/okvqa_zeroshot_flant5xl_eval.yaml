@@ -44,7 +44,7 @@ run:
 
   evaluate: True
   test_splits: ["val"]
-  # valid_splits: ["val"]
+  valid_splits: ["val"]
 
   # distribution-specific
   device: "cuda"

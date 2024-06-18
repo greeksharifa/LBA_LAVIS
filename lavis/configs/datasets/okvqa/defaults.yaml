@@ -21,7 +21,7 @@ datasets:
               - okvqa/annotations/okvqa_train.json
               # - okvqa/annotations/OpenEnded_mscoco_train2014_questions.json
               # - okvqa/annotations/mscoco_train2014_annotations.json
-        test:
+        val:
           url:
               # TODO make this order insensitive
               - https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/okvqa/okvqa_val_eval.json
