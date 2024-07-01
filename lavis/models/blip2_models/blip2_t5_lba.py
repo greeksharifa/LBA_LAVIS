@@ -335,6 +335,8 @@ class Blip2T5LBA(Blip2T5):
                 results = _predict_answers(samples, _prompt_type="default", _prompt="Focus on entities in the question. " + prompt)
                 output_texts_lba, used_text_input, new_confidences = results['output_text'], results['text_input'], results['confidences']
                 _sub_qas = []
+                for i in range(batch_size):
+                    _sub_qas.append([("dummy sub q", "dummy sub a")])
                 
             return {
                 'output_texts_origin': output_texts_origin,
