@@ -91,7 +91,43 @@ class Blip2Base(BaseModel):
         elif os.path.isfile(url_or_filename):
             checkpoint = torch.load(url_or_filename, map_location="cpu")
         else:
-            raise RuntimeError("checkpoint url or path is invalid")
+            def load_model_from_multiple_bins(model_name_or_path):
+                """
+                Load a model from multiple .bin files.
+
+                Args:
+                    model_name_or_path (str): The name of the model or the path to the model config file.
+                    bins_directory (str): The directory where the .bin files are stored.
+
+                Returns:
+                    model: The loaded model.
+                """
+                bins_directory = f'/data2/{model_name_or_path}'
+                import os
+                import torch
+                from transformers import AutoModel, AutoTokenizer, AutoConfig
+                # Load the model configuration
+                config = AutoConfig.from_pretrained(model_name_or_path)
+
+                # Initialize the model
+                model = AutoModel.from_config(config)
+
+                # Load all .bin files
+                bin_files = [os.path.join(bins_directory, f) for f in os.listdir(bins_directory) if f.endswith('.bin')]
+
+                # Merge the state dictionaries
+                state_dict = {}
+                for bin_file in bin_files:
+                    part_state_dict = torch.load(bin_file, map_location=torch.device('cpu'))
+                    state_dict.update(part_state_dict)
+                
+                # Load the merged state dictionary into the model
+                model.load_state_dict(state_dict, strict=False)
+                
+                return model
+                
+            checkpoint = {"model": load_model_from_multiple_bins(url_or_filename)}
+            # raise RuntimeError("checkpoint url or path is invalid")
 
         state_dict = checkpoint["model"]
 

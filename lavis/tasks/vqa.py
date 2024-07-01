@@ -187,6 +187,7 @@ class VQATask(BaseTask):
             output_texts_origin = answers["output_texts_origin"]
             output_texts_lba = answers["output_texts_lba"]
             confidences = answers["confidences"]
+            new_confidences = answers["new_confidences"]
             sub_qas = answers["sub_qas"]
             used_text_input = answers["used_text_input"]
             
@@ -203,6 +204,7 @@ class VQATask(BaseTask):
                     "output_text_lba": output_texts_lba[i], 
                     "gt_ans": ','.join(gt_answers[i]) if type(gt_answers[i]) == list else gt_answers[i],
                     "used_text_input": used_text_input[i],
+                    "new_confidences": new_confidences[i],
                 })
                 pred_qa_pairs.append(new_pair)
                 if self._counts['new_pair'] < 10:
@@ -289,9 +291,9 @@ class VQATask(BaseTask):
         """
         if vqa_acc:
             num_match_origin = sum([output_text_origin == gt for gt in gt_ans])
-            vqa_acc_origin = min(1.0, num_match_origin / 3.0)
+            vqa_acc_origin = min(1.0, num_match_origin)# / 3.0)
             num_match_lba = sum([output_text_lba == gt for gt in gt_ans])
-            vqa_acc_lba = min(1.0, num_match_lba / 3.0)
+            vqa_acc_lba = min(1.0, num_match_lba)# / 3.0)
             
             return vqa_acc_origin, vqa_acc_lba
         else:
@@ -384,6 +386,8 @@ class VQATask(BaseTask):
             vqa_acc_origin, vqa_acc_lba = self._get_acc(output_text_origin, output_text_lba, gt_ans, vqa_acc=vqa_acc, vqa_tool=vqa_tool)
             
             score_change = vqa_acc_lba - vqa_acc_origin
+            # if res['confidence'] > res['new_confidences']: # de/recompose 후에 confidence가 낮아지면 원래 답변 채택
+                # score_change = 0.
             new_num = correct_num_by_tau[-1] + score_change
             if new_num > max_num_by_tau:
                 max_num_by_tau = new_num

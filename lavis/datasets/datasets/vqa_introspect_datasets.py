@@ -62,7 +62,7 @@ class VQAIntrospectEvalDataset(VQADataset):
             v.update({
                 "gt_sub_qas": gt_sub_qas,
                 "question_id": k,
-                "gt_ans": vqav2_answers[k]
+                "gt_ans": vqav2_answers[k]# v["reasoning_answer_most_common"]# 
             })
             
             self.annotation.append(v)

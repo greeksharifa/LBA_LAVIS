@@ -77,7 +77,7 @@ class Blip2T5LBA(Blip2T5):
             apply_lemmatizer=apply_lemmatizer,
         )
 
-        assert decomposition in ["K-type", "zero-shot", "GT", False], f"decomposition should be one of ['K-type', 'zero-shot', 'GT', False], but got {decomposition}."
+        assert decomposition in ["K-type", "zero-shot", "GT", "Focus", False], f"decomposition should be one of ['K-type', 'zero-shot', 'GT', 'Focus', False], but got {decomposition}."
         self.decomposition = decomposition
         
         self.decomposer_name = decomposer_name 
@@ -174,7 +174,8 @@ class Blip2T5LBA(Blip2T5):
 
         if self.decomposition == False: # baseline
             return {
-                'pred_answers': output_texts_origin
+                'pred_answers': output_texts_origin,
+                # 'confidences': confidences,
             }
         else:    
             if self.decomposition == "K-type":
@@ -292,13 +293,13 @@ class Blip2T5LBA(Blip2T5):
                 # generate main_answer (recomposition)
                 samples["sub_qas"] = samples.pop("gt_sub_qas")
                 results = _predict_answers(samples, _prompt_type="recomposition")
-                output_texts_lba, used_text_input = results['output_text'], results['text_input']
+                output_texts_lba, used_text_input, new_confidences = results['output_text'], results['text_input'], results['confidences']
                 _sub_qas = []
                 for i in range(batch_size):
-                    if len(samples["gt_sub_qas"][i]) == 0:
+                    if len(samples["sub_qas"][i]) == 0:
                         _sub_qas.append([(None, None)])
                     else:
-                        _sub_qas.append([(samples["gt_sub_qas"][i][0][0], samples["gt_sub_qas"][i][0][1])])
+                        _sub_qas.append([(samples["sub_qas"][i][0][0], samples["sub_qas"][i][0][1])])
             elif self.decomposition == "zero-shot":
                 
                 # generate sub_question (decomposition)
@@ -328,13 +329,18 @@ class Blip2T5LBA(Blip2T5):
                 
                 samples_for_main_answer["sub_qas"] = _sub_qas 
                 results = _predict_answers(samples_for_main_answer, _prompt_type="recomposition")
-                output_texts_lba, used_text_input = results['output_text'], results['text_input']
-                
+                output_texts_lba, used_text_input, new_confidences = results['output_text'], results['text_input'], results['confidences']
+            elif self.decomposition == "Focus":
+                # samples["sub_qas"] = samples.pop("gt_sub_qas")
+                results = _predict_answers(samples, _prompt_type="default", _prompt="Focus on entities in the question. " + prompt)
+                output_texts_lba, used_text_input, new_confidences = results['output_text'], results['text_input'], results['confidences']
+                _sub_qas = []
                 
             return {
                 'output_texts_origin': output_texts_origin,
                 'output_texts_lba': output_texts_lba,
                 'confidences': confidences,
+                'new_confidences': new_confidences,
                 'sub_qas': _sub_qas,
                 'used_text_input': used_text_input,
             }

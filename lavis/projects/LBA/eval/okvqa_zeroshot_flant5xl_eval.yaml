@@ -29,7 +29,7 @@ run:
   task: ok_vqa
   # optimization-specific
   batch_size_train: 16
-  batch_size_eval: 64
+  batch_size_eval: 32
   num_workers: 4
 
   # inference-specific
@@ -39,7 +39,7 @@ run:
   inference_method: "generate"
   prompt: "Question: {} Short answer:"
 
-  seed: 42
+  seed: 42242
   output_dir: "output/LBA/OKVQA"
 
   evaluate: True
