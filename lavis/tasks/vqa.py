@@ -291,9 +291,9 @@ class VQATask(BaseTask):
         """
         if vqa_acc:
             num_match_origin = sum([output_text_origin == gt for gt in gt_ans])
-            vqa_acc_origin = min(1.0, num_match_origin)# / 3.0)
+            vqa_acc_origin = min(1.0, num_match_origin / 3.0)
             num_match_lba = sum([output_text_lba == gt for gt in gt_ans])
-            vqa_acc_lba = min(1.0, num_match_lba)# / 3.0)
+            vqa_acc_lba = min(1.0, num_match_lba / 3.0)
             
             return vqa_acc_origin, vqa_acc_lba
         else:
