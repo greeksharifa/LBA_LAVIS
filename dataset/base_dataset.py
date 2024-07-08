@@ -7,17 +7,11 @@ from torch.utils.data import Dataset
 
 
 class BaseDataset(Dataset):
-    def __init__(self, args):
-        # self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[]):
+    def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[]):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
         """
-        vis_root=args.vis_root
-        vis_processor=args.vis_processor
-        text_processor=args.text_processor
-        ann_paths=args.ann_paths
-        
         self.vis_root = vis_root
         self.annotation = []
         for ann_path in ann_paths:
