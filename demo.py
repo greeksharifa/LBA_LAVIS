@@ -1,14 +1,20 @@
 import argparse
+from tqdm import tqdm
+from datetime import datetime
 
 from torch.utils.data import DataLoader
 
 from dataset.VQA_Introspect import VQAIntrospectDataset
+from recomposer import Recomposer
 
 def get_args():
     parser = argparse.ArgumentParser(description='LBA method')
+    
+    # model
+    parser.add_argument('--model_name', type=str, default='Salesforce/blip2-flan-t5-xl', help='model name')
+    
     # path
     parser.add_argument('--dataset_path', type=str, default='/data1/VQA-Introspect/VQAIntrospect_valv1.0.json', help='path to the dataset')
-    # vis_root
     parser.add_argument('--vis_root', type=str, default='/data1/coco/images/', help='Root directory of images (e.g. coco/images/)')
     
     '''
@@ -24,40 +30,34 @@ def get_args():
 
 def main():
     args = get_args()
-    
-    
-
-    # Create an instance of your dataset
+    s = datetime.now()
     dataset = VQAIntrospectDataset(None, None, args.vis_root, [args.dataset_path, '/data1/VQA/v2/v2_mscoco_val2014_annotations.json'])
-
-    # Create a DataLoader to load the dataset
-    dataloader = DataLoader(dataset, batch_size=2, shuffle=False, collate_fn=dataset.collater)
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=False, collate_fn=dataset.collater)
+    print('dataset loading time : ', datetime.now()-s)
+    s = datetime.now()
+    recomposer = Recomposer(args.model_name)
+    print('recomposer loading time : ', datetime.now()-s)
     
+    s = datetime.now()
     for i, batch in enumerate(dataloader):
-        print('i:', i)
-        from pprint import pprint
-        pprint(batch, width=300)
+        # print('i:', i)
+        # from pprint import pprint
+        # pprint(batch, width=300)
         
-        
-        import requests
-        from PIL import Image
-        from transformers import Blip2Processor, Blip2ForConditionalGeneration
-
-        processor = Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl")
-        model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-flan-t5-xl").to("cuda")#, device_map="auto")
-
         images = batch['image']
         questions = batch['text_input']
-        inputs = processor(images, questions, return_tensors="pt", padding=True).to("cuda")#, torch.float16)
-
-        out = model.generate(**inputs)
-        print('-' * 20 + 'result' + '-' * 20)
-        print(out)
-        print(processor.batch_decode(out, skip_special_tokens=True))
         
+        print(f'{i:5d}/{len(dataloader)} : ', recomposer(images, questions))
+        # output_text, output_scores = recomposer(images, questions)
+        # print(output_text)
+        # print(output_scores)
         
-        break
-    
+        # inputs = processor(images, questions, return_tensors="pt", padding=True).to("cuda")#, torch.float16)
+        # out = model.generate(**inputs)
+        # print(f'{i:5d}/{len(dataloader)} : ', processor.batch_decode(out, skip_special_tokens=True))
+        if i >= 10:
+            break
+    print('inference time : ', datetime.now()-s)
     
     
 if __name__ == '__main__':
