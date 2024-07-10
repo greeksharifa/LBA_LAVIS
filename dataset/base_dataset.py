@@ -1,5 +1,5 @@
 import json
-from typing import Iterable
+from typing import List
 import pandas as pd
 import torch
 
@@ -50,3 +50,33 @@ class BaseDataset(Dataset):
     def _add_instance_ids(self, key="instance_id"):
         for idx, ann in enumerate(self.annotation):
             ann[key] = str(idx)
+
+
+def get_text_input(
+    prompt_type:str="default",
+    main_questions:List[str]='',
+    sub_questions:List[str]='',
+    sub_answers:List[str]='',
+):
+    assert prompt_type in ["default", "decomposer", "sub_answer", "recomposer"], f"Invalid prompt type: {prompt_type}"
+    
+    if prompt_type == "default": # for default vqa or generating sub-answer
+        prompt = "Question: {main_question} Short answer:"
+        return [prompt.format(main_question=main_question) for main_question in main_questions]
+    
+    elif prompt_type == "decomposer":
+        prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:"
+        return [prompt.format(main_question=main_question) for main_question in main_questions]
+    
+    elif prompt_type == "sub_answer":
+        prompt = "Question: {sub_question} Short answer:"
+        return [prompt.format(sub_question=sub_question) for sub_question in sub_questions]
+        
+    elif prompt_type == "recomposer":
+        prompt = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question} Short answer:"
+        return [prompt.format(main_question=main_question, sub_question=sub_question, sub_answer=sub_answer) 
+                for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
+        
+    else:
+        raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
+    
