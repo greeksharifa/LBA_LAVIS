@@ -1,9 +1,32 @@
 import requests
 from PIL import Image
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 
 import torch
 from torch import nn
+
+
+class Decomposer(nn.Module):
+    def __init__(self, model_name, device="cuda"):
+        super().__init__()
+        
+        self.device = device
+        self.decomposer_name = f'google/flan-t5-{model_name}'
+        self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
+        self.decomposer_model = T5ForConditionalGeneration.from_pretrained(
+            self.decomposer_name, 
+            torch_dtype=torch.bfloat16,
+            # load_in_4bit=True,
+            # device_map="auto",
+        ).to(device)
+
+    def forward(self, text_inputs):
+        input_ids = self.decomposer_tokenizer(text_inputs, padding="longest", return_tensors="pt").input_ids.to(self.device)
+        # outputs = self.decomposer_model.generate(input_ids)
+        outputs = self.decomposer_model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_tokens=50)
+        sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return sub_questions
 
 
 class Recomposer(nn.Module):
@@ -13,8 +36,8 @@ class Recomposer(nn.Module):
         self.model = Blip2ForConditionalGeneration.from_pretrained(model_name).to(device)
         self.device = device
 
-    def forward(self, images, questions):
-        inputs = self.processor(images, questions, return_tensors="pt", padding=True).to(self.device)
+    def forward(self, images, text_inputs):
+        inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
         # out = self.model.generate(**inputs)
         # return self.processor.batch_decode(out, skip_special_tokens=True)
 

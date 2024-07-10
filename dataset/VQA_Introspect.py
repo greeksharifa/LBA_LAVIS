@@ -9,7 +9,7 @@ from dataset.base_dataset import BaseDataset
 
 
 class VQAIntrospectDataset(BaseDataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
         # Initialize your dataset here
@@ -45,6 +45,10 @@ class VQAIntrospectDataset(BaseDataset):
             })
             
             self.annotation.append(v)
+            if 0 <= num_data <= len(self.annotation):
+                break
+            
+        print('len of self.annotation : ', len(self.annotation))
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
