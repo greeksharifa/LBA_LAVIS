@@ -111,3 +111,19 @@ class VQAIntrospectDataset(BaseDataset):
             "gt_sub_qas": gt_sub_qas_list, # list: [bs, N_i, 2]
             "gt_ans": gt_ans_list, # list: [bs, 10]
         }
+        
+    @staticmethod
+    def get_accuracy(outputs, targets):
+        """
+        args
+        - outputs: list of str.         shape: [bsz]
+        - targets: list of list of str. shape: [bsz, 10]
+        """
+        # get vqa_acc
+        acc_list = []
+        for out, target_list in zip(outputs, targets):
+            num_match = sum([out == target for target in target_list])
+            vqa_acc = min(1.0, num_match / 3.0)
+            acc_list.append(vqa_acc)
+        
+        return acc_list
