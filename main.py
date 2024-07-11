@@ -206,7 +206,7 @@ def main():
     
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
-    e_cr, e_ic = VQAIntrospectDataset.get_e_cr_e_ic(acc_base_list, acc_lba_list, vqa_acc=cfg.runner_cfg.vqa_acc)
+    e_cr, e_ic = VQAIntrospectDataset.get_e_cr_e_ic(acc_base_list, acc_lba_list, vqa_acc=cfg.datasets_cfg.vqa_acc)
     
     
     plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
