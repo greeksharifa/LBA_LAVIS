@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader
 
+from configs.config import Config
 from dataset.VQA_Introspect import VQAIntrospectDataset
 from dataset.base_dataset import get_text_input
 from model import Decomposer, Recomposer
@@ -16,11 +17,13 @@ from model import Decomposer, Recomposer
 from utils.misc import SmoothedValue, MetricLogger
 
 
-def get_args():
+def parse_args():
     parser = argparse.ArgumentParser(description='LBA method')
     
-    # visualize store_true
+    # mode
     parser.add_argument('--visualize', action='store_true', help='visualize the results')
+    # match1ok
+    parser.add_argument('--match1ok', action='store_true', help='match1ok')
 
     # model
     parser.add_argument('--recomposer_name', type=str, default='Salesforce/blip2-flan-t5-xl', help='recomposer_name, ex) "Salesforce/blip2-flan-t5-xl"')
@@ -34,7 +37,7 @@ def get_args():
     parser.add_argument('--num_data', type=int, default=-1, help='number of data to use')
 
     # output & log
-    parser.add_argument('--print_freq', type=int, default=4, help='# of logs per epoch')
+    parser.add_argument('--print_freq', type=int, default=50, help='# of logs per epoch')
     parser.add_argument('--output_dir', type=str, default='output/', help='output directory')
     parser.add_argument('--use_vqa_tool', action='store_true', help='use vqa tool or not')
     parser.add_argument('--num_bin', type=int, default=50, help='number of bins for acc')
@@ -44,12 +47,24 @@ def get_args():
     parser.add_argument('--sum', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
     '''
 
+    parser.add_argument(
+        "--options",
+        nargs="+",
+        help="override some settings in the used config, the key-value pair "
+        "in xxx=yyy format will be merged into config file (deprecate), "
+        "change to --cfg-options instead.",
+    )
+    
     args = parser.parse_args()
     return args
 
 
 def main():
-    args = get_args()
+    # cfg = Config(parse_args())
+    args = parse_args()
+    output_dir = os.path.join(args.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
+    os.makedirs(output_dir)
+    json.dump(vars(args), open(os.path.join(output_dir, 'args.json'), 'w'), indent=4)
     
     s = datetime.now()
     dataset = VQAIntrospectDataset(
@@ -143,12 +158,12 @@ def main():
                     })
                 )
 
-        json.dump(results, open(os.path.join(args.output_dir, 'results_base.json'), 'w'), indent=4)
+        json.dump(results, open(os.path.join(output_dir, 'results_base.json'), 'w'), indent=4)
 
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
     else:
-        results = json.load(open(os.path.join(args.output_dir, 'results_base.json'), 'r'))
+        results = json.load(open(os.path.join(output_dir, 'results_base.json'), 'r'))
         
         total_base_match, total_cnt = 0., 0
         
@@ -167,15 +182,15 @@ def main():
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
     N = len(results)
-    bins = [[] for _ in range(args.num_bin+1)]
+    bins = [[] for _ in range(args.num_bin)]
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], match1ok=args.match1ok)
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
         
-        bin_key = i // (N // args.num_bin + 1)
+        bin_key = i // (N // args.num_bin)
         bins[bin_key].append(acc_base)
         
         cur_match += acc_lba - acc_base
@@ -210,7 +225,7 @@ def main():
     plt.xlabel('bins')
     plt.ylabel('Accuracy')
     plt.xticks([(args.num_bin // 5) * i for i in range(6)])
-    fig_path = os.path.join(args.output_dir, "acc_bin.png")
+    fig_path = os.path.join(output_dir, "acc_bin.png")
     plt.savefig(fig_path, dpi=300)
     print(f'saved fig at {fig_path}')
     
@@ -224,7 +239,7 @@ def main():
     }
     print("metrics:", json.dumps(metrics, indent=4))
 
-    with open(os.path.join(args.output_dir, "evaluate.txt"), "w") as f:
+    with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
         
     
