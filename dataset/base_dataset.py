@@ -50,6 +50,15 @@ class BaseDataset(Dataset):
     def _add_instance_ids(self, key="instance_id"):
         for idx, ann in enumerate(self.annotation):
             ann[key] = str(idx)
+            
+    def get_e_cr_e_ic(acc_origin_list, acc_lba_list, vqa_acc:bool):
+        if vqa_acc:
+            e_cr = sum([1 if acc_lba > acc_origin and acc_origin < 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc < 0.5 else 0 for acc in acc_origin_list]) * 100
+            e_ic = sum([1 if acc_lba < acc_origin and acc_origin > 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc > 0.5 else 0 for acc in acc_origin_list]) * 100
+        else:
+            e_cr = sum([1 if acc_lba and not acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if not acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+            e_ic = sum([1 if not acc_lba and acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+        return e_cr, e_ic
 
 
 def get_text_input(
@@ -61,20 +70,20 @@ def get_text_input(
     assert prompt_type in ["default", "decomposer", "sub_answer", "recomposer"], f"Invalid prompt type: {prompt_type}"
     
     if prompt_type == "default": # for default vqa or generating sub-answer
-        prompt = "Question: {main_question} Short answer:"
-        return [prompt.format(main_question=main_question) for main_question in main_questions]
+        prompt = "Question: {main_question}? Short answer:"
+        return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
     elif prompt_type == "decomposer":
-        prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question} Perception Question:"
-        return [prompt.format(main_question=main_question) for main_question in main_questions]
+        prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+        return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
     elif prompt_type == "sub_answer":
-        prompt = "Question: {sub_question} Short answer:"
-        return [prompt.format(sub_question=sub_question) for sub_question in sub_questions]
+        prompt = "Question: {sub_question}? Short answer:"
+        return [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
         
     elif prompt_type == "recomposer":
-        prompt = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question} Short answer:"
-        return [prompt.format(main_question=main_question, sub_question=sub_question, sub_answer=sub_answer) 
+        prompt = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question}? Short answer:"
+        return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
                 for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
         
     else:

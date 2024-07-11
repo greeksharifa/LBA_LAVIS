@@ -57,7 +57,7 @@ class Recomposer(nn.Module):
         output_text = self.processor.batch_decode(
             outputs.sequences, skip_special_tokens=True
         )
-        output_scores = torch.exp(outputs.sequences_scores)
+        output_scores = torch.exp(outputs.sequences_scores).tolist()
 
         return output_text, output_scores
 
