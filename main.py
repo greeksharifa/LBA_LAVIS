@@ -1,6 +1,7 @@
 import argparse
 import os
 import json
+from omegaconf import OmegaConf
 from tqdm import tqdm
 from datetime import datetime
 from pprint import pprint
@@ -19,7 +20,9 @@ from utils.misc import SmoothedValue, MetricLogger
 
 def parse_args():
     parser = argparse.ArgumentParser(description='LBA method')
+    parser.add_argument("--cfg-path", default='configs/runner.yaml', help="path to configuration file.")
     
+    '''
     # mode
     parser.add_argument('--visualize', action='store_true', help='visualize the results')
     # match1ok
@@ -41,10 +44,6 @@ def parse_args():
     parser.add_argument('--output_dir', type=str, default='output/', help='output directory')
     parser.add_argument('--use_vqa_tool', action='store_true', help='use vqa tool or not')
     parser.add_argument('--num_bin', type=int, default=50, help='number of bins for acc')
-
-    '''
-    parser.add_argument('integers', metavar='N', type=int, nargs='+', help='an integer for the accumulator')
-    parser.add_argument('--sum', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
     '''
 
     parser.add_argument(
@@ -60,37 +59,39 @@ def parse_args():
 
 
 def main():
-    # cfg = Config(parse_args())
-    args = parse_args()
-    output_dir = os.path.join(args.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
+    cfg = Config(parse_args())
+    # args = parse_args()
+    output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
     os.makedirs(output_dir)
-    json.dump(vars(args), open(os.path.join(output_dir, 'args.json'), 'w'), indent=4)
+    print('cfg.config:', cfg.config)
+    OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
     
     s = datetime.now()
+    print('cfg.datasets_cfg.ann_paths.val:', cfg.datasets_cfg.ann_paths.val)
     dataset = VQAIntrospectDataset(
         None, None, 
-        vis_root=args.vis_root, 
-        ann_paths=[args.dataset_path, '/data1/VQA/v2/v2_mscoco_val2014_annotations.json'],
-        num_data=args.num_data
+        vis_root=cfg.datasets_cfg.vis_root, 
+        ann_paths=cfg.datasets_cfg.ann_paths.val,
+        num_data=cfg.runner_cfg.num_data
     )
     dataloader = DataLoader(dataset, batch_size=64,
                             shuffle=False, collate_fn=dataset.collater)
     print('dataset loading time : ', datetime.now()-s)
     
-    if not args.visualize:
+    if not cfg.runner_cfg.visualize:
         s = datetime.now()
-        recomposer = Recomposer(args.recomposer_name, device="cuda:0")
-        if args.decomposer_name == "self":
+        recomposer = Recomposer(cfg.runner_cfg.recomposer_name, device="cuda:0")
+        if cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer
         else:
-            decomposer = Decomposer(args.decomposer_name, device="cuda:1")
+            decomposer = Decomposer(cfg.runner_cfg.decomposer_name, device="cuda:1")
         print('model loading time : ', datetime.now()-s)
 
         s = datetime.now()
         total_base_match, total_cnt = 0., 0
 
         metric_logger = MetricLogger(delimiter="  ")
-        print_freq = max(1, int(len(dataloader) / args.print_freq))
+        print_freq = max(1, int(len(dataloader) / cfg.runner_cfg.print_freq))
         print('print_freq:', print_freq)
 
         
@@ -125,7 +126,7 @@ def main():
             
             # generating sub_questions
             text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-            if args.decomposer_name == "self":  # Image+Text, BLIP-2
+            if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                 sub_questions, _ = decomposer(images, text_inputs)
             else:                               # Only Text, flan-t5
                 sub_questions = decomposer(text_inputs)
@@ -182,15 +183,15 @@ def main():
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
     N = len(results)
-    bins = [[] for _ in range(args.num_bin)]
+    bins = [[] for _ in range(cfg.runner_cfg.num_bin)]
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], match1ok=args.match1ok)
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], match1ok=cfg.runner_cfg.match1ok)
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
         
-        bin_key = i // (N // args.num_bin)
+        bin_key = i // (N // cfg.runner_cfg.num_bin)
         bins[bin_key].append(acc_base)
         
         cur_match += acc_lba - acc_base
@@ -205,7 +206,7 @@ def main():
     
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
-    e_cr, e_ic = VQAIntrospectDataset.get_e_cr_e_ic(acc_base_list, acc_lba_list, vqa_acc=args.vqa_acc)
+    e_cr, e_ic = VQAIntrospectDataset.get_e_cr_e_ic(acc_base_list, acc_lba_list, vqa_acc=cfg.runner_cfg.vqa_acc)
     
     
     plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
@@ -224,7 +225,7 @@ def main():
     plt.title(f'acc for {len(acc_bin)} bins')
     plt.xlabel('bins')
     plt.ylabel('Accuracy')
-    plt.xticks([(args.num_bin // 5) * i for i in range(6)])
+    plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
     fig_path = os.path.join(output_dir, "acc_bin.png")
     plt.savefig(fig_path, dpi=300)
     print(f'saved fig at {fig_path}')

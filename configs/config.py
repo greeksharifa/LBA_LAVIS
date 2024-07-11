@@ -23,12 +23,24 @@ class Config:
 
         # runner_config = self.build_runner_config(config)
         # model_config = self.build_model_config(config, **user_config)
-        # dataset_config = self.build_dataset_config(config)
+        dataset_config = self.build_dataset_config(config)
 
-        self.config = OmegaConf.merge(config, user_config)
+        self.config = OmegaConf.merge(config, dataset_config, user_config)
         # self.config = OmegaConf.merge(
         #     runner_config, model_config, dataset_config, user_config
         # )
+        
+    @staticmethod
+    def build_dataset_config(config):
+        dataset_name = config.runner.get("dataset_name", None)
+        if dataset_name is None:
+            raise KeyError(
+                "Expecting 'dataset_name' as the root key for dataset configuration."
+            )
+        
+        dataset_config = OmegaConf.load(f'dataset/configs/{dataset_name}.yaml')
+        
+        return dataset_config
 
     def _build_opt_list(self, opts):
         opts_dot_list = self._convert_to_dot_list(opts)
@@ -51,6 +63,20 @@ class Config:
     def get_config(self):
         return self.config
 
+    @property
+    def runner_cfg(self):
+        return self.config.runner
+    # @property
+    # def run_cfg(self):
+    #     return self.config.run
+
+    @property
+    def datasets_cfg(self):
+        return self.config.datasets
+
+    # @property
+    # def model_cfg(self):
+    #     return self.config.model
 
     def pretty_print(self):
         logging.info("\n=====  Running Parameters    =====")

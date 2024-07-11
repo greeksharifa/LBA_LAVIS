@@ -1,0 +1,17 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: True
+  ann_paths:
+    train:
+      - '/data1/VQA-Introspect/VQAIntrospect_trainv1.0.json'
+      - '/data1/VQA/v2/v2_mscoco_train2014_annotations.json'
+    val:
+      - '/data1/VQA-Introspect/VQAIntrospect_valv1.0.json'
+      - '/data1/VQA/v2/v2_mscoco_val2014_annotations.json'
+    # test:
+    #   - '/data1/VQA-Introspect/VQAIntrospect_valv1.0.json'
+    #   - '/data1/VQA/v2/v2_mscoco_val2014_annotations.json'
+
+  vis_root: '/data1/coco/images/'
