@@ -9,7 +9,7 @@ from dataset.base_dataset import BaseDataset
 
 
 class VQAIntrospectDataset(BaseDataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, vqa_acc=True):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
         # Initialize your dataset here
@@ -45,17 +45,20 @@ class VQAIntrospectDataset(BaseDataset):
             })
             
             self.annotation.append(v)
-            if 0 <= num_data <= len(self.annotation):
-                break
+            # if 0 <= num_data <= len(self.annotation):
+            #     break
             
-        # if num_data != -1:
-        #     import random
-        #     self.annotation = random.sample(self.annotation, num_data)
+        if num_data != -1:
+            self.annotation = self.annotation[:num_data]
+            # import random
+            # self.annotation = random.sample(self.annotation, num_data)
             
-        print('len of self.annotation : ', len(self.annotation))
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
+        
+        self.vqa_acc = vqa_acc
+        
         import spacy
         self.lemmatizer = spacy.load("en_core_web_sm")
         
@@ -120,36 +123,3 @@ class VQAIntrospectDataset(BaseDataset):
             "gt_ans": gt_ans_list, # list: [bs, 10]
         }
         
-    @staticmethod
-    def get_accuracy(outputs, targets, match1ok=False):
-        """
-        args
-        - outputs: str          or list of str.         shape: [bsz]
-        - targets: list of str  or list of list of str. shape: [bsz, 10]
-        """
-        if match1ok:
-            # vqa_acc 무시하고 match가 1개라도 있으면 정답으로 인정
-            if isinstance(outputs, str):
-                num_match = sum([outputs == target for target in targets])
-                return 1.0 if num_match > 0 else 0.0
-            else:
-                acc_list = []
-                for out, target_list in zip(outputs, targets):
-                    num_match = sum([out == target for target in target_list])
-                    vqa_acc = 1.0 if num_match > 0 else 0.0
-                    acc_list.append(vqa_acc)
-                
-                return acc_list
-        else:
-            if isinstance(outputs, str):
-                num_match = sum([outputs == target for target in targets])
-                vqa_acc = min(1.0, num_match / 3.0)
-                return vqa_acc
-            else:
-                acc_list = []
-                for out, target_list in zip(outputs, targets):
-                    num_match = sum([out == target for target in target_list])
-                    vqa_acc = min(1.0, num_match / 3.0)
-                    acc_list.append(vqa_acc)
-                
-                return acc_list
