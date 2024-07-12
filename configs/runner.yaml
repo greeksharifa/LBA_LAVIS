@@ -1,22 +1,22 @@
 runner:
   # mode
   visualize: False
-  # split: 'val' # [train|val|test]
   # match1ok
   match1ok: False
 
   # model
   recomposer_name: "Salesforce/blip2-flan-t5-xl"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
-  
-  # dataset
-  dataset_name: VQA_Introspect
-  # num of data
-  num_data: -1  # number of data to use'
 
   # output & log
   output_dir: 'output/'
   print_freq: 50
   use_vqa_tool: False
   num_bin: 50
-  
+
+
+datasets:
+  dataset_name: VQA_Introspect
+  # num of data
+  num_data: -1  # number of data to use
+  split: 'val' # [train|val|test]

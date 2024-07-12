@@ -19,11 +19,20 @@ class Config:
         self.args = args
 
         config = OmegaConf.load(self.args.cfg_path)
-        user_config = self._build_opt_list(self.args.options)
+        user_config = OmegaConf.merge(
+            OmegaConf.create({
+                "runner": {},
+                "datasets": {},
+                "model": {},
+            }),
+            self._build_opt_list(self.args.options)
+        )
 
         # runner_config = self.build_runner_config(config)
         # model_config = self.build_model_config(config, **user_config)
-        dataset_config = self.build_dataset_config(config)
+        dataset_config = self.build_dataset_config(config, user_config.datasets)
+        
+        # LBA TODO: dataset_config랑 user_config 순서를 바꿔야 함
 
         self.config = OmegaConf.merge(config, dataset_config, user_config)
         # self.config = OmegaConf.merge(
@@ -31,14 +40,18 @@ class Config:
         # )
         
     @staticmethod
-    def build_dataset_config(config):
-        dataset_name = config.runner.get("dataset_name", None)
+    def build_dataset_config(config, user_config):
+        dataset_name = config.datasets.get("dataset_name", None)
+        dataset_name = user_config.get("dataset_name", dataset_name)
         if dataset_name is None:
             raise KeyError(
                 "Expecting 'dataset_name' as the root key for dataset configuration."
             )
         
-        dataset_config = OmegaConf.load(f'dataset/configs/{dataset_name}.yaml')
+        dataset_config = OmegaConf.merge(
+            OmegaConf.load(f'dataset/configs/{dataset_name}.yaml'),
+            user_config
+        )
         
         return dataset_config
 
@@ -80,7 +93,7 @@ class Config:
 
     def pretty_print(self):
         logging.info("\n=====  Running Parameters    =====")
-        logging.info(self._convert_node_to_json(self.config.run))
+        logging.info(self._convert_node_to_json(self.config.runner))
 
         logging.info("\n======  Dataset Attributes  ======")
         datasets = self.config.datasets
@@ -94,7 +107,7 @@ class Config:
                 logging.warning(f"No dataset named '{dataset}' in config. Skipping")
 
         logging.info(f"\n======  Model Attributes  ======")
-        logging.info(self._convert_node_to_json(self.config.model))
+        # logging.info(self._convert_node_to_json(self.config.model))
 
     def _convert_node_to_json(self, node):
         container = OmegaConf.to_container(node, resolve=True)

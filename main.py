@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
 from configs.config import Config
-from dataset.VQA_Introspect import VQAIntrospectDataset
-from dataset.base_dataset import get_text_input
+# from dataset.VQA_Introspect import VQAIntrospectDataset
+from dataset.base_dataset import get_text_input, load_dataset
 from model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
@@ -63,17 +63,17 @@ def main():
     # args = parse_args()
     output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
     os.makedirs(output_dir)
-    print('cfg.config:', cfg.config)
+    print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
     OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
     
     s = datetime.now()
-    print('cfg.datasets_cfg.ann_paths.val:', cfg.datasets_cfg.ann_paths.val)
-    dataset = VQAIntrospectDataset(
-        None, None, 
-        vis_root=cfg.datasets_cfg.vis_root, 
-        ann_paths=cfg.datasets_cfg.ann_paths.val,
-        num_data=cfg.runner_cfg.num_data
-    )
+    dataset = load_dataset(cfg.datasets_cfg)
+    # dataset = VQAIntrospectDataset(
+    #     None, None, 
+    #     vis_root=cfg.datasets_cfg.vis_root, 
+    #     ann_paths=cfg.datasets_cfg.ann_paths.val,
+    #     num_data=cfg.runner_cfg.num_data
+    # )
     dataloader = DataLoader(dataset, batch_size=64,
                             shuffle=False, collate_fn=dataset.collater)
     print('dataset loading time : ', datetime.now()-s)
@@ -159,7 +159,9 @@ def main():
                     })
                 )
 
-        json.dump(results, open(os.path.join(output_dir, 'results_base.json'), 'w'), indent=4)
+        result_path = os.path.join(output_dir, 'results_base.json')
+        json.dump(results, open(result_path, 'w'), indent=4)
+        print(f'results saved at {result_path}')
 
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
@@ -183,7 +185,7 @@ def main():
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
     N = len(results)
-    bins = [[] for _ in range(cfg.runner_cfg.num_bin)]
+    bins = [[] for _ in range(N // (N // cfg.runner_cfg.num_bin) + 1)]
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
@@ -206,7 +208,7 @@ def main():
     
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
-    e_cr, e_ic = VQAIntrospectDataset.get_e_cr_e_ic(acc_base_list, acc_lba_list, vqa_acc=cfg.datasets_cfg.vqa_acc)
+    e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
     
     plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
