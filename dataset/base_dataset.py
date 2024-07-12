@@ -13,6 +13,9 @@ def load_dataset(datasets_cfg):
     elif datasets_cfg.dataset_name == "AOKVQA":
         from dataset.AOKVQA import AOKVQADataset
         cls = AOKVQADataset
+    elif datasets_cfg.dataset_name == "OKVQA":
+        from dataset.OKVQA import OKVQADataset
+        cls = OKVQADataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         
