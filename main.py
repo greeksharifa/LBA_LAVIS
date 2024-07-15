@@ -68,13 +68,7 @@ def main():
     
     s = datetime.now()
     dataset = load_dataset(cfg.datasets_cfg)
-    # dataset = VQAIntrospectDataset(
-    #     None, None, 
-    #     vis_root=cfg.datasets_cfg.vis_root, 
-    #     ann_paths=cfg.datasets_cfg.ann_paths.val,
-    #     num_data=cfg.runner_cfg.num_data
-    # )
-    dataloader = DataLoader(dataset, batch_size=64,
+    dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
     print('dataset loading time : ', datetime.now()-s)
     
@@ -102,12 +96,7 @@ def main():
 
             bsz = len(batch['image'])
             images = batch['image']
-            '''
-            inputs = processor(images, questions, return_tensors="pt", padding=True).to("cuda")#, torch.float16)
-            out = model.generate(**inputs)
-            print(f'{i:5d}/{len(dataloader)} : ', processor.batch_decode(out, skip_special_tokens=True))
-            '''
-            
+
             """##############################  Baseline Inference   ##############################"""    
             
             text_inputs = get_text_input("default", main_questions=batch['text_input'])
@@ -210,13 +199,12 @@ def main():
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
-    
     plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
     # plt.subplots(constrained_layout=True)
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
     plt.plot([i / N * 100 for i, _ in enumerate(final_acc_list)], final_acc_list, color='b')
-    plt.title(f'E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
+    plt.title(f'{dataset.__class__.__name__} | E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
     plt.xlabel('Confidence Percentile')
     plt.ylabel('Accuracy')
     plt.xticks([0, 25, 50, 75, 100])
@@ -224,7 +212,7 @@ def main():
     plt.subplot(2, 1, 2)
     acc_bin = [sum(bin) / len(bin) for bin in bins if len(bin) > 0]
     plt.plot([i for i in range(len(acc_bin))], acc_bin, color='r')
-    plt.title(f'acc for {len(acc_bin)} bins')
+    plt.title(f'{dataset.__class__.__name__} | acc for {len(acc_bin)} bins')
     plt.xlabel('bins')
     plt.ylabel('Accuracy')
     plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
