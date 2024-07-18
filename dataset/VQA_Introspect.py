@@ -9,7 +9,7 @@ from dataset.base_dataset import BaseDataset
 
 
 class VQAIntrospectDataset(BaseDataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, vqa_acc=True):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs): # vqa_acc=True, 
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
         # Initialize your dataset here
@@ -57,7 +57,9 @@ class VQAIntrospectDataset(BaseDataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
-        self.vqa_acc = vqa_acc
+        # self.vqa_acc = vqa_acc
+        for k, v in kwargs.items():
+            setattr(self, k, v)
         
         import spacy
         self.lemmatizer = spacy.load("en_core_web_sm")

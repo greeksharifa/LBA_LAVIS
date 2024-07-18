@@ -22,27 +22,6 @@ class AOKVQADataset(BaseDataset):
         "dataset": "aokvqa"
     },
     """
-    def collater(self, samples):
-        (
-            image_list,
-            text_input_list,
-            question_id_list,
-            # instance_id_list,
-            gt_ans_list,
-        ) = ([], [], [], [])
-        
-        for sample in samples:
-            image_list.append(sample["image"])
-            text_input_list.append(sample["text_input"])
-            question_id_list.append(sample["question_id"])
-            gt_ans_list.append(sample["gt_ans"])
-            
-        return {
-            "image": image_list, #torch.stack(image_list, dim=0),
-            "text_input": text_input_list,
-            "question_id": question_id_list,
-            "gt_ans": gt_ans_list, # list: [bs, 10]
-        }
     
     def __getitem__(self, index):
         ann = self.annotation[index]

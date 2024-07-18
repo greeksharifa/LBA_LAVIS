@@ -1,0 +1,35 @@
+
+
+datasets:
+  data_type: videos # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - /data1/AnotherMissOh/AnotherMissOhQA_train_set.json
+    val:
+      - /data1/AnotherMissOh/AnotherMissOhQA_val_set.json
+    # test:
+    #  - AnotherMissOh/AnotherMissOhQA_test_set.json
+  
+  vis_root: /data1/AnotherMissOh/AnotherMissOh_videos/total/
+  n_frms: 5
+
+  vis_processor:
+    train:
+      name: alpro_video_train
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+    eval:
+      name: alpro_video_eval
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+  text_processor:
+    train:
+      name: "blip_question"
+    eval:
+      name: "blip_caption"
+      

@@ -16,6 +16,9 @@ def load_dataset(datasets_cfg):
     elif datasets_cfg.dataset_name == "OKVQA":
         from dataset.OKVQA import OKVQADataset
         cls = OKVQADataset
+    elif datasets_cfg.dataset_name == "DramaQA":
+        from dataset.DramaQA import DramaQAEvalDataset
+        cls = DramaQAEvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         
@@ -25,14 +28,15 @@ def load_dataset(datasets_cfg):
         vis_root=datasets_cfg.vis_root,
         ann_paths=datasets_cfg.ann_paths.get(datasets_cfg.split, 'val'),
         num_data=datasets_cfg.num_data,
-        vqa_acc=datasets_cfg.vqa_acc
+        vqa_acc=datasets_cfg.vqa_acc,
+        n_frms=datasets_cfg.get("n_frms", 5),
     )
     
     return dataset
     
 
 class BaseDataset(Dataset):
-    def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[], num_data=-1, vqa_acc=False):
+    def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[], num_data=-1, **kwargs):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -66,7 +70,9 @@ class BaseDataset(Dataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
-        self.vqa_acc = vqa_acc
+        # self.vqa_acc = vqa_acc
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
         self._add_instance_ids()
 
@@ -74,7 +80,26 @@ class BaseDataset(Dataset):
         return len(self.annotation)
 
     def collater(self, samples):
-        raise NotImplementedError
+        (
+            image_list,
+            text_input_list,
+            question_id_list,
+            # instance_id_list,
+            gt_ans_list,
+        ) = ([], [], [], [])
+        
+        for sample in samples:
+            image_list.append(sample["image"])
+            text_input_list.append(sample["text_input"])
+            question_id_list.append(sample["question_id"])
+            gt_ans_list.append(sample["gt_ans"])
+            
+        return {
+            "image": image_list, #torch.stack(image_list, dim=0),
+            "text_input": text_input_list,
+            "question_id": question_id_list,
+            "gt_ans": gt_ans_list, # list: [bs, 10]
+        }
 
     def set_processors(self, vis_processor, text_processor):
         self.vis_processor = vis_processor
@@ -125,10 +150,11 @@ def get_text_input(
     main_questions:List[str]='',
     sub_questions:List[str]='',
     sub_answers:List[str]='',
+    candidate_lists: List[List[str]]=[],
 ):
-    assert prompt_type in ["default", "decomposer", "sub_answer", "recomposer"], f"Invalid prompt type: {prompt_type}"
+    assert prompt_type in ["default_image", "decomposer", "sub_answer", "recomposer_image", "default_video", "recomposer_video"], f"Invalid prompt type: {prompt_type}"
     
-    if prompt_type == "default": # for default vqa or generating sub-answer
+    if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
         return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
@@ -140,11 +166,50 @@ def get_text_input(
         prompt = "Question: {sub_question}? Short answer:"
         return [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
         
-    elif prompt_type == "recomposer":
+    elif prompt_type == "recomposer_image":
         prompt = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question}? Short answer:"
         return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
                 for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
+    
+    elif prompt_type == "default_video":
+        prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        ret = []
+        for main_question, candidate_list in zip(main_questions, candidate_lists):
+            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+            ret.append(prompt.format(main_question=main_question.rstrip('?'), choices=choices))
+        return ret
+        
+        """
+        [SOS] Video: <v_1> <v_2> · · · <v_Nv>
+        Question: <question>
+        Choices:
+        (A) <option 1>
+        (B) <option 2>
+        (C) <option 3>
+        (D) <option 4>
+        (E) <option 5>
+        Answer: The answer is <answer> [EOS]
+        """
+    elif prompt_type == "recomposer_video":
+        examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+Question: Why did Dokyung pull Haeyoung1's arm hard?
+Choices:
+(A) Dokyung pulled Haeyoung1's arm to hug her hard.
+(B) It is because Dokyung did not want Haeyoung1 to fall.
+(C) This is because Dokyung and Haeyoung1 were dancing on the street.
+(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+(E) Because Dokyung needed Haeyoung1 to go to the police station.
+Answer: The answer is (A)\n"""     
+        prompt = examplar + "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        
+        ret = []
+        for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):
+            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
+        return ret
         
     else:
         raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
     
+    
+            
