@@ -22,3 +22,6 @@ datasets:
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
+
+model:
+  cache_dir: ~/.cache/torch/hub/

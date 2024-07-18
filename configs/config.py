@@ -87,9 +87,9 @@ class Config:
     def datasets_cfg(self):
         return self.config.datasets
 
-    # @property
-    # def model_cfg(self):
-    #     return self.config.model
+    @property
+    def model_cfg(self):
+        return self.config.model
 
     def pretty_print(self):
         logging.info("\n=====  Running Parameters    =====")
