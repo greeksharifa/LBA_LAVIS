@@ -12,7 +12,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
     N = len(results)
-    bins = [[] for _ in range(N // (N // cfg.runner_cfg.num_bin) + 1)]
+    M = max(1, N // cfg.runner_cfg.num_bin)
+    bins = [[] for _ in range(N // M + 1)]
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
@@ -20,7 +21,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
         
-        bin_key = i // (N // cfg.runner_cfg.num_bin)
+        bin_key = i // M
         bins[bin_key].append(acc_base)
         
         cur_match += acc_lba - acc_base

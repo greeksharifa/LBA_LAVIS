@@ -2,6 +2,7 @@ import requests
 from PIL import Image
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
+from processors.alpro_processors import AlproVideoEvalProcessor
 
 import torch
 from torch import nn
@@ -30,14 +31,48 @@ class Decomposer(nn.Module):
 
 
 class Recomposer(nn.Module):
-    def __init__(self, model_name, device="cuda"):
+    def __init__(self, cfg, device="cuda"):
         super().__init__()
+        model_name = cfg.runner_cfg.recomposer_name
         self.processor = Blip2Processor.from_pretrained(model_name)
+        print(self.processor.image_processor)
+        # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
+        # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         self.model = Blip2ForConditionalGeneration.from_pretrained(model_name).to(device)
         self.device = device
+        self.cfg = cfg
 
     def forward(self, images, text_inputs):
-        inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
+        print('*' * 120)
+        # print('images:', images)
+        # print('text_inputs:', text_inputs)
+        
+        if isinstance(images[0], Image.Image):
+            encoding_image_processor = self.processor.image_processor(images, return_tensors="pt")
+            
+            inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
+            # import pdb
+            # pdb.set_trace()
+            print('encoding_image_processor :', encoding_image_processor)
+            print('type(inputs):', type(inputs))
+        else: # video
+            inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [10, 29]
+            
+            pixel_values = []
+            for video in images:
+                pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True).to(self.device)['pixel_values'])  # [5, 3, 224, 224]
+            inputs["pixel_values"] = torch.stack(pixel_values, dim=0)                
+                
+            '''
+            dict_keys([
+                'pixel_values',   [10, 5, 3, 224, 224] # 원래는 [bsz, 3, 224, 224]
+                'input_ids',      [10, 29]
+                'attention_mask', [10, 29]
+            ])
+            '''
+            print('inputs :', inputs)
+            
+        # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
         # out = self.model.generate(**inputs)
         # return self.processor.batch_decode(out, skip_special_tokens=True)
 

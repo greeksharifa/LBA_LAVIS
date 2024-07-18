@@ -2,6 +2,12 @@
 
 ## Installation
 
+**docker**
+
+```bash
+docker run -it --gpus all --name LBA_v2 --volume /home/ywjang/LBA_LAVIS_uncertainty_v2:/workspace --volume /data1:/data1 --volume /data2:/data2 pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+```
+
 ## Inference
 
 ```bash

@@ -74,7 +74,7 @@ def main():
     
     if not cfg.runner_cfg.visualize:
         s = datetime.now()
-        recomposer = Recomposer(cfg.runner_cfg.recomposer_name, device="cuda:0")
+        recomposer = Recomposer(cfg, device="cuda:0")
         if cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer
         else:
@@ -99,7 +99,10 @@ def main():
 
             """##############################  Baseline Inference   ##############################"""    
             
-            text_inputs = get_text_input("default", main_questions=batch['text_input'])
+            if cfg.datasets_cfg.data_type == "videos":
+                text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
+            else:                          # "images"
+                text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(images, text_inputs)
             # print(f'{data_iter_step:5d}/{len(dataloader)} : ', outputs[0])
 
@@ -125,10 +128,17 @@ def main():
             sub_answers, _ = recomposer(images, text_inputs)
             
             # generating recomposed_answers
-            text_inputs = get_text_input("recomposer", 
-                                        main_questions=batch['text_input'], 
-                                        sub_questions=sub_questions, 
-                                        sub_answers=sub_answers)
+            if cfg.datasets_cfg.data_type == "videos":
+                text_inputs = get_text_input("recomposer_video", 
+                                             main_questions=batch['text_input'], 
+                                             sub_questions=sub_questions, 
+                                             sub_answers=sub_answers,
+                                             candidate_lists=batch['candidate_list'])
+            else:                          # "images"
+                text_inputs = get_text_input("recomposer_image", 
+                                             main_questions=batch['text_input'], 
+                                             sub_questions=sub_questions, 
+                                             sub_answers=sub_answers)
             text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
             
             """##############################      Save result      ##############################"""
