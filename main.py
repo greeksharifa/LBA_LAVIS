@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from configs.config import Config
 # from dataset.VQA_Introspect import VQAIntrospectDataset
 from dataset.base_dataset import get_text_input, load_dataset
-from model import Decomposer, Recomposer
+from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
 from utils.visualize import visualize

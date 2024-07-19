@@ -67,8 +67,138 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
         }
 '''
 
-# class DramaQAEvalDataset(VideoQADataset):
+
 class DramaQAEvalDataset(BaseDataset):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
+        # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+        
+        self.vis_root = vis_root
+        self.annotation = []
+        self.n_frms = kwargs['n_frms'] # default: 5
+        
+        ann_path, vis_path = ann_paths
+        
+        self.vis_features = torch.load(vis_path)
+        
+        with open(ann_path, "r") as f:
+            loaded = json.load(f)
+            len_loaded = num_data #len(loaded)
+            for i, sample in enumerate(loaded):
+                if 0 <= num_data <= i:
+                    break
+                vid = sample["vid"]
+                print(f'\r{i:6d}/{len_loaded:6d} : {vid}', end='')
+                self.annotation.append(sample)
+                        
+        
+        self.vis_processor = vis_processor
+        self.text_processor = text_processor
+        
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        self._add_instance_ids()
+        
+        print("DramaQAEvalDataset")
+        print('vis_processor : ', vis_processor)
+        print('text_processor : ', text_processor)
+        print('vis_root : ', vis_root)
+        print('ann_paths : ', ann_paths)
+        print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
+        print('type(self.vis_features), len(self.vis_features):', type(self.vis_features), len(self.vis_features))
+        
+        
+    def collater(self, samples):
+        (
+            # image_list,
+            video_list,
+            text_input_list,
+            question_id_list,
+            gt_ans_list,
+            candidate_list_list,
+            answer_sentence_list,
+        ) = ([], [], [], [], [], [])
+        
+        for sample in samples:
+            # image_list.append(sample["image"])
+            video_list.append(sample["video"])
+            text_input_list.append(sample["text_input"])
+            question_id_list.append(sample["question_id"])
+            gt_ans_list.append(sample["gt_ans"])
+            candidate_list_list.append(sample["candidate_list"])
+            answer_sentence_list.append(sample["answer_sentence"])
+            
+        return {
+            # "image": image_list, #torch.stack(image_list, dim=0),
+            "video": video_list,
+            "text_input": text_input_list,
+            "question_id": question_id_list,
+            "gt_ans": gt_ans_list, 
+            "candidate_list": candidate_list_list,
+            "answer_sentence": answer_sentence_list,
+        }
+        
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+
+        video_id = ann["vid"]
+        vpath = os.path.join(self.vis_root, f'{video_id}.mp4')
+            
+        # get_video
+        if video_id[-4:] == '0000':
+            shots = ann['shot_contained']
+            start, end = shots[0], shots[1]
+
+            for i in range(start, end+1):
+                v_name = video_id[:-4] + f'{i:04}'
+
+                if v_name not in self.features.keys(): 
+                    print(v_name, " Not in features")
+                    nxt_vid = torch.zeros(1, self.features_dim)
+                else: nxt_vid = self.features[v_name].float()
+
+                if i == start: video = nxt_vid
+                else: video = torch.concat((video, nxt_vid), dim = 0)
+        # Shot
+        else:
+            scene = False
+            if video_id not in self.features.keys():
+                print(video_id, "Not in freatures")
+                video = torch.zeros(1, self.features_dim)
+            else:
+                video = self.features[video_id].float()
+
+        if len(video) > self.max_feats:
+            sampled = []
+            for j in range(self.max_feats):
+                sampled.append(video[(j * len(video)) // self.max_feats])
+            video = torch.stack(sampled)
+            video_len = self.max_feats
+        elif len(video) < self.max_feats:
+            video_len = len(video)
+            video = torch.cat([video, torch.zeros(self.max_feats - video_len, self.features_dim)], 0)
+        else:
+            video_len = self.max_feats
+            
+            
+        question = ann["que"] # question = self.text_processor(ann["que"])
+
+        return {
+            # "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
+            "video": video, # [min(n_frms, len(video)), 768]
+            "text_input": question,
+            "question_id": ann["qid"],
+            "gt_ans": ann["correct_idx"],
+            "candidate_list": ann["answers"],
+            "answer_sentence": ann["answers"][ann["correct_idx"]],
+            # "instance_id": ann["instance_id"],
+        }
+    
+    # def get_accuracy(self, outputs, targets, match1ok=False):
+
+
+# class DramaQAEvalDataset(VideoQADataset):
+class DramaQAEvalDataset2(BaseDataset):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
