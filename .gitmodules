@@ -1,0 +1,3 @@
+[submodule "Ask-Anything"]
+	path = Ask-Anything
+	url = https://github.com/OpenGVLab/Ask-Anything.git

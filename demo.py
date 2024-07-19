@@ -5,7 +5,7 @@ from datetime import datetime
 from torch.utils.data import DataLoader
 
 from dataset.VQA_Introspect import VQAIntrospectDataset
-from model import Recomposer
+from models.model import Recomposer
 
 def get_args():
     parser = argparse.ArgumentParser(description='LBA method')
