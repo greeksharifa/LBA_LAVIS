@@ -96,6 +96,8 @@ class DramaQAEvalDataset(BaseDataset):
         
         for k, v in kwargs.items():
             setattr(self, k, v)
+        
+        # self.features_dim = 
 
         self._add_instance_ids()
         
@@ -110,8 +112,8 @@ class DramaQAEvalDataset(BaseDataset):
         
     def collater(self, samples):
         (
-            # image_list,
-            video_list,
+            image_list,
+            # video_list,
             text_input_list,
             question_id_list,
             gt_ans_list,
@@ -120,8 +122,8 @@ class DramaQAEvalDataset(BaseDataset):
         ) = ([], [], [], [], [], [])
         
         for sample in samples:
-            # image_list.append(sample["image"])
-            video_list.append(sample["video"])
+            image_list.append(sample["image"])
+            # video_list.append(sample["video"])
             text_input_list.append(sample["text_input"])
             question_id_list.append(sample["question_id"])
             gt_ans_list.append(sample["gt_ans"])
@@ -129,8 +131,8 @@ class DramaQAEvalDataset(BaseDataset):
             answer_sentence_list.append(sample["answer_sentence"])
             
         return {
-            # "image": image_list, #torch.stack(image_list, dim=0),
-            "video": video_list,
+            "image": image_list, #torch.stack(image_list, dim=0),
+            # "video": video_list,
             "text_input": text_input_list,
             "question_id": question_id_list,
             "gt_ans": gt_ans_list, 
@@ -144,6 +146,17 @@ class DramaQAEvalDataset(BaseDataset):
         video_id = ann["vid"]
         vpath = os.path.join(self.vis_root, f'{video_id}.mp4')
             
+        try:
+            frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
+            transform = transforms.ToTensor()
+            tensors = [transform(img) for img in frms]
+            stacked_tensor = torch.stack(tensors)
+            # frms = self.vis_processor(vpath)
+        except Exception as e:
+            print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
+            assert False, e
+        
+        '''
         # get_video
         if video_id[-4:] == '0000':
             shots = ann['shot_contained']
@@ -152,40 +165,41 @@ class DramaQAEvalDataset(BaseDataset):
             for i in range(start, end+1):
                 v_name = video_id[:-4] + f'{i:04}'
 
-                if v_name not in self.features.keys(): 
+                if v_name not in self.vis_features.keys(): 
                     print(v_name, " Not in features")
                     nxt_vid = torch.zeros(1, self.features_dim)
-                else: nxt_vid = self.features[v_name].float()
+                else: nxt_vid = self.vis_features[v_name].float()
 
                 if i == start: video = nxt_vid
                 else: video = torch.concat((video, nxt_vid), dim = 0)
         # Shot
         else:
             scene = False
-            if video_id not in self.features.keys():
+            if video_id not in self.vis_features.keys():
                 print(video_id, "Not in freatures")
                 video = torch.zeros(1, self.features_dim)
             else:
-                video = self.features[video_id].float()
+                video = self.vis_features[video_id].float()
 
-        if len(video) > self.max_feats:
+        
+        if len(video) > self.n_frms:
             sampled = []
-            for j in range(self.max_feats):
-                sampled.append(video[(j * len(video)) // self.max_feats])
+            for j in range(self.n_frms):
+                sampled.append(video[(j * len(video)) // self.n_frms])
             video = torch.stack(sampled)
-            video_len = self.max_feats
-        elif len(video) < self.max_feats:
+            video_len = self.n_frms
+        elif len(video) < self.n_frms:
             video_len = len(video)
-            video = torch.cat([video, torch.zeros(self.max_feats - video_len, self.features_dim)], 0)
+            video = torch.cat([video, torch.zeros(self.n_frms - video_len, self.features_dim)], 0)
         else:
-            video_len = self.max_feats
-            
+            video_len = self.n_frms
+        '''
             
         question = ann["que"] # question = self.text_processor(ann["que"])
 
         return {
-            # "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
-            "video": video, # [min(n_frms, len(video)), 768]
+            "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
+            # "video": video, # [min(n_frms, len(video)), 768]
             "text_input": question,
             "question_id": ann["qid"],
             "gt_ans": ann["correct_idx"],

@@ -5,7 +5,7 @@ runner:
   match1ok: False
 
   # model
-  recomposer_name: "Salesforce/blip2-flan-t5-xl"
+  recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
 
   batch_size: 64
