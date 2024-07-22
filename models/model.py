@@ -5,7 +5,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
 from processors.alpro_processors import AlproVideoEvalProcessor
-from _v1.lavis.models.blip2_models.
+# from _v1.lavis.models.blip2_models.
 
 import torch
 from torch import nn
@@ -43,7 +43,94 @@ class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
         attention_mask: Optional[torch.LongTensor] = None,
         **generate_kwargs,
     ) -> torch.LongTensor:
-        pass
+        """
+        Overrides `generate` function to be able to use the model as a conditional generator.
+
+        Args:
+            pixel_values (`torch.FloatTensor` of shape (batch_size, num_channels, height, width)):
+                                              or shape (batch_size, num_channels, n_frms, height, width)):
+                                                       (64,         3,            5,      224,    224  )
+                Input images to be processed.
+            input_ids (`torch.LongTensor` of shape (batch_size, sequence_length), *optional*):
+                The sequence used as a prompt for the generation.
+            attention_mask (`torch.LongTensor` of shape (batch_size, sequence_length), *optional*):
+                Mask to avoid performing attention on padding token indices
+
+        Returns:
+            captions (list): A list of strings of length batch_size * num_captions.
+        """
+        # print('in VideoBlip2ForConditionalGeneration.generate(), pixel_values.shape:', pixel_values.shape)
+        if hasattr(self, "hf_device_map"):
+            # preprocess for `accelerate`
+            self._preprocess_accelerate()
+
+        batch_size = pixel_values.shape[0]
+        
+        # For video data
+        if pixel_values.dim() == 5:                         # [bsz, 3, n_frms, 224, 224]
+            language_model_inputs, language_attention_mask = [], []
+            for j in range(pixel_values.size(2)):
+                this_frame = pixel_values[:, :, j, :, :]    # [bsz, 3, 224, 224]
+                frame_embeds = self.vision_model(this_frame, return_dict=True).last_hidden_state
+                frame_attention_mask = torch.ones(frame_embeds.size()[:-1], dtype=torch.long, device=frame_embeds.device)
+
+                frame_query_tokens = self.query_tokens.expand(batch_size, -1, -1)
+                frame_query_outputs = self.qformer(
+                    query_embeds=frame_query_tokens,
+                    encoder_hidden_states=frame_embeds,
+                    encoder_attention_mask=frame_attention_mask,
+                    return_dict=True,
+                )
+                frame_query_output = frame_query_outputs.last_hidden_state
+                
+                language_model_inputs.append(self.language_projection(frame_query_output))
+                language_attention_mask.append(torch.ones(
+                    language_model_inputs[-1].size()[:-1], dtype=torch.long, device=language_model_inputs[-1].device
+                ))
+                
+            language_model_inputs = torch.cat(language_model_inputs, dim=1)
+            language_attention_mask = torch.cat(language_attention_mask, dim=1)
+            
+        else:
+            image_embeds = self.vision_model(pixel_values, return_dict=True).last_hidden_state
+            image_attention_mask = torch.ones(image_embeds.size()[:-1], dtype=torch.long, device=image_embeds.device)
+
+            query_tokens = self.query_tokens.expand(batch_size, -1, -1)
+            query_outputs = self.qformer(
+                query_embeds=query_tokens,
+                encoder_hidden_states=image_embeds,
+                encoder_attention_mask=image_attention_mask,
+                return_dict=True,
+            )
+            query_output = query_outputs.last_hidden_state
+
+            language_model_inputs = self.language_projection(query_output)
+            language_attention_mask = torch.ones(
+                language_model_inputs.size()[:-1], dtype=torch.long, device=language_model_inputs.device
+            )
+            
+        if input_ids is None:
+            input_ids = (
+                torch.LongTensor([[self.config.text_config.bos_token_id]])
+                .repeat(batch_size, 1)
+                .to(image_embeds.device)
+            )
+        if attention_mask is None:
+            attention_mask = torch.ones_like(input_ids)
+        
+        attention_mask = torch.cat([language_attention_mask, attention_mask.to(language_attention_mask.device)], dim=1)
+
+        # concatenate query embeddings with prompt embeddings
+        inputs_embeds = self.get_input_embeddings()(input_ids)
+        inputs_embeds = torch.cat([language_model_inputs, inputs_embeds.to(language_model_inputs.device)], dim=1)
+
+        outputs = self.language_model.generate(
+            inputs_embeds=inputs_embeds,
+            attention_mask=attention_mask,
+            **generate_kwargs,
+        )
+
+        return outputs
 
 
 class VideoInstructionBlipForConditionalGeneration(InstructBlipForConditionalGeneration):
@@ -127,7 +214,7 @@ class Recomposer(nn.Module):
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         if "flan-t5" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = Blip2ForConditionalGeneration.from_pretrained(model_name).to(device)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name).to(device)
         else: # "vicuna"
             self.processor = InstructBlipProcessor.from_pretrained(model_name)
             self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name).to(device)
@@ -140,20 +227,21 @@ class Recomposer(nn.Module):
 
 
     def forward(self, images, text_inputs):
-        print('*' * 120)
+        # print('Recomposer.forward' + '*' * 120)
         # print('images:', images)
         # print('text_inputs:', text_inputs)
+        # import pdb; pdb.set_trace()
         
         if isinstance(images[0], Image.Image):
             encoding_image_processor = self.processor.image_processor(images, return_tensors="pt")
             
             # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
             inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device) 
-            # import pdb
-            # pdb.set_trace()
-            print('encoding_image_processor :', encoding_image_processor)
+            
+            print('encoding_image_processor :', encoding_image_processor.keys())
             print('type(inputs):', type(inputs))
         else: # video. type: List[Image.Image]
+            # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
             inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [64, 29]
             
             '''
@@ -177,8 +265,8 @@ class Recomposer(nn.Module):
                 'attention_mask', [64, 29]
             ])
             '''
-            for k, v in inputs.items():
-                print(f'{k:<15s} | shape: {v.shape}')
+            # for k, v in inputs.items():
+            #     print(f'{k:<15s} | shape: {v.shape}')
                 
             '''Blip2VicunaInstruct
             input_ids       | shape: torch.Size([64, 168])

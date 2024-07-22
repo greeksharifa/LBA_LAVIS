@@ -16,36 +16,15 @@ from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
 from utils.visualize import visualize
+from utils.colors import Colors
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='LBA method')
     parser.add_argument("--cfg-path", default='configs/runner.yaml', help="path to configuration file.")
+    # verbose
+    parser.add_argument('--verbose', action='store_true', help='verbose')
     
-    '''
-    # mode
-    parser.add_argument('--visualize', action='store_true', help='visualize the results')
-    # match1ok
-    parser.add_argument('--match1ok', action='store_true', help='match1ok')
-
-    # model
-    parser.add_argument('--recomposer_name', type=str, default='Salesforce/blip2-flan-t5-xl', help='recomposer_name, ex) "Salesforce/blip2-flan-t5-xl"')
-    parser.add_argument('--decomposer_name', type=str, default='self', choices=["self", "small", "base", "large", "xl", "xxl"], help='decomposer_name in flan-t5-family, choices=["self", "small", "base", "large", "xl", "xxl"]')
-
-    # dataset
-    parser.add_argument('--dataset_path', type=str, default='/data1/VQA-Introspect/VQAIntrospect_valv1.0.json', help='path to the dataset')
-    parser.add_argument('--vis_root', type=str, default='/data1/coco/images/', help='Root directory of images (e.g. coco/images/)')
-    parser.add_argument('--vqa_acc', action='store_true', help='use vqa acc or exact match')
-    # num of data
-    parser.add_argument('--num_data', type=int, default=-1, help='number of data to use')
-
-    # output & log
-    parser.add_argument('--print_freq', type=int, default=50, help='# of logs per epoch')
-    parser.add_argument('--output_dir', type=str, default='output/', help='output directory')
-    parser.add_argument('--use_vqa_tool', action='store_true', help='use vqa tool or not')
-    parser.add_argument('--num_bin', type=int, default=50, help='number of bins for acc')
-    '''
-
     parser.add_argument(
         "--options",
         nargs="+",
@@ -59,7 +38,8 @@ def parse_args():
 
 
 def main():
-    cfg = Config(parse_args())
+    args = parse_args()
+    cfg = Config(args)
     # args = parse_args()
     output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
     os.makedirs(output_dir)
@@ -143,20 +123,31 @@ def main():
             
             """##############################      Save result      ##############################"""
             for i in range(bsz):
-                results.append(
-                    OrderedDict({
-                        "question_id": batch['question_id'][i],
-                        "main_question": batch['text_input'][i],
-                        "text_input": text_inputs[i],
-                        "gt_ans": gt_answers[i],
-                        "confidence_base": confidences_base[i],
-                        "confidence_lba": confidences_lba[i],
-                        "text_output_base": text_outputs_base[i],
-                        "sub_question": sub_questions[i],
-                        "sub_answer": sub_answers[i],
-                        "text_output_lba": text_outputs_lba[i],
-                    })
-                )
+                result = OrderedDict({
+                            "question_id": batch['question_id'][i],
+                            "main_question": batch['text_input'][i],
+                            "text_input": text_inputs[i],
+                            "gt_ans": gt_answers[i],
+                            "confidence_base": confidences_base[i],
+                            "confidence_lba": confidences_lba[i],
+                            "text_output_base": text_outputs_base[i],
+                            "sub_question": sub_questions[i],
+                            "sub_answer": sub_answers[i],
+                            "text_output_lba": text_outputs_lba[i],
+                        })
+                if args.verbose and i == 0:
+                    pprint(result, width=300)
+                    base = text_outputs_base[i]
+                    lba = text_outputs_lba[i]
+                    gt_ans = gt_answers[i]
+                    if base != gt_ans and lba == gt_ans:    # wrong -> right
+                        color = Colors.BRIGHT_GREEN
+                    elif base == gt_ans and lba != gt_ans:  # right -> wrong
+                        color = Colors.BRIGHT_RED
+                    else:
+                        color = Colors.BRIGHT_YELLOW
+                    print(Colors.BRIGHT_YELLOW, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET)
+                results.append(result)
 
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
