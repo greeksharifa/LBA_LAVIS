@@ -1,8 +1,8 @@
-import logging
+# import logging
 
-import torch
+# import torch
 
-from lavis.common import dist_utils
+# from lavis.common import dist_utils
 
 
 class Colors:
@@ -27,7 +27,8 @@ class Colors:
     BRIGHT_CYAN = '\033[96m'
     BRIGHT_WHITE = '\033[97m'
     BRIGHT_END = '\033[0m'
-    
+
+'''    
 def print_color(msg, color=Colors.BRIGHT_MAGENTA):
     logging.info(color + msg + Colors.RESET)
 
@@ -45,5 +46,4 @@ def print_sample(samples, output_text="", msg="print sample...", color=Colors.BR
             for text in output_text:
                 logging.info(Colors.BRIGHT_YELLOW + "output_text: " + text + Colors.RESET)
         # logging.info(color + output_text + Colors.RESET)
-                
-                
+'''

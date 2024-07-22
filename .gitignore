@@ -5,6 +5,8 @@ Ask-Anything/
 temp.sh
 temp/
 run_scripts/LBA/eval/multiple_launch.sh
+dataset/dummy.py
+DramaQA_vid_error_list.json
 
 # data / model
 llm/
