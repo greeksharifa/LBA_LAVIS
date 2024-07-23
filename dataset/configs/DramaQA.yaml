@@ -13,7 +13,8 @@ datasets:
     # test:
     #  - AnotherMissOh/AnotherMissOhQA_test_set.json
   
-  vis_root: /data1/AnotherMissOh/AnotherMissOh_videos/total/
+  vis_root: /data1/AnotherMissOh/images/
+  # vis_root: /data1/AnotherMissOh/AnotherMissOh_videos/total/
   # vis_features: /data1/flipped_vqa/dramaqa/clipvitl14.pth
   n_frms: 5
 

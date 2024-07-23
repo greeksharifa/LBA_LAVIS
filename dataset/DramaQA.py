@@ -5,10 +5,13 @@
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
 
+import glob
 import json
 import os
 from collections import OrderedDict
+from PIL import Image
 
+import numpy as np
 import torch
 from torchvision import transforms
 
@@ -69,7 +72,7 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
 
 
 class DramaQAEvalDataset(BaseDataset):
-    
+    # vid_error_list: ["AnotherMissOh14_005_0172", "AnotherMissOh14_009_0297", "AnotherMissOh14_012_0422", "AnotherMissOh14_017_0521", "AnotherMissOh14_017_0522", "AnotherMissOh13_001_0035", "AnotherMissOh13_001_0035", "AnotherMissOh13_005_0172", "AnotherMissOh13_005_0172", "AnotherMissOh13_015_0532", "AnotherMissOh13_019_0647", "AnotherMissOh13_019_0647", "AnotherMissOh13_021_0714", "AnotherMissOh13_021_0714", "AnotherMissOh13_037_1213", "AnotherMissOh13_040_1346", "AnotherMissOh15_001_0061", "AnotherMissOh15_001_0061", "AnotherMissOh15_002_0072", "AnotherMissOh15_002_0072", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0146", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0196", "AnotherMissOh15_006_0196", "AnotherMissOh15_015_0479", "AnotherMissOh15_024_0683", "AnotherMissOh15_024_0683", "AnotherMissOh15_029_0802", "AnotherMissOh15_029_0804", "AnotherMissOh15_030_0860"]
     ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
     
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
@@ -83,7 +86,7 @@ class DramaQAEvalDataset(BaseDataset):
         
         self.vis_features = torch.load(vis_path)
         
-        vid_error_list = []
+        # vid_error_list = []
         
         with open(ann_path, "r") as f:
             loaded = json.load(f)
@@ -96,9 +99,11 @@ class DramaQAEvalDataset(BaseDataset):
             for i, sample in enumerate(loaded):
                 if len(self.annotation) >= len_loaded: # 0 <= num_data <= i:
                     break
-                video_id = sample["vid"]
-                print(f'\r{i:6d}/{len_loaded:6d} : {video_id}', end='')
+                vid = sample["vid"]
+                print(f'\r{i:6d}/{len_loaded:6d} : {vid}', end='')
                 
+                self.annotation.append(sample)
+                '''
                 try:
                     frms = load_video_to_sampled_frames(os.path.join(vis_root, f'{video_id}.mp4'), n_frms=self.n_frms)
                     transform = transforms.ToTensor()
@@ -108,10 +113,9 @@ class DramaQAEvalDataset(BaseDataset):
                 except Exception as e:
                     print('\nvideo processing error:', video_id)
                     vid_error_list.append(video_id)
-                
-                # self.annotation.append(sample)
+                '''
                         
-        json.dump(vid_error_list, open('DramaQA_vid_error_list.json', 'w'))
+        # json.dump(vid_error_list, open('DramaQA_vid_error_list.json', 'w'))
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
@@ -161,22 +165,59 @@ class DramaQAEvalDataset(BaseDataset):
             "candidate_list": candidate_list_list,
             "answer_sentence": answer_sentence_list,
         }
+       
+    def get_image_path(self, vid):
+
+        if vid.endswith('0000'):
+            scene_dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))[:-4] # ex. /data1/AnotherMissOh/AnotherMissOh_images/AnotherMissOh01/001/0078
+            dir_paths = sorted(glob.glob(os.path.join(scene_dir_path, '*/')))
+
+            if self.n_frms < len(dir_paths):
+                idxs = np.linspace(-1, len(dir_paths), self.n_frms+2, dtype=int)
+                idxs = idxs[1:-1]
+                dir_paths = [dir_paths[idx] for idx in idxs]
+
+            # shot_contained = sample["shot_contained"]
+            image_paths = []
+            for dir_path in dir_paths:
+                images = sorted(glob.glob(dir_path + '*.jpg'))
+                image_paths.append(images[len(images) // 2]) # shot 중 가운데 frame만 선택
+        else:
+            dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))
+            image_paths = sorted(glob.glob(os.path.join(dir_path, '*.jpg')))
+            idxs = np.linspace(-1, len(image_paths), self.n_frms+2, dtype=int)
+            idxs = idxs[1:-1]
+            image_paths = [image_paths[idx] for idx in idxs]
+            
+        # print('image_paths:', image_paths)
+
+        return image_paths
         
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        video_id = ann["vid"]
-        vpath = os.path.join(self.vis_root, f'{video_id}.mp4')
-            
-        try:
-            frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
-            transform = transforms.ToTensor()
-            tensors = [transform(img) for img in frms]
-            stacked_tensor = torch.stack(tensors)
-            # frms = self.vis_processor(vpath)
-        except Exception as e:
-            print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
-            assert False, e
+        vid = ann["vid"]
+        vpath = os.path.join(self.vis_root, f'{vid}.mp4')
+        
+        # load images. output: list of PIL.Image
+        frms = []
+        image_paths = self.get_image_path(vid)
+        for img_path in image_paths:
+            frms.append(Image.open(img_path))
+        if len(frms) < self.n_frms:
+            frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
+        
+        
+        # directly read Video    
+        # try:
+        #     frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
+        #     transform = transforms.ToTensor()
+        #     tensors = [transform(img) for img in frms]
+        #     stacked_tensor = torch.stack(tensors)
+        #     # frms = self.vis_processor(vpath)
+        # except Exception as e:
+        #     print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
+        #     assert False, e
         
         '''
         # get_video

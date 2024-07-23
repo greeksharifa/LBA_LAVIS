@@ -66,7 +66,7 @@ def main():
 
         metric_logger = MetricLogger(delimiter="  ")
         print_freq = max(1, int(len(dataloader) / cfg.runner_cfg.print_freq))
-        print('print_freq:', print_freq)
+        # print('print_freq:', print_freq)
 
         
         results = []
