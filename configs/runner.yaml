@@ -24,4 +24,4 @@ datasets:
   split: 'val' # [train|val|test]
 
 model:
-  cache_dir: ~/.cache/torch/hub/
+  cache_dir: /data2/ # ~/.cache/torch/hub/

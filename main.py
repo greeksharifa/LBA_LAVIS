@@ -58,7 +58,7 @@ def main():
         if cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer
         else:
-            decomposer = Decomposer(cfg.runner_cfg.decomposer_name, device="cuda:1")
+            decomposer = Decomposer(cfg, device="cuda:1")
         print('model loading time : ', datetime.now()-s)
 
         s = datetime.now()

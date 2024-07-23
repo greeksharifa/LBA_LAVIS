@@ -12,17 +12,20 @@ from torch import nn
 
 
 class Decomposer(nn.Module):
-    def __init__(self, model_name, device="cuda"):
+    def __init__(self, cfg, device="cuda"):
         super().__init__()
         
         self.device = device
-        self.decomposer_name = f'google/flan-t5-{model_name}'
+        self.cfg = cfg
+        
+        self.decomposer_name = f'google/flan-t5-{cfg.runner_cfg.decomposer_name}'
         self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
         self.decomposer_model = T5ForConditionalGeneration.from_pretrained(
             self.decomposer_name, 
             torch_dtype=torch.bfloat16,
             # load_in_4bit=True,
             # device_map="auto",
+            cache_dir=cfg.model_cfg.cache_dir,
         ).to(device)
 
     def forward(self, text_inputs):
@@ -214,10 +217,10 @@ class Recomposer(nn.Module):
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         if "flan-t5" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name).to(device)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         else: # "vicuna"
             self.processor = InstructBlipProcessor.from_pretrained(model_name)
-            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name).to(device)
+            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         # print(self.processor.image_processor)
             
         self.device = device
