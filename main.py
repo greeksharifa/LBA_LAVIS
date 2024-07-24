@@ -15,8 +15,7 @@ from dataset.base_dataset import get_text_input, load_dataset
 from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
-from utils.visualize import visualize
-from utils.colors import Colors
+from utils.visualize import visualize, sample_print
 
 
 def parse_args():
@@ -40,6 +39,7 @@ def parse_args():
 def main():
     args = parse_args()
     cfg = Config(args)
+    os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
     # args = parse_args()
     output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
     os.makedirs(output_dir)
@@ -137,16 +137,8 @@ def main():
                         })
                 if args.verbose and i == 0:
                     pprint(result, width=300)
-                    base = text_outputs_base[i]
-                    lba = text_outputs_lba[i]
-                    gt_ans = gt_answers[i]
-                    if base != gt_ans and lba == gt_ans:    # wrong -> right
-                        color = Colors.BRIGHT_GREEN
-                    elif base == gt_ans and lba != gt_ans:  # right -> wrong
-                        color = Colors.BRIGHT_RED
-                    else:
-                        color = Colors.BRIGHT_YELLOW
-                    print(Colors.BRIGHT_YELLOW, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET)
+                    sample_print(text_outputs_base[i], text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
+                    
                 results.append(result)
 
         result_path = os.path.join(output_dir, 'results_base.json')

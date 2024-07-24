@@ -2,6 +2,8 @@ import json
 import os
 import matplotlib.pyplot as plt
 
+from utils.colors import Colors
+
 
 def visualize(results, dataset, cfg, output_dir, total_base_match):
     results.sort(key=lambda x: x['confidence_lba'])
@@ -72,3 +74,16 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
         
+        
+def sample_print(base, lba, gt_ans, get_accuracy):
+    b, l = get_accuracy(base, gt_ans), get_accuracy(lba, gt_ans)
+    
+    if b < l:    # wrong -> right
+        color = Colors.BRIGHT_GREEN
+    elif b > l:  # right -> wrong
+        color = Colors.BRIGHT_RED
+    else:        # wrong -> wrong or right -> right
+        color = Colors.BRIGHT_YELLOW
+        
+    print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET)
+    
