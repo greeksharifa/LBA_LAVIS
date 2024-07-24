@@ -241,8 +241,8 @@ class Recomposer(nn.Module):
             # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
             inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device) 
             
-            print('encoding_image_processor :', encoding_image_processor.keys())
-            print('type(inputs):', type(inputs))
+            # print('encoding_image_processor :', encoding_image_processor.keys())
+            # print('type(inputs):', type(inputs))
         else: # video. type: List[Image.Image]
             # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
             inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [64, 29]

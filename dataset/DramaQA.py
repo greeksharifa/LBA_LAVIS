@@ -272,6 +272,4 @@ class DramaQAEvalDataset(BaseDataset):
             "answer_sentence": ann["answers"][ann["correct_idx"]],
             # "instance_id": ann["instance_id"],
         }
-    
-    # def get_accuracy(self, outputs, targets, match1ok=False):
-
+     
