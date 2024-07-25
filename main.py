@@ -136,7 +136,7 @@ def main():
                             "text_output_lba": text_outputs_lba[i],
                         })
                 if args.verbose and i == 0:
-                    pprint(result, width=300)
+                    # pprint(result, width=300)
                     sample_print(text_outputs_base[i], text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
                     
                 results.append(result)
