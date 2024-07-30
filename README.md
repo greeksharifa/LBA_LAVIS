@@ -21,4 +21,5 @@ CUDA_VISIBLE_DEVICES=1 python main.py
 CUDA_VISIBLE_DEVICES=2 python main.py --options runner.match1ok=True
 CUDA_VISIBLE_DEVICES=3 python main.py --options datasets.dataset_name="AOKVQA"
 CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="AOKVQA" runner.match1ok=True
+CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/"
 ```

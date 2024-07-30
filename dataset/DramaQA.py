@@ -16,7 +16,8 @@ import torch
 from torchvision import transforms
 
 # from multimodal_classification_datasets import MultimodalClassificationDataset
-from utils.load_video import load_video_to_sampled_frames
+# from utils.load_video import load_video_to_sampled_frames
+from dataset.video import read_video_pyav
 
 from dataset.base_dataset import BaseDataset
 
@@ -199,25 +200,29 @@ class DramaQAEvalDataset(BaseDataset):
         vid = ann["vid"]
         vpath = os.path.join(self.vis_root, f'{vid}.mp4')
         
-        # load images. output: list of PIL.Image
-        frms = []
-        image_paths = self.get_image_path(vid)
-        for img_path in image_paths:
-            frms.append(Image.open(img_path))
-        if len(frms) < self.n_frms:
-            frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
+        clip = read_video_pyav(vpath, self.n_frms)
+        
+        # # load images. output: list of PIL.Image
+        # frms = []
+        # image_paths = self.get_image_path(vid)
+        # for img_path in image_paths:
+        #     frms.append(Image.open(img_path))
+        # if len(frms) < self.n_frms:
+        #     frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
         
         
+        """
         # directly read Video    
-        # try:
-        #     frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
-        #     transform = transforms.ToTensor()
-        #     tensors = [transform(img) for img in frms]
-        #     stacked_tensor = torch.stack(tensors)
-        #     # frms = self.vis_processor(vpath)
-        # except Exception as e:
-        #     print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
-        #     assert False, e
+        try:
+            frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
+            transform = transforms.ToTensor()
+            tensors = [transform(img) for img in frms]
+            stacked_tensor = torch.stack(tensors)
+            # frms = self.vis_processor(vpath)
+        except Exception as e:
+            print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
+            assert False, e
+        """
         
         '''
         # get_video
@@ -263,7 +268,7 @@ class DramaQAEvalDataset(BaseDataset):
         gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
 
         return {
-            "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
+            "image": clip, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
             # "video": video, # [min(n_frms, len(video)), 768]
             "text_input": question,
             "question_id": ann["qid"],

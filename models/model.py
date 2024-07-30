@@ -1,12 +1,16 @@
 from typing import Optional
 import requests
 from PIL import Image
+import os
+
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
+from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
 from processors.alpro_processors import AlproVideoEvalProcessor
 # from _v1.lavis.models.blip2_models.
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -218,9 +222,13 @@ class Recomposer(nn.Module):
         if "flan-t5" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
-        else: # "vicuna"
+        elif "vicuna" in model_name:
             self.processor = InstructBlipProcessor.from_pretrained(model_name)
             self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
+        elif "Video-LLaVA" in model_name:
+            self.processor = VideoLlavaProcessor.from_pretrained(model_name)
+            self.model = VideoLlavaForConditionalGeneration.from_pretrained(model_name, cache_dir=os.path.join(cfg.model_cfg.cache_dir, "LanguageBind/")).to(device)#, device_map="auto")#.to(device)
+            
         # print(self.processor.image_processor)
             
         self.device = device
@@ -236,13 +244,15 @@ class Recomposer(nn.Module):
         # import pdb; pdb.set_trace()
         
         if isinstance(images[0], Image.Image):
-            encoding_image_processor = self.processor.image_processor(images, return_tensors="pt")
-            
             # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
             inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device) 
             
+            # encoding_image_processor = self.processor.image_processor(images, return_tensors="pt")
             # print('encoding_image_processor :', encoding_image_processor.keys())
             # print('type(inputs):', type(inputs))
+        elif isinstance(images[0], np.ndarray): # video. type: List[np.ndarray]
+            # import pdb; pdb.set_trace()
+            inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True).to(self.device)
         else: # video. type: List[Image.Image]
             # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
             inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [64, 29]
@@ -285,7 +295,7 @@ class Recomposer(nn.Module):
 
         outputs = self.model.generate(
             **inputs,
-            do_sample=False,
+            # do_sample=False,
             num_beams=5,
             max_new_tokens=10,
             min_length=1,
@@ -293,6 +303,32 @@ class Recomposer(nn.Module):
             return_dict_in_generate=True,
             output_scores=True,
         )
+
+        '''
+        if "Video-LLaVA" in self.cfg.runner_cfg.recomposer_name:
+            # import pdb; pdb.set_trace()
+            outputs = self.model.generate(
+                **inputs,
+                do_sample=False,
+                num_beams=5,
+                max_new_tokens=10,
+                min_length=1,
+                length_penalty=-1,
+                return_dict_in_generate=True,
+                output_scores=True,
+            )
+        else:
+            outputs = self.model.generate(
+                **inputs,
+                do_sample=False,
+                num_beams=5,
+                max_new_tokens=10,
+                min_length=1,
+                length_penalty=-1,
+                return_dict_in_generate=True,
+                output_scores=True,
+            )
+        '''
         # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
         # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
 
