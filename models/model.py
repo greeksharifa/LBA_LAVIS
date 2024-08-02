@@ -227,7 +227,12 @@ class Recomposer(nn.Module):
             self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         elif "Video-LLaVA" in model_name:
             self.processor = VideoLlavaProcessor.from_pretrained(model_name)
-            self.model = VideoLlavaForConditionalGeneration.from_pretrained(model_name, cache_dir=os.path.join(cfg.model_cfg.cache_dir, "LanguageBind/")).to(device)#, device_map="auto")#.to(device)
+            self.model = VideoLlavaForConditionalGeneration.from_pretrained(
+                model_name, 
+                cache_dir=os.path.join(cfg.model_cfg.cache_dir, "LanguageBind/"), 
+                device_map="auto",
+                attn_implementation=None,
+            )#.to(device)
             
         # print(self.processor.image_processor)
             

@@ -2,6 +2,13 @@
 
 ## Installation
 
+- follow install videollava: https://github.com/PKU-YuanGroup/Video-LLaVA?tab=readme-ov-file#%EF%B8%8F-requirements-and-installation
+- or Salesforce-lavis
+
+```bash
+pip install OmegaConf tqdm webdataset
+```
+
 **docker**
 
 ```bash
@@ -21,5 +28,5 @@ CUDA_VISIBLE_DEVICES=1 python main.py
 CUDA_VISIBLE_DEVICES=2 python main.py --options runner.match1ok=True
 CUDA_VISIBLE_DEVICES=3 python main.py --options datasets.dataset_name="AOKVQA"
 CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="AOKVQA" runner.match1ok=True
-CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/"
+CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1
 ```

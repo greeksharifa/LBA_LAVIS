@@ -72,7 +72,7 @@ def main():
         results = []
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             # if data_iter_step == 0:
-                # pprint(batch, width=300)
+            pprint(batch, width=300)
 
             bsz = len(batch['image'])
             images = batch['image']
@@ -84,7 +84,7 @@ def main():
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(images, text_inputs)
-            # print(f'{data_iter_step:5d}/{len(dataloader)} : ', outputs[0])
+            print(f'{data_iter_step:5d}/{len(dataloader)} : ', text_outputs_base, confidences_base)
 
             gt_answers = batch['gt_ans']  # list[bsz, 10]
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
@@ -102,10 +102,13 @@ def main():
                 sub_questions, _ = decomposer(images, text_inputs)
             else:                               # Only Text, flan-t5
                 sub_questions = decomposer(text_inputs)
+            print('sub_questions:', sub_questions)
+            
             
             # generating sub_answers
             text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
             sub_answers, _ = recomposer(images, text_inputs)
+            print('sub_answers:', sub_answers)
             
             # generating recomposed_answers
             if cfg.datasets_cfg.data_type == "videos":
@@ -120,6 +123,10 @@ def main():
                                              sub_questions=sub_questions, 
                                              sub_answers=sub_answers)
             text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
+            
+            print('text_outputs_lba:', text_outputs_lba)
+            print('confidences_lba:', confidences_lba)
+            
             
             """##############################      Save result      ##############################"""
             for i in range(bsz):
