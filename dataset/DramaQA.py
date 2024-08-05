@@ -168,15 +168,15 @@ class DramaQAEvalDataset(BaseDataset):
         }
        
     def get_image_path(self, vid):
-
+        # import pdb; pdb.set_trace()
         if vid.endswith('0000'):
             scene_dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))[:-4] # ex. /data1/AnotherMissOh/AnotherMissOh_images/AnotherMissOh01/001/0078
             dir_paths = sorted(glob.glob(os.path.join(scene_dir_path, '*/')))
 
-            if self.n_frms < len(dir_paths):
-                idxs = np.linspace(-1, len(dir_paths), self.n_frms+2, dtype=int)
-                idxs = idxs[1:-1]
-                dir_paths = [dir_paths[idx] for idx in idxs]
+            # if self.n_frms < len(dir_paths):
+            idxs = np.linspace(-1, len(dir_paths), self.n_frms+2, dtype=int)
+            idxs = idxs[1:-1]
+            dir_paths = [dir_paths[idx] for idx in idxs]
 
             # shot_contained = sample["shot_contained"]
             image_paths = []
@@ -200,15 +200,19 @@ class DramaQAEvalDataset(BaseDataset):
         vid = ann["vid"]
         vpath = os.path.join(self.vis_root, f'{vid}.mp4')
         
-        clip = read_video_pyav(vpath, self.n_frms)
+        # frms = read_video_pyav(vpath, self.n_frms)
         
-        # # load images. output: list of PIL.Image
-        # frms = []
-        # image_paths = self.get_image_path(vid)
-        # for img_path in image_paths:
-        #     frms.append(Image.open(img_path))
-        # if len(frms) < self.n_frms:
-        #     frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
+        # load images. output: list of PIL.Image
+        frms = []
+        image_paths = self.get_image_path(vid)
+        for img_path in image_paths:
+            frms.append(Image.open(img_path))
+            frms.append(np.array(Image.open(img_path)))
+        if len(frms) < self.n_frms:
+            frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
+            frms = [np.zeros_like(frms[0])] * (self.n_frms - len(frms)) + frms
+            
+        # frms = np.stack([x for x in frms])
         
         
         """
@@ -265,10 +269,11 @@ class DramaQAEvalDataset(BaseDataset):
             
         question = ann["que"] # question = self.text_processor(ann["que"])
         
-        gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
+        # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
+        gt_ans = ann["correct_idx"]
 
         return {
-            "image": clip, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
+            "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
             # "video": video, # [min(n_frms, len(video)), 768]
             "text_input": question,
             "question_id": ann["qid"],
@@ -278,3 +283,29 @@ class DramaQAEvalDataset(BaseDataset):
             # "instance_id": ann["instance_id"],
         }
      
+'''
+class DramaQASeViLADataset(DramaQAEvalDataset):
+    def collater(self, samples):
+        raise NotImplementedError("collater is not implemented in DramaQASeViLADataset")
+    
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+        
+        vid = ann["vid"]
+        vpath = os.path.join(self.vis_root, f'{vid}.mp4')
+        
+        # ['video', 'qa_input', 'loc_input', 'qa_output', 'question_id', 'duration']
+        return {
+            "image": NotImplementedError,
+            "text_input": ann["que"],
+            
+            
+            
+            "video": NotImplementedError,
+            "qa_input": ann["qa_input"],
+            "loc_input": ann["loc_input"],
+            "qa_output": ann["qa_output"],
+            "question_id": ann["question_id"],
+            "duration": ann["duration"],
+        }
+'''

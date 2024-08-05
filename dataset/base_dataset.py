@@ -134,7 +134,7 @@ class BaseDataset(Dataset):
             else:
                 return 1.0 if out == target else 0.0
             
-        if isinstance(outputs, str):    
+        if isinstance(outputs, (str, int)):
             acc = _get_acc(outputs, targets)
             return acc
         else:
@@ -151,9 +151,9 @@ def get_text_input(
     sub_questions:List[str]='',
     sub_answers:List[str]='',
     candidate_lists: List[List[str]]=[],
+    gt_answers: List[str]=[],
+    question_ids: List[str]=[],
 ):
-    assert prompt_type in ["default_image", "decomposer", "sub_answer", "recomposer_image", "default_video", "recomposer_video"], f"Invalid prompt type: {prompt_type}"
-    
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
         return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
@@ -207,9 +207,68 @@ Answer: The answer is (A)\n"""
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
         return ret
-        
+    
     else:
         raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
     
     
+def get_sevila_input(
+    prompt_type:str="default",
+    # text_inputs:List[str]=[],
+    batch: List=[],
+    sub_questions:List[str]=[],
+    sub_answers:List[str]=[],
+):
+    main_questions = batch['text_input']
+    candidate_lists = batch['candidate_list']
+    gt_answers = batch['gt_ans']
+    question_ids = batch['question_id']
+    
+    ret = {
+        "video": None,
+        "qa_input": [],
+        "loc_input": [],
+        "qa_output": gt_answers,
+        "question_id": question_ids,
+        "duration": [1 for _ in range(len(main_questions))],
+    }
+    
+    recomposer_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+Question: Why did Dokyung pull Haeyoung1's arm hard?
+Option A: Dokyung pulled Haeyoung1's arm to hug her hard.
+Option B: It is because Dokyung did not want Haeyoung1 to fall.
+Option C: This is because Dokyung and Haeyoung1 were dancing on the street.
+Option D: Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+Option E: Because Dokyung needed Haeyoung1 to go to the police station.
+select the correct answer from the options: (A)\n"""
+
+    for i, (main_question, candidate_list) in enumerate(zip(main_questions, candidate_lists)):
+        # qa_prompt ex. 'Question: how do the two man play the instrument? 
+        # Option A: roll the handle. Option B: tap their feet. Option C: strum the string. Option D: hit with sticks. Option E: pat with hand. 
+        # Considering the information presented in the frame, select the correct answer from the options.'
+        qa_prompt = f"Question: {main_question} "
+        qa_prompt += ' '.join([f"Option {chr(65+i)}: {c}" for i, c in enumerate(candidate_list)])
+        qa_prompt += " Considering the information presented in the frame, select the correct answer from the options."
+        
+        # loc_prompt ex.'Question: how do the two man play the instrument? 
+        # Options: (roll the handle. tap their feet. strum the string. hit with sticks. pat with hand.) 
+        # Does the information within the frame provide the necessary details to accurately answer the given question?'
+        loc_prompt = f"Question: {main_question}"
+        loc_prompt += f" Options: ({' '.join(candidate_list)})"
+        loc_prompt += " Does the information within the frame provide the necessary details to accurately answer the given question?"
+
+        if prompt_type == "default":
+            pass
+        elif prompt_type == "decomposer":
+            raise NotImplementedError("sevila decomposer not implemented")
+        elif prompt_type == "recomposer":
             
+            qa_prompt = recomposer_examplar + f"Context: {sub_questions[i]}? {sub_answers[i]}.\n" + qa_prompt
+            # loc_prompt: pass
+        else:
+            raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
+    
+        ret["qa_input"].append(qa_prompt)
+        ret["loc_input"].append(loc_prompt)
+
+    return ret

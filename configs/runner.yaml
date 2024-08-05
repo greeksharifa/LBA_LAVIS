@@ -5,8 +5,9 @@ runner:
   match1ok: False
 
   # model
-  recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf"
+  recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
+  answerer_name: "Salesforce/blip2-flan-t5-xxl" # None
   HF_HOME: /data2/
 
   batch_size: 64
@@ -16,6 +17,8 @@ runner:
   print_freq: 50
   use_vqa_tool: False
   num_bin: 50
+
+  cfg_pkl_path: 'SeViLA/cfg.pkl'
 
 
 datasets:

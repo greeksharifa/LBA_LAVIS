@@ -29,4 +29,9 @@ CUDA_VISIBLE_DEVICES=2 python main.py --options runner.match1ok=True
 CUDA_VISIBLE_DEVICES=3 python main.py --options datasets.dataset_name="AOKVQA"
 CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="AOKVQA" runner.match1ok=True
 CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1
+
+# sevila
+CUDA_VISIBLE_DEVICES=0,1,2 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="sevila" runner.decomposer_name="xl" runner.answerer_name="Salesforce/blip2-flan-t5-xl" runner.batch_size=1 datasets.n_frms=32
+CUDA_VISIBLE_DEVICES=3,4,5 python main.py --options datasets.dataset_name="DramaQA" runner.recomposer_name="sevila" runner.decomposer_name="xxl" runner.answerer_name="Salesforce/blip2-flan-t5-xxl" runner.batch_size=1 datasets.n_frms=32
+CUDA_VISIBLE_DEVICES=2 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="sevila" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1 datasets.n_frms=32
 ```

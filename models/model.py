@@ -6,8 +6,8 @@ import os
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
-from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
 from processors.alpro_processors import AlproVideoEvalProcessor
+from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoForConditionalGeneration
 # from _v1.lavis.models.blip2_models.
 
 import numpy as np
@@ -29,7 +29,8 @@ class Decomposer(nn.Module):
             torch_dtype=torch.bfloat16,
             # load_in_4bit=True,
             # device_map="auto",
-            cache_dir=cfg.model_cfg.cache_dir,
+            cache_dir=os.path.join(cfg.model_cfg.cache_dir, "google"),
+            # local_files_only=True,
         ).to(device)
 
     def forward(self, text_inputs):
@@ -72,12 +73,13 @@ class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
             self._preprocess_accelerate()
 
         batch_size = pixel_values.shape[0]
-        
+        # import pdb; pdb.set_trace()
         # For video data
-        if pixel_values.dim() == 5:                         # [bsz, 3, n_frms, 224, 224]
+        if pixel_values.dim() == 5:                         # [bsz, n_frms, 3, 224, 224]
             language_model_inputs, language_attention_mask = [], []
             for j in range(pixel_values.size(2)):
-                this_frame = pixel_values[:, :, j, :, :]    # [bsz, 3, 224, 224]
+                # this_frame = pixel_values[:, :, j, :, :]    # [bsz, 3, 224, 224]
+                this_frame = pixel_values[:, j, :, :, :]    # [bsz, 3, 224, 224]
                 frame_embeds = self.vision_model(this_frame, return_dict=True).last_hidden_state
                 frame_attention_mask = torch.ones(frame_embeds.size()[:-1], dtype=torch.long, device=frame_embeds.device)
 
@@ -120,7 +122,7 @@ class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
             input_ids = (
                 torch.LongTensor([[self.config.text_config.bos_token_id]])
                 .repeat(batch_size, 1)
-                .to(image_embeds.device)
+                .to(frame_embeds.device)
             )
         if attention_mask is None:
             attention_mask = torch.ones_like(input_ids)
@@ -214,118 +216,115 @@ class VideoInstructionBlipForConditionalGeneration(InstructBlipForConditionalGen
 
 
 class Recomposer(nn.Module):
-    def __init__(self, cfg, device="cuda"):
+    def __init__(self, cfg, device, answerer=False):
         super().__init__()
         model_name = cfg.runner_cfg.recomposer_name
+        cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
         # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
-        if "flan-t5" in model_name:
+        if answerer:
+            model_name = cfg.runner_cfg.answerer_name
+            cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
             self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
+        elif "flan-t5" in model_name:
+            self.processor = Blip2Processor.from_pretrained(model_name)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
         elif "vicuna" in model_name:
             self.processor = InstructBlipProcessor.from_pretrained(model_name)
-            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
+            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
         elif "Video-LLaVA" in model_name:
+            from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
             self.processor = VideoLlavaProcessor.from_pretrained(model_name)
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 model_name, 
-                cache_dir=os.path.join(cfg.model_cfg.cache_dir, "LanguageBind/"), 
+                cache_dir=cache_dir, #os.path.join(cache_dir, "LanguageBind/"), 
                 device_map="auto",
                 attn_implementation=None,
             )#.to(device)
+        elif model_name == "sevila":
+            self.processor = InstructBlipVideoImageProcessor.from_pretrained("Salesforce/blip2-flan-t5-xl")
+            from SeViLA.evaluate import get_sevila_model
+            self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
+        else:
+            raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
+
+        # print('self.processor:', self.processor)
+        # print('self.processor.image_processor:', self.processor.image_processor)
             
-        # print(self.processor.image_processor)
-            
+        self.model_name = model_name
         self.device = device
         self.cfg = cfg
         
-        print(self.model.__class__.__name__)
+        print('recomposer name: ',self.model.__class__.__name__)
 
 
     def forward(self, images, text_inputs):
         # print('Recomposer.forward' + '*' * 120)
         # print('images:', images)
         # print('text_inputs:', text_inputs)
+        # print(self.model_name)
+        # print(self.processor.__class__.__name__)
+        # print(self.model.__class__.__name__)
         # import pdb; pdb.set_trace()
         
-        if isinstance(images[0], Image.Image):
-            # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
-            inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device) 
+        if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
+            samples = text_inputs
+            video = self.processor(images, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
+            samples["video"] = video
+            output_text, output_scores = self.model.generate(samples)
             
-            # encoding_image_processor = self.processor.image_processor(images, return_tensors="pt")
-            # print('encoding_image_processor :', encoding_image_processor.keys())
-            # print('type(inputs):', type(inputs))
-        elif isinstance(images[0], np.ndarray): # video. type: List[np.ndarray]
-            # import pdb; pdb.set_trace()
-            inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True).to(self.device)
-        else: # video. type: List[Image.Image]
-            # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
-            inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [64, 29]
-            
-            '''
-            images: list of list of PIL.Image | [64, len, 640, 480]
-            '''
-            
-            pixel_values = []
-            for video in images: # video: [len, 640, 480]
-                # [len, 640, 480] -> [len, 3, 224, 224]
-                pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True).to(self.device)['pixel_values'])  # [len, 3, 224, 224]
-            # [len, 3, 224, 224] -> [bsz, len, 3, 224, 224]
-            stacked = torch.stack(pixel_values, dim=0)
-            # [bsz, len, 3, 224, 224] -> [bsz, 3, len, 224, 224]
-            inputs["pixel_values"] = stacked.transpose(2, 1)
-                
-            '''FlanT5
-            batch_size=64, n_frms=5, n_channels=3, height=224, width=224
-            dict_keys([
-                'pixel_values',   [64, 3, 5, 224, 224] # 원래는 [64, 3, 224, 224]
-                'input_ids',      [64, 29]
-                'attention_mask', [64, 29]
-            ])
-            '''
-            # for k, v in inputs.items():
-            #     print(f'{k:<15s} | shape: {v.shape}')
-                
-            '''Blip2VicunaInstruct
-            input_ids       | shape: torch.Size([64, 168])
-            attention_mask  | shape: torch.Size([64, 168])
-            qformer_input_ids | shape: torch.Size([64, 156])
-            qformer_attention_mask | shape: torch.Size([64, 156])
-            pixel_values    | shape: torch.Size([64, 5, 3, 224, 224])
-            '''
-            
-        # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
-        # out = self.model.generate(**inputs)
-        # return self.processor.batch_decode(out, skip_special_tokens=True)
-
-        outputs = self.model.generate(
-            **inputs,
-            # do_sample=False,
-            num_beams=5,
-            max_new_tokens=10,
-            min_length=1,
-            length_penalty=-1,
-            return_dict_in_generate=True,
-            output_scores=True,
-        )
-
-        '''
-        if "Video-LLaVA" in self.cfg.runner_cfg.recomposer_name:
-            # import pdb; pdb.set_trace()
-            outputs = self.model.generate(
-                **inputs,
-                do_sample=False,
-                num_beams=5,
-                max_new_tokens=10,
-                min_length=1,
-                length_penalty=-1,
-                return_dict_in_generate=True,
-                output_scores=True,
-            )
         else:
+            # import pdb; pdb.set_trace()
+            if isinstance(images[0], Image.Image):
+                # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
+                inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device) 
+            elif isinstance(images[0], np.ndarray): # video. type: List[np.ndarray]
+                inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True).to(self.device)
+                # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True).to(self.device)
+            else: # video. type: List[Image.Image]
+                # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
+                inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True).to(self.device) # [64, 29]
+                
+                '''
+                images: list of list of PIL.Image | [64, len, 640, 480]
+                '''
+                
+                pixel_values = []
+                for video in images: # video: [n_frms, 640, 480]
+                    # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
+                    pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True).to(self.device)['pixel_values'])  # [n_frms, 3, 224, 224]
+                # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]
+                stacked = torch.stack(pixel_values, dim=0)
+                # 미적용중.."""# [bsz, n_frms, 3, 224, 224] -> [bsz, 3, n_frms, 224, 224]"""
+                inputs["pixel_values"] = stacked#.transpose(2, 1)
+                    
+                '''FlanT5
+                batch_size=64, n_frms=5, n_channels=3, height=224, width=224
+                dict_keys([
+                    'pixel_values',   [64, 3, 5, 224, 224] # 원래는 [64, 3, 224, 224]
+                    'input_ids',      [64, 29]
+                    'attention_mask', [64, 29]
+                ])
+                '''
+                # for k, v in inputs.items():
+                #     print(f'{k:<15s} | shape: {v.shape}')
+                    
+                '''Blip2VicunaInstruct
+                input_ids       | shape: torch.Size([64, 168])
+                attention_mask  | shape: torch.Size([64, 168])
+                qformer_input_ids | shape: torch.Size([64, 156])
+                qformer_attention_mask | shape: torch.Size([64, 156])
+                pixel_values    | shape: torch.Size([64, 5, 3, 224, 224])
+                '''
+                
+            # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
+            # out = self.model.generate(**inputs)
+            # return self.processor.batch_decode(out, skip_special_tokens=True)
+
             outputs = self.model.generate(
                 **inputs,
-                do_sample=False,
+                # do_sample=False,
                 num_beams=5,
                 max_new_tokens=10,
                 min_length=1,
@@ -333,14 +332,14 @@ class Recomposer(nn.Module):
                 return_dict_in_generate=True,
                 output_scores=True,
             )
-        '''
-        # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
-        # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
+            # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
+            # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
+            
+            output_text = self.processor.batch_decode(
+                outputs.sequences, skip_special_tokens=True
+            )
+            output_scores = torch.exp(outputs.sequences_scores).tolist()
 
-        output_text = self.processor.batch_decode(
-            outputs.sequences, skip_special_tokens=True
-        )
-        output_scores = torch.exp(outputs.sequences_scores).tolist()
 
         return output_text, output_scores
 

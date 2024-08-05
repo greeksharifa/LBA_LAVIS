@@ -6,12 +6,14 @@ from tqdm import tqdm
 from datetime import datetime
 from pprint import pprint
 from collections import OrderedDict
+import PIL
 
+import torch
 from torch.utils.data import DataLoader
 
 from configs.config import Config
 # from dataset.VQA_Introspect import VQAIntrospectDataset
-from dataset.base_dataset import get_text_input, load_dataset
+from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input
 from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
@@ -55,6 +57,12 @@ def main():
     if not cfg.runner_cfg.visualize:
         s = datetime.now()
         recomposer = Recomposer(cfg, device="cuda:0")
+        
+        if cfg.runner_cfg.recomposer_name == "sevila":
+            answerer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
+        else:
+            answerer = recomposer
+            
         if cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer
         else:
@@ -72,21 +80,33 @@ def main():
         results = []
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             # if data_iter_step == 0:
-            pprint(batch, width=300)
+            print('batch:')
+            for k, v in batch.items():
+                if hasattr(v, "shape"):
+                    print(f'{k}: {v.shape}')
+                elif isinstance(v, list) and hasattr(v[0], "shape"):
+                    print(f'{k}: {len(v)} {v[0].shape}')
+                elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], PIL.Image.Image):
+                    print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
+                else:
+                    print(f'{k}: {v}')
+            # pprint(batch, width=300)
 
             bsz = len(batch['image'])
             images = batch['image']
 
             """##############################  Baseline Inference   ##############################"""    
-            
-            if cfg.datasets_cfg.data_type == "videos":
+            if cfg.runner_cfg.recomposer_name == "sevila":
+                # return list of dict, not list of str
+                text_inputs = get_sevila_input("default", batch=batch)
+            elif cfg.datasets_cfg.data_type == "videos":
                 text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(images, text_inputs)
             print(f'{data_iter_step:5d}/{len(dataloader)} : ', text_outputs_base, confidences_base)
 
-            gt_answers = batch['gt_ans']  # list[bsz, 10]
+            gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
 
             total_base_match += sum(acc_base)
@@ -107,11 +127,27 @@ def main():
             
             # generating sub_answers
             text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-            sub_answers, _ = recomposer(images, text_inputs)
+            sub_answers, _ = answerer(images, text_inputs)
+            '''
+            if cfg.runner_cfg.recomposer_name == "sevila":
+                # sub_a_batch = batch.copy()
+                # sub_a_batch['text_input'] = sub_questions
+                # text_inputs = get_sevila_input("default", batch=batch)
+                text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
+                sub_answers, _ = answerer(images, text_inputs)
+            else:
+                text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
+                sub_answers, _ = recomposer(images, text_inputs)
+            '''
             print('sub_answers:', sub_answers)
             
             # generating recomposed_answers
-            if cfg.datasets_cfg.data_type == "videos":
+            if cfg.runner_cfg.recomposer_name == "sevila":
+                text_inputs = get_sevila_input("recomposer", 
+                                               batch=batch, 
+                                               sub_questions=sub_questions, 
+                                               sub_answers=sub_answers)
+            elif cfg.datasets_cfg.data_type == "videos":
                 text_inputs = get_text_input("recomposer_video", 
                                              main_questions=batch['text_input'], 
                                              sub_questions=sub_questions, 
@@ -133,7 +169,7 @@ def main():
                 result = OrderedDict({
                             "question_id": batch['question_id'][i],
                             "main_question": batch['text_input'][i],
-                            "text_input": text_inputs[i],
+                            "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
                             "gt_ans": gt_answers[i],
                             "confidence_base": confidences_base[i],
                             "confidence_lba": confidences_lba[i],
