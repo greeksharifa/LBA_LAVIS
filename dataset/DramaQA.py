@@ -269,8 +269,8 @@ class DramaQAEvalDataset(BaseDataset):
             
         question = ann["que"] # question = self.text_processor(ann["que"])
         
-        # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
-        gt_ans = ann["correct_idx"]
+        gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
+        # gt_ans = ann["correct_idx"]
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷

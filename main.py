@@ -58,15 +58,15 @@ def main():
         s = datetime.now()
         recomposer = Recomposer(cfg, device="cuda:0")
         
-        if cfg.runner_cfg.recomposer_name == "sevila":
-            answerer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
-        else:
-            answerer = recomposer
-            
         if cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer
         else:
             decomposer = Decomposer(cfg, device="cuda:1")
+            
+        if cfg.runner_cfg.recomposer_name == "sevila":
+            answerer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
+        else:
+            answerer = recomposer
         print('model loading time : ', datetime.now()-s)
 
         s = datetime.now()
@@ -107,6 +107,8 @@ def main():
             print(f'{data_iter_step:5d}/{len(dataloader)} : ', text_outputs_base, confidences_base)
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
+            if cfg.runner_cfg.recomposer_name == "sevila":
+                gt_answers = [dataset.__class__.ANSWER_MAPPING[ans] for ans in gt_answers]
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
 
             total_base_match += sum(acc_base)

@@ -7,7 +7,7 @@ runner:
   # model
   recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
-  answerer_name: "Salesforce/blip2-flan-t5-xxl" # None
+  answerer_name: "Salesforce/blip2-flan-t5-xl" # None
   HF_HOME: /data2/
 
   batch_size: 64
