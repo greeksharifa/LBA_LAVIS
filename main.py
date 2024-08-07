@@ -88,7 +88,7 @@ def main():
                     print(f'{k}: {len(v)} {v[0].shape}')
                 elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], PIL.Image.Image):
                     print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
-                else:
+                elif k != "candidate_list":
                     print(f'{k}: {v}')
             # pprint(batch, width=300)
 

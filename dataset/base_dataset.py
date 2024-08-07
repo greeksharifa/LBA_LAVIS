@@ -155,16 +155,17 @@ def get_text_input(
     gt_answers: List[str]=[],
     question_ids: List[str]=[],
 ):
+    # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
         return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
     elif prompt_type == "decomposer":
-        prompt = "<video> Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+        prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
         return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
     elif prompt_type == "sub_answer":
-        prompt = "<video> Question: {sub_question}? Short answer:"
+        prompt = "Question: {sub_question}? Short answer:"
         return [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
         
     elif prompt_type == "recomposer_image":
@@ -173,7 +174,7 @@ def get_text_input(
                 for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
     
     elif prompt_type == "default_video":
-        prompt = "<video> Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
@@ -201,7 +202,7 @@ Choices:
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
 Answer: The answer is (A)\n"""     
-        prompt = examplar + "<video> Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = examplar + "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):
