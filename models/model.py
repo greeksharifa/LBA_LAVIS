@@ -220,22 +220,23 @@ class Recomposer(nn.Module):
         super().__init__()
         model_name = cfg.runner_cfg.recomposer_name
         cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
+        device_map = "auto" if cfg.runner_cfg.device_map == "auto" else device
         # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         if answerer:
             model_name = cfg.runner_cfg.answerer_name
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
-            self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
+            self.processor = Blip2Processor.from_pretrained(model_name, device_map=device_map)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "flan-t5" in model_name:
-            self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
+            self.processor = Blip2Processor.from_pretrained(model_name, device_map=device_map)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "vicuna" in model_name:
-            self.processor = InstructBlipProcessor.from_pretrained(model_name)
-            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)
+            self.processor = InstructBlipProcessor.from_pretrained(model_name, device_map=device_map)
+            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "Video-LLaVA" in model_name:
             from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
-            self.processor = VideoLlavaProcessor.from_pretrained(model_name)
+            self.processor = VideoLlavaProcessor.from_pretrained(model_name, device_map=device_map)
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 model_name, 
                 cache_dir=cache_dir, #os.path.join(cache_dir, "LanguageBind/"), 
@@ -267,6 +268,7 @@ class Recomposer(nn.Module):
         # print(self.processor.__class__.__name__)
         # print(self.model.__class__.__name__)
         # import pdb; pdb.set_trace()
+        # images = [[image.to(self.model.device) for image in video] for video in images]
         
         if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
             samples = text_inputs
@@ -295,7 +297,7 @@ class Recomposer(nn.Module):
                     # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
                     pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True).to(self.device)['pixel_values'])  # [n_frms, 3, 224, 224]
                 # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]
-                stacked = torch.stack(pixel_values, dim=0)
+                stacked = torch.stack(pixel_values, dim=0).to(self.model.device)
                 # 미적용중.."""# [bsz, n_frms, 3, 224, 224] -> [bsz, 3, n_frms, 224, 224]"""
                 inputs["pixel_values"] = stacked#.transpose(2, 1)
                     
@@ -321,6 +323,13 @@ class Recomposer(nn.Module):
             # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
             # out = self.model.generate(**inputs)
             # return self.processor.batch_decode(out, skip_special_tokens=True)
+            try:
+                for k, v in inputs.items():
+                    print(k, type(v), v.device)
+                    v = v.to(self.model.device)
+            except:
+                pass
+            print(self.model.device)
 
             outputs = self.model.generate(
                 **inputs,

@@ -30,6 +30,7 @@ def load_dataset(datasets_cfg):
         num_data=datasets_cfg.num_data,
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 5),
+        datasets_cfg=datasets_cfg,
     )
     
     return dataset

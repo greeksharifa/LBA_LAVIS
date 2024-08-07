@@ -107,7 +107,7 @@ def main():
             print(f'{data_iter_step:5d}/{len(dataloader)} : ', text_outputs_base, confidences_base)
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
-            if cfg.runner_cfg.recomposer_name == "sevila":
+            if cfg.runner_cfg.recomposer_name != "sevila":
                 gt_answers = [dataset.__class__.ANSWER_MAPPING[ans] for ans in gt_answers]
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
 

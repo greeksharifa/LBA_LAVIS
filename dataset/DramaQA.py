@@ -87,6 +87,12 @@ class DramaQAEvalDataset(BaseDataset):
         
         self.vis_features = torch.load(vis_path)
         
+        self.vis_processor = vis_processor
+        self.text_processor = text_processor
+        
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        
         # vid_error_list = []
         
         with open(ann_path, "r") as f:
@@ -100,6 +106,10 @@ class DramaQAEvalDataset(BaseDataset):
             for i, sample in enumerate(loaded):
                 if len(self.annotation) >= len_loaded: # 0 <= num_data <= i:
                     break
+                
+                if self.datasets_cfg.get("only_scene", False) and not sample["vid"].endswith('0000'):
+                    continue
+                    
                 vid = sample["vid"]
                 print(f'\r{i:6d}/{len_loaded:6d} : {vid}', end='')
                 
@@ -117,12 +127,6 @@ class DramaQAEvalDataset(BaseDataset):
                 '''
                         
         # json.dump(vid_error_list, open('DramaQA_vid_error_list.json', 'w'))
-        
-        self.vis_processor = vis_processor
-        self.text_processor = text_processor
-        
-        for k, v in kwargs.items():
-            setattr(self, k, v)
         
         # self.features_dim = 
 
@@ -269,8 +273,8 @@ class DramaQAEvalDataset(BaseDataset):
             
         question = ann["que"] # question = self.text_processor(ann["que"])
         
-        gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
-        # gt_ans = ann["correct_idx"]
+        # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
+        gt_ans = ann["correct_idx"]
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷

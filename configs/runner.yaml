@@ -9,6 +9,7 @@ runner:
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
   answerer_name: "Salesforce/blip2-flan-t5-xl" # None
   HF_HOME: /data2/
+  device_map: "auto" # ['auto', 0, 1, ...]
 
   batch_size: 64
 

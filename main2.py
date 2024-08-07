@@ -102,7 +102,7 @@ def main():
     """##############################     Report metrics     ##############################"""
         
     metrics = {
-        "acc_origin           ": f'{total_base_match / N * 100:.3f}%',
+        "acc_origin           ": f'{total_base_match / total_cnt * 100:.3f}%',
     }
     print("metrics:", json.dumps(metrics, indent=4))
 
