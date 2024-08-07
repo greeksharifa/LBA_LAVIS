@@ -260,7 +260,7 @@ class Recomposer(nn.Module):
         print('recomposer name: ',self.model.__class__.__name__)
 
 
-    def forward(self, images, text_inputs):
+    def forward(self, images, text_inputs, generate_sub_q=False):
         # print('Recomposer.forward' + '*' * 120)
         # print('images:', images)
         # print('text_inputs:', text_inputs)
@@ -325,17 +325,17 @@ class Recomposer(nn.Module):
             # return self.processor.batch_decode(out, skip_special_tokens=True)
             try:
                 for k, v in inputs.items():
-                    print(k, type(v), v.device)
+                    # print(k, type(v), v.device)
                     v = v.to(self.model.device)
             except:
                 pass
-            print(self.model.device)
+            # print(self.model.device)
 
             outputs = self.model.generate(
                 **inputs,
-                # do_sample=False,
+                do_sample=generate_sub_q,
                 num_beams=5,
-                max_new_tokens=10,
+                max_new_tokens=50 if generate_sub_q else 10,
                 min_length=1,
                 length_penalty=-1,
                 return_dict_in_generate=True,

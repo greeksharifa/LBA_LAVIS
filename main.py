@@ -59,7 +59,7 @@ def main():
         recomposer = Recomposer(cfg, device="cuda:0")
         
         if cfg.runner_cfg.decomposer_name == "self":
-            decomposer = recomposer
+            decomposer = recomposer # Recomposer(cfg, device="cuda:1") # 
         else:
             decomposer = Decomposer(cfg, device="cuda:1")
             
@@ -121,7 +121,7 @@ def main():
             # generating sub_questions
             text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
             if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                sub_questions, _ = decomposer(images, text_inputs)
+                sub_questions, _ = decomposer(images, text_inputs, generate_sub_q=True)
             else:                               # Only Text, flan-t5
                 sub_questions = decomposer(text_inputs)
             print('sub_questions:', sub_questions)
