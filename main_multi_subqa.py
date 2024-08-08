@@ -209,9 +209,9 @@ def main():
                             "sub_answer": sub_answers[i],
                             "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                         })
-                if args.verbose and i == 0:
+                if args.verbose:# and i == 0:
                     # pprint(result, width=300)
-                    sample_print(text_outputs_base[i], text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
+                    sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
                     
                 results.append(result)
 
