@@ -117,6 +117,8 @@ def main():
             metric_logger.update(n=bsz, base_acc=sum(acc_base)/bsz)
             metric_logger.update(n=bsz, total_base_acc=total_base_match/total_cnt)
             
+            print("batch['text_input']:", batch['text_input'])
+            
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
@@ -177,6 +179,7 @@ def main():
             confidences_lba_list = _convert_nested_list(confidences_lba_list)
             
             final_text_outputs_lba, final_confidences_lba = [], []
+            indices = []
             
             # TODO: select num_sub_qa_select
             for text_output_lba_list, confidence_lba_list in zip(text_outputs_lba_list, confidences_lba_list):
@@ -184,6 +187,12 @@ def main():
                 index = confidence_lba_list.index(max(confidence_lba_list))
                 final_text_outputs_lba.append(text_output_lba_list[index])
                 final_confidences_lba.append(confidence_lba_list[index])
+                indices.append(index)
+            
+            print('indices:', indices)
+            print('final_text_outputs_lba:', final_text_outputs_lba)
+            print('final_confidences_lba:', final_confidences_lba)
+            
             
             
             """##############################      Save result      ##############################"""
