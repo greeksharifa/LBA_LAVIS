@@ -15,6 +15,9 @@ runner:
 
   batch_size: 64
 
+  num_sub_qa_generate: 3
+  num_sub_qa_select: 1
+
   # output & log
   output_dir: 'output/'
   print_freq: 50

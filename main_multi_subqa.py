@@ -118,57 +118,72 @@ def main():
             metric_logger.update(n=bsz, total_base_acc=total_base_match/total_cnt)
             
             """############################## Decompose & Recompose ##############################"""
+            sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
-            # generating sub_questions
-            text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-            if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                sub_questions, _ = decomposer(images, text_inputs, generate_sub_q=True)
-            else:                               # Only Text, flan-t5
-                sub_questions = decomposer(text_inputs)
-            if args.verbose:
-                print('sub_questions:', sub_questions)
-            
-            
-            # generating sub_answers
-            text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-            sub_answers, _ = answerer(images, text_inputs)
-            '''
-            if cfg.runner_cfg.recomposer_name == "sevila":
-                # sub_a_batch = batch.copy()
-                # sub_a_batch['text_input'] = sub_questions
-                # text_inputs = get_sevila_input("default", batch=batch)
+            for _ in range(cfg.runner_cfg.num_sub_qa_generate):
+                # generating sub_questions
+                text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
+                if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                    sub_questions, _ = decomposer(images, text_inputs, generate_sub_q=True)
+                else:                               # Only Text, flan-t5
+                    sub_questions = decomposer(text_inputs)
+                if args.verbose:
+                    print('sub_questions:', sub_questions)
+                sub_questions_list.append(sub_questions)
+                
+                
+                # generating sub_answers
                 text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
                 sub_answers, _ = answerer(images, text_inputs)
-            else:
-                text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                sub_answers, _ = recomposer(images, text_inputs)
-            '''
-            if args.verbose:
-                print('sub_answers:', sub_answers)
+                if args.verbose:
+                    print('sub_answers:', sub_answers)
+                sub_answers_list.append(sub_answers)
+                
+                # generating recomposed_answers
+                if cfg.runner_cfg.recomposer_name == "sevila":
+                    text_inputs = get_sevila_input("recomposer", 
+                                                batch=batch, 
+                                                sub_questions=sub_questions, 
+                                                sub_answers=sub_answers)
+                elif cfg.datasets_cfg.data_type == "videos":
+                    text_inputs = get_text_input("recomposer_video", 
+                                                main_questions=batch['text_input'], 
+                                                sub_questions=sub_questions, 
+                                                sub_answers=sub_answers,
+                                                candidate_lists=batch['candidate_list'],
+                                                recomposer_examplar=cfg.runner_cfg.recomposer_examplar)
+                else:                          # "images"
+                    text_inputs = get_text_input("recomposer_image", 
+                                                main_questions=batch['text_input'], 
+                                                sub_questions=sub_questions, 
+                                                sub_answers=sub_answers)
+                text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
+                text_outputs_lba_list.append(text_outputs_lba)
+                confidences_lba_list.append(confidences_lba)
+                
+                if args.verbose:
+                    print('text_outputs_lba:', text_outputs_lba)
+                    print('confidences_lba:', confidences_lba)
+                
+            def _convert_nested_list(lists):
+                return [
+                    [inner_list[i] for inner_list in lists] 
+                    for i in range(len(lists[0]))
+                ]
+                
+            sub_questions_list = _convert_nested_list(sub_questions_list)
+            sub_answers_list = _convert_nested_list(sub_answers_list)
+            text_outputs_lba_list = _convert_nested_list(text_outputs_lba_list)
+            confidences_lba_list = _convert_nested_list(confidences_lba_list)
             
-            # generating recomposed_answers
-            if cfg.runner_cfg.recomposer_name == "sevila":
-                text_inputs = get_sevila_input("recomposer", 
-                                               batch=batch, 
-                                               sub_questions=sub_questions, 
-                                               sub_answers=sub_answers)
-            elif cfg.datasets_cfg.data_type == "videos":
-                text_inputs = get_text_input("recomposer_video", 
-                                             main_questions=batch['text_input'], 
-                                             sub_questions=sub_questions, 
-                                             sub_answers=sub_answers,
-                                             candidate_lists=batch['candidate_list'],
-                                             recomposer_examplar=cfg.runner_cfg.recomposer_examplar)
-            else:                          # "images"
-                text_inputs = get_text_input("recomposer_image", 
-                                             main_questions=batch['text_input'], 
-                                             sub_questions=sub_questions, 
-                                             sub_answers=sub_answers)
-            text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
+            final_text_outputs_lba, final_confidences_lba = [], []
             
-            if args.verbose:
-                print('text_outputs_lba:', text_outputs_lba)
-                print('confidences_lba:', confidences_lba)
+            # TODO: select num_sub_qa_select
+            for text_output_lba_list, confidence_lba_list in zip(text_outputs_lba_list, confidences_lba_list):
+                # select highest confidence_lba among sub_qa
+                index = confidence_lba_list.index(max(confidence_lba_list))
+                final_text_outputs_lba.append(text_output_lba_list[index])
+                final_confidences_lba.append(confidence_lba_list[index])
             
             
             """##############################      Save result      ##############################"""
@@ -179,11 +194,11 @@ def main():
                             "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
                             "gt_ans": gt_answers[i],
                             "confidence_base": confidences_base[i],
-                            "confidence_lba": confidences_lba[i],
+                            "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
                             "text_output_base": text_outputs_base[i],
                             "sub_question": sub_questions[i],
                             "sub_answer": sub_answers[i],
-                            "text_output_lba": text_outputs_lba[i],
+                            "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                         })
                 if args.verbose and i == 0:
                     # pprint(result, width=300)
