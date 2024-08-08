@@ -77,6 +77,10 @@ class BaseDataset(Dataset):
 
         self._add_instance_ids()
 
+    @staticmethod
+    def answer_mapping(answer):
+        return answer
+
     def __len__(self):
         return len(self.annotation)
 
@@ -154,6 +158,7 @@ def get_text_input(
     candidate_lists: List[List[str]]=[],
     gt_answers: List[str]=[],
     question_ids: List[str]=[],
+    **kwargs,
 ):
     # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
@@ -201,8 +206,9 @@ Choices:
 (C) This is because Dokyung and Haeyoung1 were dancing on the street.
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
-Answer: The answer is (A)\n"""     
-        prompt = examplar + "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+Answer: The answer is (A)\n"""
+        prompt = examplar if kwargs.get("recomposer_examplar", True) else ""
+        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):

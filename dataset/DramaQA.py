@@ -74,7 +74,6 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
 
 class DramaQAEvalDataset(BaseDataset):
     # vid_error_list: ["AnotherMissOh14_005_0172", "AnotherMissOh14_009_0297", "AnotherMissOh14_012_0422", "AnotherMissOh14_017_0521", "AnotherMissOh14_017_0522", "AnotherMissOh13_001_0035", "AnotherMissOh13_001_0035", "AnotherMissOh13_005_0172", "AnotherMissOh13_005_0172", "AnotherMissOh13_015_0532", "AnotherMissOh13_019_0647", "AnotherMissOh13_019_0647", "AnotherMissOh13_021_0714", "AnotherMissOh13_021_0714", "AnotherMissOh13_037_1213", "AnotherMissOh13_040_1346", "AnotherMissOh15_001_0061", "AnotherMissOh15_001_0061", "AnotherMissOh15_002_0072", "AnotherMissOh15_002_0072", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0146", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0196", "AnotherMissOh15_006_0196", "AnotherMissOh15_015_0479", "AnotherMissOh15_024_0683", "AnotherMissOh15_024_0683", "AnotherMissOh15_029_0802", "AnotherMissOh15_029_0804", "AnotherMissOh15_030_0860"]
-    ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
     
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
@@ -170,6 +169,11 @@ class DramaQAEvalDataset(BaseDataset):
             "candidate_list": candidate_list_list,
             "answer_sentence": answer_sentence_list,
         }
+       
+    @staticmethod
+    def answer_mapping(answer):
+        ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
+        return ANSWER_MAPPING[answer]
        
     def get_image_path(self, vid):
         # import pdb; pdb.set_trace()

@@ -3,9 +3,9 @@ runner:
   visualize: False
   # match1ok
   match1ok: False
-  # confidence
+  # settings
   select_high_confidence: False
-
+  recomposer_examplar: True
   # model
   recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]

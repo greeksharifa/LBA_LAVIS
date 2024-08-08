@@ -79,18 +79,18 @@ def main():
         
         results = []
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
-            # if data_iter_step == 0:
-            print('batch:')
-            for k, v in batch.items():
-                if hasattr(v, "shape"):
-                    print(f'{k}: {v.shape}')
-                elif isinstance(v, list) and hasattr(v[0], "shape"):
-                    print(f'{k}: {len(v)} {v[0].shape}')
-                elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], PIL.Image.Image):
-                    print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
-                elif k != "candidate_list":
-                    print(f'{k}: {v}')
-            # pprint(batch, width=300)
+            if args.verbose and data_iter_step == 0:
+                print('batch:')
+                for k, v in batch.items():
+                    if hasattr(v, "shape"):
+                        print(f'{k}: {v.shape}')
+                    elif isinstance(v, list) and hasattr(v[0], "shape"):
+                        print(f'{k}: {len(v)} {v[0].shape}')
+                    elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], PIL.Image.Image):
+                        print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
+                    elif k != "candidate_list":
+                        print(f'{k}: {v}')
+                # pprint(batch, width=300)
 
             bsz = len(batch['image'])
             images = batch['image']
@@ -108,7 +108,8 @@ def main():
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
             if cfg.runner_cfg.recomposer_name != "sevila":
-                gt_answers = [dataset.__class__.ANSWER_MAPPING[ans] for ans in gt_answers]
+                gt_answers = [dataset.answer_mapping(ans) for ans in gt_answers]
+                    
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
 
             total_base_match += sum(acc_base)
@@ -154,7 +155,8 @@ def main():
                                              main_questions=batch['text_input'], 
                                              sub_questions=sub_questions, 
                                              sub_answers=sub_answers,
-                                             candidate_lists=batch['candidate_list'])
+                                             candidate_lists=batch['candidate_list'],
+                                             recomposer_examplar=cfg.runner_cfg.recomposer_examplar)
             else:                          # "images"
                 text_inputs = get_text_input("recomposer_image", 
                                              main_questions=batch['text_input'], 
