@@ -26,7 +26,11 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         bin_key = i // M
         bins[bin_key].append(acc_base)
         
-        cur_match += acc_lba - acc_base
+        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] > result['confidence_lba']:
+            pass
+        else: # 무조건 lba 선택
+            cur_match += acc_lba - acc_base
+        
         match_list.append(cur_match)
         
         if cur_match > max_match:
