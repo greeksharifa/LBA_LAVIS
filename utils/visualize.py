@@ -49,6 +49,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         for i, result in enumerate(results):
             
             question_type = result['type']
+            if cfg.datasets_cfg.dataset_name == 'NExTQA':
+                question_type = question_type[0]
             
             target = result['gt_ans']
             

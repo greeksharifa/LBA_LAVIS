@@ -104,7 +104,7 @@ def main():
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(images, text_inputs)
-            print(f'{data_iter_step:5d}/{len(dataloader)} : ', text_outputs_base, confidences_base)
+            print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
             if cfg.runner_cfg.recomposer_name != "sevila":
@@ -160,7 +160,8 @@ def main():
                 confidences_lba_list.append(confidences_lba)
                 
                 if args.verbose:
-                    print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                    # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                    print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
                 
             def _convert_nested_list(lists):
                 return [
