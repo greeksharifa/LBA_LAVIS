@@ -8,6 +8,7 @@ from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
 from processors.alpro_processors import AlproVideoEvalProcessor
 from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoForConditionalGeneration
+from accelerate import infer_auto_device_map
 # from _v1.lavis.models.blip2_models.
 
 import numpy as np
@@ -220,7 +221,7 @@ class Recomposer(nn.Module):
         super().__init__()
         model_name = cfg.runner_cfg.recomposer_name
         cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
-        device_map = cfg.runner_cfg.device_map if cfg.runner_cfg.device_map else device
+        device_map = cfg.runner_cfg.device_map # if cfg.runner_cfg.device_map else device
         # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         if answerer:
@@ -230,7 +231,9 @@ class Recomposer(nn.Module):
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "flan-t5" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
+            device_map = infer_auto_device_map(self.model)
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)
         elif "vicuna" in model_name:
             self.processor = InstructBlipProcessor.from_pretrained(model_name)
             self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
