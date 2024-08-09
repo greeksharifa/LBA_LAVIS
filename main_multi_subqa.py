@@ -160,7 +160,7 @@ def main():
                 confidences_lba_list.append(confidences_lba)
                 
                 if args.verbose:
-                    print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {confidences_lba:.4f}')
+                    print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                 
             def _convert_nested_list(lists):
                 return [
@@ -181,29 +181,28 @@ def main():
                 # select highest confidence_lba among sub_qa
                 index = confidence_lba_list.index(max(confidence_lba_list))
                 final_text_outputs_lba.append(text_output_lba_list[index])
-                final_confidences_lba.append(confidence_lba_list[index])
+                final_confidences_lba.append(round(confidence_lba_list[index], 6))
                 indices.append(index)
             
             if args.verbose:
-                print(f'indices: {indices}, LBA: {final_text_outputs_lba} | {final_confidences_lba:.4f}')
+                print(f'indices: {indices}, LBA: {final_text_outputs_lba} | {final_confidences_lba}')
             
             
             """##############################      Save result      ##############################"""
             for i in range(bsz):
                 result = OrderedDict({
-                            "question_id": batch['question_id'][i],
-                            "main_question": batch['text_input'][i],
-                            "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
-                            "gt_ans": gt_answers[i],
-                            "confidence_base": confidences_base[i],
-                            "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
-                            "text_output_base": text_outputs_base[i],
-                            "sub_question": sub_questions[i],
-                            "sub_answer": sub_answers[i],
-                            "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
-                        })
-                if args.verbose:# and i == 0:
-                    # pprint(result, width=300)
+                    "question_id": batch['question_id'][i],
+                    "main_question": batch['text_input'][i],
+                    "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
+                    "gt_ans": gt_answers[i],
+                    "confidence_base": confidences_base[i],
+                    "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
+                    "text_output_base": text_outputs_base[i],
+                    "sub_question": sub_questions[i],
+                    "sub_answer": sub_answers[i],
+                    "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
+                })
+                if args.verbose:
                     sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
                     
                 results.append(result)
