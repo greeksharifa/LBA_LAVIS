@@ -62,6 +62,15 @@ class VideoEvalDataset(BaseDataset):
 
         
     def collater(self, samples):
+        result = {}
+        for k, v in samples[0].items():
+            if isinstance(v, torch.Tensor): # no use, 240809
+                result[k] = torch.stack([sample[k] for sample in samples], dim=0)
+            else:
+                result[k] = [sample[k] for sample in samples]
+        
+        return result
+            
         (
             image_list,
             text_input_list,

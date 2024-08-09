@@ -205,6 +205,9 @@ def main():
                 if args.verbose:
                     sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
                     
+                if 'type' in batch:
+                    result['type'] = batch['type'][i]
+                    
                 results.append(result)
 
         result_path = os.path.join(output_dir, 'results_base.json')

@@ -26,7 +26,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         bin_key = i // M
         bins[bin_key].append(acc_base)
         
-        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] > result['confidence_lba']:
+        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] > result['confidence_lba']: # 높은것만 선택
             pass
         else: # 무조건 lba 선택
             cur_match += acc_lba - acc_base
@@ -39,6 +39,38 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             confidence_percentile = (i+1) / N * 100
             
     final_acc_list = [match / N for match in match_list]
+    
+    if cfg.datasets_cfg.dataset_name == 'NExTQA':
+        match_per_type = {'C': 0, 'T': 0, 'D': 0}     # Causal, Temporal, Descriptive
+        total_per_type = {'C': 0, 'T': 0, 'D': 0}
+        # total: {'C': 2607, 'T': 1612, 'D': 777}
+        for i, result in enumerate(results):
+            
+            question_type = result['type']
+            
+            target = result['gt_ans']
+            
+            # get predict
+            if result['confidence_base'] <= max_arg_confidence:
+                if cfg.runner_cfg.select_high_confidence:
+                    if result['confidence_base'] > result['confidence_lba']:
+                        predict = result['text_output_base']
+                    else:
+                        predict = result['text_output_lba']
+                else:
+                    predict = result['text_output_lba']
+            else:
+                predict = result['text_output_base']
+            
+            acc = dataset.get_accuracy(predict, target)
+            match_per_type[question_type] += acc
+            total_per_type[question_type] += 1
+        
+        print("match_per_type:", match_per_type)
+        for q_type in match_per_type.keys():
+            print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.3f}%')
+            
+            
     
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio

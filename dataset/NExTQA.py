@@ -47,6 +47,8 @@ class NExTQAEvalDataset(VideoEvalDataset):
         candidate_list = []
         for i in range(ann["num_option"]):
             candidate_list.append(ann[f'a{i}'])
+            
+        question_type = ann["type"][0] # Causal, Temporal, Descriptive -> C, T, D
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
@@ -55,6 +57,7 @@ class NExTQAEvalDataset(VideoEvalDataset):
             "gt_ans": gt_ans,
             "candidate_list": candidate_list,
             "answer_sentence": candidate_list[gt_ans],
+            "type": question_type,
             # "instance_id": ann["instance_id"],
         }
      
