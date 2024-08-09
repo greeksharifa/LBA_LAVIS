@@ -143,6 +143,8 @@ class BaseDataset(Dataset):
                 num_match = sum([out == t for t in target])
                 return min(1.0, num_match / 3.0)
             else:
+                if len(out) == 1:
+                    out = '(' + out + ')'
                 return 1.0 if out == target else 0.0
             
         if isinstance(outputs, (str, int)):

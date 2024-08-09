@@ -129,16 +129,12 @@ def main():
                     sub_questions, _ = decomposer(images, text_inputs, generate_sub_q=True)
                 else:                               # Only Text, flan-t5
                     sub_questions = decomposer(text_inputs)
-                if args.verbose:
-                    print('sub_questions:', sub_questions)
                 sub_questions_list.append(sub_questions)
                 
                 
                 # generating sub_answers
                 text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
                 sub_answers, _ = answerer(images, text_inputs)
-                if args.verbose:
-                    print('sub_answers:', sub_answers)
                 sub_answers_list.append(sub_answers)
                 
                 # generating recomposed_answers
@@ -164,8 +160,7 @@ def main():
                 confidences_lba_list.append(confidences_lba)
                 
                 if args.verbose:
-                    print('text_outputs_lba:', text_outputs_lba)
-                    print('confidences_lba:', confidences_lba)
+                    print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {confidences_lba:.4f}')
                 
             def _convert_nested_list(lists):
                 return [
@@ -189,10 +184,8 @@ def main():
                 final_confidences_lba.append(confidence_lba_list[index])
                 indices.append(index)
             
-            print('indices:', indices)
-            print('final_text_outputs_lba:', final_text_outputs_lba)
-            print('final_confidences_lba:', final_confidences_lba)
-            
+            if args.verbose:
+                print(f'indices: {indices}, LBA: {final_text_outputs_lba} | {final_confidences_lba:.4f}')
             
             
             """##############################      Save result      ##############################"""
