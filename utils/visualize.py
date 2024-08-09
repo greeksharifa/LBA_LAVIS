@@ -76,7 +76,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         
         print("match_per_type:", match_per_type)
         for q_type in match_per_type.keys():
-            print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
+            if total_per_type[q_type] > 0:
+                print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
             
             
     

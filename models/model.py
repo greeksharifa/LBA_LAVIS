@@ -334,24 +334,31 @@ class Recomposer(nn.Module):
             # except:
             #     pass
             
-            if self.device_map != "auto":
-                inputs = inputs.to(self.model.device) # "cuda"
+            # if self.device_map != "auto":
+            #     inputs = inputs.to(self.model.device) # "cuda"
                 
             # debug
             # print(self.model.device)
             # for k, v in inputs.items():
             #     print(k, type(v), v.device)
             # import pdb; pdb.set_trace()
+            
+            generation_params = {
+                "do_sample": generate_sub_q,
+                "num_beams": 5,
+                "max_new_tokens": 10,
+                "min_length": 1,
+                "length_penalty": -1,
+                "return_dict_in_generate": True,
+                "output_scores": True
+            }
+            if generate_sub_q:
+                generation_params["top_p"] = 0.98
+                generation_params["max_new_tokens"] = 100
 
             outputs = self.model.generate(
                 **inputs,
-                do_sample=generate_sub_q,
-                num_beams=5,
-                max_new_tokens=100 if generate_sub_q else 10,
-                min_length=1,
-                length_penalty=-1,
-                return_dict_in_generate=True,
-                output_scores=True,
+                **generation_params
             )
             # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
             # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
