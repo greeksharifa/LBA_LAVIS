@@ -40,10 +40,12 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             
     final_acc_list = [match / N for match in match_list]
     
-    if cfg.datasets_cfg.dataset_name == 'NExTQA':
-        match_per_type = {'C': 0, 'T': 0, 'D': 0}     # Causal, Temporal, Descriptive
-        total_per_type = {'C': 0, 'T': 0, 'D': 0}
-        # total: {'C': 2607, 'T': 1612, 'D': 777}
+    if cfg.datasets_cfg.dataset_name in ['NExTQA', 'STAR']:
+        match_per_type = {}    
+        total_per_type = {}
+        # total number of each question type
+        # NExTQA : {'C': 2607, 'T': 1612, 'D': 777}
+        # STAR   : {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
         for i, result in enumerate(results):
             
             question_type = result['type']
@@ -63,12 +65,16 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 predict = result['text_output_base']
             
             acc = dataset.get_accuracy(predict, target)
-            match_per_type[question_type] += acc
-            total_per_type[question_type] += 1
+            if question_type not in match_per_type:
+                match_per_type[question_type] = 0
+                total_per_type[question_type] = 0
+            else:
+                match_per_type[question_type] += acc
+                total_per_type[question_type] += 1
         
         print("match_per_type:", match_per_type)
         for q_type in match_per_type.keys():
-            print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.3f}%')
+            print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
             
             
     
@@ -98,10 +104,10 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(f'saved fig at {fig_path}')
     
     metrics = {
-        "acc_origin           ": f'{total_base_match / N * 100:.3f}%',
-        "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.3f}%', 
+        "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
+        "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
         "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
-        "confidence_percentile": f'{confidence_percentile:.3f}%',
+        "confidence_percentile": f'{confidence_percentile:.2f}%',
         "E_CR                 ": f'{e_cr:.2f}%',
         "E_IC                 ": f'{e_ic:.2f}%',
     }

@@ -97,3 +97,36 @@ class VideoEvalDataset(BaseDataset):
             "answer_sentence": answer_sentence_list,
         }
   
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+
+        vid = ann["video"]
+        vpath = os.path.join(self.vis_root, f'{vid}.mp4')
+        
+        # load images. output: list of PIL.Image
+        frms = read_video_pyav(vpath, n_frms=self.n_frms)
+        
+        question = ann["question"] # question = self.text_processor(ann["que"])
+        
+        # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
+        gt_ans = ann["answer"]
+        
+        candidate_list = []
+        for i in range(ann["num_option"]):
+            candidate_list.append(ann[f'a{i}'])
+            
+        question_type = ann['qid'].split('_')[0]
+        # NExTQA : Causal, Temporal, Descriptive -> C, T, D
+        # STAR   : Interaction, Sequence, Prediction, Feasibility 
+
+        return {
+            "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
+            "text_input": question,
+            "question_id": ann["qid"],
+            "gt_ans": gt_ans,
+            "candidate_list": candidate_list,
+            "answer_sentence": candidate_list[gt_ans],
+            "type": question_type,
+            # "instance_id": ann["instance_id"],
+        }
+     

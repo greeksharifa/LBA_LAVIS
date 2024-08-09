@@ -48,6 +48,8 @@ class STAREvalDataset(VideoEvalDataset):
         candidate_list = []
         for i in range(ann["num_option"]):
             candidate_list.append(ann[f'a{i}'])
+            
+        question_type = ann['qid'].split('_')[0]
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷

@@ -183,6 +183,8 @@ class DramaQAEvalDataset(VideoEvalDataset):
         
         # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
         gt_ans = ann["correct_idx"]
+        
+        question_type = "Level " + ann["q_level_mem"]
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
@@ -192,6 +194,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
             "gt_ans": gt_ans, #ann["correct_idx"],
             "candidate_list": ann["answers"],
             "answer_sentence": ann["answers"][ann["correct_idx"]],
+            "type": question_type,
             # "instance_id": ann["instance_id"],
         }
    
