@@ -86,8 +86,10 @@ def sample_print(base, lba, gt_ans, get_accuracy):
         color = Colors.BRIGHT_GREEN
     elif b > l:  # right -> wrong
         color = Colors.BRIGHT_RED
-    else:        # wrong -> wrong or right -> right
+    elif b == l == 1:  # right -> right
         color = Colors.BRIGHT_YELLOW
+    else:        # wrong -> wrong or right -> right
+        color = Colors.YELLOW
         
     print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET)
     

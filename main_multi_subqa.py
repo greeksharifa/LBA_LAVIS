@@ -87,7 +87,7 @@ def main():
                     elif isinstance(v, list) and hasattr(v[0], "shape"):
                         print(f'{k}: {len(v)} {v[0].shape}')
                     elif isinstance(v, list) and isinstance(v[0], list) and hasattr(v[0][0], "shape"):
-                        print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
+                        print(f'{k}: {len(v)} {len(v[0])} {v[0][0].shape}')
                     elif k != "candidate_list":
                         print(f'{k}: {v}')
                 # pprint(batch, width=300)
