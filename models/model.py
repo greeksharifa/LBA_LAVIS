@@ -334,8 +334,8 @@ class Recomposer(nn.Module):
             # except:
             #     pass
             
-            # if self.device_map != "auto":
-            #     inputs = inputs.to(self.model.device) # "cuda"
+            if self.device_map != "auto":
+                inputs = inputs.to(self.model.device) # "cuda"
                 
             # debug
             # print(self.model.device)
