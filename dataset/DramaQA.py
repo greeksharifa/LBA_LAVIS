@@ -1,10 +1,3 @@
-"""
- Copyright (c) 2022, salesforce.com, inc.
- All rights reserved.
- SPDX-License-Identifier: BSD-3-Clause
- For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
-"""
-
 import glob
 import json
 import os
@@ -19,7 +12,7 @@ from torchvision import transforms
 # from utils.load_video import load_video_to_sampled_frames
 from dataset.video import read_video_pyav
 
-from dataset.base_dataset import BaseDataset
+from dataset.VideoQA import VideoEvalDataset
 
 '''
 class __DisplMixin:
@@ -72,7 +65,7 @@ class VideoQADataset(MultimodalClassificationDataset, __DisplMixin):
 '''
 
 
-class DramaQAEvalDataset(BaseDataset):
+class DramaQAEvalDataset(VideoEvalDataset):
     # vid_error_list: ["AnotherMissOh14_005_0172", "AnotherMissOh14_009_0297", "AnotherMissOh14_012_0422", "AnotherMissOh14_017_0521", "AnotherMissOh14_017_0522", "AnotherMissOh13_001_0035", "AnotherMissOh13_001_0035", "AnotherMissOh13_005_0172", "AnotherMissOh13_005_0172", "AnotherMissOh13_015_0532", "AnotherMissOh13_019_0647", "AnotherMissOh13_019_0647", "AnotherMissOh13_021_0714", "AnotherMissOh13_021_0714", "AnotherMissOh13_037_1213", "AnotherMissOh13_040_1346", "AnotherMissOh15_001_0061", "AnotherMissOh15_001_0061", "AnotherMissOh15_002_0072", "AnotherMissOh15_002_0072", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0122", "AnotherMissOh15_004_0146", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0189", "AnotherMissOh15_006_0196", "AnotherMissOh15_006_0196", "AnotherMissOh15_015_0479", "AnotherMissOh15_024_0683", "AnotherMissOh15_024_0683", "AnotherMissOh15_029_0802", "AnotherMissOh15_029_0804", "AnotherMissOh15_030_0860"]
     
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
@@ -131,7 +124,7 @@ class DramaQAEvalDataset(BaseDataset):
 
         self._add_instance_ids()
         
-        print("DramaQAEvalDataset")
+        print("\n" + self.__class__.__name__)
         print('vis_processor : ', vis_processor)
         print('text_processor : ', text_processor)
         print('vis_root : ', vis_root)
@@ -139,41 +132,6 @@ class DramaQAEvalDataset(BaseDataset):
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
         print('type(self.vis_features), len(self.vis_features):', type(self.vis_features), len(self.vis_features))
         
-        
-    def collater(self, samples):
-        (
-            image_list,
-            # video_list,
-            text_input_list,
-            question_id_list,
-            gt_ans_list,
-            candidate_list_list,
-            answer_sentence_list,
-        ) = ([], [], [], [], [], [])
-        
-        for sample in samples:
-            image_list.append(sample["image"])
-            # video_list.append(sample["video"])
-            text_input_list.append(sample["text_input"])
-            question_id_list.append(sample["question_id"])
-            gt_ans_list.append(sample["gt_ans"])
-            candidate_list_list.append(sample["candidate_list"])
-            answer_sentence_list.append(sample["answer_sentence"])
-            
-        return {
-            "image": image_list, #torch.stack(image_list, dim=0),
-            # "video": video_list,
-            "text_input": text_input_list,
-            "question_id": question_id_list,
-            "gt_ans": gt_ans_list, 
-            "candidate_list": candidate_list_list,
-            "answer_sentence": answer_sentence_list,
-        }
-       
-    @staticmethod
-    def answer_mapping(answer):
-        ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
-        return ANSWER_MAPPING[answer]
        
     def get_image_path(self, vid):
         # import pdb; pdb.set_trace()
@@ -214,66 +172,12 @@ class DramaQAEvalDataset(BaseDataset):
         frms = []
         image_paths = self.get_image_path(vid)
         for img_path in image_paths:
-            frms.append(Image.open(img_path))
+            # frms.append(Image.open(img_path))
             frms.append(np.array(Image.open(img_path)))
         if len(frms) < self.n_frms:
-            frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
+            # frms = [Image.new('RGB', frms[0].size)] * (self.n_frms - len(frms)) + frms
             frms = [np.zeros_like(frms[0])] * (self.n_frms - len(frms)) + frms
             
-        # frms = np.stack([x for x in frms])
-        
-        
-        """
-        # directly read Video    
-        try:
-            frms = load_video_to_sampled_frames(vpath, n_frms=self.n_frms) # list of PIL.Image
-            transform = transforms.ToTensor()
-            tensors = [transform(img) for img in frms]
-            stacked_tensor = torch.stack(tensors)
-            # frms = self.vis_processor(vpath)
-        except Exception as e:
-            print('*' * 200 + f"\nError processing {vpath}\n" + '*' * 200)
-            assert False, e
-        """
-        
-        '''
-        # get_video
-        if video_id[-4:] == '0000':
-            shots = ann['shot_contained']
-            start, end = shots[0], shots[1]
-
-            for i in range(start, end+1):
-                v_name = video_id[:-4] + f'{i:04}'
-
-                if v_name not in self.vis_features.keys(): 
-                    print(v_name, " Not in features")
-                    nxt_vid = torch.zeros(1, self.features_dim)
-                else: nxt_vid = self.vis_features[v_name].float()
-
-                if i == start: video = nxt_vid
-                else: video = torch.concat((video, nxt_vid), dim = 0)
-        # Shot
-        else:
-            scene = False
-            if video_id not in self.vis_features.keys():
-                print(video_id, "Not in freatures")
-                video = torch.zeros(1, self.features_dim)
-            else:
-                video = self.vis_features[video_id].float()
-
-        
-        if len(video) > self.n_frms:
-            sampled = []
-            for j in range(self.n_frms):
-                sampled.append(video[(j * len(video)) // self.n_frms])
-            video = torch.stack(sampled)
-            video_len = self.n_frms
-        elif len(video) < self.n_frms:
-            video_len = len(video)
-            video = torch.cat([video, torch.zeros(self.n_frms - video_len, self.features_dim)], 0)
-        else:
-            video_len = self.n_frms
-        '''
             
         question = ann["que"] # question = self.text_processor(ann["que"])
         
@@ -281,7 +185,7 @@ class DramaQAEvalDataset(BaseDataset):
         gt_ans = ann["correct_idx"]
 
         return {
-            "image": frms, # frms, # 이름은 image지만 list of PIL.Image, 즉 video랑 비슷
+            "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
             # "video": video, # [min(n_frms, len(video)), 768]
             "text_input": question,
             "question_id": ann["qid"],
@@ -290,30 +194,4 @@ class DramaQAEvalDataset(BaseDataset):
             "answer_sentence": ann["answers"][ann["correct_idx"]],
             # "instance_id": ann["instance_id"],
         }
-     
-'''
-class DramaQASeViLADataset(DramaQAEvalDataset):
-    def collater(self, samples):
-        raise NotImplementedError("collater is not implemented in DramaQASeViLADataset")
-    
-    def __getitem__(self, index):
-        ann = self.annotation[index]
-        
-        vid = ann["vid"]
-        vpath = os.path.join(self.vis_root, f'{vid}.mp4')
-        
-        # ['video', 'qa_input', 'loc_input', 'qa_output', 'question_id', 'duration']
-        return {
-            "image": NotImplementedError,
-            "text_input": ann["que"],
-            
-            
-            
-            "video": NotImplementedError,
-            "qa_input": ann["qa_input"],
-            "loc_input": ann["loc_input"],
-            "qa_output": ann["qa_output"],
-            "question_id": ann["question_id"],
-            "duration": ann["duration"],
-        }
-'''
+   

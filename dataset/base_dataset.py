@@ -19,6 +19,9 @@ def load_dataset(datasets_cfg):
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
+    elif datasets_cfg.dataset_name == "NExTQA":
+        from dataset.NExTQA import NExTQAEvalDataset
+        cls = NExTQAEvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         
@@ -29,7 +32,7 @@ def load_dataset(datasets_cfg):
         ann_paths=datasets_cfg.ann_paths.get(datasets_cfg.split, 'val'),
         num_data=datasets_cfg.num_data,
         vqa_acc=datasets_cfg.vqa_acc,
-        n_frms=datasets_cfg.get("n_frms", 5),
+        n_frms=datasets_cfg.get("n_frms", 4),
         datasets_cfg=datasets_cfg,
     )
     

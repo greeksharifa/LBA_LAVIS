@@ -2,7 +2,7 @@
 
 datasets:
   data_type: videos # [images|videos|features]
-  n_frms: 5
+  n_frms: 4
   vqa_acc: False
   only_scene: False
   ann_paths:

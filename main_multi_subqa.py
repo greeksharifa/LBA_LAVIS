@@ -86,7 +86,7 @@ def main():
                         print(f'{k}: {v.shape}')
                     elif isinstance(v, list) and hasattr(v[0], "shape"):
                         print(f'{k}: {len(v)} {v[0].shape}')
-                    elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], PIL.Image.Image):
+                    elif isinstance(v, list) and isinstance(v[0], list) and hasattr(v[0][0], "shape"):
                         print(f'{k}: {len(v)} {len(v[0])} {v[0][0].size}')
                     elif k != "candidate_list":
                         print(f'{k}: {v}')
@@ -238,3 +238,18 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
+<class 'list'>
+7098
+{'video': '6H78U',
+ 'num_option': 4,
+ 'qid': 'Interaction_T1_13',
+ 'a0': 'The closet/cabinet.',
+ 'a1': 'The blanket.',
+ 'a2': 'The clothes.',
+ 'a3': 'The table.',
+ 'answer': 2,
+ 'question': 'Which object was tidied up by the person?',
+ 'start': 11.1,
+ 'end': 19.6}
+'''
