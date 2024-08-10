@@ -18,7 +18,7 @@ from dataset.VideoQA import VideoEvalDataset
 class STAREvalDataset(VideoEvalDataset):
     '''
     <class 'list'>
-    7098
+    7098 {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
     {'video': '6H78U',
     'num_option': 4,
     'qid': 'Interaction_T1_13',

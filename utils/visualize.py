@@ -44,8 +44,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         match_per_type = {}    
         total_per_type = {}
         # total number of each question type
-        # NExTQA : {'C': 2607, 'T': 1612, 'D': 777}
-        # STAR   : {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
+        # NExTQA : 4996 {'C': 2607, 'T': 1612, 'D': 777}
+        # STAR   : 7098 {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
         for i, result in enumerate(results):
             
             question_type = result['type']

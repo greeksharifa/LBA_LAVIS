@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-def load_dataset(datasets_cfg):
+def load_dataset(datasets_cfg, split='val'):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -19,7 +19,7 @@ def load_dataset(datasets_cfg):
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
-    elif datasets_cfg.dataset_name in ["NExTQA", "STAR"]:
+    elif datasets_cfg.dataset_name in ["NExTQA", "STAR", "How2QA"]:
         from dataset.VideoQA import VideoEvalDataset
         cls = VideoEvalDataset
     # elif datasets_cfg.dataset_name == "NExTQA":
@@ -35,7 +35,7 @@ def load_dataset(datasets_cfg):
         vis_processor=None,
         text_processor=None,
         vis_root=datasets_cfg.vis_root,
-        ann_paths=datasets_cfg.ann_paths.get(datasets_cfg.split, 'val'),
+        ann_paths=datasets_cfg.ann_paths.get(datasets_cfg.split, split),
         num_data=datasets_cfg.num_data,
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 4),
@@ -159,7 +159,10 @@ class BaseDataset(Dataset):
                 acc = _get_acc(out, target_list)
                 acc_list.append(acc)
             return acc_list
-            
+    
+    
+# train_example = 
+
             
 def get_text_input(
     prompt_type:str="default",

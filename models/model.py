@@ -7,7 +7,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
 from processors.alpro_processors import AlproVideoEvalProcessor
-from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoForConditionalGeneration
+from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 from accelerate import infer_auto_device_map
 # from _v1.lavis.models.blip2_models.
 
@@ -43,6 +43,8 @@ class Decomposer(nn.Module):
 
 
 class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
+    
+    
     
     @torch.no_grad()
     def generate(
@@ -235,8 +237,10 @@ class Recomposer(nn.Module):
             device_map = infer_auto_device_map(self.model)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)
         elif "vicuna" in model_name:
-            self.processor = InstructBlipProcessor.from_pretrained(model_name)
-            self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
+            self.processor = InstructBlipVideoProcessor.from_pretrained(model_name)
+            self.model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
+            # self.processor = InstructBlipProcessor.from_pretrained(model_name)
+            # self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "Video-LLaVA" in model_name:
             from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
             self.processor = VideoLlavaProcessor.from_pretrained(model_name)
@@ -247,7 +251,7 @@ class Recomposer(nn.Module):
                 attn_implementation=None,
             )#.to(device)
         elif model_name == "sevila":
-            self.processor = InstructBlipVideoImageProcessor.from_pretrained("Salesforce/blip2-flan-t5-xl")
+            self.processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/blip2-flan-t5-xl")
             from SeViLA.evaluate import get_sevila_model
             self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
         else:
@@ -260,6 +264,8 @@ class Recomposer(nn.Module):
         self.device = self.model.device
         self.cfg = cfg
         self.device_map = device_map
+        print('device_map:', device_map)
+        
         
         print('recomposer name: ',self.model.__class__.__name__)
 
@@ -288,7 +294,9 @@ class Recomposer(nn.Module):
             elif isinstance(images[0], np.ndarray): # video. type: List[np.ndarray]
                 inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
                 # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
-            else: # video. type: List[Image.Image]
+            # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
+                # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
+            else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
                 # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
                 inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True) # [64, 29]
                 
@@ -323,7 +331,6 @@ class Recomposer(nn.Module):
                 qformer_attention_mask | shape: torch.Size([64, 156])
                 pixel_values    | shape: torch.Size([64, 5, 3, 224, 224])
                 '''
-                
             # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
             # out = self.model.generate(**inputs)
             # return self.processor.batch_decode(out, skip_special_tokens=True)
@@ -334,14 +341,16 @@ class Recomposer(nn.Module):
             # except:
             #     pass
             
-            if self.device_map != "auto":
+            # import pdb; pdb.set_trace()
+            if self.cfg.runner_cfg.device_map != "auto":
                 inputs = inputs.to(self.model.device) # "cuda"
                 
             # debug
-            # print(self.model.device)
-            # for k, v in inputs.items():
-            #     print(k, type(v), v.device)
-            # import pdb; pdb.set_trace()
+            if self.cfg.runner_cfg.debug:
+                print(self.model.device)
+                for k, v in inputs.items():
+                    print(k, type(v), v.device)
+                import pdb; pdb.set_trace()
             
             generation_params = {
                 "do_sample": generate_sub_q,
@@ -355,6 +364,7 @@ class Recomposer(nn.Module):
             if generate_sub_q:
                 generation_params["top_p"] = 0.98
                 generation_params["max_new_tokens"] = 100
+                
 
             outputs = self.model.generate(
                 **inputs,

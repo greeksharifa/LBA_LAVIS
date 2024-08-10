@@ -18,7 +18,7 @@ from dataset.VideoQA import VideoEvalDataset
 class NExTQAEvalDataset(VideoEvalDataset):
     '''
     <class 'list'>
-    4996
+    4996 {'C': 2607, 'T': 1612, 'D': 777}
     {'num_option': 5, 
     'qid': 'TN_6233408665_8', 
     'question': 'what did the people on the sofa do after the lady in pink finished singing?', 

@@ -155,6 +155,11 @@ def main():
                                                 main_questions=batch['text_input'], 
                                                 sub_questions=sub_questions, 
                                                 sub_answers=sub_answers)
+                
+                if cfg.runner_cfg.debug:
+                    print('sub_questions text_inputs:', text_inputs)
+                    print('sub_answers text_inputs:', text_inputs)
+                    print('recomposer_video text_inputs:', text_inputs)
                 text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
