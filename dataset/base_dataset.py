@@ -161,8 +161,20 @@ class BaseDataset(Dataset):
             return acc_list
     
     
-# train_example = 
-
+def get_examplar(datasets_cfg):
+    train_dataset = load_dataset(datasets_cfg, split='train')
+    example = train_dataset[0]
+    
+    main_question = example["text_input"].strip().rstrip('?')
+    candidate_list = example["candidate_list"]
+    gt_ans = train_dataset.answer_mapping(example["gt_ans"])
+    answer_sentence = example["answer_sentence"].strip().rstrip('.')
+    
+    prompt = """Context: {main_question}? {answer_sentence}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is {gt_ans}"""
+    for candidate in candidate_list:
+        choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+    
+    return prompt.format(main_question=main_question, answer_sentence=answer_sentence, choices=choices, gt_ans=gt_ans)
             
 def get_text_input(
     prompt_type:str="default",
@@ -170,8 +182,9 @@ def get_text_input(
     sub_questions:List[str]='',
     sub_answers:List[str]='',
     candidate_lists: List[List[str]]=[],
-    gt_answers: List[str]=[],
-    question_ids: List[str]=[],
+    gt_answers:List[str]=[],
+    question_ids:List[str]=[],
+    examplar:str='',
     **kwargs,
 ):
     # add <video> in front of prompt if video_llava
@@ -212,15 +225,15 @@ def get_text_input(
         Answer: The answer is <answer> [EOS]
         """
     elif prompt_type == "recomposer_video":
-        examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
-Question: Why did Dokyung pull Haeyoung1's arm hard?
-Choices:
-(A) Dokyung pulled Haeyoung1's arm to hug her hard.
-(B) It is because Dokyung did not want Haeyoung1 to fall.
-(C) This is because Dokyung and Haeyoung1 were dancing on the street.
-(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
-(E) Because Dokyung needed Haeyoung1 to go to the police station.
-Answer: The answer is (A)\n"""
+#         examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+# Question: Why did Dokyung pull Haeyoung1's arm hard?
+# Choices:
+# (A) Dokyung pulled Haeyoung1's arm to hug her hard.
+# (B) It is because Dokyung did not want Haeyoung1 to fall.
+# (C) This is because Dokyung and Haeyoung1 were dancing on the street.
+# (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+# (E) Because Dokyung needed Haeyoung1 to go to the police station.
+# Answer: The answer is (A)\n"""
         prompt = examplar if kwargs.get("recomposer_examplar", True) else ""
         prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         

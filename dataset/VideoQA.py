@@ -47,6 +47,8 @@ class VideoEvalDataset(BaseDataset):
 
         self._add_instance_ids()
         
+        self.ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
+        
         print("\n" + self.__class__.__name__)
         print('vis_processor : ', vis_processor)
         print('text_processor : ', text_processor)
@@ -55,10 +57,9 @@ class VideoEvalDataset(BaseDataset):
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
         
            
-    @staticmethod
-    def answer_mapping(answer):
-        ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
-        return ANSWER_MAPPING[answer]
+    # @staticmethod
+    def answer_mapping(self, answer):
+        return self.ANSWER_MAPPING[answer]
 
         
     def collater(self, samples):

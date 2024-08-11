@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 
 from configs.config import Config
 # from dataset.VQA_Introspect import VQAIntrospectDataset
-from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input
+from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input, get_examplar
 from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
@@ -76,7 +76,8 @@ def main():
         print_freq = max(1, int(len(dataloader) / cfg.runner_cfg.print_freq))
         # print('print_freq:', print_freq)
 
-        
+        examplar = get_examplar(cfg.datasets_cfg)
+        print('examplar:', examplar)
         results = []
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             if args.verbose and data_iter_step == 0:
@@ -149,6 +150,7 @@ def main():
                                                 sub_questions=sub_questions, 
                                                 sub_answers=sub_answers,
                                                 candidate_lists=batch['candidate_list'],
+                                                examplar=examplar,
                                                 recomposer_examplar=cfg.runner_cfg.recomposer_examplar)
                 else:                          # "images"
                     text_inputs = get_text_input("recomposer_image", 
