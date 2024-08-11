@@ -89,12 +89,14 @@ def main():
                         print(f'{k}: {len(v)} {v[0].shape}')
                     elif isinstance(v, list) and isinstance(v[0], list) and hasattr(v[0][0], "shape"):
                         print(f'{k}: {len(v)} {len(v[0])} {v[0][0].shape}')
+                    elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], list) and hasattr(v[0][0][0], "shape"):
+                        print(f'{k}: {len(v)} {len(v[0])} {len(v[0][0])} {v[0][0][0].shape}')
                     elif k != "candidate_list":
                         print(f'{k}: {v}')
                 # pprint(batch, width=300)
 
-            bsz = len(batch['image'])
-            images = batch['image']
+            bsz = len(batch['vision'])
+            vision = batch['vision']
 
             """##############################  Baseline Inference   ##############################"""    
             if cfg.runner_cfg.recomposer_name == "sevila":
@@ -104,7 +106,7 @@ def main():
                 text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
-            text_outputs_base, confidences_base = recomposer(images, text_inputs)
+            text_outputs_base, confidences_base = recomposer(vision, text_inputs)
             print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
@@ -123,11 +125,15 @@ def main():
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
-            for _ in range(cfg.runner_cfg.num_sub_qa_generate):
+            for i in range(cfg.runner_cfg.num_sub_qa_generate):
                 # generating sub_questions
+                if cfg.datasets_cfg.data_type == "videos" and cfg.runner_cfg.select_high_confidence > 1:
+                    vision = []
+                    for b in range(bsz):
+                        vision.append(batch['vision'][b][i])
                 text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
                 if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                    sub_questions, _ = decomposer(images, text_inputs, generate_sub_q=True)
+                    sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
                 else:                               # Only Text, flan-t5
                     sub_questions = decomposer(text_inputs)
                 sub_questions_list.append(sub_questions)
@@ -135,7 +141,7 @@ def main():
                 
                 # generating sub_answers
                 text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                sub_answers, _ = answerer(images, text_inputs)
+                sub_answers, _ = answerer(vision, text_inputs)
                 sub_answers_list.append(sub_answers)
                 
                 # generating recomposed_answers
@@ -162,7 +168,7 @@ def main():
                     print('sub_questions text_inputs:', text_inputs)
                     print('sub_answers text_inputs:', text_inputs)
                     print('recomposer_video text_inputs:', text_inputs)
-                text_outputs_lba, confidences_lba = recomposer(images, text_inputs)
+                text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
                 

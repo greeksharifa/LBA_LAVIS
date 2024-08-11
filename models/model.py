@@ -270,7 +270,7 @@ class Recomposer(nn.Module):
         print('recomposer name: ',self.model.__class__.__name__)
 
 
-    def forward(self, images, text_inputs, generate_sub_q=False):
+    def forward(self, vision, text_inputs, generate_sub_q=False):
         # print('Recomposer.forward' + '*' * 120)
         # print('images:', images)
         # print('text_inputs:', text_inputs)
@@ -282,17 +282,17 @@ class Recomposer(nn.Module):
         
         if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
             samples = text_inputs
-            video = self.processor(images, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
+            video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
             samples["video"] = video
             output_text, output_scores = self.model.generate(samples)
             
         else:
             # import pdb; pdb.set_trace()
-            if isinstance(images[0], Image.Image):
+            if isinstance(vision[0], Image.Image):
                 # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
-                inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True)
-            elif isinstance(images[0], np.ndarray): # video. type: List[np.ndarray]
-                inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
+                inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
+            elif isinstance(vision[0], np.ndarray): # video. type: List[np.ndarray]
+                inputs = self.processor(vision, text=text_inputs, return_tensors="pt", padding=True)
                 # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
             # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
                 # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
@@ -305,7 +305,7 @@ class Recomposer(nn.Module):
                 '''
                 
                 pixel_values = []
-                for video in images: # video: [n_frms, 640, 480]
+                for video in vision: # video: [n_frms, 640, 480]
                     # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
                     pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
                 # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]

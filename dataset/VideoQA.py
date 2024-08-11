@@ -65,10 +65,10 @@ class VideoEvalDataset(BaseDataset):
     def collater(self, samples):
         result = {}
         for k, v in samples[0].items():
-            if isinstance(v, torch.Tensor): # no use, 240809
-                result[k] = torch.stack([sample[k] for sample in samples], dim=0)
-            else:
-                result[k] = [sample[k] for sample in samples]
+            # if isinstance(v, torch.Tensor): # no use, 240809
+            #     result[k] = torch.stack([sample[k] for sample in samples], dim=0)
+            # else:
+            result[k] = [sample[k] for sample in samples]
         
         return result
             
@@ -81,9 +81,9 @@ class VideoEvalDataset(BaseDataset):
         
         # load images. output: list of PIL.Image
         if "start" in ann and "end" in ann:
-            frms = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"])
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"])
         else:
-            frms = read_video_pyav(vpath, n_frms=self.n_frms)
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms)
         
         question = ann["question"] # question = self.text_processor(ann["que"])
         
@@ -99,7 +99,8 @@ class VideoEvalDataset(BaseDataset):
         # STAR   : Interaction, Sequence, Prediction, Feasibility 
 
         return {
-            "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
+            "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
+            "vision_supple": frms_supple, # list of list of ndarray
             "text_input": question,
             "question_id": ann["qid"],
             "gt_ans": gt_ans,
