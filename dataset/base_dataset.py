@@ -19,15 +19,9 @@ def load_dataset(datasets_cfg, split='val'):
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
-    elif datasets_cfg.dataset_name in ["NExTQA", "STAR", "How2QA"]:
+    elif datasets_cfg.dataset_name in ["NExTQA", "STAR", "TVQA"]:# "How2QA"]:
         from dataset.VideoQA import VideoEvalDataset
         cls = VideoEvalDataset
-    # elif datasets_cfg.dataset_name == "NExTQA":
-    #     from dataset.NExTQA import NExTQAEvalDataset
-    #     cls = NExTQAEvalDataset
-    # elif datasets_cfg.dataset_name == "STAR":
-    #     from dataset.STAR import STAREvalDataset
-    #     cls = STAREvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         

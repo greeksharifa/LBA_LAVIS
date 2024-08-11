@@ -124,6 +124,8 @@ class DramaQAEvalDataset(VideoEvalDataset):
 
         self._add_instance_ids()
         
+        self.ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
+        
         print("\n" + self.__class__.__name__)
         print('vis_processor : ', vis_processor)
         print('text_processor : ', text_processor)
@@ -184,7 +186,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
         # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
         gt_ans = ann["correct_idx"]
         
-        question_type = "Level " + ann["q_level_mem"]
+        question_type = "Level " + str(ann["q_level_mem"])
 
         return {
             "image": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷

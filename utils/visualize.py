@@ -120,7 +120,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         f.write(json.dumps(metrics, indent=4) + "\n")
         
         
-def sample_print(base, lba, gt_ans, get_accuracy):
+def sample_print(base, lba, gt_ans, get_accuracy, i):
     b, l = get_accuracy(base, gt_ans), get_accuracy(lba, gt_ans)
     
     if b < l:    # wrong -> right
@@ -132,5 +132,7 @@ def sample_print(base, lba, gt_ans, get_accuracy):
     else:        # wrong -> wrong or right -> right
         color = Colors.BRIGHT_YELLOW
         
-    print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET)
+    print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET, end='\t')
+    if i % 8 == 7:
+        print()
     

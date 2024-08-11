@@ -211,12 +211,13 @@ def main():
                     "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                 })
                 if args.verbose:
-                    sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy)
+                    sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
                     
                 if 'type' in batch:
                     result['type'] = batch['type'][i]
                     
                 results.append(result)
+            print()
 
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
