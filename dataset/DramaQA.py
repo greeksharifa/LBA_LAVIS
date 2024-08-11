@@ -197,6 +197,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
             "candidate_list": ann["answers"],
             "answer_sentence": ann["answers"][ann["correct_idx"]],
             "type": question_type,
+            "vid": vid,
             # "instance_id": ann["instance_id"],
         }
    

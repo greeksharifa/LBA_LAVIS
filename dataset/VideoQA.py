@@ -72,31 +72,6 @@ class VideoEvalDataset(BaseDataset):
         
         return result
             
-        (
-            image_list,
-            text_input_list,
-            question_id_list,
-            gt_ans_list,
-            candidate_list_list,
-            answer_sentence_list,
-        ) = ([], [], [], [], [], [])
-        
-        for sample in samples:
-            image_list.append(sample["image"])
-            text_input_list.append(sample["text_input"])
-            question_id_list.append(sample["question_id"])
-            gt_ans_list.append(sample["gt_ans"])
-            candidate_list_list.append(sample["candidate_list"])
-            answer_sentence_list.append(sample["answer_sentence"])
-            
-        return {
-            "image": image_list, #torch.stack(image_list, dim=0),
-            "text_input": text_input_list,
-            "question_id": question_id_list,
-            "gt_ans": gt_ans_list, 
-            "candidate_list": candidate_list_list,
-            "answer_sentence": answer_sentence_list,
-        }
   
     def __getitem__(self, index):
         ann = self.annotation[index]
@@ -105,7 +80,10 @@ class VideoEvalDataset(BaseDataset):
         vpath = os.path.join(self.vis_root, f'{vid}.mp4')
         
         # load images. output: list of PIL.Image
-        frms = read_video_pyav(vpath, n_frms=self.n_frms)
+        if "start" in ann and "end" in ann:
+            frms = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"])
+        else:
+            frms = read_video_pyav(vpath, n_frms=self.n_frms)
         
         question = ann["question"] # question = self.text_processor(ann["que"])
         
@@ -128,6 +106,7 @@ class VideoEvalDataset(BaseDataset):
             "candidate_list": candidate_list,
             "answer_sentence": candidate_list[gt_ans],
             "type": question_type,
+            "vid": vid,
             # "instance_id": ann["instance_id"],
         }
      
