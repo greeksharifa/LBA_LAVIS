@@ -40,7 +40,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             
     final_acc_list = [match / N for match in match_list]
     
-    if cfg.datasets_cfg.dataset_name in ['NExTQA', 'STAR']:
+    if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
         match_per_type = {}    
         total_per_type = {}
         # total number of each question type
@@ -77,7 +77,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         print("match_per_type:", match_per_type)
         for q_type in match_per_type.keys():
             if total_per_type[q_type] > 0:
-                print(f'{q_type} acc: {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
+                print(f'{q_type} acc: {match_per_type[q_type]} / {total_per_type[q_type]} = {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
             
             
     
@@ -128,8 +128,8 @@ def sample_print(base, lba, gt_ans, get_accuracy, i):
     elif b > l:  # right -> wrong
         color = Colors.BRIGHT_RED
     elif b == l and round(b) == 1:  # right -> right
-        color = Colors.BRIGHT_CYAN
-    else:        # wrong -> wrong or right -> right
+        color = Colors.WHITE
+    else:        # wrong -> wrong
         color = Colors.BRIGHT_YELLOW
         
     print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET, end='\t')

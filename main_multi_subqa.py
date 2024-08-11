@@ -40,13 +40,16 @@ def parse_args():
 
 def main():
     args = parse_args()
-    cfg = Config(args)
+    cfg = Config(args)    
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
-    # args = parse_args()
-    output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
-    os.makedirs(output_dir)
     print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
-    OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
+
+    if not cfg.runner_cfg.visualize:
+        output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
+        os.makedirs(output_dir)
+        OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
+    else:
+        output_dir = cfg.runner_cfg.output_dir
     
     s = datetime.now()
     dataset = load_dataset(cfg.datasets_cfg)
@@ -127,7 +130,7 @@ def main():
             
             for i in range(cfg.runner_cfg.num_sub_qa_generate):
                 # generating sub_questions
-                if cfg.datasets_cfg.data_type == "videos" and cfg.runner_cfg.select_high_confidence > 1:
+                if cfg.runner_cfg.random_frame and cfg.runner_cfg.select_high_confidence > 1:
                     vision = []
                     for b in range(bsz):
                         vision.append(batch['vision'][b][i])

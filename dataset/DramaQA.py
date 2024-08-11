@@ -170,8 +170,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
         ann = self.annotation[index]
 
         vid = ann["vid"]
-        vpath = os.path.join(self.vis_root, f'{vid}.mp4')
-        
+        # vpath = os.path.join(self.vis_root, f'{vid}.mp4')
         # frms = read_video_pyav(vpath, self.n_frms)
         
         # load images. output: list of PIL.Image

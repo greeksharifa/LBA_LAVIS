@@ -44,8 +44,6 @@ class Decomposer(nn.Module):
 
 class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
     
-    
-    
     @torch.no_grad()
     def generate(
         self,
