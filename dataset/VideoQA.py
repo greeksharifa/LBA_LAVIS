@@ -62,17 +62,6 @@ class VideoEvalDataset(BaseDataset):
         return self.ANSWER_MAPPING[answer]
 
         
-    def collater(self, samples):
-        result = {}
-        for k, v in samples[0].items():
-            # if isinstance(v, torch.Tensor): # no use, 240809
-            #     result[k] = torch.stack([sample[k] for sample in samples], dim=0)
-            # else:
-            result[k] = [sample[k] for sample in samples]
-        
-        return result
-            
-  
     def __getitem__(self, index):
         ann = self.annotation[index]
 

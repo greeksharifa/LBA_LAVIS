@@ -79,7 +79,10 @@ def main():
         print_freq = max(1, int(len(dataloader) / cfg.runner_cfg.print_freq))
         # print('print_freq:', print_freq)
 
-        examplar = get_examplar(cfg.datasets_cfg)
+        try:
+            examplar = get_examplar(cfg.datasets_cfg)
+        except:
+            examplar = ""
         print('examplar:', examplar)
         results = []
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):

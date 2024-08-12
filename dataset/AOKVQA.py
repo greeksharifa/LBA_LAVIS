@@ -34,7 +34,7 @@ class AOKVQADataset(BaseDataset):
         text_input = ann["question"]
 
         return {
-            "image": image,
+            "vision": image,
             "text_input": text_input,
             "question_id": ann["question_id"],
             "gt_ans": ann["direct_answers"], # vqav2 answers list of str(len=10)

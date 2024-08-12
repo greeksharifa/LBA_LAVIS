@@ -1,6 +1,7 @@
 import json
 import os
 import matplotlib.pyplot as plt
+from collections import Counter
 
 from utils.colors import Colors
 
@@ -118,7 +119,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
 
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
-        
+
+
+def modefinder(l):   #numbers는 리스트나 튜플 형태의 데이터
+    c = Counter(l)
+    mode = c.most_common(1)
+    return mode[0][0]
+
         
 def sample_print(base, lba, gt_ans, get_accuracy, i):
     b, l = get_accuracy(base, gt_ans), get_accuracy(lba, gt_ans)
@@ -132,7 +139,7 @@ def sample_print(base, lba, gt_ans, get_accuracy, i):
     else:        # wrong -> wrong
         color = Colors.BRIGHT_YELLOW
         
-    print(color, f'{base} -> {lba}, gt: {gt_ans}', Colors.RESET, end='\t')
-    if i % 8 == 7:
+    print(color, f'{base} -> {lba}, gt: {modefinder(gt_ans) if isinstance(gt_ans, list) else gt_ans}', Colors.RESET, end='\t')
+    if i % 4 == 4:
         print()
     

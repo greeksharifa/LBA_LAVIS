@@ -87,41 +87,10 @@ class VQAIntrospectDataset(BaseDataset):
         reasoning_answer_most_common = ann["reasoning_answer_most_common"]
         
         return {
-            "image": image,
+            "vision": image,
             "text_input": text_input,
             "question_id": ann["question_id"],
             "reasoning_answer_most_common": reasoning_answer_most_common,
             "gt_sub_qas": ann["gt_sub_qas"],
             "gt_ans": ann["gt_ans"], # vqav2 answers list of str(len=10)
         }
-
-    def collater(self, samples):
-        (
-            image_list,
-            text_input_list,
-            question_id_list,
-            # instance_id_list,
-            reasoning_answer_most_common_list,
-            gt_sub_qas_list,
-            gt_ans_list,
-        ) = ([], [], [], [], [], []) # ([], [], [], [], [], [], [])
-
-        for sample in samples:
-            image_list.append(sample["image"])
-            text_input_list.append(sample["text_input"])
-            question_id_list.append(sample["question_id"])
-            # instance_id_list.append(sample["instance_id"])
-            reasoning_answer_most_common_list.append(sample["reasoning_answer_most_common"])
-            gt_sub_qas_list.append(sample["gt_sub_qas"])
-            gt_ans_list.append(sample["gt_ans"])
-
-        return {
-            "image": image_list,#torch.stack(image_list, dim=0),
-            "text_input": text_input_list,
-            "question_id": question_id_list,
-            # "instance_id": instance_id_list,
-            "reasoning_answer_most_common": reasoning_answer_most_common_list,
-            "gt_sub_qas": gt_sub_qas_list, # list: [bs, N_i, 2]
-            "gt_ans": gt_ans_list, # list: [bs, 10]
-        }
-        

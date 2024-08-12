@@ -91,26 +91,14 @@ class BaseDataset(Dataset):
         return len(self.annotation)
 
     def collater(self, samples):
-        (
-            image_list,
-            text_input_list,
-            question_id_list,
-            # instance_id_list,
-            gt_ans_list,
-        ) = ([], [], [], [])
+        result = {}
+        for k, v in samples[0].items():
+            # if isinstance(v, torch.Tensor): # no use, 240809
+            #     result[k] = torch.stack([sample[k] for sample in samples], dim=0)
+            # else:
+            result[k] = [sample[k] for sample in samples]
         
-        for sample in samples:
-            image_list.append(sample["image"])
-            text_input_list.append(sample["text_input"])
-            question_id_list.append(sample["question_id"])
-            gt_ans_list.append(sample["gt_ans"])
-            
-        return {
-            "image": image_list, #torch.stack(image_list, dim=0),
-            "text_input": text_input_list,
-            "question_id": question_id_list,
-            "gt_ans": gt_ans_list, # list: [bs, 10]
-        }
+        return result
 
     def set_processors(self, vis_processor, text_processor):
         self.vis_processor = vis_processor
@@ -198,7 +186,8 @@ def get_text_input(
         return [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
         
     elif prompt_type == "recomposer_image":
-        prompt = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext: {sub_question}? {sub_answer}. Question: {main_question}? Short answer:"
+        examplar = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\n"
+        prompt = examplar + "Context: {sub_question}? {sub_answer}. Question: {main_question}? Short answer:"
         return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
                 for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
     
@@ -222,15 +211,15 @@ def get_text_input(
         Answer: The answer is <answer> [EOS]
         """
     elif prompt_type == "recomposer_video":
-#         examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
-# Question: Why did Dokyung pull Haeyoung1's arm hard?
-# Choices:
-# (A) Dokyung pulled Haeyoung1's arm to hug her hard.
-# (B) It is because Dokyung did not want Haeyoung1 to fall.
-# (C) This is because Dokyung and Haeyoung1 were dancing on the street.
-# (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
-# (E) Because Dokyung needed Haeyoung1 to go to the police station.
-# Answer: The answer is (A)\n"""
+        examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+Question: Why did Dokyung pull Haeyoung1's arm hard?
+Choices:
+(A) Dokyung pulled Haeyoung1's arm to hug her hard.
+(B) It is because Dokyung did not want Haeyoung1 to fall.
+(C) This is because Dokyung and Haeyoung1 were dancing on the street.
+(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+(E) Because Dokyung needed Haeyoung1 to go to the police station.
+Answer: The answer is (A)\n"""
         prompt = examplar if kwargs.get("recomposer_examplar", True) else ""
         prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
