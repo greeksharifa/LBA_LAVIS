@@ -15,12 +15,22 @@ from dataset.video import read_video_pyav
 from dataset.VideoQA import VideoEvalDataset
 
 
-class TVQAEvalDataset(VideoEvalDataset):
-       
+class VLEPEvalDataset(VideoEvalDataset):
+    """
+    <class 'list'>
+    total 4392
+    {'a0': 'Ross will stop, turn and point at Monica.',
+    'a1': 'Ross will stop and ask Monica why she is pointing at him.',
+    'answer': 0,
+    'end': 40.37,
+    'num_option': 2,
+    'qid': 'VLEP_20142',
+    'start': 38.81,
+    'video': 'friends_s03e09_seg02_clip_07_ep'}
+    """
+
     def get_image_path(self, vid, random=False):
-        dir_path = os.path.join(self.vis_root, 
-                                f"{vid.split('_')[0]}_frames" if vid.count('_') == 4 else f"bbt_frames",
-                                vid)
+        dir_path = os.path.join(self.vis_root, vid)
         image_paths = glob.glob(os.path.join(dir_path, '*.jpg'))
         
         if random:
@@ -57,7 +67,7 @@ class TVQAEvalDataset(VideoEvalDataset):
             frms_supple.append(_get_frames(True))
         # print(len(frms_supple), len(frms_supple[0]), frms_supple[0][0].shape)
         
-        question = ann["question"] # question = self.text_processor(ann["que"])
+        question = "Which event is more likely to happen right after?" # event prediction
         
         # gt_ans = self.__class__.ANSWER_MAPPING[ann["correct_idx"]]
         gt_ans = ann["answer"]

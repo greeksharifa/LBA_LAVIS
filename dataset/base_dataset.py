@@ -19,12 +19,15 @@ def load_dataset(datasets_cfg, split='val'):
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
-    elif datasets_cfg.dataset_name in ["NExTQA", "STAR"]:# "How2QA"]:
+    elif datasets_cfg.dataset_name in ["NExTQA", "STAR"]:#, "VLEP"]:# "How2QA"]:
         from dataset.VideoQA import VideoEvalDataset
         cls = VideoEvalDataset
-    elif datasets_cfg.dataset_name == "TVQA":
+    elif datasets_cfg.dataset_name == "TVQA": 
         from dataset.TVQA import TVQAEvalDataset
         cls = TVQAEvalDataset
+    elif datasets_cfg.dataset_name == "VLEP": # '/data1/VLEP/vlep_frames/friends_s03e09_seg02_clip_07_ep.mp4'
+        from dataset.VLEP import VLEPEvalDataset
+        cls = VLEPEvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         
@@ -37,6 +40,7 @@ def load_dataset(datasets_cfg, split='val'):
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 4),
         datasets_cfg=datasets_cfg,
+        supple_n=datasets_cfg.get("supple_n"),
     )
     
     return dataset
@@ -117,7 +121,7 @@ class BaseDataset(Dataset):
             e_ic = sum([1 if not acc_lba and acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc_origin else 0 for acc_origin in acc_origin_list]) * 100
         return e_cr, e_ic
     
-    def get_accuracy(self, outputs, targets, match1ok=False):
+    def get_accuracy(self, outputs, targets):#, match1ok=False):
         """
         args
         - outputs: str          or list of str.         shape: [bsz]
@@ -125,11 +129,12 @@ class BaseDataset(Dataset):
         """
         def _get_acc(out, target):
             if self.vqa_acc:
-                if match1ok:
-                    return out in target
+                return out in target
+                # if match1ok:
+                #     return out in target
                 
-                num_match = sum([out == t for t in target])
-                return min(1.0, num_match / 3.0)
+                # num_match = sum([out == t for t in target])
+                # return min(1.0, num_match / 3.0)
             else:
                 if len(out) == 1:
                     out = '(' + out + ')'

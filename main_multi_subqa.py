@@ -40,7 +40,10 @@ def parse_args():
 
 def main():
     args = parse_args()
-    cfg = Config(args)    
+    cfg = Config(args)
+    if cfg.runner_cfg.visualize:
+        args.cfg_path = os.path.join(cfg.runner_cfg.output_dir, 'config.yaml')
+        cfg = Config(args)
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
     print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
 
@@ -49,6 +52,8 @@ def main():
         os.makedirs(output_dir)
         OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
     else:
+        print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
+        # output_dir = os.path.join('output/', cfg.runner_cfg.output_dir)
         output_dir = cfg.runner_cfg.output_dir
     
     s = datetime.now()
@@ -238,7 +243,9 @@ def main():
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
     else:
-        results = json.load(open(os.path.join(output_dir, 'results_base.json'), 'r'))
+        result_path = os.path.join(output_dir, 'results_base.json')
+        results = json.load(open(result_path, 'r'))
+        print('load results from:', result_path)
         
         total_base_match, total_cnt = 0., 0
         
@@ -254,18 +261,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
-<class 'list'>
-7098
-{'video': '6H78U',
- 'num_option': 4,
- 'qid': 'Interaction_T1_13',
- 'a0': 'The closet/cabinet.',
- 'a1': 'The blanket.',
- 'a2': 'The clothes.',
- 'a3': 'The table.',
- 'answer': 2,
- 'question': 'Which object was tidied up by the person?',
- 'start': 11.1,
- 'end': 19.6}
-'''

@@ -1,12 +1,14 @@
 runner:
   # mode
   visualize: False
-  # match1ok
-  match1ok: False
   # settings
   select_high_confidence: True
-  train_recomposer_examplar: True
+  train_recomposer_examplar: False
+  threshold_lba: False
   random_frame: False
+  num_sub_qa_generate: 3
+  num_sub_qa_select: 1
+
   # model
   recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
@@ -14,10 +16,7 @@ runner:
   HF_HOME: /data2/
   device_map: "cuda:0" # ['auto', 0, 1, ...]
 
-  batch_size: 64
-
-  num_sub_qa_generate: 3
-  num_sub_qa_select: 1
+  batch_size: 32 # xl: image:32, video: 16 or 12
 
   # output & log
   output_dir: 'output/'
@@ -34,6 +33,7 @@ datasets:
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
+  supple_n: 3
 
 model:
   cache_dir: /data2/ # ~/.cache/torch/hub/
