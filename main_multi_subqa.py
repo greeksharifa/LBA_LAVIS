@@ -126,7 +126,7 @@ def main():
             metric_logger.update(n=bsz, base_acc=sum(acc_base)/bsz)
             metric_logger.update(n=bsz, total_base_acc=total_base_match/total_cnt)
             
-            print("batch['text_input']:", batch['text_input'])
+            print("batch['text_input'][0]:", batch['text_input'][0])
             
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
@@ -163,7 +163,7 @@ def main():
                                                 sub_answers=sub_answers,
                                                 candidate_lists=batch['candidate_list'],
                                                 examplar=examplar,
-                                                recomposer_examplar=cfg.runner_cfg.recomposer_examplar)
+                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
                 else:                          # "images"
                     text_inputs = get_text_input("recomposer_image", 
                                                 main_questions=batch['text_input'], 
@@ -205,7 +205,7 @@ def main():
                 indices.append(index)
             
             if args.verbose:
-                print(f'indices: {indices}, LBA: {final_text_outputs_lba} | {final_confidences_lba}')
+                print(f'indices: {indices[0]}, LBA: {final_text_outputs_lba[0]} | {final_confidences_lba[0]}')
             
             
             """##############################      Save result      ##############################"""

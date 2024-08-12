@@ -211,7 +211,7 @@ def get_text_input(
         Answer: The answer is <answer> [EOS]
         """
     elif prompt_type == "recomposer_video":
-        examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+        default_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
 Question: Why did Dokyung pull Haeyoung1's arm hard?
 Choices:
 (A) Dokyung pulled Haeyoung1's arm to hug her hard.
@@ -220,7 +220,7 @@ Choices:
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
 Answer: The answer is (A)\n"""
-        prompt = examplar if kwargs.get("recomposer_examplar", True) else ""
+        prompt = examplar if kwargs.get("train_recomposer_examplar", False) else default_examplar
         prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []

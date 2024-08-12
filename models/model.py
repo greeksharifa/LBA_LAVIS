@@ -360,6 +360,7 @@ class Recomposer(nn.Module):
                 "output_scores": True
             }
             if generate_sub_q:
+                print('text_inputs[0]:', text_inputs[0])
                 generation_params["top_p"] = 0.98
                 generation_params["max_new_tokens"] = 100
                 

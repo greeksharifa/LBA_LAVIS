@@ -41,6 +41,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             
     final_acc_list = [match / N for match in match_list]
     
+    metrics = {}
+    
     if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
         match_per_type = {}    
         total_per_type = {}
@@ -75,10 +77,12 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 match_per_type[question_type] += acc
                 total_per_type[question_type] += 1
         
-        print("match_per_type:", match_per_type)
+        # print("match_per_type:", match_per_type)
         for q_type in match_per_type.keys():
             if total_per_type[q_type] > 0:
-                print(f'{q_type} acc: {match_per_type[q_type]} / {total_per_type[q_type]} = {match_per_type[q_type] / total_per_type[q_type] * 100:.2f}%')
+                qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
+                # print(f'{q_type:<21s}: {qtype_v}')
+                metrics[f'{q_type:<21s}'] = qtype_v
             
             
     
@@ -107,14 +111,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     plt.savefig(fig_path, dpi=300)
     print(f'saved fig at {fig_path}')
     
-    metrics = {
+    metrics.update({
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
         "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
         "confidence_percentile": f'{confidence_percentile:.2f}%',
         "E_CR                 ": f'{e_cr:.2f}%',
         "E_IC                 ": f'{e_ic:.2f}%',
-    }
+    })
     print("metrics:", json.dumps(metrics, indent=4))
 
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
@@ -140,6 +144,6 @@ def sample_print(base, lba, gt_ans, get_accuracy, i):
         color = Colors.BRIGHT_YELLOW
         
     print(color, f'{base} -> {lba}, gt: {modefinder(gt_ans) if isinstance(gt_ans, list) else gt_ans}', Colors.RESET, end='\t')
-    if i % 4 == 4:
+    if i % 4 == 3:
         print()
     
