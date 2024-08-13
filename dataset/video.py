@@ -61,7 +61,7 @@ def process_video_cv2(video_path, n_frms, start_time=0, end_time=None):
 
 # Example usage:
 # video_frames = process_video("path/to/your/video.mp4", n_frms=10, start_time=5, end_time=15)
-def read_video_pyav(video_path, n_frms, start_time=0, end_time=None):
+def read_video_pyav(video_path, n_frms, start_time=0, end_time=None, supple_n=0):
     container = av.open(video_path)
     video_stream = container.streams.video[0]
     
@@ -80,23 +80,22 @@ def read_video_pyav(video_path, n_frms, start_time=0, end_time=None):
 
     # Calculate frames to sample
     frames_to_sample = np.linspace(start_frame, end_frame - 1, n_frms, dtype=int)
-    SUPPLE_N = 3
     try:    
-        frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(SUPPLE_N)]
+        frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(supple_n)]
     except:
-        frames_to_sample_supple = [frames_to_sample for _ in range(SUPPLE_N)]
+        frames_to_sample_supple = [frames_to_sample for _ in range(supple_n)]
 
     # Seek to start_frame
     container.seek(int(start_frame * video_stream.time_base * 1000000))  # Seek in microseconds
 
     frames = []
-    frames_supple = [[] for _ in range(SUPPLE_N)]
+    frames_supple = [[] for _ in range(supple_n)]
     for frame_idx, frame in enumerate(container.decode(video=0)):
         if frame_idx + start_frame >= end_frame:
             break
         if frame_idx + start_frame in frames_to_sample:
             frames.append(frame.to_ndarray(format="rgb24"))
-        for i in range(SUPPLE_N):
+        for i in range(supple_n):
             if frame_idx + start_frame in frames_to_sample_supple[i]:
                 frames_supple[i].append(frame.to_ndarray(format="rgb24"))
 

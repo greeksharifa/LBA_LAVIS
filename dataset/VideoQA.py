@@ -61,7 +61,7 @@ class VideoEvalDataset(BaseDataset):
     def answer_mapping(self, answer):
         return self.ANSWER_MAPPING[answer]
 
-        
+
     def __getitem__(self, index):
         ann = self.annotation[index]
 
@@ -70,9 +70,9 @@ class VideoEvalDataset(BaseDataset):
         
         # load images. output: list of PIL.Image
         if "start" in ann and "end" in ann:
-            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"])
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"], supple_n=self.supple_n)
         else:
-            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms)
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, supple_n=self.supple_n)
         
         question = ann["question"] # question = self.text_processor(ann["que"])
         

@@ -37,7 +37,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         
         if cur_match > max_match:
             max_match = cur_match
-            max_arg_confidence = result['confidence_base']
+            max_arg_confidence = result[key]
             confidence_percentile = (i+1) / N * 100
             
     final_acc_list = [match / N for match in match_list]

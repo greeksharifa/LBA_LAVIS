@@ -138,10 +138,10 @@ def main():
             
             for i in range(cfg.runner_cfg.num_sub_qa_generate):
                 # generating sub_questions
-                if cfg.runner_cfg.random_frame and cfg.runner_cfg.select_high_confidence > 1:
+                if cfg.runner_cfg.random_frame and i >= 1:
                     vision = []
                     for b in range(bsz):
-                        vision.append(batch['vision'][b][i])
+                        vision.append(batch['vision'][b][i]) # or [i-1]
                 text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
                 if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
