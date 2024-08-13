@@ -3,12 +3,29 @@ import os
 import matplotlib.pyplot as plt
 from collections import Counter
 
+import numpy as np
+import seaborn as sns
+
 from utils.colors import Colors
 
 
-def visualize(results, dataset, cfg, output_dir, total_base_match):
-    key = 'confidence_lba' if cfg.runner_cfg.threshold_lba else 'confidence_base'
+def get_conf_rank(results, key):
+    reverse_key = 'confidence_lba' if key == 'confidence_base' else 'confidence_base'
+    results.sort(key=lambda x: x[reverse_key])
+    N = len(results)
+    for i, result in enumerate(results):
+        result[f'rank_{reverse_key.split("_")[-1]}'] = int(i / N * 10)
     results.sort(key=lambda x: x[key])
+    for i, result in enumerate(results):
+        result[f'rank_{key.split("_")[-1]}'] = int(i / N * 10)
+        
+    return results
+
+
+def visualize(results, dataset, cfg, output_dir, total_base_match):
+    output_dir = 'temp/'
+    key = 'confidence_lba' if cfg.runner_cfg.threshold_lba else 'confidence_base'
+    results = get_conf_rank(results, key)
     
     max_match, cur_match = total_base_match, total_base_match
     match_list = [cur_match]
@@ -17,7 +34,16 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     acc_base_list, acc_lba_list = [], []
     N = len(results)
     M = max(1, N // cfg.runner_cfg.num_bin)
+    H = max(1, N // cfg.runner_cfg.get("num_heatmap_row", 10))
     bins = [[] for _ in range(N // M + 1)]
+    heatmap_data = {
+        'base': [[[] for _ in range(N // H + 1)] for _ in range(10)],
+        'lba' : [[[] for _ in range(N // H + 1)] for _ in range(10)],
+    }
+    heatmap_data2 = {
+        'number': [[0 for _ in range(10)] for _ in range(10)],
+        'change': [[0. for _ in range(10)] for _ in range(10)],
+    }
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
@@ -40,6 +66,16 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             max_arg_confidence = result[key]
             confidence_percentile = (i+1) / N * 100
             
+        # for heatmap
+        row = int(result[key] * 10)
+        col = i // H
+        heatmap_data['base'][row][col].append(acc_base)
+        heatmap_data['lba'][row][col].append(acc_lba)
+        
+        # if result['confidence_base'] < result['confidence_lba']:
+        heatmap_data2['number'][9-result['rank_lba']][result['rank_base']] += 1
+        heatmap_data2['change'][9-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
+                
     final_acc_list = [match / N for match in match_list]
     
     metrics = {}
@@ -89,13 +125,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
-    plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=1)
+    plt.subplots_adjust(left=0.125, bottom=0.3, right=0.9, top=0.5, wspace=0.2, hspace=1)
     # plt.subplots(constrained_layout=True)
     # tight_layout()
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
     plt.plot([i / N * 100 for i, _ in enumerate(final_acc_list)], final_acc_list, color='b')
-    plt.title(f'{dataset.__class__.__name__} | E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
     plt.xlabel('Confidence Percentile')
     plt.ylabel('Accuracy')
     plt.xticks([0, 25, 50, 75, 100])
@@ -103,7 +139,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     plt.subplot(2, 1, 2)
     acc_bin = [sum(bin) / len(bin) for bin in bins if len(bin) > 0]
     plt.plot([i for i in range(len(acc_bin))], acc_bin, color='r')
-    plt.title(f'{dataset.__class__.__name__} | acc for {len(acc_bin)} bins')
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {len(acc_bin)} bins')
     plt.xlabel('bins')
     plt.ylabel('Accuracy')
     plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
@@ -111,7 +147,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # if not cfg.runner_cfg.visualize:
     plt.savefig(fig_path, dpi=300)
     print(f'saved fig path is {fig_path}')
+    # draw heatmap
+    # draw_heatmap(heatmap_data['base'], output_dir, 'base', N // H + 1)
+    # draw_heatmap(heatmap_data['lba'], output_dir, 'lba', N // H + 1)
+    draw_heatmap2(heatmap_data2['number'], output_dir, 'number')
+    draw_heatmap2(heatmap_data2['change'], output_dir, 'change')
+    
     print(f'saved config path is {os.path.join(output_dir, "config.yaml")}')
+
     
     metrics.update({
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
@@ -139,11 +182,58 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
 
     print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
     if 'type' in results[0]:
-        for q in ["TCDISPF"]:
+        for q in ["TCDISPFL"]:
             for q_type in match_per_type.keys():
                 if q_type.startswith(q) and total_per_type[q_type] > 0:
                     print(f'\t{match_per_type[q_type] / total_per_type[q_type] * 100:.2f}', end='')
     print('\n')
+
+
+def draw_heatmap(raw_data, output_dir, key, col_num):
+    data = [[-0.2 for _ in range(col_num)] for _ in range(10)]
+    for i, row in enumerate(raw_data):
+        for j, col in enumerate(row):
+            if len(col) > 0:
+                data[i][j] = sum(col) / len(col)
+
+    # Convert the nested list to a numpy array
+    data_array = np.array(data)
+
+    # Create a heatmap using seaborn
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(data_array, annot=True, cmap='viridis', fmt='.2f')
+
+    # Set title
+    plt.xlabel('Relative Confidence')
+    plt.ylabel('Absolute Confidence')
+    plt.title(f'Acc_{key} Heatmap by Rel/Abs Confidence')
+
+    # Show the plot
+    # plt.show()
+    plt.savefig(os.path.join(output_dir, f'heatmap_{key}.png'), dpi=300)
+
+
+def draw_heatmap2(data, output_dir, key):
+    # Convert the nested list to a numpy array
+    data_array = np.array(data)
+
+    # Create a heatmap using seaborn
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(data_array, annot=True, cmap='viridis', fmt='.1f')
+
+    # Set title
+    plt.xlabel('Base Confidence(rel %)')
+    plt.ylabel('LBA Confidence(rel %)')
+    plt.xticks(range(0, 11), [10*i for i in range(11)])
+    plt.yticks(range(0, 11), [100-10*i for i in range(11)])
+    plt.title(f'Base -> LBA {key}')
+
+    # Show the plot
+    # plt.show()
+    fig_path = os.path.join(output_dir, f'heatmap_conversion_{key}.png')
+    # fig_path = os.path.join('temp', f'heatmap_conversion_{key}.png')
+    plt.savefig(fig_path, dpi=300)
+    print(f'saved heatmap_conversion path is {fig_path}')
 
 
 def modefinder(l):   #numbers는 리스트나 튜플 형태의 데이터

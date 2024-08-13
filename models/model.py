@@ -233,6 +233,7 @@ class Recomposer(nn.Module):
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
             device_map = infer_auto_device_map(self.model)
+            del self.model
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)
         elif "vicuna" in model_name:
             self.processor = InstructBlipVideoProcessor.from_pretrained(model_name)
@@ -255,29 +256,17 @@ class Recomposer(nn.Module):
         else:
             raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
 
-        # print('self.processor:', self.processor)
-        # print('self.processor.image_processor:', self.processor.image_processor)
-            
         self.model_name = model_name
         self.device = self.model.device
         self.cfg = cfg
         self.device_map = device_map
         print('device_map:', device_map)
-        
-        
         print('recomposer name: ',self.model.__class__.__name__)
+        # print('self.processor:', self.processor)
+        # print('self.processor.image_processor:', self.processor.image_processor)
 
 
     def forward(self, vision, text_inputs, generate_sub_q=False):
-        # print('Recomposer.forward' + '*' * 120)
-        # print('images:', images)
-        # print('text_inputs:', text_inputs)
-        # print(self.model_name)
-        # print(self.processor.__class__.__name__)
-        # print(self.model.__class__.__name__)
-        # import pdb; pdb.set_trace()
-        # images = [[image.to(self.model.device) for image in video] for video in images]
-        
         if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
             samples = text_inputs
             video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
@@ -297,11 +286,7 @@ class Recomposer(nn.Module):
             else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
                 # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
                 inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True) # [64, 29]
-                
-                '''
-                images: list of list of PIL.Image | [64, len, 640, 480]
-                '''
-                
+
                 pixel_values = []
                 for video in vision: # video: [n_frms, 640, 480]
                     # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
@@ -310,36 +295,11 @@ class Recomposer(nn.Module):
                 stacked = torch.stack(pixel_values, dim=0)#.to(self.model.device)
                 # 미적용중.."""# [bsz, n_frms, 3, 224, 224] -> [bsz, 3, n_frms, 224, 224]"""
                 inputs["pixel_values"] = stacked#.transpose(2, 1)
-                    
-                '''FlanT5
-                batch_size=64, n_frms=5, n_channels=3, height=224, width=224
-                dict_keys([
-                    'pixel_values',   [64, 3, 5, 224, 224] # 원래는 [64, 3, 224, 224]
-                    'input_ids',      [64, 29]
-                    'attention_mask', [64, 29]
-                ])
-                '''
-                # for k, v in inputs.items():
-                #     print(f'{k:<15s} | shape: {v.shape}')
-                    
-                '''Blip2VicunaInstruct
-                input_ids       | shape: torch.Size([64, 168])
-                attention_mask  | shape: torch.Size([64, 168])
-                qformer_input_ids | shape: torch.Size([64, 156])
-                qformer_attention_mask | shape: torch.Size([64, 156])
-                pixel_values    | shape: torch.Size([64, 5, 3, 224, 224])
-                '''
+
             # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
             # out = self.model.generate(**inputs)
             # return self.processor.batch_decode(out, skip_special_tokens=True)
-            # try:
-            #     for k, v in inputs.items():
-            #         # print(k, type(v), v.device)
-            #         v = v.to(self.model.device)
-            # except:
-            #     pass
             
-            # import pdb; pdb.set_trace()
             if self.cfg.runner_cfg.device_map != "auto":
                 inputs = inputs.to(self.model.device) # "cuda"
                 
