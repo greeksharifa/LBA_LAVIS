@@ -77,19 +77,34 @@ def read_video_pyav(video_path, n_frms, start_time=0, end_time=None, supple_n=0)
     # Convert times to frame numbers
     start_frame = int(start_time * fps)
     end_frame = int(end_time * fps)
+    
+    supple_n -= 1 # 첫 번째 sub-qa는 uniform sampled frames를 그대로 사용하기 때문에 1을 빼준다.
 
     # Calculate frames to sample
     frames_to_sample = np.linspace(start_frame, end_frame - 1, n_frms, dtype=int)
-    try:    
-        frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(supple_n)]
+    try:
+        segment_size = (end_frame - start_frame) / supple_n
+    
+        frames_to_sample_supple = []
+        
+        for i in range(supple_n):
+            st = start_frame + int(i * segment_size)
+            en = min(start_frame + int((i + 1) * segment_size), end_frame)
+            
+            # Calculate frame indices to extract
+            frame_indices = np.linspace(st, en-1, n_frms, dtype=int)
+            frames_to_sample_supple.append(frame_indices)
+
+        # frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(supple_n)]
     except:
         frames_to_sample_supple = [frames_to_sample for _ in range(supple_n)]
 
     # Seek to start_frame
-    container.seek(int(start_frame * video_stream.time_base * 1000000))  # Seek in microseconds
+    container.seek(int(start_frame * video_stream.time_base * 1000000), backward=True)  # Seek in microseconds
 
     frames = []
     frames_supple = [[] for _ in range(supple_n)]
+    
     for frame_idx, frame in enumerate(container.decode(video=0)):
         if frame_idx + start_frame >= end_frame:
             break
