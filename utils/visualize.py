@@ -47,7 +47,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     }
     heatmap_data2 = {
         'number': [[0 for _ in range(H)] for _ in range(H)],
-        'change': [[0. for _ in range(H)] for _ in range(H)],
+        'change': [[0 for _ in range(H)] for _ in range(H)],
     }
     
     for i, result in enumerate(results):
@@ -130,24 +130,23 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
-    plt.subplots_adjust(left=0.125, bottom=0.3, right=0.9, top=0.5, wspace=0.2, hspace=1)
-    # plt.subplots(constrained_layout=True)
-    # tight_layout()
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
     plt.plot([i / N * 100 for i, _ in enumerate(final_acc_list)], final_acc_list, color='b')
     plt.title(f'{cfg.datasets_cfg.dataset_name} | E_CR: {e_cr:.2f}%, E_IC: {e_ic:.2f}%')
     plt.xlabel('Confidence Percentile')
     plt.ylabel('Accuracy')
-    plt.xticks([0, 25, 50, 75, 100])
+    plt.xticks(list(range(0, 101, 10)))# [0, 25, 50, 75, 100])
     
     plt.subplot(2, 1, 2)
     acc_bin = [sum(bin) / len(bin) for bin in bins if len(bin) > 0]
     plt.plot([i for i in range(len(acc_bin))], acc_bin, color='r')
-    plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {len(acc_bin)} bins')
-    plt.xlabel('bins')
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {cfg.runner_cfg.num_bin} bins') # len(acc_bin)
+    plt.xlabel('Confidence Percentile')
     plt.ylabel('Accuracy')
-    plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
+    plt.xticks([(cfg.runner_cfg.num_bin // 10) * i for i in range(11)], list(range(0, 101, 10)))
+    # plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
+    plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
     fig_path = os.path.join(output_dir, "acc_bin.png")
     # if not cfg.runner_cfg.visualize:
     plt.savefig(fig_path, dpi=300)
@@ -220,13 +219,13 @@ def draw_heatmap(raw_data, output_dir, key, col_num):
 
 def draw_heatmap2(data, output_dir, key, H):
     # Convert the nested list to a numpy array
-    data_array = np.array(data)
+    data_array = np.array(data, dtype=int)
     
     # Create a heatmap using seaborn
     plt.figure(figsize=(10, 8))
     
     if key == 'number':
-        sns.heatmap(data_array, annot=True, cmap='viridis', fmt='.1f')
+        sns.heatmap(data_array, annot=True, cmap='viridis', fmt='d') #.1f
     else:
         sel_col = ['#ba001e','#d80019','#f32b1d','#ff502b','#ff7c3c','#ffa84e','#ffcb6c','#ffe992','#fcfeb3','#e4f693','#c6ea74','#a0de5c','#68cb57','#39be56','#00b14d','#00893e','#006b31']
         sel_colmap = ListedColormap(sel_col)
@@ -234,7 +233,7 @@ def draw_heatmap2(data, output_dir, key, H):
         sel_norm = list(range(-8, 9))
         sel_norm = BoundaryNorm(sel_norm, ncolors=len(sel_col))
 
-        sns.heatmap(data_array, annot=True, cmap=sel_colmap, norm=sel_norm, fmt='.1f')
+        sns.heatmap(data_array, annot=True, cmap=sel_colmap, norm=sel_norm, fmt='+d')
 
     # Set title
     plt.xlabel('Base Confidence(rel %)')

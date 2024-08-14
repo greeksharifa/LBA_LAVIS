@@ -7,8 +7,11 @@ from datetime import datetime
 from pprint import pprint
 from collections import OrderedDict
 import PIL
+import random
 
+import numpy as np
 import torch
+import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader
 
 from configs.config import Config
@@ -18,6 +21,17 @@ from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
 from utils.visualize import visualize, sample_print
+
+
+def setup_seeds(config):
+    seed = config.runner_cfg.seed # + get_rank()
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    cudnn.benchmark = False
+    cudnn.deterministic = True
 
 
 def parse_args():
@@ -42,6 +56,7 @@ def parse_args():
 def main():
     args = parse_args()
     cfg = Config(args)
+    setup_seeds(cfg)
     if cfg.runner_cfg.visualize:
         args.cfg_path = os.path.join(cfg.runner_cfg.output_dir, 'config.yaml')
         cfg = Config(args)

@@ -17,6 +17,7 @@ runner:
   device_map: "cuda:0" # ['auto', 0, 1, ...]
 
   batch_size: 32 # xl: image:32, video: 16 or 12
+  seed: 44
 
   # output & log
   output_dir: 'output/'
