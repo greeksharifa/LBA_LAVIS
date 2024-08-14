@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--cfg-path", default='configs/runner.yaml', help="path to configuration file.")
     # verbose
     parser.add_argument('--verbose', action='store_true', help='verbose')
+    parser.add_argument('--visualize_high_confidence', default=True, type=bool, help='select high confidence')
     
     parser.add_argument(
         "--options",

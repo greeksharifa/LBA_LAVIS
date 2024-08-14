@@ -5,44 +5,49 @@ from collections import Counter
 
 import numpy as np
 import seaborn as sns
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 from utils.colors import Colors
 
 
-def get_conf_rank(results, key):
+def get_conf_rank(results, key, H):
     reverse_key = 'confidence_lba' if key == 'confidence_base' else 'confidence_base'
     results.sort(key=lambda x: x[reverse_key])
     N = len(results)
     for i, result in enumerate(results):
-        result[f'rank_{reverse_key.split("_")[-1]}'] = int(i / N * 10)
+        result[f'rank_{reverse_key.split("_")[-1]}'] = int(i / N * H)
     results.sort(key=lambda x: x[key])
     for i, result in enumerate(results):
-        result[f'rank_{key.split("_")[-1]}'] = int(i / N * 10)
+        result[f'rank_{key.split("_")[-1]}'] = int(i / N * H)
         
     return results
 
 
 def visualize(results, dataset, cfg, output_dir, total_base_match):
-    output_dir = 'temp/'
-    key = 'confidence_lba' if cfg.runner_cfg.threshold_lba else 'confidence_base'
-    results = get_conf_rank(results, key)
+    if cfg.runner_cfg.visualize:
+        output_dir = 'temp/'
+    key = 'confidence_lba' if cfg.runner_cfg.get("threshold_lba", False) else 'confidence_base'
+    
+    N = len(results)
+    M = max(1, N // cfg.runner_cfg.num_bin)
+    H = cfg.runner_cfg.get("num_heatmap_row", 10)
+    HH = max(1, N // H)
+    
+    results = get_conf_rank(results, key, H)
     
     max_match, cur_match = total_base_match, total_base_match
     match_list = [cur_match]
     max_arg_confidence = -1e10
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
-    N = len(results)
-    M = max(1, N // cfg.runner_cfg.num_bin)
-    H = max(1, N // cfg.runner_cfg.get("num_heatmap_row", 10))
     bins = [[] for _ in range(N // M + 1)]
     heatmap_data = {
-        'base': [[[] for _ in range(N // H + 1)] for _ in range(10)],
-        'lba' : [[[] for _ in range(N // H + 1)] for _ in range(10)],
+        'base': [[[] for _ in range(N // HH + 1)] for _ in range(H)],
+        'lba' : [[[] for _ in range(N // HH + 1)] for _ in range(H)],
     }
     heatmap_data2 = {
-        'number': [[0 for _ in range(10)] for _ in range(10)],
-        'change': [[0. for _ in range(10)] for _ in range(10)],
+        'number': [[0 for _ in range(H)] for _ in range(H)],
+        'change': [[0. for _ in range(H)] for _ in range(H)],
     }
     
     for i, result in enumerate(results):
@@ -67,14 +72,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             confidence_percentile = (i+1) / N * 100
             
         # for heatmap
-        row = int(result[key] * 10)
-        col = i // H
+        row = int(result[key] * H)
+        col = i // HH
         heatmap_data['base'][row][col].append(acc_base)
         heatmap_data['lba'][row][col].append(acc_lba)
         
-        # if result['confidence_base'] < result['confidence_lba']:
-        heatmap_data2['number'][9-result['rank_lba']][result['rank_base']] += 1
-        heatmap_data2['change'][9-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
+        if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] < result['confidence_lba']:
+            heatmap_data2['number'][H-1-result['rank_lba']][result['rank_base']] += 1
+            heatmap_data2['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
                 
     final_acc_list = [match / N for match in match_list]
     
@@ -150,8 +155,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # draw heatmap
     # draw_heatmap(heatmap_data['base'], output_dir, 'base', N // H + 1)
     # draw_heatmap(heatmap_data['lba'], output_dir, 'lba', N // H + 1)
-    draw_heatmap2(heatmap_data2['number'], output_dir, 'number')
-    draw_heatmap2(heatmap_data2['change'], output_dir, 'change')
+    draw_heatmap2(heatmap_data2['number'], output_dir, 'number', H)
+    draw_heatmap2(heatmap_data2['change'], output_dir, 'change', H)
     
     print(f'saved config path is {os.path.join(output_dir, "config.yaml")}')
 
@@ -213,19 +218,29 @@ def draw_heatmap(raw_data, output_dir, key, col_num):
     plt.savefig(os.path.join(output_dir, f'heatmap_{key}.png'), dpi=300)
 
 
-def draw_heatmap2(data, output_dir, key):
+def draw_heatmap2(data, output_dir, key, H):
     # Convert the nested list to a numpy array
     data_array = np.array(data)
-
+    
     # Create a heatmap using seaborn
     plt.figure(figsize=(10, 8))
-    sns.heatmap(data_array, annot=True, cmap='viridis', fmt='.1f')
+    
+    if key == 'number':
+        sns.heatmap(data_array, annot=True, cmap='viridis', fmt='.1f')
+    else:
+        sel_col = ['#ba001e','#d80019','#f32b1d','#ff502b','#ff7c3c','#ffa84e','#ffcb6c','#ffe992','#fcfeb3','#e4f693','#c6ea74','#a0de5c','#68cb57','#39be56','#00b14d','#00893e','#006b31']
+        sel_colmap = ListedColormap(sel_col)
+        
+        sel_norm = list(range(-8, 9))
+        sel_norm = BoundaryNorm(sel_norm, ncolors=len(sel_col))
+
+        sns.heatmap(data_array, annot=True, cmap=sel_colmap, norm=sel_norm, fmt='.1f')
 
     # Set title
     plt.xlabel('Base Confidence(rel %)')
     plt.ylabel('LBA Confidence(rel %)')
-    plt.xticks(range(0, 11), [10*i for i in range(11)])
-    plt.yticks(range(0, 11), [100-10*i for i in range(11)])
+    plt.xticks(range(0, H+1), [round(100*i/H) for i in range(H+1)])
+    plt.yticks(range(0, H+1), [round(100/H*(H-i)) for i in range(H+1)])
     plt.title(f'Base -> LBA {key}')
 
     # Show the plot
