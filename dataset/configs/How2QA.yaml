@@ -6,11 +6,11 @@ datasets:
   vqa_acc: False
   ann_paths:
     train:
-      - /data1/how2_series/How2QA/sevila_style/train.json
+      - how2_series/How2QA/sevila_style/train.json
     val:
-      - /data1/how2_series/How2QA/sevila_style/val.json
+      - how2_series/How2QA/sevila_style/val.json
   
-  vis_root: /data1/how2_video_not_found/
+  vis_root: how2_video_not_found/
 
   vis_processor:
     train:

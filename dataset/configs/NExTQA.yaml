@@ -6,11 +6,11 @@ datasets:
   vqa_acc: False
   ann_paths:
     train:
-      - /data1/NExT-QA/sevila_style/train.json
+      - NExT-QA/sevila_style/train.json
     val:
-      - /data1/NExT-QA/sevila_style/val.json
+      - NExT-QA/sevila_style/val.json
   
-  vis_root: /data1/NExT-QA/NExTVideo/
+  vis_root: NExT-QA/NExTVideo/
 
   vis_processor:
     train:

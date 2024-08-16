@@ -1,3 +1,4 @@
+import os
 import json
 from typing import List
 import pandas as pd
@@ -34,8 +35,8 @@ def load_dataset(datasets_cfg, split='val'):
     dataset = cls(
         vis_processor=None,
         text_processor=None,
-        vis_root=datasets_cfg.vis_root,
-        ann_paths=datasets_cfg.ann_paths.get(datasets_cfg.split, split),
+        vis_root=os.path.join(datasets_cfg.root_dir, datasets_cfg.vis_root),
+        ann_paths=[os.path.join(datasets_cfg.root_dir, path) for path in datasets_cfg.ann_paths.get(datasets_cfg.split, split)],
         num_data=datasets_cfg.num_data,
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 4),
@@ -224,7 +225,7 @@ Choices:
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
 Answer: The answer is (A)\n"""
-        prompt = kwargs.get("train_recomposer_examplar", default_examplar)
+        prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else default_examplar
         prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []

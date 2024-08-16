@@ -6,11 +6,11 @@ datasets:
   vqa_acc: False
   ann_paths:
     train:
-      - /data1/TVQA/sevila_style/train.json
+      - TVQA/sevila_style/train.json
     val:
-      - /data1/TVQA/sevila_style/val.json
+      - TVQA/sevila_style/val.json
   
-  vis_root: /data1/TVQA/frames_hq/
+  vis_root: TVQA/frames_hq/
 
   vis_processor:
     train:

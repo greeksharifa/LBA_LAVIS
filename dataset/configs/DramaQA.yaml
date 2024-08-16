@@ -7,17 +7,17 @@ datasets:
   only_scene: False
   ann_paths:
     train:
-      - /data1/AnotherMissOh/AnotherMissOhQA_train_set.json
-      - /data1/flipped_vqa/dramaqa/clipvitl14.pth
+      - AnotherMissOh/AnotherMissOhQA_train_set.json
+      - flipped_vqa/dramaqa/clipvitl14.pth
     val:
-      - /data1/AnotherMissOh/AnotherMissOhQA_val_set.json
-      - /data1/flipped_vqa/dramaqa/clipvitl14.pth
+      - AnotherMissOh/AnotherMissOhQA_val_set.json
+      - flipped_vqa/dramaqa/clipvitl14.pth
     # test:
     #  - AnotherMissOh/AnotherMissOhQA_test_set.json
   
-  vis_root: /data1/AnotherMissOh/images/
-  # vis_root: /data1/AnotherMissOh/AnotherMissOh_videos/total/
-  # vis_features: /data1/flipped_vqa/dramaqa/clipvitl14.pth
+  vis_root: AnotherMissOh/images/
+  # vis_root: AnotherMissOh/AnotherMissOh_videos/total/
+  # vis_features: flipped_vqa/dramaqa/clipvitl14.pth
 
   vis_processor:
     train:

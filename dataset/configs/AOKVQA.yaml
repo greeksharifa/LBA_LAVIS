@@ -5,10 +5,10 @@ datasets:
   vqa_acc: True
   ann_paths:
     train:
-      - '/data1/aokvqa/annotations/aokvqa_v1p0_train.json'
+      - 'aokvqa/annotations/aokvqa_v1p0_train.json'
     val:
-      - '/data1/aokvqa/annotations/aokvqa_v1p0_val.json'
+      - 'aokvqa/annotations/aokvqa_v1p0_val.json'
     # test:
-    #   - '/data1/aokvqa/annotations/aokvqa_v1p0_test.json'
+    #   - 'aokvqa/annotations/aokvqa_v1p0_test.json'
 
-  vis_root: '/data1/coco/images/'
+  vis_root: 'coco/images/'

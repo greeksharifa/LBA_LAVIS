@@ -34,6 +34,7 @@ runner:
 
 datasets:
   dataset_name: VQA_Introspect
+  root_dir: /data1/
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
