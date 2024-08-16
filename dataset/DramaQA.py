@@ -134,15 +134,14 @@ class DramaQAEvalDataset(VideoEvalDataset):
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
         print('type(self.vis_features), len(self.vis_features):', type(self.vis_features), len(self.vis_features))
         
-       
-    def get_image_path(self, vid, random=False):
+    def get_image_path(self, vid, supple=False):
         # import pdb; pdb.set_trace()
         if vid.endswith('0000'):
             scene_dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))[:-4] # ex. /data1/AnotherMissOh/AnotherMissOh_images/AnotherMissOh01/001/0078
             dir_paths = sorted(glob.glob(os.path.join(scene_dir_path, '*/')))
 
             # if self.n_frms < len(dir_paths):
-            if random:
+            if supple:
                 idxs = sorted(np.random.choice(len(dir_paths), self.n_frms, replace=len(dir_paths) <= self.n_frms))
             else:
                 idxs = np.linspace(-1, len(dir_paths), self.n_frms+2, dtype=int)[1:-1]
@@ -156,7 +155,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
         else:
             dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))
             image_paths = sorted(glob.glob(os.path.join(dir_path, '*.jpg')))
-            if random:
+            if supple:
                 idxs = sorted(np.random.choice(len(image_paths), self.n_frms, replace=len(image_paths) <= self.n_frms))
             else:
                 idxs = np.linspace(-1, len(image_paths), self.n_frms+2, dtype=int)[1:-1]
@@ -165,7 +164,10 @@ class DramaQAEvalDataset(VideoEvalDataset):
         # print('image_paths:', image_paths)
 
         return image_paths
+     
+    # def get_image_path_2(self, vid):
         
+           
     def __getitem__(self, index):
         ann = self.annotation[index]
 
@@ -174,9 +176,9 @@ class DramaQAEvalDataset(VideoEvalDataset):
         # frms = read_video_pyav(vpath, self.n_frms)
         
         # load images. output: list of PIL.Image
-        def _get_frames(random=False):
+        def _get_frames(supple=False):
             _frms = []
-            image_paths = self.get_image_path(vid, random=random)
+            image_paths = self.get_image_path(vid, supple=supple)
             for img_path in image_paths:
                 # _frms.append(Image.open(img_path))
                 _frms.append(np.array(Image.open(img_path)))
@@ -185,7 +187,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
                 _frms += [np.zeros_like(_frms[0])] * (self.n_frms - len(_frms))
             return _frms
                 
-        frms = _get_frames(random=False)
+        frms = _get_frames(supple=False)
                 
             
         question = ann["que"] # question = self.text_processor(ann["que"])
@@ -195,10 +197,9 @@ class DramaQAEvalDataset(VideoEvalDataset):
         
         question_type = "Level " + str(ann["q_level_mem"])
         
-        SUPPLE_N = 3
         frms_supple = []
-        for i in range(SUPPLE_N):
-            frms_supple.append(_get_frames(random=True))
+        for i in range(self.n_supple):
+            frms_supple.append(_get_frames(supple=True))
         # print(len(frms_supple), len(frms_supple[0]), frms_supple[0][0].shape)
 
         return {

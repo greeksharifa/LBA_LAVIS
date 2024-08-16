@@ -53,7 +53,7 @@ class TVQAEvalDataset(VideoEvalDataset):
         frms = _get_frames(False)
         
         frms_supple = []
-        for i in range(self.supple_n):
+        for i in range(self.n_supple):
             frms_supple.append(_get_frames(True))
         # print(len(frms_supple), len(frms_supple[0]), frms_supple[0][0].shape)
         

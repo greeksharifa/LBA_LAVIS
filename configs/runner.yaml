@@ -25,6 +25,7 @@ runner:
   use_vqa_tool: False
   num_bin: 50
   num_heatmap_row: 10
+  conf_gap: 0.1
   debug: False
 
   cfg_pkl_path: 'SeViLA/cfg.pkl'
@@ -35,7 +36,7 @@ datasets:
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
-  supple_n: 3
+  n_supple: 3
 
 model:
   cache_dir: /data2/ # ~/.cache/torch/hub/

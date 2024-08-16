@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
@@ -34,6 +35,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     HH = max(1, N // H)
     
     results = get_conf_rank(results, key, H)
+    conf_gap = cfg.runner_cfg.get("conf_gap", 0.1)
     
     max_match, cur_match = total_base_match, total_base_match
     match_list = [cur_match]
@@ -49,6 +51,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         'number': [[0 for _ in range(H)] for _ in range(H)],
         'change': [[0 for _ in range(H)] for _ in range(H)],
     }
+    scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
@@ -59,7 +62,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         bin_key = i // M
         bins[bin_key].append(acc_base)
         
-        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] > result['confidence_lba']: # 높은것만 선택
+        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
+        # if cfg.runner_cfg.select_high_confidence and result['rank_base'] > result['rank_lba']: # 높은것만 선택
             pass
         else: # 무조건 lba 선택
             cur_match += acc_lba - acc_base
@@ -77,9 +81,18 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         heatmap_data['base'][row][col].append(acc_base)
         heatmap_data['lba'][row][col].append(acc_lba)
         
-        if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] < result['confidence_lba']:
+        if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] + conf_gap < result['confidence_lba']:
+        # if not cfg.runner_cfg.select_high_confidence or result['rank_base'] < result['rank_lba']:
             heatmap_data2['number'][H-1-result['rank_lba']][result['rank_base']] += 1
             heatmap_data2['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
+            
+        # for scatter plot
+        scatter_data.append({
+            'conf_base': np.log(result['confidence_base']), 
+            'conf_lba': np.log(result['confidence_lba']),
+            'acc_change': acc_lba - acc_base, 
+            'size': abs(acc_lba - acc_base) * 3 + 2
+        })
                 
     final_acc_list = [match / N for match in match_list]
     
@@ -156,6 +169,18 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # draw_heatmap(heatmap_data['lba'], output_dir, 'lba', N // H + 1)
     draw_heatmap2(heatmap_data2['number'], output_dir, 'number', H)
     draw_heatmap2(heatmap_data2['change'], output_dir, 'change', H)
+    
+    # draw scatter plot
+    plt.figure(figsize=(6,6))
+    scatter_df = pd.DataFrame(scatter_data, columns=['conf_base', 'conf_lba', 'acc_change', 'size'])
+    sns.scatterplot(x='conf_base', y='conf_lba', hue='acc_change', data=scatter_df, palette='coolwarm', 
+                    hue_order=[1, 0, -1], size='size', sizes=(1, 10))
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | Scatter Plot')
+    plt.xlabel('Confidence Base')
+    plt.ylabel('Confidence LBA')
+    fig_path = os.path.join(output_dir, "scatter.png")
+    plt.savefig(fig_path, dpi=300)
+    print(f'saved scatter fig path is {fig_path}')
     
     print(f'saved config path is {os.path.join(output_dir, "config.yaml")}')
 

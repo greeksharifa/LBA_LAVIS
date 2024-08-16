@@ -70,9 +70,9 @@ class VideoEvalDataset(BaseDataset):
         
         # load images. output: list of PIL.Image
         if "start" in ann and "end" in ann:
-            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"], supple_n=self.supple_n)
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"], n_supple=self.n_supple)
         else:
-            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, supple_n=self.supple_n)
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, n_supple=self.n_supple)
         
         question = ann["question"] # question = self.text_processor(ann["que"])
         
