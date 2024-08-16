@@ -229,12 +229,9 @@ class Recomposer(nn.Module):
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
-        elif "flan-t5" in model_name:
+        elif "flan-t5" in model_name or "blip2-opt-" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
-            device_map = infer_auto_device_map(self.model)
-            del self.model
-            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)
         elif "vicuna" in model_name:
             self.processor = InstructBlipVideoProcessor.from_pretrained(model_name)
             self.model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
@@ -255,6 +252,11 @@ class Recomposer(nn.Module):
             self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
         else:
             raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
+        
+        if device_map == "auto":
+            device_map = infer_auto_device_map(self.model)
+            del self.model
+            self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)
 
         self.model_name = model_name
         self.device = self.model.device
