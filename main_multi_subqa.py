@@ -284,13 +284,15 @@ def main():
                     w2r, r2w = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
                     wrong2right += w2r
                     right2wrong += r2w
-                    print(f'accumulated wrong2right: {wrong2right}, right2wrong: {right2wrong}')
                     
                 if 'type' in batch:
                     result['type'] = batch['type'][i]
                     
                 results.append(result)
-            print()
+            
+            if args.verbose:
+                print()
+                print(f'accumulated wrong2right: {wrong2right}, right2wrong: {right2wrong}')
 
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
