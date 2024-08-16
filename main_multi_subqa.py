@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 
 from configs.config import Config
 # from dataset.VQA_Introspect import VQAIntrospectDataset
-from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input, get_examplar
+from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input, get_train_examplar
 from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
@@ -101,11 +101,12 @@ def main():
         # print('print_freq:', print_freq)
 
         try:
-            examplar = get_examplar(cfg.datasets_cfg)
+            examplar = get_train_examplar(cfg.datasets_cfg)
         except:
             examplar = ""
         print('examplar:', examplar)
         results = []
+        wrong2right, right2wrong = 0, 0
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             if args.verbose and data_iter_step == 0:
                 print('batch:')
@@ -124,7 +125,7 @@ def main():
 
             bsz = len(batch['vision'])
             vision = batch['vision']
-
+            
             """##############################  Baseline Inference   ##############################"""    
             if cfg.runner_cfg.recomposer_name == "sevila":
                 # return list of dict, not list of str
@@ -152,24 +153,62 @@ def main():
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
-            for i in range(cfg.runner_cfg.num_sub_qa_generate):
-                # generating sub_questions
-                if cfg.runner_cfg.random_frame and i >= 1:
-                    vision = []
-                    for b in range(bsz):
-                        vision.append(batch['vision'][b][i-1])
-                text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-                if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                    sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
-                else:                               # Only Text, flan-t5
-                    sub_questions = decomposer(text_inputs)
-                sub_questions_list.append(sub_questions)
-                
-                
-                # generating sub_answers
-                text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                sub_answers, _ = answerer(vision, text_inputs)
-                sub_answers_list.append(sub_answers)
+            if cfg.runner_cfg.sub_mode == "subqa":
+                for i in range(cfg.runner_cfg.num_sub_qa_generate):
+                    # generating sub_questions
+                    if cfg.runner_cfg.random_frame and i >= 1:
+                        vision = []
+                        for b in range(bsz):
+                            vision.append(batch['vision'][b][i-1])
+                    text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
+                    if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                    else:                               # Only Text, flan-t5
+                        sub_questions = decomposer(text_inputs)
+                    sub_questions_list.append(sub_questions)
+                    
+                    
+                    # generating sub_answers
+                    text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
+                    sub_answers, _ = answerer(vision, text_inputs)
+                    sub_answers_list.append(sub_answers)
+                    
+                    # generating recomposed_answers
+                    if cfg.runner_cfg.recomposer_name == "sevila":
+                        text_inputs = get_sevila_input("recomposer", 
+                                                    batch=batch, 
+                                                    sub_questions=sub_questions, 
+                                                    sub_answers=sub_answers)
+                    elif cfg.datasets_cfg.data_type == "videos":
+                        text_inputs = get_text_input("recomposer_video", 
+                                                    main_questions=batch['text_input'], 
+                                                    sub_questions=sub_questions, 
+                                                    sub_answers=sub_answers,
+                                                    candidate_lists=batch['candidate_list'],
+                                                    examplar=examplar,
+                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                    else:                          # "images"
+                        text_inputs = get_text_input("recomposer_image", 
+                                                    main_questions=batch['text_input'], 
+                                                    sub_questions=sub_questions, 
+                                                    sub_answers=sub_answers)
+                    
+                    if cfg.runner_cfg.debug:
+                        print('sub_questions text_inputs:', text_inputs)
+                        print('sub_answers text_inputs:', text_inputs)
+                        print('recomposer_video text_inputs:', text_inputs)
+                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                    text_outputs_lba_list.append(text_outputs_lba)
+                    confidences_lba_list.append(confidences_lba)
+                    
+                    if args.verbose:
+                        # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                        print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            elif cfg.runner_cfg.sub_mode == "description":
+                descriptions_list = []
+                text_inputs = ["Describe the video in detail. What is happening in the video?" for _ in range(bsz)]
+                descriptions, _ = recomposer(vision, text_inputs, generate_sub_q=True)
+                descriptions_list.append(descriptions)
                 
                 # generating recomposed_answers
                 if cfg.runner_cfg.recomposer_name == "sevila":
@@ -178,39 +217,36 @@ def main():
                                                 sub_questions=sub_questions, 
                                                 sub_answers=sub_answers)
                 elif cfg.datasets_cfg.data_type == "videos":
-                    text_inputs = get_text_input("recomposer_video", 
+                    text_inputs = get_text_input("recomposer_video_description", 
                                                 main_questions=batch['text_input'], 
-                                                sub_questions=sub_questions, 
-                                                sub_answers=sub_answers,
+                                                descriptions=descriptions,
                                                 candidate_lists=batch['candidate_list'],
                                                 examplar=examplar,
                                                 train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
                 else:                          # "images"
-                    text_inputs = get_text_input("recomposer_image", 
-                                                main_questions=batch['text_input'], 
-                                                sub_questions=sub_questions, 
-                                                sub_answers=sub_answers)
+                    raise NotImplementedError("description mode is not implemented for images")
                 
                 if cfg.runner_cfg.debug:
                     print('sub_questions text_inputs:', text_inputs)
                     print('sub_answers text_inputs:', text_inputs)
                     print('recomposer_video text_inputs:', text_inputs)
                 text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                # sub_questions_list = descriptions_list
+                # sub_answers_list = 
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
                 
                 if args.verbose:
                     # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
-                    print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-                
+                    print(f'Description: {descriptions[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
             def _convert_nested_list(lists):
                 return [
                     [inner_list[i] for inner_list in lists] 
                     for i in range(len(lists[0]))
                 ]
                 
-            sub_questions_list = _convert_nested_list(sub_questions_list)
-            sub_answers_list = _convert_nested_list(sub_answers_list)
+            # sub_questions_list = _convert_nested_list(sub_questions_list)
+            # sub_answers_list = _convert_nested_list(sub_answers_list)
             text_outputs_lba_list = _convert_nested_list(text_outputs_lba_list)
             confidences_lba_list = _convert_nested_list(confidences_lba_list)
             
@@ -239,12 +275,16 @@ def main():
                     "confidence_base": confidences_base[i],
                     "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
                     "text_output_base": text_outputs_base[i],
-                    "sub_question": sub_questions[i],
-                    "sub_answer": sub_answers[i],
+                    "sub_question": sub_questions[i] if cfg.runner_cfg.sub_mode == "subqa" else "",
+                    "sub_answer": sub_answers[i] if cfg.runner_cfg.sub_mode == "subqa" else "",
+                    "description": descriptions[i] if cfg.runner_cfg.sub_mode == "description" else "",
                     "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                 })
                 if args.verbose:
-                    sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
+                    w2r, r2w = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
+                    wrong2right += w2r
+                    right2wrong += r2w
+                    print(f'accumulated wrong2right: {wrong2right}, right2wrong: {right2wrong}')
                     
                 if 'type' in batch:
                     result['type'] = batch['type'][i]

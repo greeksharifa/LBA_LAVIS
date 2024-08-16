@@ -151,7 +151,7 @@ class BaseDataset(Dataset):
             return acc_list
     
     
-def get_examplar(datasets_cfg):
+def get_train_examplar(datasets_cfg):
     train_dataset = load_dataset(datasets_cfg, split='train')
     example = train_dataset[0]
     
@@ -174,7 +174,6 @@ def get_text_input(
     candidate_lists: List[List[str]]=[],
     gt_answers:List[str]=[],
     question_ids:List[str]=[],
-    examplar:str='',
     **kwargs,
 ):
     # add <video> in front of prompt if video_llava
@@ -225,7 +224,7 @@ Choices:
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
 Answer: The answer is (A)\n"""
-        prompt = examplar if kwargs.get("train_recomposer_examplar", False) else default_examplar
+        prompt = kwargs.get("train_recomposer_examplar", default_examplar)
         prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
@@ -233,7 +232,14 @@ Answer: The answer is (A)\n"""
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
         return ret
-    
+    elif prompt_type == "recomposer_video_description":
+        prompt = "Video Description: {description}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        
+        ret = []
+        for description, main_question, candidate_list in zip(kwargs.get('descriptions'), main_questions, candidate_lists):
+            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+            ret.append(prompt.format(description=description, main_question=main_question.rstrip('?'), choices=choices))
+        return ret
     else:
         raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
     

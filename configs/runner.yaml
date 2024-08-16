@@ -1,6 +1,7 @@
 runner:
   # mode
   visualize: False
+  sub_mode: "subqa" # "description"
   # settings
   select_high_confidence: True
   train_recomposer_examplar: False

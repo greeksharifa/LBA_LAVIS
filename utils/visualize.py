@@ -297,3 +297,5 @@ def sample_print(base, lba, gt_ans, get_accuracy, i):
     if i % 4 == 3:
         print()
     
+    return round(float(b < l)), round(float(b > l)) # w2r, r2w
+    
