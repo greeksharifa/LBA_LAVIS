@@ -9,6 +9,7 @@ runner:
   random_frame: False
   num_sub_qa_generate: 3
   num_sub_qa_select: 1
+  num_frame_sampling: 3
 
   # model
   recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"

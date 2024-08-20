@@ -42,7 +42,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     max_arg_confidence = -1e10
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
-    bins = [[] for _ in range(N // M + 1)]
+    bins_base = [[] for _ in range(N // M + 1)]
     heatmap_data = {
         'base': [[[] for _ in range(N // HH + 1)] for _ in range(H)],
         'lba' : [[[] for _ in range(N // HH + 1)] for _ in range(H)],
@@ -60,7 +60,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         acc_lba_list.append(acc_lba)
         
         bin_key = i // M
-        bins[bin_key].append(acc_base)
+        bins_base[bin_key].append(acc_base)
         
         if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
         # if cfg.runner_cfg.select_high_confidence and result['rank_base'] > result['rank_lba']: # 높은것만 선택
@@ -92,7 +92,10 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             'conf_base': np.log(result['confidence_base']), 
             'conf_lba': np.log(result['confidence_lba']),
             'acc_change': acc_lba - acc_base, 
-            'size': abs(acc_lba - acc_base) * 2 + 3
+            'size': abs(acc_lba - acc_base) * 2 + 3,
+            'acc_base': acc_base,
+            'acc_lba': acc_lba,
+            'class': round(acc_base + acc_lba * 2),
         })
         
     final_acc_list = [match / N for match in match_list]
@@ -144,6 +147,17 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
+    results.sort(key=lambda x: x['confidence_lba'])
+    bins_lba = [[] for _ in range(N // M + 1)]
+    
+    for i, result in enumerate(results):
+        # bins_lba
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+        
+        bin_key = i // M
+        bins_lba[bin_key].append(acc_lba)
+        
+    
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
     plt.plot([i / N * 100 for i, _ in enumerate(final_acc_list)], final_acc_list, color='b')
@@ -153,14 +167,18 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     plt.xticks(list(range(0, 101, 10)))# [0, 25, 50, 75, 100])
     
     plt.subplot(2, 1, 2)
-    acc_bin = [sum(bin) / len(bin) for bin in bins if len(bin) > 0]
-    plt.plot([i for i in range(len(acc_bin))], acc_bin, color='r')
-    plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {cfg.runner_cfg.num_bin} bins') # len(acc_bin)
+    acc_bin_base = [sum(bin) / len(bin) for bin in bins_base if len(bin) > 0]
+    acc_bin_lba = [sum(bin) / len(bin) for bin in bins_lba if len(bin) > 0]
+    plt.plot([i for i in range(len(acc_bin_base))], acc_bin_base, color='r')
+    plt.plot([i for i in range(len(acc_bin_lba))], acc_bin_lba, color='g')
+    
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {cfg.runner_cfg.num_bin} bins by conf') # len(acc_bin)
     plt.xlabel('Confidence Percentile')
-    plt.ylabel('Accuracy')
+    plt.ylabel('Accuracy (Base: red, LBA: green)')
     plt.xticks([(cfg.runner_cfg.num_bin // 10) * i for i in range(11)], list(range(0, 101, 10)))
+    
     # plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
-    plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.35)
+    plt.subplots_adjust(left=0.125, bottom=0.10, right=0.9, top=0.90, wspace=0.2, hspace=0.45)
     fig_path = os.path.join(output_dir, "acc_bin.png")
     # if not cfg.runner_cfg.visualize:
     plt.savefig(fig_path, dpi=300)
@@ -173,10 +191,10 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     # draw scatter plot
     plt.figure(figsize=(6,6))
-    scatter_df = pd.DataFrame(scatter_data, columns=['conf_base', 'conf_lba', 'acc_change', 'size'])
-    sns.scatterplot(x='conf_base', y='conf_lba', hue='acc_change', data=scatter_df, palette='rainbow', # 'coolwarm'
-                    hue_order=[1, 0, -1], size='size', sizes=(1, 10))
-    plt.title(f'{cfg.datasets_cfg.dataset_name} | Scatter Plot')
+    scatter_df = pd.DataFrame(scatter_data)#, columns=['conf_base', 'conf_lba', 'acc_change', 'size'])
+    sns.scatterplot(x='conf_base', y='conf_lba', hue='class', data=scatter_df, palette='rainbow', # 'coolwarm'
+                    hue_order=[1, 0, -1], size='size', sizes=(4, 10))
+    plt.title(f'{cfg.datasets_cfg.dataset_name} | class 0: both wrong, 1: right -> wrong, 2: wrong -> right, 3: both right')
     plt.xlabel('Confidence Base')
     plt.ylabel('Confidence LBA')
     fig_path = os.path.join(output_dir, "scatter.png")

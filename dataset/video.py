@@ -114,14 +114,27 @@ def read_video_pyav(video_path, n_frms, start_time=0, end_time=None, n_supple=0)
             if frame_idx + start_frame in frames_to_sample_supple[i]:
                 frames_supple[i].append(frame.to_ndarray(format="rgb24"))
 
-    # Ensure we have exactly n_frms
-    if len(frames) < n_frms:
-        # Pad with zeros if we don't have enough frames
-        last_frame = frames[-1] if frames else np.zeros((video_stream.height, video_stream.width, 3), dtype=np.uint8)
-        frames.extend([np.zeros_like(last_frame) for _ in range(n_frms - len(frames))])
-    elif len(frames) > n_frms:
-        # Truncate if we somehow got too many frames
-        frames = frames[:n_frms]
+    def ensure_n_frms(_frames):
+        if len(_frames) < n_frms:
+            # Pad with zeros if we don't have enough frames
+            last_frame = _frames[-1] if _frames else np.zeros((video_stream.height, video_stream.width, 3), dtype=np.uint8)
+            _frames.extend([np.zeros_like(last_frame) for _ in range(n_frms - len(_frames))])
+        elif len(_frames) > n_frms:
+            # Truncate if we somehow got too many frames
+            _frames = _frames[:n_frms]
+        return _frames
+    
+    # # Ensure we have exactly n_frms
+    # if len(frames) < n_frms:
+    #     # Pad with zeros if we don't have enough frames
+    #     last_frame = frames[-1] if frames else np.zeros((video_stream.height, video_stream.width, 3), dtype=np.uint8)
+    #     frames.extend([np.zeros_like(last_frame) for _ in range(n_frms - len(frames))])
+    # elif len(frames) > n_frms:
+    #     # Truncate if we somehow got too many frames
+    #     frames = frames[:n_frms]
+    
+    frames = ensure_n_frms(frames)
+    frames_supple = [ensure_n_frms(_frames) for _frames in frames_supple]
 
     return frames, frames_supple
 

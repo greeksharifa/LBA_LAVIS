@@ -159,7 +159,7 @@ def main():
                     if cfg.runner_cfg.random_frame and i >= 1:
                         vision = []
                         for b in range(bsz):
-                            vision.append(batch['vision'][b][i-1])
+                            vision.append(batch['vision_supple'][b][i-1])
                     text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
                     if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                         sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
@@ -204,6 +204,7 @@ def main():
                     if args.verbose:
                         # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                         print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            
             elif cfg.runner_cfg.sub_mode == "description":
                 descriptions_list = []
                 text_inputs = ["Describe the video in detail. What is happening in the video?" for _ in range(bsz)]
@@ -239,6 +240,21 @@ def main():
                 if args.verbose:
                     # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                     print(f'Description: {descriptions[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            
+            elif cfg.runner_cfg.sub_mode == "frame_sampling":
+                for i in range(cfg.runner_cfg.num_sub_qa_generate):
+                    
+                    if cfg.runner_cfg.random_frame and i >= 1:
+                        vision = []
+                        for b in range(bsz):
+                            vision.append(batch['vision_supple'][b][i-1])
+                            
+                    # sub_question generate 및 select text_outputs_lba by argmax confidence 재활용
+                    text_inputs = get_text_input("sub_answer", sub_question=batch['text_input'])
+                    text_outputs_lba, confidences_lba = answerer(vision, text_inputs)
+                    text_outputs_lba_list.append(text_outputs_lba)
+                    confidences_lba_list.append(confidences_lba)
+                    
             def _convert_nested_list(lists):
                 return [
                     [inner_list[i] for inner_list in lists] 
