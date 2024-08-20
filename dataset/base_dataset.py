@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-def load_dataset(datasets_cfg, split='val'):
+def load_dataset(datasets_cfg, split='val', n_supple=0):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -41,7 +41,7 @@ def load_dataset(datasets_cfg, split='val'):
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 4),
         datasets_cfg=datasets_cfg,
-        n_supple=datasets_cfg.get("n_supple"),
+        n_supple=n_supple, #datasets_cfg.get("n_supple"),
     )
     
     return dataset

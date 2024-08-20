@@ -22,11 +22,11 @@ docker run --gpus all --name ywjang --shm-size 64G -i -t -p 22 -p 6006 -p 8888 -
 
 ```bash
 # image baseline
-CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.train_recomposer_examplar=False runner.threshold_lba=False runner.random_frame=False runner.num_sub_qa_generate=1
+CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.train_recomposer_examplar=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
 
 
 # video baseline
-CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.train_recomposer_examplar=False runner.threshold_lba=False runner.random_frame=False runner.num_sub_qa_generate=1
+CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.train_recomposer_examplar=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
 
 
 # video description

@@ -61,7 +61,7 @@ def process_video_cv2(video_path, n_frms, start_time=0, end_time=None):
 
 # Example usage:
 # video_frames = process_video("path/to/your/video.mp4", n_frms=10, start_time=5, end_time=15)
-def read_video_pyav(video_path, n_frms, start_time=0, end_time=None, n_supple=0):
+def read_video_pyav(video_path, n_frms, n_supple=0, start_time=0, end_time=None):
     container = av.open(video_path)
     video_stream = container.streams.video[0]
     
@@ -78,7 +78,7 @@ def read_video_pyav(video_path, n_frms, start_time=0, end_time=None, n_supple=0)
     start_frame = int(start_time * fps)
     end_frame = int(end_time * fps)
     
-    n_supple -= 1 # 첫 번째 sub-qa는 uniform sampled frames를 그대로 사용하기 때문에 1을 빼준다.
+    # n_supple -= 1 # 첫 번째 sub-qa는 uniform sampled frames를 그대로 사용하기 때문에 1을 빼준다.
 
     # Calculate frames to sample
     frames_to_sample = np.linspace(start_frame, end_frame - 1, n_frms, dtype=int)

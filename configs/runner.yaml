@@ -6,7 +6,7 @@ runner:
   select_high_confidence: True
   train_recomposer_examplar: False
   threshold_lba: False
-  random_frame: False
+  vision_supple: True
   num_sub_qa_generate: 3
   num_sub_qa_select: 1
   num_frame_sampling: 3
@@ -39,7 +39,7 @@ datasets:
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
-  n_supple: 3
+  # n_supple: 3
 
 model:
   cache_dir: /data2/ # ~/.cache/torch/hub/

@@ -61,7 +61,26 @@ class VideoEvalDataset(BaseDataset):
     def answer_mapping(self, answer):
         return self.ANSWER_MAPPING[answer]
 
-    # def get_frms(self, v)
+    
+    def image_path_sampling(self, image_paths):
+        idxs = np.linspace(0, len(image_paths)-1, self.n_frms, dtype=int)
+        return [image_paths[idx] for idx in idxs]
+    
+    
+    def get_frames(self, image_paths):
+        image_paths_base = self.image_path_sampling(image_paths)
+        frames_base = [np.array(Image.open(img_path)) for img_path in image_paths_base]
+
+        frames_supple = []
+        segment_size = len(image_paths) / self.n_supple
+        for i in range(self.n_supple):
+            st = int(i * segment_size)
+            en = min(int((i + 1) * segment_size), len(image_paths))
+            image_paths_supple = self.image_path_sampling(image_paths[st:en])
+            frames_supple.append([np.array(Image.open(img_path)) for img_path in image_paths_supple])
+            
+        return frames_base, frames_supple
+
 
     def __getitem__(self, index):
         ann = self.annotation[index]
@@ -71,7 +90,7 @@ class VideoEvalDataset(BaseDataset):
         
         # load images. output: list of PIL.Image
         if "start" in ann and "end" in ann:
-            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, start_time=ann["start"], end_time=ann["end"], n_supple=self.n_supple)
+            frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, n_supple=self.n_supple, start_time=ann["start"], end_time=ann["end"])
         else:
             frms, frms_supple = read_video_pyav(vpath, n_frms=self.n_frms, n_supple=self.n_supple)
         

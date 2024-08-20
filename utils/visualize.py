@@ -224,7 +224,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.select_high_confidence, end='\t')
     print(cfg.runner_cfg.train_recomposer_examplar, end='\t')
     print(cfg.runner_cfg.threshold_lba, end='\t')
-    print(cfg.runner_cfg.random_frame, end='\t')
+    print(cfg.runner_cfg.vision_supple, end='\t')
 
     print(cfg.runner_cfg.num_sub_qa_generate, end='\t')
 

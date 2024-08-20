@@ -73,7 +73,15 @@ def main():
         output_dir = cfg.runner_cfg.output_dir
     
     s = datetime.now()
-    dataset = load_dataset(cfg.datasets_cfg)
+    
+    if cfg.runner_cfg.sub_mode == "subqa":
+        n_supple = cfg.runner_cfg.num_sub_qa_generate
+    elif cfg.runner_cfg.sub_mode == "frame_sampling":
+        n_supple = cfg.runner_cfg.num_frame_sampling
+    else:
+        n_supple = 0
+    
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple)
     dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
     print('dataset loading time : ', datetime.now()-s)
@@ -156,10 +164,11 @@ def main():
             if cfg.runner_cfg.sub_mode == "subqa":
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     # generating sub_questions
-                    if cfg.runner_cfg.random_frame and i >= 1:
+                    if cfg.runner_cfg.vision_supple:# and i >= 1:
                         vision = []
                         for b in range(bsz):
-                            vision.append(batch['vision_supple'][b][i-1])
+                            vision.append(batch['vision_supple'][b][i])
+                            # vision.append(batch['vision_supple'][b][i-1])
                     text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
                     if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                         sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
@@ -244,10 +253,11 @@ def main():
             elif cfg.runner_cfg.sub_mode == "frame_sampling":
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     
-                    if cfg.runner_cfg.random_frame and i >= 1:
+                    if cfg.runner_cfg.vision_supple:# and i >= 1:
                         vision = []
                         for b in range(bsz):
-                            vision.append(batch['vision_supple'][b][i-1])
+                            vision.append(batch['vision_supple'][b][i])
+                            # vision.append(batch['vision_supple'][b][i-1])
                             
                     # sub_question generate 및 select text_outputs_lba by argmax confidence 재활용
                     text_inputs = get_text_input("sub_answer", sub_question=batch['text_input'])

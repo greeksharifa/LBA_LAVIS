@@ -32,40 +32,16 @@ class VLEPEvalDataset(VideoEvalDataset):
     def get_image_path(self, vid, random=False):
         dir_path = os.path.join(self.vis_root, vid)
         image_paths = glob.glob(os.path.join(dir_path, '*.jpg'))
-        
-        if random:
-            idxs = sorted(np.random.choice(len(image_paths), self.n_frms, replace=len(image_paths) <= self.n_frms))
-        else:
-            idxs = np.linspace(-1, len(image_paths), self.n_frms+2, dtype=int)[1:-1]
-            
-        image_paths = [image_paths[idx] for idx in idxs]
-        # print('image_paths:', image_paths)
 
-        return image_paths
+        return sorted(image_paths)
         
     def __getitem__(self, index):
         ann = self.annotation[index]
 
         vid = ann["video"]
+        image_paths = self.get_image_path(vid)
+        frms, frms_supple = self.get_frames(image_paths)
         
-        # load images. output: list of PIL.Image
-        def _get_frames(random=False):
-            _frms = []
-            image_paths = self.get_image_path(vid, random=random)
-            for img_path in image_paths:
-                # _frms.append(Image.open(img_path))
-                _frms.append(np.array(Image.open(img_path)))
-            if len(_frms) < self.n_frms:
-                # _frms = [Image.new('RGB', _frms[0].size)] * (self.n_frms - len(_frms)) + _frms
-                _frms += [np.zeros_like(_frms[0])] * (self.n_frms - len(_frms))
-            return _frms
-                
-        frms = _get_frames(False)
-        
-        frms_supple = []
-        for i in range(self.n_supple):
-            frms_supple.append(_get_frames(True))
-        # print(len(frms_supple), len(frms_supple[0]), frms_supple[0][0].shape)
         
         question = "Which event is more likely to happen right after?" # event prediction
         
