@@ -37,7 +37,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     results = get_conf_rank(results, key, H)
     conf_gap = cfg.runner_cfg.get("conf_gap", 0.1)
     
-    max_match, cur_match = total_base_match, total_base_match
+    max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
     match_list = [cur_match]
     max_arg_confidence = -1e10
     confidence_percentile = 0.
@@ -69,6 +69,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             cur_match += acc_lba - acc_base
         
         match_list.append(cur_match)
+        min_match = min(min_match, cur_match)
         
         if cur_match > max_match:
             max_match = cur_match
@@ -91,9 +92,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             'conf_base': np.log(result['confidence_base']), 
             'conf_lba': np.log(result['confidence_lba']),
             'acc_change': acc_lba - acc_base, 
-            'size': abs(acc_lba - acc_base) * 3 + 2
+            'size': abs(acc_lba - acc_base) * 2 + 3
         })
-                
+        
     final_acc_list = [match / N for match in match_list]
     
     metrics = {}
@@ -173,7 +174,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # draw scatter plot
     plt.figure(figsize=(6,6))
     scatter_df = pd.DataFrame(scatter_data, columns=['conf_base', 'conf_lba', 'acc_change', 'size'])
-    sns.scatterplot(x='conf_base', y='conf_lba', hue='acc_change', data=scatter_df, palette='coolwarm', 
+    sns.scatterplot(x='conf_base', y='conf_lba', hue='acc_change', data=scatter_df, palette='rainbow', # 'coolwarm'
                     hue_order=[1, 0, -1], size='size', sizes=(1, 10))
     plt.title(f'{cfg.datasets_cfg.dataset_name} | Scatter Plot')
     plt.xlabel('Confidence Base')

@@ -269,15 +269,23 @@ def main():
             for i in range(bsz):
                 result = OrderedDict({
                     "question_id": batch['question_id'][i],
-                    "main_question": batch['text_input'][i],
                     "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
+                    "main_question": batch['text_input'][i],
+                })
+                if cfg.runner_cfg.sub_mode == "subqa":
+                    result.update({
+                        "sub_question": sub_questions[i],
+                        "sub_answer": sub_answers[i],
+                    })
+                elif cfg.runner_cfg.sub_mode == "description":
+                    result.update({
+                        "description": descriptions[i],
+                    })
+                result.update({
                     "gt_ans": gt_answers[i],
                     "confidence_base": confidences_base[i],
                     "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
                     "text_output_base": text_outputs_base[i],
-                    "sub_question": sub_questions[i] if cfg.runner_cfg.sub_mode == "subqa" else "",
-                    "sub_answer": sub_answers[i] if cfg.runner_cfg.sub_mode == "subqa" else "",
-                    "description": descriptions[i] if cfg.runner_cfg.sub_mode == "description" else "",
                     "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                 })
                 if args.verbose:
@@ -311,6 +319,8 @@ def main():
             acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
             total_base_match += acc_base
             total_cnt += 1
+        
+        print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
         
     """##############################     Report metrics     ##############################"""
