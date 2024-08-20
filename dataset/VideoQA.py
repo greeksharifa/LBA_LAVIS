@@ -65,6 +65,13 @@ class VideoEvalDataset(BaseDataset):
     def image_path_sampling(self, image_paths):
         idxs = np.linspace(0, len(image_paths)-1, self.n_frms, dtype=int)
         return [image_paths[idx] for idx in idxs]
+        # try:
+        #     idxs = np.linspace(0, len(image_paths)-1, self.n_frms, dtype=int)
+        #     result = [image_paths[idx] for idx in idxs]
+        # except Exception as e:
+        #     import pdb; pdb.set_trace()
+        #     result = image_paths
+        # return result
     
     
     def get_frames(self, image_paths):
@@ -75,7 +82,7 @@ class VideoEvalDataset(BaseDataset):
         segment_size = len(image_paths) / self.n_supple
         for i in range(self.n_supple):
             st = int(i * segment_size)
-            en = min(int((i + 1) * segment_size), len(image_paths))
+            en = min(max(int((i + 1) * segment_size), st+1), len(image_paths)) # clip [st+1, len(image_paths)]
             image_paths_supple = self.image_path_sampling(image_paths[st:en])
             frames_supple.append([np.array(Image.open(img_path)) for img_path in image_paths_supple])
             
