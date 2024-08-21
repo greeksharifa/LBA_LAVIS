@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 
 from torch.utils.data import Dataset
-
+from transformers import InstructBlipVideoProcessor
 
 def load_dataset(datasets_cfg, split='val', n_supple=0):
     if datasets_cfg.dataset_name == "VQA_Introspect":
@@ -137,7 +137,7 @@ class BaseDataset(Dataset):
                 # num_match = sum([out == t for t in target])
                 # return min(1.0, num_match / 3.0)
             else:
-                if len(out) == 1:
+                if type(out) == str and len(out) == 1:
                     out = '(' + out + ')'
                 return 1.0 if out == target else 0.0
             
@@ -249,16 +249,27 @@ def get_sevila_input(
     prompt_type:str="default",
     # text_inputs:List[str]=[],
     batch: List=[],
+    processor: InstructBlipVideoProcessor=None,
     sub_questions:List[str]=[],
     sub_answers:List[str]=[],
+    device="cuda:0",
 ):
     main_questions = batch['text_input']
     candidate_lists = batch['candidate_list']
     gt_answers = batch['gt_ans']
     question_ids = batch['question_id']
+
+    # pixel_values = []
+    # for video in vision: # video: [n_frms, 640, 480]
+    #     # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
+    #     pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
+    # # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]
+    # stacked = torch.stack(pixel_values, dim=0)#.to(self.model.device)
+    # # 미적용중.."""# [bsz, n_frms, 3, 224, 224] -> [bsz, 3, n_frms, 224, 224]"""
+    # inputs["pixel_values"] = stacked#.transpose(2, 1)
     
     ret = {
-        "video": None,
+        "video": processor(batch['vision'], return_tensors="pt", padding=True)['pixel_values'].to(device),
         "qa_input": [],
         "loc_input": [],
         "qa_output": gt_answers,

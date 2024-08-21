@@ -4,9 +4,16 @@
 
 - follow install videollava: https://github.com/PKU-YuanGroup/Video-LLaVA?tab=readme-ov-file#%EF%B8%8F-requirements-and-installation
 - or Salesforce-lavis
+- or SeViLA
 
 ```bash
-pip install OmegaConf tqdm webdataset
+cd SeViLA & pip install -e .
+conda create -n LBA python=3.10
+conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.7 -c pytorch -c nvidia -y
+pip install transformers==4.42
+pip install accelerate numpy pandas pyav opencv-python==4.7.0.72 
+pip install matplotlib seaborn OmegaConf nltk tqdm webdataset decord
+# pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless 
 ```
 
 **docker**

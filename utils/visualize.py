@@ -1,7 +1,7 @@
 import json
 import os
 import matplotlib.pyplot as plt
-from collections import Counter
+from collections import Counter, OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -24,6 +24,9 @@ def get_conf_rank(results, key, H):
     return results
 
 
+# def condition(conf_base, conf_lba, select_high_confidence, conf_gap):
+    
+
 def visualize(results, dataset, cfg, output_dir, total_base_match):
     if cfg.runner_cfg.visualize:
         output_dir = 'temp/'
@@ -35,7 +38,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     HH = max(1, N // H)
     
     results = get_conf_rank(results, key, H)
-    conf_gap = cfg.runner_cfg.get("conf_gap", 0.1)
+    # conf_gap = cfg.runner_cfg.get("conf_gap", 0.1)
     
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
     match_list = [cur_match]
@@ -53,6 +56,28 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
+    max_conf_gap = 0.0
+    for conf_gap in np.linspace(0, 1, 1001):
+        cur_match = total_base_match
+        
+        for i, result in enumerate(results):
+            acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+            acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+            
+            if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
+                pass
+            else: # 무조건 lba 선택
+                cur_match += acc_lba - acc_base
+            
+            if cur_match > max_match:
+                max_match = cur_match
+                max_conf_gap = conf_gap
+        
+        print(f'\rconf_gap: {conf_gap:.3f} max_conf_gap: {max_conf_gap:.3f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+    
+    print()
+    max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
+    
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
         acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
@@ -62,8 +87,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         bin_key = i // M
         bins_base[bin_key].append(acc_base)
         
-        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
-        # if cfg.runner_cfg.select_high_confidence and result['rank_base'] > result['rank_lba']: # 높은것만 선택
+        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + max_conf_gap > result['confidence_lba']: # 높은것만 선택
             pass
         else: # 무조건 lba 선택
             cur_match += acc_lba - acc_base
@@ -82,7 +106,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         heatmap_data['base'][row][col].append(acc_base)
         heatmap_data['lba'][row][col].append(acc_lba)
         
-        if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] + conf_gap < result['confidence_lba']:
+        if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] + max_conf_gap < result['confidence_lba']:
         # if not cfg.runner_cfg.select_high_confidence or result['rank_base'] < result['rank_lba']:
             heatmap_data2['number'][H-1-result['rank_lba']][result['rank_base']] += 1
             heatmap_data2['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
@@ -100,7 +124,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         
     final_acc_list = [match / N for match in match_list]
     
-    metrics = {}
+    metrics = OrderedDict()
     
     if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
         match_per_type = {}    
@@ -137,11 +161,12 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 total_per_type[question_type] += 1
         
         # print("match_per_type:", match_per_type)
-        for q_type in match_per_type.keys():
-            if total_per_type[q_type] > 0:
-                qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
-                # print(f'{q_type:<21s}: {qtype_v}')
-                metrics[f'{q_type:<21s}'] = qtype_v
+        for q in ["TCDISPFL"]:
+            for q_type in match_per_type.keys():
+                if q_type.startswith(q) and total_per_type[q_type] > 0:
+                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
+                    # print(f'{q_type:<21s}: {qtype_v}')
+                    metrics[f'{q_type:<21s}'] = qtype_v
     
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
@@ -211,6 +236,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "confidence_percentile": f'{confidence_percentile:.2f}%',
         "E_CR                 ": f'{e_cr:.2f}%',
         "E_IC                 ": f'{e_ic:.2f}%',
+        "min_match            ": f'{min_match / N * 100:.2f}%',
     })
     print("metrics:", json.dumps(metrics, indent=4))
 
@@ -221,12 +247,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.datasets_cfg.dataset_name, end='\t')
     print(cfg.runner_cfg.recomposer_name, end='\t')
     
-    print(cfg.runner_cfg.select_high_confidence, end='\t')
-    print(cfg.runner_cfg.train_recomposer_examplar, end='\t')
-    print(cfg.runner_cfg.threshold_lba, end='\t')
-    print(cfg.runner_cfg.vision_supple, end='\t')
+    print(cfg.runner_cfg.get("select_high_confidence", False), end='\t')
+    print(cfg.runner_cfg.get("train_recomposer_examplar", False), end='\t')
+    # print(cfg.runner_cfg.get("threshold_lba", False), end='\t')
+    print(cfg.runner_cfg.get("vision_supple", False), end='\t')
+    print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
+    # print(cfg.runner_cfg.get("conf_gap", 0.0), end='\t')
+    print(f'{max_conf_gap:.3f}', end='\t')
 
-    print(cfg.runner_cfg.num_sub_qa_generate, end='\t')
 
     print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
     if 'type' in results[0]:

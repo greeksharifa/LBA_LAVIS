@@ -41,7 +41,7 @@ class VideoEvalDataset(BaseDataset):
                     break
                     
                 vid = sample["video"]
-                print(f'\r{i:6d}/{len_loaded:6d} : {vid}', end='')
+                print(f'\r{i+1:6d}/{len_loaded:6d} : {vid}', end='')
                 
                 self.annotation.append(sample)
 

@@ -27,7 +27,7 @@ runner:
   use_vqa_tool: False
   num_bin: 50
   num_heatmap_row: 10
-  conf_gap: 0.1
+  # conf_gap: 0.0
   debug: False
 
   cfg_pkl_path: 'SeViLA/cfg.pkl'

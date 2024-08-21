@@ -14,10 +14,13 @@ import torch
 import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader
 
+from transformers import InstructBlipVideoProcessor
+
 from configs.config import Config
 # from dataset.VQA_Introspect import VQAIntrospectDataset
 from dataset.base_dataset import load_dataset, get_text_input, get_sevila_input, get_train_examplar
 from models.model import Decomposer, Recomposer
+
 
 from utils.misc import SmoothedValue, MetricLogger
 from utils.visualize import visualize, sample_print
@@ -88,13 +91,19 @@ def main():
     
     if not cfg.runner_cfg.visualize:
         s = datetime.now()
-        recomposer = Recomposer(cfg, device="cuda:0")
-        
-        if cfg.runner_cfg.decomposer_name == "self":
+        # recomposer
+        if cfg.runner_cfg.recomposer_name == "sevila":
+            processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-flan-t5-xl")
+            from SeViLA.evaluate import get_sevila_model
+            recomposer = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to("cuda:0")
+        else:
+            recomposer = Recomposer(cfg, device="cuda:0")
+        # decomposer
+        if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer # Recomposer(cfg, device="cuda:1") # 
         else:
             decomposer = Decomposer(cfg, device="cuda:1")
-            
+        # answerer
         if cfg.runner_cfg.recomposer_name == "sevila":
             answerer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
         else:
@@ -137,12 +146,14 @@ def main():
             """##############################  Baseline Inference   ##############################"""    
             if cfg.runner_cfg.recomposer_name == "sevila":
                 # return list of dict, not list of str
-                text_inputs = get_sevila_input("default", batch=batch)
-            elif cfg.datasets_cfg.data_type == "videos":
-                text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
-            else:                          # "images"
-                text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
-            text_outputs_base, confidences_base = recomposer(vision, text_inputs)
+                sevila_inputs = get_sevila_input("default", batch=batch, processor=processor)
+                text_outputs_base, confidences_base = recomposer.generate(sevila_inputs)
+            else:
+                if cfg.datasets_cfg.data_type == "videos":
+                    text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
+                else:                          # "images"
+                    text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
+                text_outputs_base, confidences_base = recomposer(vision, text_inputs)
             print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
@@ -170,7 +181,9 @@ def main():
                             vision.append(batch['vision_supple'][b][i])
                             # vision.append(batch['vision_supple'][b][i-1])
                     text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-                    if cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                    if cfg.runner_cfg.recomposer_name == "sevila":
+                        sub_questions, _ = answerer(vision, text_inputs) # blip2-flan-t5-xl
+                    elif cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                         sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
                     else:                               # Only Text, flan-t5
                         sub_questions = decomposer(text_inputs)
@@ -184,29 +197,35 @@ def main():
                     
                     # generating recomposed_answers
                     if cfg.runner_cfg.recomposer_name == "sevila":
-                        text_inputs = get_sevila_input("recomposer", 
+                        sevila_inputs = get_sevila_input("recomposer", 
                                                     batch=batch, 
+                                                    processor=processor,
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
-                    elif cfg.datasets_cfg.data_type == "videos":
-                        text_inputs = get_text_input("recomposer_video", 
-                                                    main_questions=batch['text_input'], 
-                                                    sub_questions=sub_questions, 
-                                                    sub_answers=sub_answers,
-                                                    candidate_lists=batch['candidate_list'],
-                                                    examplar=examplar,
-                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
-                    else:                          # "images"
-                        text_inputs = get_text_input("recomposer_image", 
-                                                    main_questions=batch['text_input'], 
-                                                    sub_questions=sub_questions, 
-                                                    sub_answers=sub_answers)
+                        text_outputs_lba, confidences_lba = recomposer.generate(sevila_inputs)
+                    else:
+                        if cfg.datasets_cfg.data_type == "videos":
+                            text_inputs = get_text_input("recomposer_video", 
+                                                        main_questions=batch['text_input'], 
+                                                        sub_questions=sub_questions, 
+                                                        sub_answers=sub_answers,
+                                                        candidate_lists=batch['candidate_list'],
+                                                        examplar=examplar,
+                                                        train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                        else:                          # "images"
+                            text_inputs = get_text_input("recomposer_image", 
+                                                        main_questions=batch['text_input'], 
+                                                        sub_questions=sub_questions, 
+                                                        sub_answers=sub_answers)
+                        
+                        text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                     
                     if cfg.runner_cfg.debug:
-                        print('sub_questions text_inputs:', text_inputs)
-                        print('sub_answers text_inputs:', text_inputs)
-                        print('recomposer_video text_inputs:', text_inputs)
-                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                        t_inputs = sevila_inputs[0] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[0]
+                        print('sub_questions text_inputs:', t_inputs)
+                        print('sub_answers text_inputs:', t_inputs)
+                        print('recomposer_video text_inputs:', t_inputs)
+                        
                     text_outputs_lba_list.append(text_outputs_lba)
                     confidences_lba_list.append(confidences_lba)
                     
@@ -295,7 +314,7 @@ def main():
             for i in range(bsz):
                 result = OrderedDict({
                     "question_id": batch['question_id'][i],
-                    "text_input": text_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
+                    "text_input": sevila_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
                     "main_question": batch['text_input'][i],
                 })
                 if cfg.runner_cfg.sub_mode == "subqa":

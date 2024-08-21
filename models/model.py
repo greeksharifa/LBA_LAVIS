@@ -42,6 +42,11 @@ class Decomposer(nn.Module):
         return sub_questions
 
 
+# class Blip2VideoProcessor(Blip2Processor):
+#     def __call__(self, batch_video):
+
+
+
 class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
     
     @torch.no_grad()
@@ -246,10 +251,10 @@ class Recomposer(nn.Module):
                 device_map="auto",
                 attn_implementation=None,
             )#.to(device)
-        elif model_name == "sevila":
-            self.processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/blip2-flan-t5-xl")
-            from SeViLA.evaluate import get_sevila_model
-            self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
+        # elif model_name == "sevila":
+        #     self.processor = Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl")
+        #     from SeViLA.evaluate import get_sevila_model
+        #     self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
         else:
             raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
         
@@ -271,8 +276,16 @@ class Recomposer(nn.Module):
     def forward(self, vision, text_inputs, generate_sub_q=False):
         if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
             samples = text_inputs
-            video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
-            samples["video"] = video
+
+            pixel_values = []
+            for video in vision: # video: [n_frms, 640, 480]
+                # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
+                pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
+            # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]
+            samples["video"] = torch.stack(pixel_values, dim=0)#.to(self.model.device)
+            
+            # video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
+            # samples["video"] = video
             output_text, output_scores = self.model.generate(samples)
             
         else:
