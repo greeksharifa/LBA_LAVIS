@@ -57,7 +57,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
     max_conf_gap = 0.0
-    for conf_gap in np.linspace(0, 1, 1001):
+    conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
+    for conf_gap in conf_list:
         cur_match = total_base_match
         
         for i, result in enumerate(results):
@@ -73,7 +74,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 max_match = cur_match
                 max_conf_gap = conf_gap
         
-        print(f'\rconf_gap: {conf_gap:.3f} max_conf_gap: {max_conf_gap:.3f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+        print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
     
     print()
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -253,7 +254,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.get("vision_supple", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
     # print(cfg.runner_cfg.get("conf_gap", 0.0), end='\t')
-    print(f'{max_conf_gap:.3f}', end='\t')
+    print(f'{max_conf_gap:.5f}', end='\t')
 
 
     print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
