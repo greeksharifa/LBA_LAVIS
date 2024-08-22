@@ -56,27 +56,30 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
-    max_conf_gap = 0.0
-    conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
-    for conf_gap in conf_list:
-        cur_match = total_base_match
-        
-        for i, result in enumerate(results):
-            acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-            acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+    if cfg.runner_cfg.max_conf_gap:
+        max_conf_gap = cfg.runner_cfg.max_conf_gap
+    else:
+        max_conf_gap = 0.0
+        conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
+        for conf_gap in conf_list:
+            cur_match = total_base_match
             
-            if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
-                pass
-            else: # 무조건 lba 선택
-                cur_match += acc_lba - acc_base
+            for i, result in enumerate(results):
+                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+                
+                if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
+                    pass
+                else: # 무조건 lba 선택
+                    cur_match += acc_lba - acc_base
+                
+                if cur_match > max_match:
+                    max_match = cur_match
+                    max_conf_gap = conf_gap
             
-            if cur_match > max_match:
-                max_match = cur_match
-                max_conf_gap = conf_gap
+            print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
         
-        print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
-    
-    print()
+        print()
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
     
     for i, result in enumerate(results):
@@ -124,51 +127,6 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         })
         
     final_acc_list = [match / N for match in match_list]
-    
-    metrics = OrderedDict()
-    
-    if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
-        match_per_type = {}    
-        total_per_type = {}
-        # total number of each question type
-        # NExTQA : 4996 {'C': 2607, 'T': 1612, 'D': 777}
-        # STAR   : 7098 {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
-        for i, result in enumerate(results):
-            
-            question_type = result['type']
-            if cfg.datasets_cfg.dataset_name == 'NExTQA':
-                question_type = question_type[0]
-            
-            target = result['gt_ans']
-            
-            # get predict
-            if result['confidence_base'] <= max_arg_confidence:
-                if cfg.runner_cfg.select_high_confidence:
-                    if result['confidence_base'] > result['confidence_lba']:
-                        predict = result['text_output_base']
-                    else:
-                        predict = result['text_output_lba']
-                else:
-                    predict = result['text_output_lba']
-            else:
-                predict = result['text_output_base']
-            
-            acc = dataset.get_accuracy(predict, target)
-            if question_type not in match_per_type:
-                match_per_type[question_type] = 0
-                total_per_type[question_type] = 0
-            else:
-                match_per_type[question_type] += acc
-                total_per_type[question_type] += 1
-        
-        # print("match_per_type:", match_per_type)
-        for q in ["TCDISPFL"]:
-            for q_type in match_per_type.keys():
-                if q_type.startswith(q) and total_per_type[q_type] > 0:
-                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
-                    # print(f'{q_type:<21s}: {qtype_v}')
-                    metrics[f'{q_type:<21s}'] = qtype_v
-    
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
@@ -230,7 +188,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(f'saved config path is {os.path.join(output_dir, "config.yaml")}')
 
     
-    metrics.update({
+    metrics = OrderedDict({
+        "max_conf_gap         ": f'{max_conf_gap:.5f}',
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
         "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
@@ -239,6 +198,51 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "E_IC                 ": f'{e_ic:.2f}%',
         "min_match            ": f'{min_match / N * 100:.2f}%',
     })
+    
+    if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
+        match_per_type = {}    
+        total_per_type = {}
+        # total number of each question type
+        # NExTQA : 4996 {'C': 2607, 'T': 1612, 'D': 777}
+        # STAR   : 7098 {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
+        for i, result in enumerate(results):
+            
+            question_type = result['type']
+            if cfg.datasets_cfg.dataset_name == 'NExTQA':
+                question_type = question_type[0]
+            
+            target = result['gt_ans']
+            
+            # get predict
+            if result['confidence_base'] <= max_arg_confidence:
+                if cfg.runner_cfg.select_high_confidence:
+                    if result['confidence_base'] > result['confidence_lba']:
+                        predict = result['text_output_base']
+                    else:
+                        predict = result['text_output_lba']
+                else:
+                    predict = result['text_output_lba']
+            else:
+                predict = result['text_output_base']
+            
+            acc = dataset.get_accuracy(predict, target)
+            if question_type not in match_per_type:
+                match_per_type[question_type] = 0
+                total_per_type[question_type] = 0
+            else:
+                match_per_type[question_type] += acc
+                total_per_type[question_type] += 1
+        
+        # print("match_per_type:", match_per_type)
+        # print("total_per_type:", total_per_type)
+        
+        for _q in "TCDISPFL":
+            for q_type in match_per_type.keys():
+                if q_type.startswith(_q) and total_per_type[q_type] > 0:
+                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
+                    # print(f'{q_type:<21s}: {qtype_v}')
+                    metrics[f'{q_type:<21s}'] = qtype_v
+    
     print("metrics:", json.dumps(metrics, indent=4))
 
     # if not cfg.runner_cfg.visualize:
@@ -259,9 +263,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
 
     print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
     if 'type' in results[0]:
-        for q in ["TCDISPFL"]:
+        for _q in "TCDISPFL":
             for q_type in match_per_type.keys():
-                if q_type.startswith(q) and total_per_type[q_type] > 0:
+                if q_type.startswith(_q) and total_per_type[q_type] > 0:
                     print(f'\t{match_per_type[q_type] / total_per_type[q_type] * 100:.2f}', end='')
     print('\n')
 
