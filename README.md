@@ -40,7 +40,8 @@ CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.d
 CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="" runner.batch_size=16 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=False datasets.n_frms=8 runner.sub_mode="description" model.cache_dir="/data/LLMs/" datasets.root_dir="/data/video_datasets"
 
 # visualize
-python main_multi_subqa.py --options runner.visualize=True runner.output_dir=""
+python main_multi_subqa.py --options runner.visualize=True runner.output_dir="output/<dir>"
+python main_multi_subqa.py --options runner.visualize=True runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=False runner.output_dir="output/<dir>"
 ```
 
 

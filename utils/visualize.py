@@ -24,9 +24,6 @@ def get_conf_rank(results, key, H):
     return results
 
 
-# def condition(conf_base, conf_lba, select_high_confidence, conf_gap):
-    
-
 def visualize(results, dataset, cfg, output_dir, total_base_match):
     if cfg.runner_cfg.visualize:
         output_dir = 'temp/'
@@ -47,16 +44,12 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     acc_base_list, acc_lba_list = [], []
     bins_base = [[] for _ in range(N // M + 1)]
     heatmap_data = {
-        'base': [[[] for _ in range(N // HH + 1)] for _ in range(H)],
-        'lba' : [[[] for _ in range(N // HH + 1)] for _ in range(H)],
-    }
-    heatmap_data2 = {
         'number': [[0 for _ in range(H)] for _ in range(H)],
         'change': [[0 for _ in range(H)] for _ in range(H)],
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
-    if cfg.runner_cfg.max_conf_gap:
+    if cfg.runner_cfg.get("max_conf_gap", None) is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap
     else:
         max_conf_gap = 0.0
@@ -104,18 +97,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             max_arg_confidence = result[key]
             confidence_percentile = (i+1) / N * 100
             
-        # for heatmap
-        row = int(result[key] * H)
-        col = i // HH
-        heatmap_data['base'][row][col].append(acc_base)
-        heatmap_data['lba'][row][col].append(acc_lba)
-        
+        # heatmap
         if not cfg.runner_cfg.select_high_confidence or result['confidence_base'] + max_conf_gap < result['confidence_lba']:
         # if not cfg.runner_cfg.select_high_confidence or result['rank_base'] < result['rank_lba']:
-            heatmap_data2['number'][H-1-result['rank_lba']][result['rank_base']] += 1
-            heatmap_data2['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
+            heatmap_data['number'][H-1-result['rank_lba']][result['rank_base']] += 1
+            heatmap_data['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
             
-        # for scatter plot
+        # scatter plot
         scatter_data.append({
             'conf_base': np.log(result['confidence_base']), 
             'conf_lba': np.log(result['confidence_lba']),
@@ -164,14 +152,11 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # plt.xticks([(cfg.runner_cfg.num_bin // 5) * i for i in range(6)])
     plt.subplots_adjust(left=0.125, bottom=0.10, right=0.9, top=0.90, wspace=0.2, hspace=0.45)
     fig_path = os.path.join(output_dir, "acc_bin.png")
-    # if not cfg.runner_cfg.visualize:
     plt.savefig(fig_path, dpi=300)
     print(f'saved fig path is {fig_path}')
     # draw heatmap
-    # draw_heatmap(heatmap_data['base'], output_dir, 'base', N // H + 1)
-    # draw_heatmap(heatmap_data['lba'], output_dir, 'lba', N // H + 1)
-    draw_heatmap2(heatmap_data2['number'], output_dir, 'number', H)
-    draw_heatmap2(heatmap_data2['change'], output_dir, 'change', H)
+    draw_heatmap2(heatmap_data['number'], output_dir, 'number', H)
+    draw_heatmap2(heatmap_data['change'], output_dir, 'change', H)
     
     # draw scatter plot
     plt.figure(figsize=(6,6))
@@ -254,10 +239,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     print(cfg.runner_cfg.get("select_high_confidence", False), end='\t')
     print(cfg.runner_cfg.get("train_recomposer_examplar", False), end='\t')
-    # print(cfg.runner_cfg.get("threshold_lba", False), end='\t')
     print(cfg.runner_cfg.get("vision_supple", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
-    # print(cfg.runner_cfg.get("conf_gap", 0.0), end='\t')
     print(f'{max_conf_gap:.5f}', end='\t')
 
 
