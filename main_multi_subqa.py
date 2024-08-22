@@ -99,13 +99,15 @@ def main():
         else:
             recomposer = Recomposer(cfg, device="cuda:0")
         # decomposer
-        if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":
+        if cfg.runner_cfg.recomposer_name == "sevila":
+            decomposer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)  
+        elif cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer # Recomposer(cfg, device="cuda:1") # 
         else:
             decomposer = Decomposer(cfg, device="cuda:1")
         # answerer
         if cfg.runner_cfg.recomposer_name == "sevila":
-            answerer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
+            answerer = decomposer # Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)
         else:
             answerer = recomposer
         print('model loading time : ', datetime.now()-s)
@@ -182,13 +184,12 @@ def main():
                             # vision.append(batch['vision_supple'][b][i-1])
                     text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
                     if cfg.runner_cfg.recomposer_name == "sevila":
-                        sub_questions, _ = answerer(vision, text_inputs) # blip2-flan-t5-xl
+                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True) # blip2-flan-t5-xl
                     elif cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                         sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
                     else:                               # Only Text, flan-t5
                         sub_questions = decomposer(text_inputs)
                     sub_questions_list.append(sub_questions)
-                    
                     
                     # generating sub_answers
                     text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
@@ -201,7 +202,8 @@ def main():
                                                     batch=batch, 
                                                     processor=processor,
                                                     sub_questions=sub_questions, 
-                                                    sub_answers=sub_answers)
+                                                    sub_answers=sub_answers,
+                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
                         text_outputs_lba, confidences_lba = recomposer.generate(sevila_inputs)
                     else:
                         if cfg.datasets_cfg.data_type == "videos":
@@ -217,7 +219,6 @@ def main():
                                                         main_questions=batch['text_input'], 
                                                         sub_questions=sub_questions, 
                                                         sub_answers=sub_answers)
-                        
                         text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                     
                     if cfg.runner_cfg.debug:
@@ -314,7 +315,7 @@ def main():
             for i in range(bsz):
                 result = OrderedDict({
                     "question_id": batch['question_id'][i],
-                    "text_input": sevila_inputs['qa_input'] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
+                    "text_input": sevila_inputs['qa_input'][i] if cfg.runner_cfg.recomposer_name == "sevila" else text_inputs[i],
                     "main_question": batch['text_input'][i],
                 })
                 if cfg.runner_cfg.sub_mode == "subqa":

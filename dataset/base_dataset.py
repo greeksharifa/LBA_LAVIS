@@ -253,6 +253,7 @@ def get_sevila_input(
     sub_questions:List[str]=[],
     sub_answers:List[str]=[],
     device="cuda:0",
+    **kwargs,
 ):
     main_questions = batch['text_input']
     candidate_lists = batch['candidate_list']
@@ -277,7 +278,7 @@ def get_sevila_input(
         "duration": [1 for _ in range(len(main_questions))],
     }
     
-    recomposer_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+    default_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
 Question: Why did Dokyung pull Haeyoung1's arm hard?
 Option A: Dokyung pulled Haeyoung1's arm to hug her hard.
 Option B: It is because Dokyung did not want Haeyoung1 to fall.
@@ -306,8 +307,8 @@ select the correct answer from the options: (A)\n"""
         elif prompt_type == "decomposer":
             raise NotImplementedError("sevila decomposer not implemented")
         elif prompt_type == "recomposer":
-            
-            qa_prompt = recomposer_examplar + f"Context: {sub_questions[i]}? {sub_answers[i]}.\n" + qa_prompt
+            examplar = "" if kwargs.get("train_recomposer_examplar", False) else default_examplar
+            qa_prompt = examplar + f"Context: {sub_questions[i].rstrip('?')}? {sub_answers[i]}.\n" + qa_prompt
             # loc_prompt: pass
         else:
             raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
