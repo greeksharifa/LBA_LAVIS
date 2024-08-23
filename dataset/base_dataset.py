@@ -137,8 +137,11 @@ class BaseDataset(Dataset):
                 # num_match = sum([out == t for t in target])
                 # return min(1.0, num_match / 3.0)
             else:
-                if type(out) == str and len(out) == 1:
-                    out = '(' + out + ')'
+                if type(out) == str:
+                    if len(out) == 1:
+                        out = '(' + out + ')'
+                    elif out[0] == '(' and len(out) > 3:
+                        out = out[:3]
                 return 1.0 if out == target else 0.0
             
         if isinstance(outputs, (str, int)):
@@ -177,6 +180,15 @@ def get_text_input(
     question_ids:List[str]=[],
     **kwargs,
 ):
+    video_default_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+Question: Why did Dokyung pull Haeyoung1's arm hard?
+Choices:
+(A) Dokyung pulled Haeyoung1's arm to hug her hard.
+(B) It is because Dokyung did not want Haeyoung1 to fall.
+(C) This is because Dokyung and Haeyoung1 were dancing on the street.
+(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+(E) Because Dokyung needed Haeyoung1 to go to the police station.
+Answer: The short answer is (A)\n"""
     # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
@@ -197,7 +209,8 @@ def get_text_input(
                 for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
     
     elif prompt_type == "default_video":
-        prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
+        prompt += "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
@@ -216,17 +229,8 @@ def get_text_input(
         Answer: The answer is <answer> [EOS]
         """
     elif prompt_type == "recomposer_video":
-        default_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
-Question: Why did Dokyung pull Haeyoung1's arm hard?
-Choices:
-(A) Dokyung pulled Haeyoung1's arm to hug her hard.
-(B) It is because Dokyung did not want Haeyoung1 to fall.
-(C) This is because Dokyung and Haeyoung1 were dancing on the street.
-(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
-(E) Because Dokyung needed Haeyoung1 to go to the police station.
-Answer: The answer is (A)\n"""
-        prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else default_examplar
-        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
+        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The short answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):

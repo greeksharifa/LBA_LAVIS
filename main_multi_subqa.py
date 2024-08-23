@@ -91,6 +91,8 @@ def main():
     
     if not cfg.runner_cfg.visualize:
         s = datetime.now()
+        device_recomposer = "cuda:0"
+        device_decomposer = f"cuda:{torch.cuda.device_count() - 1}"
         # recomposer
         if cfg.runner_cfg.recomposer_name == "sevila":
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, "Salesforce/")
@@ -98,12 +100,14 @@ def main():
             from SeViLA.evaluate import get_sevila_model
             recomposer = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to("cuda:0")
         else:
-            recomposer = Recomposer(cfg, device="cuda:0")
+            recomposer = Recomposer(cfg, device="cuda:0", model_type="recomposer")
         # decomposer
         if cfg.runner_cfg.recomposer_name == "sevila":
-            decomposer = Recomposer(cfg, device="cuda:1", answerer=True)  
+            decomposer = Recomposer(cfg, device="cuda:1", model_type="answerer")
         elif cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer # Recomposer(cfg, device="cuda:1") # 
+        elif "blip" in cfg.runner_cfg.decomposer_name:
+            decomposer = Recomposer(cfg, device="cuda:1", model_type="decomposer")
         else:
             decomposer = Decomposer(cfg, device="cuda:1")
         # answerer
@@ -153,7 +157,10 @@ def main():
                 text_outputs_base, confidences_base = recomposer.generate(sevila_inputs)
             else:
                 if cfg.datasets_cfg.data_type == "videos":
-                    text_inputs = get_text_input("default_video", main_questions=batch['text_input'], candidate_lists=batch['candidate_list'])
+                    text_inputs = get_text_input("default_video", 
+                                                 main_questions=batch['text_input'], 
+                                                 candidate_lists=batch['candidate_list'],
+                                                 add_examplar="blip2" not in cfg.runner_cfg.recomposer_name)
                 else:                          # "images"
                     text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
                 text_outputs_base, confidences_base = recomposer(vision, text_inputs)
@@ -184,12 +191,15 @@ def main():
                             vision.append(batch['vision_supple'][b][i])
                             # vision.append(batch['vision_supple'][b][i-1])
                     text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-                    if cfg.runner_cfg.recomposer_name == "sevila":
-                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True) # blip2-flan-t5-xl
-                    elif cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
-                    else:                               # Only Text, flan-t5
+                    
+                    if type(decomposer) == Decomposer:
                         sub_questions = decomposer(text_inputs)
+                    else:
+                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                    # if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                    #     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                    # else:                               # Only Text, flan-t5
+                    #     sub_questions = decomposer(text_inputs)
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers
@@ -372,7 +382,7 @@ def main():
     print('Recomposer')
     print('recomposer.model_name:', cfg.runner_cfg.recomposer_name)
     print(recomposer.model.__class__.__name__)
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     """##############################     Report metrics     ##############################"""
     visualize(results, dataset, cfg, output_dir, total_base_match)
     

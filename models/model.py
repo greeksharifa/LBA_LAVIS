@@ -23,10 +23,10 @@ class Decomposer(nn.Module):
         self.device = device
         self.cfg = cfg
         
-        self.decomposer_name = f'google/flan-t5-{cfg.runner_cfg.decomposer_name}'
-        self.decomposer_tokenizer = T5Tokenizer.from_pretrained(self.decomposer_name)
-        self.decomposer_model = T5ForConditionalGeneration.from_pretrained(
-            self.decomposer_name, 
+        self.model_name = f'google/flan-t5-{cfg.runner_cfg.decomposer_name}'
+        self.tokenizer = T5Tokenizer.from_pretrained(self.model_name)
+        self.model = T5ForConditionalGeneration.from_pretrained(
+            self.model_name, 
             torch_dtype=torch.bfloat16,
             # load_in_4bit=True,
             # device_map="auto",
@@ -34,17 +34,12 @@ class Decomposer(nn.Module):
             # local_files_only=True,
         ).to(device)
 
-    def forward(self, text_inputs):
-        input_ids = self.decomposer_tokenizer(text_inputs, padding="longest", return_tensors="pt").input_ids.to(self.device)
+    def forward(self, text_inputs, generate_sub_q=True):
+        input_ids = self.tokenizer(text_inputs, padding="longest", return_tensors="pt").input_ids.to(self.device)
         # outputs = self.decomposer_model.generate(input_ids)
-        outputs = self.decomposer_model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_tokens=50)
-        sub_questions = self.decomposer_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-        return sub_questions
-
-
-# class Blip2VideoProcessor(Blip2Processor):
-#     def __call__(self, batch_video):
-
+        outputs = self.model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_tokens=100)
+        sub_questions = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return sub_questions #,None
 
 
 class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
@@ -138,6 +133,8 @@ class VideoBlip2ForConditionalGeneration(Blip2ForConditionalGeneration):
         # concatenate query embeddings with prompt embeddings
         inputs_embeds = self.get_input_embeddings()(input_ids)
         inputs_embeds = torch.cat([language_model_inputs, inputs_embeds.to(language_model_inputs.device)], dim=1)
+        
+        # import pdb; pdb.set_trace()
 
         outputs = self.language_model.generate(
             inputs_embeds=inputs_embeds,
@@ -254,15 +251,14 @@ class VideoInstructionBlipForConditionalGeneration(InstructBlipForConditionalGen
 
 
 class Recomposer(nn.Module):
-    def __init__(self, cfg, device, answerer=False):
+    def __init__(self, cfg, device, model_type):
         super().__init__()
-        model_name = cfg.runner_cfg.recomposer_name
+        model_name = cfg.runner_cfg.get(f"{model_type}_name")
         cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
         device_map = cfg.runner_cfg.device_map # if cfg.runner_cfg.device_map else device
         # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
-        if answerer:
-            model_name = cfg.runner_cfg.answerer_name
+        if model_type == "answerer":
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
