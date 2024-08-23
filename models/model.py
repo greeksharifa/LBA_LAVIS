@@ -165,29 +165,61 @@ class VideoInstructionBlipForConditionalGeneration(InstructBlipForConditionalGen
             self._preprocess_accelerate()
 
         batch_size = pixel_values.shape[0]
-        image_embeds = self.vision_model(pixel_values, return_dict=True).last_hidden_state
+        if pixel_values.dim() == 5:
+            language_model_inputs, language_attention_mask = [], []
+            for j in range(pixel_values.size(2)):
+                # this_frame = pixel_values[:, :, j, :, :]    # [bsz, 3, 224, 224]
+                this_frame = pixel_values[:, j, :, :, :]    # [bsz, 3, 224, 224]
+                frame_embeds = self.vision_model(this_frame, return_dict=True).last_hidden_state
+                frame_attention_mask = torch.ones(frame_embeds.size()[:-1], dtype=torch.long, device=frame_embeds.device)
+                
+                frame_query_tokens = self.query_tokens.expand(image_embeds.shape[0], -1, -1)
+                frame_query_attention_mask = torch.ones(frame_query_tokens.size()[:-1], dtype=torch.long, device=frame_embeds.device)
+                if qformer_attention_mask is None:
+                    frame_qformer_attention_mask = torch.ones_like(qformer_input_ids)
+                frame_qformer_attention_mask = torch.cat([frame_query_attention_mask, frame_qformer_attention_mask], dim=1)
+                frame_query_outputs = self.qformer(
+                    input_ids=qformer_input_ids,
+                    attention_mask=frame_qformer_attention_mask,
+                    query_embeds=frame_query_tokens,
+                    encoder_hidden_states=frame_embeds,
+                    encoder_attention_mask=frame_attention_mask,
+                    return_dict=True,
+                )
+                frame_query_output = frame_query_outputs.last_hidden_state[:, : frame_query_tokens.size(1), :]
+                
+                language_model_inputs.append(self.language_projection(frame_query_output))
+                language_attention_mask.append(torch.ones(
+                    language_model_inputs[-1].size()[:-1], dtype=torch.long, device=language_model_inputs[-1].device
+                ))
+            
+            language_model_inputs = torch.cat(language_model_inputs, dim=1)
+            language_attention_mask = torch.cat(language_attention_mask, dim=1)
+            
+        else:
+            image_embeds = self.vision_model(pixel_values, return_dict=True).last_hidden_state
 
-        image_attention_mask = torch.ones(image_embeds.size()[:-1], dtype=torch.long, device=image_embeds.device)
+            image_attention_mask = torch.ones(image_embeds.size()[:-1], dtype=torch.long, device=image_embeds.device)
 
-        query_tokens = self.query_tokens.expand(image_embeds.shape[0], -1, -1)
-        query_attention_mask = torch.ones(query_tokens.size()[:-1], dtype=torch.long, device=image_embeds.device)
-        if qformer_attention_mask is None:
-            qformer_attention_mask = torch.ones_like(qformer_input_ids)
-        qformer_attention_mask = torch.cat([query_attention_mask, qformer_attention_mask], dim=1)
-        query_outputs = self.qformer(
-            input_ids=qformer_input_ids,
-            attention_mask=qformer_attention_mask,
-            query_embeds=query_tokens,
-            encoder_hidden_states=image_embeds,
-            encoder_attention_mask=image_attention_mask,
-            return_dict=True,
-        )
-        query_output = query_outputs.last_hidden_state[:, : query_tokens.size(1), :]
+            query_tokens = self.query_tokens.expand(image_embeds.shape[0], -1, -1)
+            query_attention_mask = torch.ones(query_tokens.size()[:-1], dtype=torch.long, device=image_embeds.device)
+            if qformer_attention_mask is None:
+                qformer_attention_mask = torch.ones_like(qformer_input_ids)
+            qformer_attention_mask = torch.cat([query_attention_mask, qformer_attention_mask], dim=1)
+            query_outputs = self.qformer(
+                input_ids=qformer_input_ids,
+                attention_mask=qformer_attention_mask,
+                query_embeds=query_tokens,
+                encoder_hidden_states=image_embeds,
+                encoder_attention_mask=image_attention_mask,
+                return_dict=True,
+            )
+            query_output = query_outputs.last_hidden_state[:, : query_tokens.size(1), :]
 
-        language_model_inputs = self.language_projection(query_output)
-        language_attention_mask = torch.ones(
-            language_model_inputs.size()[:-1], dtype=torch.long, device=language_model_inputs.device
-        )
+            language_model_inputs = self.language_projection(query_output)
+            language_attention_mask = torch.ones(
+                language_model_inputs.size()[:-1], dtype=torch.long, device=language_model_inputs.device
+            )
 
         if input_ids is None:
             input_ids = (
@@ -234,10 +266,10 @@ class Recomposer(nn.Module):
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
-        elif "flan-t5" in model_name or "blip2-opt-" in model_name:
+        elif "blip2" in model_name: # "flan-t5" in model_name or "blip2-opt-" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
-        elif "vicuna" in model_name:
+        elif "instructblip" in model_name:
             self.processor = InstructBlipVideoProcessor.from_pretrained(model_name)
             self.model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
             # self.processor = InstructBlipProcessor.from_pretrained(model_name)
@@ -250,11 +282,7 @@ class Recomposer(nn.Module):
                 cache_dir=cache_dir, #os.path.join(cache_dir, "LanguageBind/"), 
                 device_map="auto",
                 attn_implementation=None,
-            )#.to(device)
-        # elif model_name == "sevila":
-        #     self.processor = Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl")
-        #     from SeViLA.evaluate import get_sevila_model
-        #     self.model = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to(device)
+            )
         else:
             raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
         
@@ -290,15 +318,19 @@ class Recomposer(nn.Module):
             
         else:
             # import pdb; pdb.set_trace()
-            if isinstance(vision[0], Image.Image):
-                # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
+            try:
                 inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
-            elif isinstance(vision[0], np.ndarray): # video. type: List[np.ndarray]
-                inputs = self.processor(vision, text=text_inputs, return_tensors="pt", padding=True)
-                # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
-            # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
-                # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
-            else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
+            except:
+                
+            # if isinstance(vision[0], Image.Image):
+            #     # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
+            #     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
+            # elif isinstance(vision[0], np.ndarray): # video. type: List[np.ndarray]
+            #     inputs = self.processor(vision, text=text_inputs, return_tensors="pt", padding=True)
+            #     # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
+            # # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
+            #     # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
+            # else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
                 # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
                 inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True) # [64, 29]
 

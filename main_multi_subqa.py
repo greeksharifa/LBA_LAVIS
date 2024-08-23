@@ -93,14 +93,15 @@ def main():
         s = datetime.now()
         # recomposer
         if cfg.runner_cfg.recomposer_name == "sevila":
-            processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-flan-t5-xl")
+            cache_dir = os.path.join(cfg.model_cfg.cache_dir, "Salesforce/")
+            processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-flan-t5-xl", cache_dir=cache_dir)
             from SeViLA.evaluate import get_sevila_model
             recomposer = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to("cuda:0")
         else:
             recomposer = Recomposer(cfg, device="cuda:0")
         # decomposer
         if cfg.runner_cfg.recomposer_name == "sevila":
-            decomposer = Recomposer(cfg, device=f"cuda:{torch.cuda.device_count() - 1}", answerer=True)  
+            decomposer = Recomposer(cfg, device="cuda:1", answerer=True)  
         elif cfg.runner_cfg.decomposer_name == "self":
             decomposer = recomposer # Recomposer(cfg, device="cuda:1") # 
         else:
@@ -368,7 +369,10 @@ def main():
         
         print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
-        
+    print('Recomposer')
+    print('recomposer.model_name:', cfg.runner_cfg.recomposer_name)
+    print(recomposer.model.__class__.__name__)
+    import pdb; pdb.set_trace()
     """##############################     Report metrics     ##############################"""
     visualize(results, dataset, cfg, output_dir, total_base_match)
     
