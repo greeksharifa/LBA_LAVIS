@@ -140,7 +140,7 @@ class BaseDataset(Dataset):
                 if type(out) == str:
                     if len(out) == 1:
                         out = '(' + out + ')'
-                    elif out[0] == '(' and len(out) > 3:
+                    elif len(out) > 3 and out[0] == '(':
                         out = out[:3]
                 return 1.0 if out == target else 0.0
             
@@ -188,7 +188,7 @@ Choices:
 (C) This is because Dokyung and Haeyoung1 were dancing on the street.
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
-Answer: The short answer is (A)\n"""
+Answer: The answer is (A)\n"""
     # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
@@ -230,7 +230,7 @@ Answer: The short answer is (A)\n"""
         """
     elif prompt_type == "recomposer_video":
         prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
-        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The short answer is "
+        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):

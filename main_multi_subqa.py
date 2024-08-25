@@ -381,7 +381,10 @@ def main():
             
     print('Recomposer')
     print('recomposer.model_name:', cfg.runner_cfg.recomposer_name)
-    print(recomposer.model.__class__.__name__)
+    try:
+        print('recomposer.model.__class__.__name__:', recomposer.model.__class__.__name__)
+    except:
+        pass
     # import pdb; pdb.set_trace()
     """##############################     Report metrics     ##############################"""
     visualize(results, dataset, cfg, output_dir, total_base_match)
