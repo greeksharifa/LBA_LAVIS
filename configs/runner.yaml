@@ -31,7 +31,8 @@ runner:
   # conf_gap: 0.0
   debug: False
 
-  cfg_pkl_path: 'SeViLA/cfg.pkl'
+  sevila_cfg_pkl_path: 'SeViLA/cfg.pkl'
+  flipped_vqa_cfg_pkl_path: 'flipped_vqa/cfg.pkl'
 
 
 datasets:

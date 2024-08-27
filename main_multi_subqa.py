@@ -84,9 +84,16 @@ def main():
     else:
         n_supple = 0
     
-    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple)
-    dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
-                            shuffle=False, collate_fn=dataset.collater)
+    if cfg.runner_cfg.recomposer_name == "flipped_vqa":
+        import pickle
+        from flipped_vqa.get_model import get_flipped_vqa_model
+        flipped_vqa_args = pickle.load(open(cfg.runner_cfg.flipped_vqa_args_pkl_path, 'rb'))
+        flipped_vqa_model, dataloader = get_flipped_vqa_model(flipped_vqa_args, device="cuda:0")
+    
+    else:        
+        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple)
+        dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
+                                shuffle=False, collate_fn=dataset.collater)
     print('dataset loading time : ', datetime.now()-s)
     
     if not cfg.runner_cfg.visualize:
@@ -98,7 +105,9 @@ def main():
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, "Salesforce/")
             processor = InstructBlipVideoProcessor.from_pretrained("Salesforce/instructblip-flan-t5-xl", cache_dir=cache_dir)
             from SeViLA.evaluate import get_sevila_model
-            recomposer = get_sevila_model(cfg.runner_cfg.cfg_pkl_path).to("cuda:0")
+            recomposer = get_sevila_model(cfg.runner_cfg.sevila_cfg_pkl_path).to("cuda:0")
+        elif cfg.runner_cfg.recomposer_name == "flipped_vqa":
+            recomposer = flipped_vqa_model
         else:
             recomposer = Recomposer(cfg, device="cuda:0", model_type="recomposer")
         # decomposer
