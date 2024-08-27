@@ -242,6 +242,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.get("select_high_confidence", False), end='\t')
     print(cfg.runner_cfg.get("train_recomposer_examplar", False), end='\t')
     print(cfg.runner_cfg.get("vision_supple", False), end='\t')
+    print(cfg.runner_cfg.get("use_pre_generated_sub_q", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
     print(f'{max_conf_gap:.5f}', end='\t')
 

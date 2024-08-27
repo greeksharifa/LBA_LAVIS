@@ -315,7 +315,14 @@ class Recomposer(nn.Module):
         else:
             # import pdb; pdb.set_trace()
             try:
-                inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
+                if "Video-LLaVA" in self.model_name:
+                    # import pdb; pdb.set_trace()
+                    # video_llava_prompt = "USER: <video>\n{text_input}"
+                    # video_llava_text_inputs = [video_llava_prompt.format(text_input=text_input.replace("Answer: The answer is ", "ASSISTANT: ")) for text_input in text_inputs]
+                    video_llava_text_inputs = [f'USER: <video>\n{text_input.replace("Answer: The answer is ", "ASSISTANT: ")}' for text_input in text_inputs]
+                    inputs = self.processor(videos=vision, text=video_llava_text_inputs, return_tensors="pt", padding=True)
+                else:
+                    inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
             except:
                 
             # if isinstance(vision[0], Image.Image):
@@ -357,7 +364,8 @@ class Recomposer(nn.Module):
                 "do_sample": generate_sub_q,
                 "num_beams": 5,
                 "max_new_tokens": 10,
-                "min_length": 1,
+                # "min_length": 1,
+                "min_new_tokens": 1,
                 "length_penalty": -1,
                 "return_dict_in_generate": True,
                 "output_scores": True
@@ -365,6 +373,8 @@ class Recomposer(nn.Module):
             if generate_sub_q:
                 generation_params["top_p"] = 0.95
                 generation_params["max_new_tokens"] = 100
+            # if "Video-LLaVA" in self.model_name:
+                # generation_params["max_new_tokens"] += 1000
                 
 
             outputs = self.model.generate(
@@ -379,6 +389,14 @@ class Recomposer(nn.Module):
             )
             output_scores = torch.exp(outputs.sequences_scores).tolist()
 
+        if "Video-LLaVA" in self.model_name:# and not generate_sub_q:
+            _output_text = []
+            for i, o in zip(text_inputs, output_text):
+                _output_text.append(o.replace(i.replace("Answer: The answer is ", "ASSISTANT: "), "")[7:].strip())
+                
+            print(_output_text)
+            # import pdb; pdb.set_trace()
+            output_text = _output_text
 
         return output_text, output_scores
 

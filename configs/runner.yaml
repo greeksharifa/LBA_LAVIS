@@ -7,7 +7,7 @@ runner:
   train_recomposer_examplar: False
   threshold_lba: False
   vision_supple: True
-  use_pre_generated_sub_q: True
+  use_pre_generated_sub_q: False
   num_sub_qa_generate: 3
   num_sub_qa_select: 1
   num_frame_sampling: 3

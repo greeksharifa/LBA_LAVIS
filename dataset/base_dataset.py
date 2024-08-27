@@ -142,6 +142,8 @@ class BaseDataset(Dataset):
                         out = '(' + out + ')'
                     elif len(out) > 3 and out[0] == '(':
                         out = out[:3]
+                    if '0' <= out[1] <= '4':
+                        out = '(' + chr(ord(out[1]) + 17) + ')'
                 return 1.0 if out == target else 0.0
             
         if isinstance(outputs, (str, int)):
@@ -211,6 +213,7 @@ Answer: The answer is (A)\n"""
     elif prompt_type == "default_video":
         prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
         prompt += "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])

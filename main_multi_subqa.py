@@ -169,7 +169,9 @@ def main():
                     text_inputs = get_text_input("default_video", 
                                                  main_questions=batch['text_input'], 
                                                  candidate_lists=batch['candidate_list'],
-                                                 add_examplar="blip2" not in cfg.runner_cfg.recomposer_name)
+                                                 add_examplar="blip2" not in cfg.runner_cfg.recomposer_name,
+                                                 video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
+                                                 )
                 else:                          # "images"
                     text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
                 text_outputs_base, confidences_base = recomposer(vision, text_inputs)
@@ -239,7 +241,9 @@ def main():
                                                         sub_answers=sub_answers,
                                                         candidate_lists=batch['candidate_list'],
                                                         examplar=examplar,
-                                                        train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                                                        train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
+                                                        video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
+                                                        )
                         else:                          # "images"
                             text_inputs = get_text_input("recomposer_image", 
                                                         main_questions=batch['text_input'], 
