@@ -314,12 +314,13 @@ class Recomposer(nn.Module):
             
         else:
             # import pdb; pdb.set_trace()
+            vision = np.array(vision)
             try:
                 if "Video-LLaVA" in self.model_name:
                     # import pdb; pdb.set_trace()
                     # video_llava_prompt = "USER: <video>\n{text_input}"
                     # video_llava_text_inputs = [video_llava_prompt.format(text_input=text_input.replace("Answer: The answer is ", "ASSISTANT: ")) for text_input in text_inputs]
-                    video_llava_text_inputs = [f'USER: <video>\n{text_input.replace("Answer: The answer is ", "ASSISTANT: ")}' for text_input in text_inputs]
+                    video_llava_text_inputs = [f'USER: <video>\n{text_input.replace("Answer: The answer is ", "Answer with one of (A), (B), (C), (D), or (E). ASSISTANT: ")}' for text_input in text_inputs]
                     inputs = self.processor(videos=vision, text=video_llava_text_inputs, return_tensors="pt", padding=True)
                 else:
                     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
@@ -392,9 +393,9 @@ class Recomposer(nn.Module):
         if "Video-LLaVA" in self.model_name:# and not generate_sub_q:
             _output_text = []
             for i, o in zip(text_inputs, output_text):
-                _output_text.append(o.replace(i.replace("Answer: The answer is ", "ASSISTANT: "), "")[7:].strip())
+                _output_text.append(o.replace(i.replace("Answer: The answer is ", "Answer with one of (A), (B), (C), (D), or (E). ASSISTANT: "), "")[7:].strip())
                 
-            print(_output_text)
+            # print(_output_text)
             # import pdb; pdb.set_trace()
             output_text = _output_text
 
