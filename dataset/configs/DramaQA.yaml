@@ -8,10 +8,12 @@ datasets:
   ann_paths:
     train:
       - AnotherMissOh/AnotherMissOhQA_train_set.json
-      - flipped_vqa/dramaqa/clipvitl14.pth
+      # - AnotherMissOh/sub_questions.json
+      # - flipped_vqa/dramaqa/clipvitl14.pth
     val:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
-      - flipped_vqa/dramaqa/clipvitl14.pth
+      - AnotherMissOh/sub_questions_val.json
+      # - flipped_vqa/dramaqa/clipvitl14.pth
     # test:
     #  - AnotherMissOh/AnotherMissOhQA_test_set.json
   

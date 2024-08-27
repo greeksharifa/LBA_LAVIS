@@ -185,21 +185,27 @@ def main():
             if cfg.runner_cfg.sub_mode == "subqa":
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     # generating sub_questions
-                    if cfg.runner_cfg.vision_supple:# and i >= 1:
-                        vision = []
+                    if cfg.runner_cfg.use_pre_generated_sub_q: 
+                        # using pre-generated sub_questions
+                        sub_questions = []
                         for b in range(bsz):
-                            vision.append(batch['vision_supple'][b][i])
-                            # vision.append(batch['vision_supple'][b][i-1])
-                    text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
-                    
-                    if type(decomposer) == Decomposer:
-                        sub_questions = decomposer(text_inputs)
+                            sub_questions.append(batch['sub_question_list'][b][i])
                     else:
-                        sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
-                    # if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                    #     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
-                    # else:                               # Only Text, flan-t5
-                    #     sub_questions = decomposer(text_inputs)
+                        if cfg.runner_cfg.vision_supple:# and i >= 1:
+                            vision = []
+                            for b in range(bsz):
+                                vision.append(batch['vision_supple'][b][i])
+                                # vision.append(batch['vision_supple'][b][i-1])
+                        text_inputs = get_text_input("decomposer", main_questions=batch['text_input'])
+                        
+                        if type(decomposer) == Decomposer:
+                            sub_questions = decomposer(text_inputs)
+                        else:
+                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                        # if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                        #     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                        # else:                               # Only Text, flan-t5
+                        #     sub_questions = decomposer(text_inputs)
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers

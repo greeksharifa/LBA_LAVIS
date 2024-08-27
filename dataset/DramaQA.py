@@ -25,9 +25,9 @@ class DramaQAEvalDataset(VideoEvalDataset):
         self.annotation = []
         self.n_frms = kwargs['n_frms'] # default: 5
         
-        ann_path, vis_path = ann_paths
-        
-        self.vis_features = torch.load(vis_path)
+        ann_path, sub_questions_path = ann_paths
+        # ann_path, vis_path = ann_paths
+        # self.vis_features = torch.load(vis_path)
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
@@ -68,10 +68,10 @@ class DramaQAEvalDataset(VideoEvalDataset):
                     vid_error_list.append(video_id)
                 '''
                         
+        self.sub_questions = json.load(open(sub_questions_path, 'r'))
+        
         # json.dump(vid_error_list, open('DramaQA_vid_error_list.json', 'w'))
         
-        # self.features_dim = 
-
         self._add_instance_ids()
         
         self.ANSWER_MAPPING = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)", 4: "(E)"}
@@ -82,7 +82,8 @@ class DramaQAEvalDataset(VideoEvalDataset):
         print('vis_root : ', vis_root)
         print('ann_paths : ', ann_paths)
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
-        print('type(self.vis_features), len(self.vis_features):', type(self.vis_features), len(self.vis_features))
+        print('len(sub_questions):', len(self.sub_questions))
+        # print('type(self.vis_features), len(self.vis_features):', type(self.vis_features), len(self.vis_features))
         
     def get_image_path(self, vid, supple=False):
         # import pdb; pdb.set_trace()
@@ -105,6 +106,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
     def __getitem__(self, index):
         ann = self.annotation[index]
         vid = ann["vid"]
+        question_id = ann["qid"]
         
         image_paths = self.get_image_path(vid)
         frms, frms_supple = self.get_frames(image_paths)
@@ -119,12 +121,13 @@ class DramaQAEvalDataset(VideoEvalDataset):
             "vision_supple": frms_supple,
             # "video": video, # [min(n_frms, len(video)), 768]
             "text_input": question,
-            "question_id": ann["qid"],
+            "question_id": question_id,
             "gt_ans": gt_ans, #ann["correct_idx"],
             "candidate_list": ann["answers"],
             "answer_sentence": ann["answers"][ann["correct_idx"]],
             "type": question_type,
             "vid": vid,
+            "sub_question_list": self.sub_questions[str(question_id)],
             # "instance_id": ann["instance_id"],
         }
    
