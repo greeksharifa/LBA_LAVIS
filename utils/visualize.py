@@ -192,6 +192,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # total number of each question type
         # NExTQA : 4996 {'C': 2607, 'T': 1612, 'D': 777}
         # STAR   : 7098 {'Interaction': 2398, 'Sequence': 3586, 'Prediction': 624, 'Feasibility': 490}
+        # DramaQA: 3889 { 'Level 2': 2698, 'Level 3': 1189}
         for i, result in enumerate(results):
             
             question_type = result['type']
@@ -203,10 +204,10 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             # get predict
             if result['confidence_base'] <= max_arg_confidence:
                 if cfg.runner_cfg.select_high_confidence:
-                    if result['confidence_base'] > result['confidence_lba']:
-                        predict = result['text_output_base']
-                    else:
+                    if result['confidence_base'] + max_conf_gap < result['confidence_lba']:
                         predict = result['text_output_lba']
+                    else:
+                        predict = result['text_output_base']
                 else:
                     predict = result['text_output_lba']
             else:

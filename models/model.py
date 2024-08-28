@@ -313,11 +313,10 @@ class Recomposer(nn.Module):
             output_text, output_scores = self.model.generate(samples)
             
         else:
-            # import pdb; pdb.set_trace()
-            vision = np.array(vision)
             try:
                 if "Video-LLaVA" in self.model_name:
                     # import pdb; pdb.set_trace()
+                    # vision = [np.array(v) for v in vision] # len(vision), len(vision[0]), vision[0][0].shape
                     # video_llava_prompt = "USER: <video>\n{text_input}"
                     # video_llava_text_inputs = [video_llava_prompt.format(text_input=text_input.replace("Answer: The answer is ", "ASSISTANT: ")) for text_input in text_inputs]
                     video_llava_text_inputs = [f'USER: <video>\n{text_input.replace("Answer: The answer is ", "Answer with one of (A), (B), (C), (D), or (E). ASSISTANT: ")}' for text_input in text_inputs]
@@ -374,8 +373,6 @@ class Recomposer(nn.Module):
             if generate_sub_q:
                 generation_params["top_p"] = 0.95
                 generation_params["max_new_tokens"] = 100
-            # if "Video-LLaVA" in self.model_name:
-                # generation_params["max_new_tokens"] += 1000
                 
 
             outputs = self.model.generate(
