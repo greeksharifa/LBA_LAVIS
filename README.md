@@ -10,10 +10,28 @@
 cd SeViLA && pip install -e .
 conda create -n LBA python=3.10
 conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.7 -c pytorch -c nvidia -y
-pip install transformers==4.42 sentencepiece
+pip install transformers==4.44.2 sentencepiece protobuf
 pip install accelerate numpy pandas pyav opencv-python==4.7.0.72 
 pip install matplotlib seaborn OmegaConf nltk tqdm webdataset decord
 # pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless 
+```
+
+### Submodule
+```bash
+# repository clone
+git clone https://github.com/greeksharifa/LBA_2024.git
+
+# 서브모듈 정보를 기반으로 로컬 환경설정 파일을 만들어준다.
+git submodule init
+
+# 서브모듈의 리모트 저장소에서 데이터를 가져오고 Checkout을 한다.
+git submodule update
+
+# 서브모듈이 외부에서 업데이트가 되었을 때 현재 사용하려는 메인 깃에도 반영
+git submodule update 
+
+# 서브모듈 명령어 한 번에 실행하기
+git submodule foreach 'git pull'
 ```
 
 **docker**
@@ -24,6 +42,18 @@ docker run -it --gpus all --name LBA_v2 --volume /home/ywjang/LBA_LAVIS_uncertai
 # BIVI
 docker run --gpus all --name ywjang --shm-size 64G -i -t -p 22 -p 6006 -p 8888 -p 8889 -v /data:/data -v /home/ywjang/LBA_LAVIS_uncertainty_v2:/workspace nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 /bin/bash
 ```
+
+## SeViLA
+
+```python
+# SeViLA/lavis/models/sevila_models/sevila.py line no 678. 
+# after pred_ans = torch.argmax(pred_logits_qa, dim=-1).cpu().tolist()
+# before out['output_text'] = pred_ans
+return pred_ans, torch.exp(pred_logits_qa[:, 0]).cpu().tolist()
+# or 
+out['confidence'] = torch.exp(pred_logits_qa[:, 0]).cpu().tolist()
+```
+
 
 ## Inference
 
@@ -36,7 +66,7 @@ CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.d
 CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
 
 # sevila
-CUDA_VISIBLE_DEVICES=1,2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" runner.batch_size=8 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=False runner.num_sub_qa_generate=1 datasets.n_frms=32
+CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" runner.batch_size=6 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=True runner.vision_supple=False runner.num_sub_qa_generate=1 datasets.n_frms=32 
 
 # video_llava
 CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" runner.batch_size=8 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True use_pre_generated_sub_q=False runner.num_sub_qa_generate=1 datasets.n_frms=4

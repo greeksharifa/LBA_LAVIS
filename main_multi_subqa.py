@@ -159,6 +159,8 @@ def main():
             bsz = len(batch['vision'])
             vision = batch['vision']
             
+            # import pdb; pdb.set_trace()
+            
             """##############################  Baseline Inference   ##############################"""    
             if cfg.runner_cfg.recomposer_name == "sevila":
                 # return list of dict, not list of str

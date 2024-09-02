@@ -9,6 +9,7 @@ datasets:
       - NExT-QA/sevila_style/train.json
     val:
       - NExT-QA/sevila_style/val.json
+      - NExT-QA/sub_questions_val.json
   
   vis_root: NExT-QA/NExTVideo/
 

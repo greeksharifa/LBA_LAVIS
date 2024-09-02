@@ -1,6 +1,7 @@
 import os
 import json
 from typing import List
+import numpy as np
 import pandas as pd
 import torch
 
@@ -266,6 +267,8 @@ def get_sevila_input(
     candidate_lists = batch['candidate_list']
     gt_answers = batch['gt_ans']
     question_ids = batch['question_id']
+    vision = [np.stack(inner_list, axis=0) for inner_list in batch['vision']]
+    # vision = np.stack([np.stack(inner_list, axis=0) for inner_list in batch['vision']], axis=0)#np.array(batch['vision']) 
 
     # pixel_values = []
     # for video in vision: # video: [n_frms, 640, 480]
@@ -277,7 +280,7 @@ def get_sevila_input(
     # inputs["pixel_values"] = stacked#.transpose(2, 1)
     
     ret = {
-        "video": processor(batch['vision'], return_tensors="pt", padding=True)['pixel_values'].to(device),
+        "video": processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(device),
         "qa_input": [],
         "loc_input": [],
         "qa_output": gt_answers,

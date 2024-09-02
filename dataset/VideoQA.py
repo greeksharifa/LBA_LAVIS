@@ -22,13 +22,19 @@ class VideoEvalDataset(BaseDataset):
         self.annotation = []
         self.n_frms = kwargs['n_frms'] # default: 4
         
+        if len(ann_paths) == 1:
+            ann_path = ann_paths[0]
+        else:
+            ann_path, sub_questions_path = ann_paths
+            self.sub_questions = json.load(open(sub_questions_path, 'r'))
+        
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
         for k, v in kwargs.items():
             setattr(self, k, v)
         
-        with open(ann_paths[0], "r") as f:
+        with open(ann_path, "r") as f:
             loaded = json.load(f)
             
             if num_data == -1: # use all dataset
@@ -91,8 +97,9 @@ class VideoEvalDataset(BaseDataset):
 
     def __getitem__(self, index):
         ann = self.annotation[index]
-
         vid = ann["video"]
+        question_id = ann["qid"]
+        
         vpath = os.path.join(self.vis_root, f'{vid}.mp4')
         
         # load images. output: list of PIL.Image
@@ -113,17 +120,20 @@ class VideoEvalDataset(BaseDataset):
         question_type = ann['qid'].split('_')[0]
         # NExTQA : Causal, Temporal, Descriptive -> C, T, D
         # STAR   : Interaction, Sequence, Prediction, Feasibility 
+        
+        sub_question_list = self.sub_questions[str(question_id)] if hasattr(self, 'sub_questions') else None
 
         return {
             "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
             "text_input": question,
-            "question_id": ann["qid"],
+            "question_id": question_id,
             "gt_ans": gt_ans,
             "candidate_list": candidate_list,
             "answer_sentence": candidate_list[gt_ans],
             "type": question_type,
             "vid": vid,
+            "sub_question_list": sub_question_list,
             # "instance_id": ann["instance_id"],
         }
      
