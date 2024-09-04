@@ -52,29 +52,35 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     if type(cfg.runner_cfg.get("max_conf_gap", None)) == float:# is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap
+        conf_list = [0.00000]
     else:
         max_conf_gap = 0.0
-        if cfg.runner_cfg.select_high_confidence:
-            conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
-            for conf_gap in conf_list:
-                cur_match = total_base_match
+        conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
+    
+    if cfg.runner_cfg.select_high_confidence:
+        for conf_gap in conf_list:
+            cur_match = total_base_match
+            
+            for i, result in enumerate(results):
+                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
                 
-                for i, result in enumerate(results):
-                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-                    acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
-                    
-                    if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
-                        pass
-                    else: # 무조건 lba 선택
-                        cur_match += acc_lba - acc_base
-                    
-                    if cur_match > max_match:
-                        max_match = cur_match
-                        max_conf_gap = conf_gap
+                if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
+                    pass
+                else: # 무조건 lba 선택
+                    cur_match += acc_lba - acc_base
                 
-                print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+                if cur_match > max_match:
+                    max_match = cur_match
+                    max_conf_gap = conf_gap
+            
+            print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+            if conf_gap < 0.00001:
+                Kkan_max_acc = max_match / N * 100
+        print(f'\nKhan max_acc: {Kkan_max_acc:.2f}')
+    else:
+        Kkan_max_acc = "None"
         
-        print()
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
     
     for i, result in enumerate(results):
@@ -178,6 +184,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     metrics = OrderedDict({
         "max_conf_gap         ": f'{max_conf_gap:.5f}',
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
+        "Kkan_max_acc         ": f'{Kkan_max_acc:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
         "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
         "confidence_percentile": f'{confidence_percentile:.2f}%',

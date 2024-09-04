@@ -26,7 +26,8 @@ class VideoEvalDataset(BaseDataset):
             ann_path = ann_paths[0]
         else:
             ann_path, sub_questions_path = ann_paths
-            self.sub_questions = json.load(open(sub_questions_path, 'r'))
+            if os.path.exists(sub_questions_path):
+                self.sub_questions = json.load(open(sub_questions_path, 'r'))
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor

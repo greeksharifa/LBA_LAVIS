@@ -403,7 +403,9 @@ def main():
                 }
                 total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
                 total_cnt += 1
-            for i in range(1,5):
+                
+            # for i in [0, 1, 4]:
+            for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
                 results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}/{i}/result/val_epochbest.json'))
                 for r in results_subqa:
                     _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
