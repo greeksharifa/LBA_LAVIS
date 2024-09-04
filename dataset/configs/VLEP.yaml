@@ -9,6 +9,7 @@ datasets:
       - VLEP/sevila_style/train.json
     val:
       - VLEP/sevila_style/val.json
+      - VLEP/sub_questions_val.json
   
   vis_root: VLEP/vlep_frames/
 

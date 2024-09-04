@@ -9,6 +9,7 @@ datasets:
       - STAR/sevila_style/train.json
     val:
       - STAR/sevila_style/val.json
+      - STAR/sub_questions_val.json
   
   vis_root: STAR/videos_480/
 

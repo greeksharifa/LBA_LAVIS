@@ -28,6 +28,7 @@ class TVQAEvalDataset(VideoEvalDataset):
     def __getitem__(self, index):
         ann = self.annotation[index]
         vid = ann["video"]
+        question_id = ann["qid"]
         
         image_paths = self.get_image_path(vid)
         frms, frms_supple = self.get_frames(image_paths)
@@ -40,17 +41,20 @@ class TVQAEvalDataset(VideoEvalDataset):
         candidate_list = []
         for i in range(ann["num_option"]):
             candidate_list.append(ann[f'a{i}'])
+        
+        sub_question_list = self.sub_questions[str(question_id)] if hasattr(self, 'sub_questions') else None
             
         return {
             "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
             "text_input": question,
-            "question_id": ann["qid"],
+            "question_id": question_id,
             "gt_ans": gt_ans,
             "candidate_list": candidate_list,
             "answer_sentence": candidate_list[gt_ans],
             # "type": question_type,
             "vid": vid,
+            "sub_question_list": sub_question_list,
             # "instance_id": ann["instance_id"],
         }
    

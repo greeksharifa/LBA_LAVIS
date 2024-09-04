@@ -9,6 +9,7 @@ datasets:
       - TVQA/sevila_style/train.json
     val:
       - TVQA/sevila_style/val.json
+      - TVQA/sub_questions_val.json
   
   vis_root: TVQA/frames_hq/
 

@@ -9,6 +9,7 @@ datasets:
       - how2_series/How2QA/sevila_style/train.json
     val:
       - how2_series/How2QA/sevila_style/val.json
+      - how2_series/How2QA/sub_questions_val.json
   
   vis_root: how2_video_not_found/
 
