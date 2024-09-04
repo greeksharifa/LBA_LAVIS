@@ -387,18 +387,52 @@ def main():
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
     else:
-        result_path = os.path.join(output_dir, 'results_base.json')
-        results = json.load(open(result_path, 'r'))
-        print('load results from:', result_path)
-        
-        total_base_match, total_cnt = 0., 0
-        
-        for result in results:
-            acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-            total_base_match += acc_base
-            total_cnt += 1
-        
-        print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
+        if cfg.runner_cfg.get("sevila_visualize", False):
+            total_base_match, total_cnt = 0., 0
+            _results = {}
+            dataset_name = cfg.datasets_cfg.dataset_name.lower()
+            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}/base/result/val_epochbest.json'))
+            for r in results_base:
+                _results[r['qid']] = {
+                    "question_id": r["qid"],
+                    "gt_ans": r["target"],
+                    "text_output_base": r["prediction"],
+                    "confidence_base": r["confidence"],
+                    "text_output_lba_list": [],
+                    "confidence_lba_list": [],
+                }
+                total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
+                total_cnt += 1
+            for i in range(1,5):
+                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}/{i}/result/val_epochbest.json'))
+                for r in results_subqa:
+                    _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
+                    _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
+            
+            results = []
+            for k, v in _results.items():
+                max_confidence_lba = max(v['confidence_lba_list'])
+                idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
+                text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                r = v
+                r['text_output_lba'] = text_output_lba
+                r['confidence_lba'] = max_confidence_lba
+                r['type'] = v["question_id"]
+                results.append(r) 
+            
+        else:
+            result_path = os.path.join(output_dir, 'results_base.json')
+            results = json.load(open(result_path, 'r'))
+            print('load results from:', result_path)
+            
+            total_base_match, total_cnt = 0., 0
+            
+            for result in results:
+                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                total_base_match += acc_base
+                total_cnt += 1
+            
+            print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
     print('Recomposer')
     print('recomposer.model_name:', cfg.runner_cfg.recomposer_name)
