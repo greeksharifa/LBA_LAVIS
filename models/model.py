@@ -34,7 +34,7 @@ class Decomposer(nn.Module):
             # local_files_only=True,
         ).to(device)
 
-    def forward(self, text_inputs, generate_sub_q=True):
+    def forward(self, text_inputs, generate_sub_q=True, beam_search=True):
         input_ids = self.tokenizer(text_inputs, padding="longest", return_tensors="pt").input_ids.to(self.device)
         # outputs = self.decomposer_model.generate(input_ids)
         outputs = self.model.generate(input_ids, num_beams=5, do_sample=True, top_p=0.95, temperature=1.0, length_penalty=1.0, repetition_penalty=1.0, max_new_tokens=100)
@@ -297,7 +297,7 @@ class Recomposer(nn.Module):
         # print('self.processor.image_processor:', self.processor.image_processor)
 
 
-    def forward(self, vision, text_inputs, generate_sub_q=False):
+    def forward(self, vision, text_inputs, generate_sub_q=False, beam_search=True):
         if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
             samples = text_inputs
 
@@ -362,30 +362,32 @@ class Recomposer(nn.Module):
             
             generation_params = {
                 "do_sample": generate_sub_q,
-                "num_beams": 5,
-                "max_new_tokens": 10,
-                # "min_length": 1,
                 "min_new_tokens": 1,
-                "length_penalty": -1,
+                "max_new_tokens": 100 if generate_sub_q else 10,
                 "return_dict_in_generate": True,
                 "output_scores": True
             }
-            if generate_sub_q:
-                generation_params["top_p"] = 0.95
-                generation_params["max_new_tokens"] = 100
+            if beam_search:
+                generation_params["num_beams"] = 5
+                generation_params["length_penalty"] = -1
+            else:
+                generation_params["top_p"] = 0.8
+                # generation_params["temperature"] = 0.9
+                # generation_params["top_k"] = 50
                 
-
             outputs = self.model.generate(
                 **inputs,
                 **generation_params
             )
-            # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
-            # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
-            
             output_text = self.processor.batch_decode(
                 outputs.sequences, skip_special_tokens=True
             )
-            output_scores = torch.exp(outputs.sequences_scores).tolist()
+            try:
+                # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
+                # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])
+                output_scores = torch.exp(outputs.sequences_scores).tolist()
+            except: # beam_search is False. GenerateEncoderDecoderOutput
+                output_scores = None
 
         if "Video-LLaVA" in self.model_name:# and not generate_sub_q:
             _output_text = []

@@ -214,7 +214,8 @@ def main():
                         if type(decomposer) == Decomposer:
                             sub_questions = decomposer(text_inputs)
                         else:
-                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                            beam_search = i==0
+                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search)
                         # if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
                         #     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
                         # else:                               # Only Text, flan-t5
