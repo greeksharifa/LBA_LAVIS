@@ -88,7 +88,7 @@ CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.d
 
 # visualize
 python main_multi_subqa.py --options runner.visualize=True runner.output_dir="output/"
-python main_multi_subqa.py --options runner.visualize=True runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=False runner.output_dir="output/20240820_185932"
+python main_multi_subqa.py --options runner.visualize=True runner.sub_mode="subqa" datasets.root_dir="/data/" runner.select_high_confidence=True runner.max_conf_gap=False runner.output_dir="output/20240820_185932"
 ```
 
 
@@ -101,10 +101,10 @@ CUDA_VISIBLE_DEVICES=1 python main.py
 CUDA_VISIBLE_DEVICES=2 python main.py 
 CUDA_VISIBLE_DEVICES=3 python main.py --options datasets.dataset_name="AOKVQA"
 CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="AOKVQA"
-CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1
+CUDA_VISIBLE_DEVICES=4 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.vis_root="/data/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1
 
 # sevila
 CUDA_VISIBLE_DEVICES=0,1,2 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="sevila" runner.decomposer_name="xl" runner.answerer_name="Salesforce/blip2-flan-t5-xl" runner.batch_size=1 datasets.n_frms=32
 CUDA_VISIBLE_DEVICES=3,4,5 python main.py --options datasets.dataset_name="DramaQA" runner.recomposer_name="sevila" runner.decomposer_name="xxl" runner.answerer_name="Salesforce/blip2-flan-t5-xxl" runner.batch_size=1 datasets.n_frms=32
-CUDA_VISIBLE_DEVICES=2 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="sevila" datasets.vis_root="/data1/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1 datasets.n_frms=32
+CUDA_VISIBLE_DEVICES=2 python main.py --options datasets.dataset_name="DramaQA" datasets.num_data=10 runner.recomposer_name="sevila" datasets.vis_root="/data/AnotherMissOh/AnotherMissOh_videos/total/" runner.batch_size=1 datasets.n_frms=32
 ```

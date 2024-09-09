@@ -27,7 +27,7 @@ def load_dataset(datasets_cfg, split='val', n_supple=0):
     elif datasets_cfg.dataset_name == "TVQA": 
         from dataset.TVQA import TVQAEvalDataset
         cls = TVQAEvalDataset
-    elif datasets_cfg.dataset_name == "VLEP": # '/data1/VLEP/sevila_style/vlep_frames/friends_s03e09_seg02_clip_07_ep.mp4'
+    elif datasets_cfg.dataset_name == "VLEP": # '/data/VLEP/sevila_style/vlep_frames/friends_s03e09_seg02_clip_07_ep.mp4'
         from dataset.VLEP import VLEPEvalDataset
         cls = VLEPEvalDataset
     else:

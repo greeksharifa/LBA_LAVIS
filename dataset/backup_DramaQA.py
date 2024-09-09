@@ -137,7 +137,7 @@ class DramaQAEvalDataset(VideoEvalDataset):
     def get_image_path(self, vid, supple=False):
         # import pdb; pdb.set_trace()
         if vid.endswith('0000'):
-            scene_dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))[:-4] # ex. /data1/AnotherMissOh/AnotherMissOh_images/AnotherMissOh01/001/0078
+            scene_dir_path = os.path.join(self.vis_root, vid.replace('_', '/'))[:-4] # ex. /data/AnotherMissOh/AnotherMissOh_images/AnotherMissOh01/001/0078
             dir_paths = sorted(glob.glob(os.path.join(scene_dir_path, '*/')))
 
             # if self.n_frms < len(dir_paths):

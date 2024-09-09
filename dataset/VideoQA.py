@@ -25,9 +25,28 @@ class VideoEvalDataset(BaseDataset):
         if len(ann_paths) == 1:
             ann_path = ann_paths[0]
         else:
-            ann_path, sub_questions_path = ann_paths
-            if os.path.exists(sub_questions_path):
-                self.sub_questions = json.load(open(sub_questions_path, 'r'))
+            ann_path, sub_qas_path = ann_paths
+            if os.path.exists(sub_qas_path):
+                self.sub_qas = json.load(open(sub_qas_path, 'r'))
+            """
+            sub_questions: {
+                "Interaction_T1_13": [
+                    "What objects are present in the living room scene?",
+                    ...
+                ], 
+                ...
+            }
+            sub_qas: {
+                "Interaction_T1_13": [
+                    [
+                        "What objects are present in the living room scene?",
+                        "couch"
+                    ],
+                    ...
+                ],
+                ...
+            }
+            """
         
         self.vis_processor = vis_processor
         self.text_processor = text_processor
@@ -72,13 +91,6 @@ class VideoEvalDataset(BaseDataset):
     def image_path_sampling(self, image_paths):
         idxs = np.linspace(0, len(image_paths)-1, self.n_frms, dtype=int)
         return [image_paths[idx] for idx in idxs]
-        # try:
-        #     idxs = np.linspace(0, len(image_paths)-1, self.n_frms, dtype=int)
-        #     result = [image_paths[idx] for idx in idxs]
-        # except Exception as e:
-        #     import pdb; pdb.set_trace()
-        #     result = image_paths
-        # return result
     
     
     def get_frames(self, image_paths):
@@ -122,7 +134,13 @@ class VideoEvalDataset(BaseDataset):
         # NExTQA : Causal, Temporal, Descriptive -> C, T, D
         # STAR   : Interaction, Sequence, Prediction, Feasibility 
         
-        sub_question_list = self.sub_questions[str(question_id)] if hasattr(self, 'sub_questions') else None
+        sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
+        if type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+            sub_questions = sub_qa_list[0]
+            sub_answers = sub_qa_list[1]
+        else:
+            sub_questions = sub_qa_list
+            sub_answers = None
 
         return {
             "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
@@ -134,7 +152,8 @@ class VideoEvalDataset(BaseDataset):
             "answer_sentence": candidate_list[gt_ans],
             "type": question_type,
             "vid": vid,
-            "sub_question_list": sub_question_list,
+            "sub_question_list": sub_questions,
+            "sub_answer_list": sub_answers,
             # "instance_id": ann["instance_id"],
         }
      

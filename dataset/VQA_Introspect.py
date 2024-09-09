@@ -75,7 +75,7 @@ class VQAIntrospectDataset(BaseDataset):
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        # ex. /data1/coco/images/val2014/COCO_val2014_000000284623.jpg
+        # ex. /data/coco/images/val2014/COCO_val2014_000000284623.jpg
         image_path = os.path.join(self.vis_root, f'{self.split}2014', f'COCO_{self.split}2014_000000{ann["image_id"]:06}.jpg')
         # print('image_path : ', image_path)
         image = Image.open(image_path).convert("RGB")
