@@ -70,6 +70,8 @@ def main():
         output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
         os.makedirs(output_dir)
         OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
+    # elif cfg.runner_cfg.get("sevila_visualize", False):
+    #     cfg.runner_cfg.output_dir = output_dir = "output/20240903_110615"
     else:
         print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
         # output_dir = os.path.join('output/', cfg.runner_cfg.output_dir)
@@ -140,6 +142,7 @@ def main():
         print('examplar:', examplar)
         results = []
         wrong2right, right2wrong = 0, 0
+        wrong, right = 0, 0
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             if args.verbose and data_iter_step == 0:
                 print('batch:')
@@ -195,10 +198,21 @@ def main():
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
-            if cfg.runner_cfg.sub_mode == "subqa":
+            if cfg.runner_cfg.sub_mode == "subqa" or cfg.runner_cfg.sub_mode == "Ktype":
+                
+                knowledge_types = {
+                    # What is a missing information about ...
+                    "Ktype_0": "What is the who or what a person or thing is?", # Identity
+                    "Ktype_1": "What is the inclusion relationships of {entity}?", # Class
+                    "Ktype_2": "What is the properties or feature of {entity}?", # Attributes
+                    "Ktype_3": "What is the the number of {entity}?", # Quantities
+                    "Ktype_4": "What is the spatial relations among {entity}s?", # Spatial
+                    "Ktype_5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
+                }
+                
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     # generating sub_questions
-                    if cfg.runner_cfg.use_pre_generated_sub_q: 
+                    if cfg.runner_cfg.use_pre_generated_sub_q:
                         # using pre-generated sub_questions
                         sub_questions = []
                         for b in range(bsz):
@@ -223,9 +237,14 @@ def main():
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers
-                    text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                    sub_answers, _ = answerer(vision, text_inputs)
-                    sub_answers_list.append(sub_answers)
+                    if cfg.runner_cfg.use_pre_generated_sub_a:
+                        sub_answers = []
+                        for b in range(bsz):
+                            sub_answers.append(batch['sub_answer_list'][b][i])
+                    else:
+                        text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
+                        sub_answers, _ = answerer(vision, text_inputs)
+                        sub_answers_list.append(sub_answers)
                     
                     # generating recomposed_answers
                     if cfg.runner_cfg.recomposer_name == "sevila":
@@ -266,7 +285,8 @@ def main():
                     if args.verbose:
                         # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                         print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-            
+                    
+                    
             elif cfg.runner_cfg.sub_mode == "description":
                 descriptions_list = []
                 text_inputs = ["Describe the video in detail. What is happening in the video?" for _ in range(bsz)]
@@ -368,9 +388,11 @@ def main():
                     "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
                 })
                 if args.verbose:
-                    w2r, r2w = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
+                    w2r, r2w, w, r = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
                     wrong2right += w2r
                     right2wrong += r2w
+                    wrong += w
+                    right += r
                     
                 if 'type' in batch:
                     result['type'] = batch['type'][i]
@@ -392,7 +414,8 @@ def main():
             total_base_match, total_cnt = 0., 0
             _results = {}
             dataset_name = cfg.datasets_cfg.dataset_name.lower()
-            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}/base/result/val_epochbest.json'))
+            chat_or_xl = "sub_qas_val_xl" if cfg.runner_cfg.get("visualize_xl", False) else "sub_qas_val"
+            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{chat_or_xl}/base/result/val_epochbest.json'))
             for r in results_base:
                 _results[r['qid']] = {
                     "question_id": r["qid"],
@@ -405,9 +428,9 @@ def main():
                 total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
                 total_cnt += 1
                 
-            # for i in [0, 1, 4]:
+            # for i in [0, 3, 4]:
             for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
-                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}/{i}/result/val_epochbest.json'))
+                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{chat_or_xl}/{i}/result/val_epochbest.json'))
                 for r in results_subqa:
                     _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
                     _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
@@ -420,7 +443,7 @@ def main():
                 r = v
                 r['text_output_lba'] = text_output_lba
                 r['confidence_lba'] = max_confidence_lba
-                r['type'] = v["question_id"]
+                r['type'] = v["question_id"].split("_")[0]
                 results.append(r) 
             
         else:

@@ -1,6 +1,7 @@
 import json
 import os
 import matplotlib.pyplot as plt
+from pprint import pprint
 from collections import Counter, OrderedDict
 
 import numpy as np
@@ -111,6 +112,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             heatmap_data['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
             
         # scatter plot
+        if acc_base == 0 and acc_lba == 0:
+            class_label = 'w2w'
+        elif acc_base == 0 and acc_lba == 1:
+            class_label = 'w2r'
+        elif acc_base == 1 and acc_lba == 0:
+            class_label = 'r2w'
+        elif acc_base == 1 and acc_lba == 1:
+            class_label = 'r2r'
         scatter_data.append({
             'conf_base': np.log(result['confidence_base']), 
             'conf_lba': np.log(result['confidence_lba']),
@@ -118,7 +127,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             'size': abs(acc_lba - acc_base) * 2 + 3,
             'acc_base': acc_base,
             'acc_lba': acc_lba,
-            'class': round(acc_base + acc_lba * 2),
+            'class': class_label,
         })
         
     final_acc_list = [match / N for match in match_list]
@@ -170,8 +179,19 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # draw scatter plot
     plt.figure(figsize=(6,6))
     scatter_df = pd.DataFrame(scatter_data)#, columns=['conf_base', 'conf_lba', 'acc_change', 'size'])
-    sns.scatterplot(x='conf_base', y='conf_lba', hue='class', data=scatter_df, palette='rainbow', # 'coolwarm'
-                    hue_order=[1, 0, -1], size='size', sizes=(4, 10))
+    palette_params = {
+        'w2w': 'gray',
+        'w2r': 'green',
+        'r2w': 'red',
+        'r2r': 'black',
+    }
+    # color_map = {k: v['color'] for k, v in palette_params.items()}
+    # label_map = {k: v['label'] for k, v in palette_params.items()}
+    sns.scatterplot(x='conf_base', y='conf_lba', hue='class', data=scatter_df, 
+                    palette=palette_params, #'rainbow', # 'coolwarm'
+                    # hue_order=[1, 0, -1], 
+                    size='size', sizes=(3, 7))
+    # plt.legend(title='Class', labels=[label_map[i] for i in range(4)])
     plt.title(f'{cfg.datasets_cfg.dataset_name} | class 0: both wrong, 1: right -> wrong, 2: wrong -> right, 3: both right')
     plt.xlabel('Confidence Base')
     plt.ylabel('Confidence LBA')
@@ -194,8 +214,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "min_match            ": f'{min_match / N * 100:.2f}%',
     })
     
-    if 'type' in results[0]: # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
-        match_per_type = {}    
+    pprint(results[0], width=300)
+    if 'type' in results[0] or results[0]["question_id"][0] in "TCDISPFL": # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
+        match_per_type = {}
         total_per_type = {}
         # total number of each question type
         # NExTQA : 4996 {'C': 2607, 'T': 1612, 'D': 777}
@@ -203,7 +224,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # DramaQA: 3889 { 'Level 2': 2698, 'Level 3': 1189}
         for i, result in enumerate(results):
             
-            question_type = result['type']
+            question_type = result['type'] if 'type' in results[0] else result["question_id"].split('_')[0]
             if cfg.datasets_cfg.dataset_name == 'NExTQA':
                 question_type = question_type[0]
             
@@ -344,5 +365,5 @@ def sample_print(base, lba, gt_ans, get_accuracy, i):
     if i % 4 == 3:
         print()
     
-    return round(float(b < l)), round(float(b > l)) # w2r, r2w
+    return round(float(b < l)), round(float(b > l)), round(b) == round(l) == 0, round(b) == round(l) == 1,  # w2r, r2w, w, r
     

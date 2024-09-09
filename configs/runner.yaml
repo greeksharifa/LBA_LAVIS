@@ -17,7 +17,7 @@ runner:
   recomposer_name: "Salesforce/blip2-flan-t5-xl" # "Salesforce/instructblip-vicuna-7b" "LanguageBind/Video-LLaVA-7B-hf" "sevila"
   decomposer_name: "self" # ["self", "small", "base", "large", "xl", "xxl"]
   answerer_name: "Salesforce/blip2-flan-t5-xl" # None
-  HF_HOME: /data2/
+  HF_HOME: /model/
   device_map: "cuda:0" # ['auto', 0, 1, ...]
 
   batch_size: 32 # xl: image:32, video: 16 or 12
@@ -38,11 +38,11 @@ runner:
 
 datasets:
   dataset_name: VQA_Introspect
-  root_dir: /data1/
+  root_dir: /data/
   # num of data
   num_data: -1  # number of data to use
   split: 'val' # [train|val|test]
   # n_supple: 3
 
 model:
-  cache_dir: /data2/ # ~/.cache/torch/hub/
+  cache_dir: /model/ # ~/.cache/torch/hub/
