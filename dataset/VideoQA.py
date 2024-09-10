@@ -98,12 +98,13 @@ class VideoEvalDataset(BaseDataset):
         frames_base = [np.array(Image.open(img_path)) for img_path in image_paths_base]
 
         frames_supple = []
-        segment_size = len(image_paths) / self.n_supple
-        for i in range(self.n_supple):
-            st = int(i * segment_size)
-            en = min(max(int((i + 1) * segment_size), st+1), len(image_paths)) # clip [st+1, len(image_paths)]
-            image_paths_supple = self.image_path_sampling(image_paths[st:en])
-            frames_supple.append([np.array(Image.open(img_path)) for img_path in image_paths_supple])
+        if self.n_supple > 0:
+            segment_size = len(image_paths) / self.n_supple
+            for i in range(self.n_supple):
+                st = int(i * segment_size)
+                en = min(max(int((i + 1) * segment_size), st+1), len(image_paths)) # clip [st+1, len(image_paths)]
+                image_paths_supple = self.image_path_sampling(image_paths[st:en])
+                frames_supple.append([np.array(Image.open(img_path)) for img_path in image_paths_supple])
             
         return frames_base, frames_supple
 

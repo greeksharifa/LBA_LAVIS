@@ -77,12 +77,12 @@ def main():
     
     s = datetime.now()
     
-    if cfg.runner_cfg.sub_mode == "subqa":
-        n_supple = cfg.runner_cfg.num_sub_qa_generate
-    elif cfg.runner_cfg.sub_mode == "frame_sampling":
+    if cfg.runner_cfg.sub_mode == "frame_sampling":
         n_supple = cfg.runner_cfg.num_frame_sampling
+    elif cfg.runner_cfg.vision_supple:
+        n_supple = cfg.runner_cfg.num_sub_qa_generate
     else:
-        n_supple = 1
+        n_supple = 0
     
     if cfg.runner_cfg.recomposer_name == "flipped_vqa":
         import pickle

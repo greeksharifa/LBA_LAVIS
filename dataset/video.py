@@ -82,22 +82,24 @@ def read_video_pyav(video_path, n_frms, n_supple=0, start_time=0, end_time=None)
 
     # Calculate frames to sample
     frames_to_sample = np.linspace(start_frame, end_frame - 1, n_frms, dtype=int)
-    try:
-        segment_size = (end_frame - start_frame) / n_supple
-    
-        frames_to_sample_supple = []
+    if n_supple > 0:
+        try:
+            segment_size = (end_frame - start_frame) / n_supple
         
-        for i in range(n_supple):
-            st = start_frame + int(i * segment_size)
-            en = min(start_frame + int((i + 1) * segment_size), end_frame)
+            frames_to_sample_supple = []
             
-            # Calculate frame indices to extract
-            frame_indices = np.linspace(st, en-1, n_frms, dtype=int)
-            frames_to_sample_supple.append(frame_indices)
-
-        # frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(n_supple)]
-    except:
-        frames_to_sample_supple = [frames_to_sample for _ in range(n_supple)]
+            for i in range(n_supple):
+                st = start_frame + int(i * segment_size)
+                en = min(start_frame + int((i + 1) * segment_size), end_frame)
+                
+                # Calculate frame indices to extract
+                frame_indices = np.linspace(st, en-1, n_frms, dtype=int)
+                frames_to_sample_supple.append(frame_indices)
+            # frames_to_sample_supple = [sorted(np.random.choice(range(start_frame, end_frame - 1), n_frms, replace=(end_frame-start_frame) <= n_frms)) for _ in range(n_supple)]
+        except:
+            frames_to_sample_supple = [frames_to_sample for _ in range(n_supple)]
+    else:
+        frames_to_sample_supple = []
 
     # Seek to start_frame
     container.seek(int(start_frame * video_stream.time_base * 1000000), backward=True)  # Seek in microseconds
