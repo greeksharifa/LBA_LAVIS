@@ -9,13 +9,12 @@ datasets:
     train:
       - AnotherMissOh/AnotherMissOhQA_train_set.json
       # - AnotherMissOh/sub_questions.json
-      # - flipped_vqa/dramaqa/clipvitl14.pth
     val:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
-      - AnotherMissOh/sub_questions_val.json
-      # - flipped_vqa/dramaqa/clipvitl14.pth
-    # test:
-    #  - AnotherMissOh/AnotherMissOhQA_test_set.json
+      # - AnotherMissOh/sub_questions_val.json # created by gpt
+      # - AnotherMissOh/sub_qas_val.json # created by gpt
+      # - AnotherMissOh/sub_qas_val_xl.json # created by xl
+      - AnotherMissOh/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: AnotherMissOh/images/
   # vis_root: AnotherMissOh/AnotherMissOh_videos/total/

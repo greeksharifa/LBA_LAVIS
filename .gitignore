@@ -3,6 +3,8 @@ Ask-Anything/
 flipped_vqa/
 
 # demo / temp
+temp.py
+temp.ipynb
 temp.sh
 temp/
 run_scripts/LBA/eval/multiple_launch.sh

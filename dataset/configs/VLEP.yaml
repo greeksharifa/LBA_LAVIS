@@ -9,7 +9,10 @@ datasets:
       - VLEP/sevila_style/train.json
     val:
       - VLEP/sevila_style/val.json
-      - VLEP/sub_questions_val.json
+      # - VLEP/sub_questions_val.json # created by gpt
+      # - VLEP/sub_qas_val.json # created by gpt
+      # - VLEP/sub_qas_val_xl.json # created by xl
+      - VLEP/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: VLEP/vlep_frames/
 

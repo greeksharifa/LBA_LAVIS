@@ -45,6 +45,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
         if cfg.runner_cfg.select_high_confidence:
             conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
+            # import pdb; pdb.set_trace()
             for conf_gap in conf_list:
                 cur_match = total_base_match
                 

@@ -10,6 +10,7 @@ import PIL
 import random
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader
@@ -24,6 +25,7 @@ from models.model import Decomposer, Recomposer
 
 from utils.misc import SmoothedValue, MetricLogger
 from utils.visualize import visualize, sample_print
+from utils.llava_answer_eval import map_prediction_to_answer_v2
 
 
 def setup_seeds(config):
@@ -199,17 +201,6 @@ def main():
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
             
             if cfg.runner_cfg.sub_mode == "subqa" or cfg.runner_cfg.sub_mode == "Ktype":
-                
-                knowledge_types = {
-                    # What is a missing information about ...
-                    "Ktype_0": "What is the who or what a person or thing is?", # Identity
-                    "Ktype_1": "What is the inclusion relationships of {entity}?", # Class
-                    "Ktype_2": "What is the properties or feature of {entity}?", # Attributes
-                    "Ktype_3": "What is the the number of {entity}?", # Quantities
-                    "Ktype_4": "What is the spatial relations among {entity}s?", # Spatial
-                    "Ktype_5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
-                }
-                
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     # generating sub_questions
                     if cfg.runner_cfg.use_pre_generated_sub_q:
@@ -244,7 +235,7 @@ def main():
                     else:
                         text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
                         sub_answers, _ = answerer(vision, text_inputs)
-                        sub_answers_list.append(sub_answers)
+                    sub_answers_list.append(sub_answers)
                     
                     # generating recomposed_answers
                     if cfg.runner_cfg.recomposer_name == "sevila":
@@ -285,7 +276,6 @@ def main():
                     if args.verbose:
                         # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                         print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-                    
                     
             elif cfg.runner_cfg.sub_mode == "description":
                 descriptions_list = []
@@ -401,7 +391,7 @@ def main():
             
             if args.verbose:
                 print()
-                print(f'accumulated wrong2right: {wrong2right}, right2wrong: {right2wrong}')
+                print(f'wrong: {wrong} wrong2right: {wrong2right}, right2wrong: {right2wrong} right: {right} total_cnt: {total_cnt}')
 
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
@@ -414,8 +404,13 @@ def main():
             total_base_match, total_cnt = 0., 0
             _results = {}
             dataset_name = cfg.datasets_cfg.dataset_name.lower()
-            chat_or_xl = "sub_qas_val_xl" if cfg.runner_cfg.get("visualize_xl", False) else "sub_qas_val"
-            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{chat_or_xl}/base/result/val_epochbest.json'))
+            if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
+                subqa_type = "sub_qas_val_xl_Ktype"
+            elif cfg.runner_cfg.get("visualize_xl", False):
+                subqa_type = "sub_qas_val_xl"
+            else:
+                subqa_type = "sub_qas_val"
+            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/base/result/val_epochbest.json'))
             for r in results_base:
                 _results[r['qid']] = {
                     "question_id": r["qid"],
@@ -430,7 +425,7 @@ def main():
                 
             # for i in [0, 3, 4]:
             for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
-                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{chat_or_xl}/{i}/result/val_epochbest.json'))
+                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/{i}/result/val_epochbest.json'))
                 for r in results_subqa:
                     _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
                     _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
@@ -446,12 +441,71 @@ def main():
                 r['type'] = v["question_id"].split("_")[0]
                 results.append(r) 
             
+        elif cfg.runner_cfg.get("IGVLM_visualize", False):
+            total_base_match, total_cnt = 0., 0
+            _results = {}
+            dataset_name = cfg.datasets_cfg.dataset_name
+            
+            if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
+                subqa_type = "sub_qas_val_xl_Ktype"
+            elif cfg.runner_cfg.get("visualize_xl", False):
+                subqa_type = "sub_qas_val_xl"
+            else:
+                subqa_type = "sub_qas_val"
+                
+                
+            results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
+            
+            results_base["predicted_answer"] = results_base.apply(map_prediction_to_answer_v2, axis=1)
+            results_base["is_correct"] = results_base["predicted_answer"] == results_base["answer"]
+            
+            for idx, row in results_base.iterrows():
+                pred_base = map_prediction_to_answer_v2(row)
+                _results[row['question_id']] = {
+                    "question_id": row["question_id"],
+                    "gt_ans": row["answer"],
+                    "text_output_base": pred_base,
+                    "confidence_base": row["confidence_score"],
+                    "text_output_lba_list": [],
+                    "confidence_lba_list": [],
+                }
+                total_base_match += pred_base == row["answer"]
+                total_cnt += 1
+                
+                ours_match = pred_base == row["answer"]
+                IGVLM_match = row["predicted_answer"] == row["answer"]
+                if ours_match != IGVLM_match:
+                    import pdb; pdb.set_trace()
+                pass
+            
+            print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
+            
+            total_accuracy = results_base["is_correct"].mean()
+            print(f'IGVLM total_accuracy: {total_accuracy * 100:.2f}%')
+                
+            # for i in [0, 3, 4]:
+            for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
+                results_subqa = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/{i}/ffn=6/result.csv', index_col=0)
+                for idx, row in results_subqa.iterrows():
+                    _results[row['question_id']][f'text_output_lba_list'].append(map_prediction_to_answer_v2(row))
+                    _results[row['question_id']][f'confidence_lba_list'].append(row["confidence_score"])
+            
+            results = []
+            for k, v in _results.items():
+                max_confidence_lba = max(v['confidence_lba_list'])
+                idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
+                text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                r = v
+                r['text_output_lba'] = text_output_lba
+                r['confidence_lba'] = max_confidence_lba
+                r['type'] = v["question_id"].split("_")[0]
+                results.append(r) 
         else:
             result_path = os.path.join(output_dir, 'results_base.json')
             results = json.load(open(result_path, 'r'))
             print('load results from:', result_path)
             
-            total_base_match, total_cnt = 0., 0
+            total_base_match, total_cnt = 0, 0
             
             for result in results:
                 acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
