@@ -4,11 +4,9 @@ datasets:
   data_type: videos # [images|videos|features]
   n_frms: 4
   vqa_acc: False
-  only_scene: False
   ann_paths:
     train:
       - AnotherMissOh/AnotherMissOhQA_train_set.json
-      # - AnotherMissOh/sub_questions.json
     val:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
       # - AnotherMissOh/sub_questions_val.json # created by gpt
@@ -18,7 +16,8 @@ datasets:
   
   vis_root: AnotherMissOh/images/
   # vis_root: AnotherMissOh/AnotherMissOh_videos/total/
-  # vis_features: flipped_vqa/dramaqa/clipvitl14.pth
+  only_scene: False
+
 
   vis_processor:
     train:

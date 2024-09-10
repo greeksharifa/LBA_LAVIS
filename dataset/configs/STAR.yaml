@@ -14,7 +14,6 @@ datasets:
       # - STAR/sub_qas_val_xl.json # created by xl
       - STAR/sub_qas_val_xl_Ktype.json # created by xl, Ktype
 
-  
   vis_root: STAR/videos_480/
 
   vis_processor:

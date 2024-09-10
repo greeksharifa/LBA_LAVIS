@@ -136,8 +136,8 @@ class VideoEvalDataset(BaseDataset):
         
         sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
         if type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
-            sub_questions = sub_qa_list[0]
-            sub_answers = sub_qa_list[1]
+            sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
+            sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
         else:
             sub_questions = sub_qa_list
             sub_answers = None

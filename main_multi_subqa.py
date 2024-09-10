@@ -86,7 +86,7 @@ def main():
     elif cfg.runner_cfg.sub_mode == "frame_sampling":
         n_supple = cfg.runner_cfg.num_frame_sampling
     else:
-        n_supple = 0
+        n_supple = 1
     
     if cfg.runner_cfg.recomposer_name == "flipped_vqa":
         import pickle
@@ -153,18 +153,17 @@ def main():
                         print(f'{k}: {v.shape}')
                     elif isinstance(v, list) and hasattr(v[0], "shape"):
                         print(f'{k}: {len(v)} {v[0].shape}')
+                    elif isinstance(v, list) and v[0] == []:
+                        print(f'{k}: {len(v)}, v[0]==[]')
                     elif isinstance(v, list) and isinstance(v[0], list) and hasattr(v[0][0], "shape"):
                         print(f'{k}: {len(v)} {len(v[0])} {v[0][0].shape}')
                     elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], list) and hasattr(v[0][0][0], "shape"):
                         print(f'{k}: {len(v)} {len(v[0])} {len(v[0][0])} {v[0][0][0].shape}')
                     elif k != "candidate_list":
                         print(f'{k}: {v}')
-                # pprint(batch, width=300)
 
             bsz = len(batch['vision'])
             vision = batch['vision']
-            
-            # import pdb; pdb.set_trace()
             
             """##############################  Baseline Inference   ##############################"""    
             if cfg.runner_cfg.recomposer_name == "sevila":
@@ -207,7 +206,10 @@ def main():
                         # using pre-generated sub_questions
                         sub_questions = []
                         for b in range(bsz):
-                            sub_questions.append(batch['sub_question_list'][b][i])
+                            try:
+                                sub_questions.append(batch['sub_question_list'][b][i])
+                            except:
+                                import pdb; pdb.set_trace()
                     else:
                         if cfg.runner_cfg.vision_supple:# and i >= 1:
                             vision = []
@@ -221,10 +223,12 @@ def main():
                         else:
                             beam_search = i==0
                             sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search)
-                        # if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
-                        #     sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
-                        # else:                               # Only Text, flan-t5
-                        #     sub_questions = decomposer(text_inputs)
+                        """
+                        if cfg.runner_cfg.recomposer_name == "sevila" or cfg.runner_cfg.decomposer_name == "self":  # Image+Text, BLIP-2
+                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True)
+                        else:                               # Only Text, flan-t5
+                            sub_questions = decomposer(text_inputs)
+                        """
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers
@@ -376,6 +380,8 @@ def main():
                     "confidence_lba": final_confidences_lba[i], #confidences_lba[i],
                     "text_output_base": text_outputs_base[i],
                     "text_output_lba": final_text_outputs_lba[i], #text_outputs_lba[i],
+                    "text_outputs_lba_list": text_outputs_lba_list[i],
+                    "confidences_lba_list": confidences_lba_list[i],
                 })
                 if args.verbose:
                     w2r, r2w, w, r = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
@@ -390,8 +396,7 @@ def main():
                 results.append(result)
             
             if args.verbose:
-                print()
-                print(f'wrong: {wrong} wrong2right: {wrong2right}, right2wrong: {right2wrong} right: {right} total_cnt: {total_cnt}')
+                print(f'\nwrong: {wrong} wrong2right: {wrong2right}, right2wrong: {right2wrong} right: {right} total_cnt: {total_cnt}')
 
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
@@ -463,6 +468,7 @@ def main():
                 pred_base = map_prediction_to_answer_v2(row)
                 _results[row['question_id']] = {
                     "question_id": row["question_id"],
+                    "type": row["question_type"],
                     "gt_ans": row["answer"],
                     "text_output_base": pred_base,
                     "confidence_base": row["confidence_score"],
@@ -498,7 +504,7 @@ def main():
                 r = v
                 r['text_output_lba'] = text_output_lba
                 r['confidence_lba'] = max_confidence_lba
-                r['type'] = v["question_id"].split("_")[0]
+                r['type'] = v["type"].split("_")[0] #v["question_id"].split("_")[0]
                 results.append(r) 
         else:
             result_path = os.path.join(output_dir, 'results_base.json')
@@ -511,6 +517,15 @@ def main():
                 acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
                 total_base_match += acc_base
                 total_cnt += 1
+                
+                # select highest confidence_lba among sub_qa
+                if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
+                    max_confidence_lba = max(result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate])
+                    idx_max_confidence_lba = result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate].index(max_confidence_lba)
+                    text_output_lba = result['text_outputs_lba_list'][:cfg.runner_cfg.num_sub_qa_generate][idx_max_confidence_lba]
+                    result['text_output_lba'] = text_output_lba
+                    result['confidence_lba'] = max_confidence_lba
+                
             
             print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
