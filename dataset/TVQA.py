@@ -42,8 +42,14 @@ class TVQAEvalDataset(VideoEvalDataset):
         for i in range(ann["num_option"]):
             candidate_list.append(ann[f'a{i}'])
         
-        sub_question_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_questions') else None
-            
+        sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
+        if type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+            sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
+            sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
+        else:
+            sub_questions = sub_qa_list
+            sub_answers = None
+    
         return {
             "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
@@ -54,7 +60,8 @@ class TVQAEvalDataset(VideoEvalDataset):
             "answer_sentence": candidate_list[gt_ans],
             # "type": question_type,
             "vid": vid,
-            "sub_question_list": sub_question_list,
+            "sub_question_list": sub_questions,
+            "sub_answer_list": sub_answers,
             # "instance_id": ann["instance_id"],
         }
    

@@ -351,7 +351,7 @@ def main():
                 # select highest confidence_lba among sub_qa
                 index = confidence_lba_list.index(max(confidence_lba_list))
                 final_text_outputs_lba.append(text_output_lba_list[index])
-                final_confidences_lba.append(round(confidence_lba_list[index], 6))
+                final_confidences_lba.append(round(confidence_lba_list[index], 6)) # 10?
                 indices.append(index)
             
             if args.verbose:

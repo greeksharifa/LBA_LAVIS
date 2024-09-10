@@ -33,7 +33,6 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     N = len(results)
     M = max(1, N // cfg.runner_cfg.num_bin)
     H = cfg.runner_cfg.get("num_heatmap_row", 10)
-    HH = max(1, N // H)
     
     results = get_conf_rank(results, key, H)
     
