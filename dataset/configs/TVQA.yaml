@@ -11,27 +11,8 @@ datasets:
       - TVQA/sevila_style/val.json
       # - TVQA/sub_questions_val.json # created by gpt
       # - TVQA/sub_qas_val.json # created by gpt
+      - TVQA/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
       # - TVQA/sub_qas_val_xl.json # created by xl
-      - TVQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
+      # - TVQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: TVQA/frames_hq/
-
-  vis_processor:
-    train:
-      name: "blip_video_eval"
-      n_frms: 4
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-    eval:
-      name: "blip_video_eval"
-      n_frms: 4
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-  text_processor:
-    train:
-      name: "blip_question"
-    eval:
-      name: "blip_caption"
-      

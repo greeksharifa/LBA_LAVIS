@@ -9,7 +9,8 @@ from transformers import InstructBlipProcessor, InstructBlipForConditionalGenera
 from processors.alpro_processors import AlproVideoEvalProcessor
 from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 from accelerate import infer_auto_device_map
-# from _v1.lavis.models.blip2_models.
+
+from utils.api_chatgpt import call_vision_api, ndarrays_to_base64
 
 import numpy as np
 import torch

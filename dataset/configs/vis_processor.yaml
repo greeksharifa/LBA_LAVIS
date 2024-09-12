@@ -1,0 +1,20 @@
+
+  vis_processor:
+    train:
+      name: "blip_video_eval"
+      n_frms: 4
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+    eval:
+      name: "blip_video_eval"
+      n_frms: 4
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+  text_processor:
+    train:
+      name: "blip_question"
+    eval:
+      name: "blip_caption"
+      

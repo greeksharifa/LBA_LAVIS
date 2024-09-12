@@ -175,9 +175,9 @@ def get_train_examplar(datasets_cfg):
             
 def get_text_input(
     prompt_type:str="default",
-    main_questions:List[str]='',
-    sub_questions:List[str]='',
-    sub_answers:List[str]='',
+    main_questions:List[str]=[],
+    sub_questions:List[str]=[],
+    sub_answers:List[str]=[],
     candidate_lists: List[List[str]]=[],
     gt_answers:List[str]=[],
     question_ids:List[str]=[],

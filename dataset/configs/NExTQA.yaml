@@ -11,27 +11,8 @@ datasets:
       - NExT_QA/sevila_style/val.json
       # - NExT_QA/sub_questions_val.json # created by gpt
       # - NExT_QA/sub_qas_val.json # created by gpt
+      - NExT_QA/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
       # - NExT_QA/sub_qas_val_xl.json # created by xl
-      - NExT_QA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
+      # - NExT_QA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: NExT_QA/NExTVideo/
-
-  vis_processor:
-    train:
-      name: "blip_video_eval"
-      n_frms: 4
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-    eval:
-      name: "blip_video_eval"
-      n_frms: 4
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-  text_processor:
-    train:
-      name: "blip_question"
-    eval:
-      name: "blip_caption"
-      

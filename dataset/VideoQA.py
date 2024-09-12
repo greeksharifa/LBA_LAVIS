@@ -136,7 +136,10 @@ class VideoEvalDataset(BaseDataset):
         # STAR   : Interaction, Sequence, Prediction, Feasibility 
         
         sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
-        if type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+        if sub_qa_list is None:
+            sub_questions = None
+            sub_answers = None
+        elif type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
             sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
             sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
         else:

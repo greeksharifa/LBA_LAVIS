@@ -11,30 +11,10 @@ datasets:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
       # - AnotherMissOh/sub_questions_val.json # created by gpt
       # - AnotherMissOh/sub_qas_val.json # created by gpt
+      - AnotherMissOh/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
       # - AnotherMissOh/sub_qas_val_xl.json # created by xl
-      - AnotherMissOh/sub_qas_val_xl_Ktype.json # created by xl, Ktype
+      # - AnotherMissOh/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: AnotherMissOh/images/
   # vis_root: AnotherMissOh/AnotherMissOh_videos/total/
   only_scene: False
-
-
-  vis_processor:
-    train:
-      name: alpro_video_train
-      n_frms: 5
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-    eval:
-      name: alpro_video_eval
-      n_frms: 5
-      image_size: 224
-      min_scale: 0.9
-      max_scale: 1.0
-  text_processor:
-    train:
-      name: "blip_question"
-    eval:
-      name: "blip_caption"
-      

@@ -163,7 +163,7 @@ def main():
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
             gt_answers = [dataset.answer_mapping(ans) for ans in gt_answers]
-                    
+            
             acc_base = dataset.get_accuracy(text_outputs_base, gt_answers)
 
             total_base_match += sum(acc_base)
@@ -477,9 +477,15 @@ def main():
                 
                 # select highest confidence_lba among sub_qa
                 if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
+                    # result['confidences_lba_list'] = [result['confidences_lba_list'][i] for i in idxs]
+                    # result['text_outputs_lba_list'] = [result['text_outputs_lba_list'][i] for i in idxs]
+                    # max_confidence_lba = max(result['confidences_lba_list'])
+                    # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
+                    # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
                     max_confidence_lba = max(result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate])
                     idx_max_confidence_lba = result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate].index(max_confidence_lba)
                     text_output_lba = result['text_outputs_lba_list'][:cfg.runner_cfg.num_sub_qa_generate][idx_max_confidence_lba]
+                    
                     result['text_output_lba'] = text_output_lba
                     result['confidence_lba'] = max_confidence_lba
                 
