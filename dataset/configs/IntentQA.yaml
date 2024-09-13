@@ -1,0 +1,19 @@
+
+
+datasets:
+  data_type: videos # [images|videos|features]
+  n_frms: 4
+  vqa_acc: False
+  ann_paths:
+    train:
+      - IntentQA/train.csv
+    val:
+      - IntentQA/val.csv
+      # - IntentQA/sub_questions_val.json # created by gpt
+      # - IntentQA/sub_qas_val.json # created by gpt
+      # - IntentQA/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
+      # - IntentQA/sub_qas_val_xl.json # created by xl
+      # - IntentQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
+  
+  vis_root: IntentQA/fixed_videos/
+  

@@ -30,6 +30,12 @@ def load_dataset(datasets_cfg, split='val', n_supple=0):
     elif datasets_cfg.dataset_name == "VLEP": # '/data/VLEP/sevila_style/vlep_frames/friends_s03e09_seg02_clip_07_ep.mp4'
         from dataset.VLEP import VLEPEvalDataset
         cls = VLEPEvalDataset
+    elif datasets_cfg.dataset_name == "IntentQA":
+        from dataset.IntentQA import IntentQAEvalDataset
+        cls = IntentQAEvalDataset
+    elif datasets_cfg.dataset_name == "EgoSchema":
+        from dataset.EgoSchema import EgoSchemaEvalDataset
+        cls = EgoSchemaEvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
         

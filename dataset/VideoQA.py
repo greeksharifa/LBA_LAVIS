@@ -5,6 +5,7 @@ from collections import OrderedDict
 from PIL import Image
 
 import numpy as np
+import pandas as pd
 import torch
 from torchvision import transforms
 
@@ -55,7 +56,15 @@ class VideoEvalDataset(BaseDataset):
             setattr(self, k, v)
         
         with open(ann_path, "r") as f:
-            loaded = json.load(f)
+            if ann_path.endswith('.json'):
+                loaded = json.load(f)
+            elif ann_path.endswith('.jsonl'):
+                loaded = [json.loads(line) for line in f]
+            elif ann_path.endswith('.csv'):
+                df = pd.read_csv(f)
+                loaded = df.to_dict(orient='records')
+            else:
+                raise ValueError(f"Unsupported file extension: {ann_path}")
             
             if num_data == -1: # use all dataset
                 len_loaded = len(loaded)
@@ -66,7 +75,12 @@ class VideoEvalDataset(BaseDataset):
                 if len(self.annotation) >= len_loaded: # 0 <= num_data <= i:
                     break
                     
-                vid = sample["video"]
+                for key in ["video", "vid", "video_id", "video_name"]:
+                    if key in sample:
+                        vid = sample[key]
+                        break
+                else:
+                    raise ValueError(f"Unsupported vid: {ann_path}, {sample}")
                 print(f'\r{i+1:6d}/{len_loaded:6d} : {vid}', end='')
                 
                 self.annotation.append(sample)
@@ -147,7 +161,7 @@ class VideoEvalDataset(BaseDataset):
             sub_answers = None
 
         return {
-            "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
+            "vision": frms, # frms, # list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
             "text_input": question,
             "question_id": question_id,
