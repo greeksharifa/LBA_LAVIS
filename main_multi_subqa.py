@@ -363,6 +363,7 @@ def main():
         s = datetime.now()
     else:
         if cfg.runner_cfg.get("sevila_visualize", False):
+            # python main_multi_subqa.py --options runner.visualize=True runner.sevila_visualize=True runner.output_dir="output/visualize_sevila/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="VLEP" runner.num_sub_qa_generate=1 runner.visualize_xl=True
             total_base_match, total_cnt = 0., 0
             _results = {}
             dataset_name = cfg.datasets_cfg.dataset_name.lower()
@@ -370,6 +371,8 @@ def main():
                 subqa_type = "sub_qas_val_xl_Ktype"
             elif cfg.runner_cfg.get("visualize_xl", False):
                 subqa_type = "sub_qas_val_xl"
+            elif cfg.runner_cfg.get("visualize_fvu", False):
+                subqa_type = "sub_qas_val_fvu"
             else:
                 subqa_type = "sub_qas_val"
             results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/base/result/val_epochbest.json'))
@@ -404,16 +407,17 @@ def main():
                 results.append(r) 
             
         elif cfg.runner_cfg.get("IGVLM_visualize", False):
+            # python main_multi_subqa.py --options runner.visualize=True runner.IGVLM_visualize=True runner.output_dir="output/visualize_IGVLM/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="TVQA" runner.num_sub_qa_generate=4 runner.visualize_xl=True
             total_base_match, total_cnt = 0., 0
             _results = {}
             dataset_name = cfg.datasets_cfg.dataset_name
             
             if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
                 subqa_type = "sub_qas_val_xl_Ktype"
-            elif cfg.runner_cfg.get("visualize_xl", False):
-                subqa_type = "sub_qas_val_xl"
+            elif cfg.runner_cfg.get("visualize_xl_fvu", False):
+                subqa_type = "sub_qas_val_fewshot_vqaintrospect_unique"
             else:
-                subqa_type = "sub_qas_val"
+                subqa_type = "sub_qas_val_xl"
                 
                 
             results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
@@ -424,14 +428,16 @@ def main():
             for idx, row in results_base.iterrows():
                 pred_base = map_prediction_to_answer_v2(row)
                 _results[row['question_id']] = {
-                    "question_id": row["question_id"],
-                    "type": row["question_type"],
+                    "question_id": str(row["question_id"]),
+                    # "type": row["question_type"],
                     "gt_ans": row["answer"],
                     "text_output_base": pred_base,
                     "confidence_base": row["confidence_score"],
                     "text_output_lba_list": [],
                     "confidence_lba_list": [],
                 }
+                if "question_type" in row:
+                    _results[row['question_id']]["type"] = row["question_type"].split("_")[0]
                 total_base_match += pred_base == row["answer"]
                 total_cnt += 1
                 
@@ -461,7 +467,7 @@ def main():
                 r = v
                 r['text_output_lba'] = text_output_lba
                 r['confidence_lba'] = max_confidence_lba
-                r['type'] = v["type"].split("_")[0] #v["question_id"].split("_")[0]
+                # r['type'] = r["type"].split("_")[0] #v["question_id"].split("_")[0]
                 results.append(r) 
         else:
             result_path = os.path.join(output_dir, 'results_base.json')
@@ -492,8 +498,6 @@ def main():
             
             print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
-    print('Recomposer')
-    print('recomposer.model_name:', cfg.runner_cfg.recomposer_name)
     try:
         print('recomposer.model.__class__.__name__:', recomposer.model.__class__.__name__)
     except:
