@@ -202,11 +202,11 @@ def main():
             #     print(f'Main Question: {main_question}\nSub Question: {sub_question}\nSub Answer: {sub_answer}\n')
             # import pdb; pdb.set_trace()
             
-    out_path = f"temp/subqa/sub_qas_{cfg.datasets_cfg.dataset_name}_{cfg.runner_cfg.sub_mode}.json"
+    out_path = f"temp/subqa/sub_qas_val_{model_name.split('-')[-1]}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_xl_{cfg.runner_cfg.sub_mode}.json"
+    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{model_name.split('-')[-1]}_{cfg.runner_cfg.sub_mode}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
