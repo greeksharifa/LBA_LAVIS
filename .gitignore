@@ -12,6 +12,7 @@ dataset/dummy.py
 DramaQA_vid_error_list.json
 generate_subqa_*
 utils/api_chatgpt.py
+call_chatgpt.py
 
 # data / model
 llm/

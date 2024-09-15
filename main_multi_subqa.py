@@ -415,7 +415,7 @@ def main():
             if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
                 subqa_type = "sub_qas_val_xl_Ktype"
             elif cfg.runner_cfg.get("visualize_xl_fvu", False):
-                subqa_type = "sub_qas_val_fewshot_vqaintrospect_unique"
+                subqa_type = "sub_qas_val_xl_fvu"#"sub_qas_val_fewshot_vqaintrospect_unique"
             else:
                 subqa_type = "sub_qas_val_xl"
                 
