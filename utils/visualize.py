@@ -161,6 +161,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     acc_bin_lba = [sum(bin) / len(bin) for bin in bins_lba if len(bin) > 0]
     plt.plot([i for i in range(len(acc_bin_base))], acc_bin_base, color='r')
     plt.plot([i for i in range(len(acc_bin_lba))], acc_bin_lba, color='g')
+    # acc_bin_base = acc_bin_base[:cfg.runner_cfg.num_bin]
+    # plt.plot([i+0.5 for i in range(len(acc_bin_base))], acc_bin_base, color='r')
+    # json.dump(acc_bin_base, open(os.path.join(output_dir, f'vis/{cfg.datasets_cfg.dataset_name}_BLIP2.json'), 'w'))
     
     plt.title(f'{cfg.datasets_cfg.dataset_name} | acc for {cfg.runner_cfg.num_bin} bins by conf') # len(acc_bin)
     plt.xlabel('Confidence Percentile')
@@ -192,9 +195,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     # hue_order=[1, 0, -1], 
                     size='size', sizes=(3, 7))
     # plt.legend(title='Class', labels=[label_map[i] for i in range(4)])
-    plt.title(f'{cfg.datasets_cfg.dataset_name} | class 0: both wrong, 1: right -> wrong, 2: wrong -> right, 3: both right')
-    plt.xlabel('Confidence Base')
-    plt.ylabel('Confidence LBA')
+    plt.title(f'{cfg.datasets_cfg.dataset_name}')
+    plt.xlabel('log Confidence score, Baseline')
+    plt.ylabel('log Confidence score, LBA')
     fig_path = os.path.join(output_dir, "scatter.png")
     plt.savefig(fig_path, dpi=300)
     print(f'saved scatter fig path is {fig_path}')
@@ -207,11 +210,6 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
         "Previous_work_acc    ": f'{baseline_max_match / N * 100:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
-        "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
-        "confidence_percentile": f'{confidence_percentile:.2f}%',
-        "E_CR                 ": f'{e_cr:.2f}%',
-        "E_IC                 ": f'{e_ic:.2f}%',
-        "min_match            ": f'{min_match / N * 100:.2f}%',
     })
     
     pprint(results[0], width=300)
@@ -260,6 +258,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     # print(f'{q_type:<21s}: {qtype_v}')
                     metrics[f'{q_type:<21s}'] = qtype_v
     
+    metrics.update({
+        "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
+        "confidence_percentile": f'{confidence_percentile:.2f}%',
+        "E_CR                 ": f'{e_cr:.2f}%',
+        "E_IC                 ": f'{e_ic:.2f}%',
+        # "min_match            ": f'{min_match / N * 100:.2f}%',
+    })
+    
     print("metrics:", json.dumps(metrics, indent=4))
 
     # if not cfg.runner_cfg.visualize:
@@ -274,6 +280,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.get("vision_supple", False), end='\t')
     print(cfg.runner_cfg.get("use_pre_generated_sub_q", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
+    print(cfg.runner_cfg.get("num_sub_qa_select", 1), end='\t')
     print(f'{max_conf_gap:.5f}', end='\t')
 
 
