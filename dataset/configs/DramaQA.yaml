@@ -11,7 +11,7 @@ datasets:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
       # - AnotherMissOh/sub_questions_val.json # created by gpt
       # - AnotherMissOh/sub_qas_val.json # created by gpt
-      - AnotherMissOh/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
+      - AnotherMissOh/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - AnotherMissOh/sub_qas_val_xl.json # created by xl
       # - AnotherMissOh/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   

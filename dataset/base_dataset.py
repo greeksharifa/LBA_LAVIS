@@ -240,12 +240,17 @@ Answer: The answer is (A)\n"""
         """
     elif prompt_type == "recomposer_video":
         prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
-        prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        # prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt += "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):
+            sub_qas = ""
+            for sq, sa in zip(sub_question, sub_answer):
+                sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
-            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
+            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas, choices=choices))
+            # ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
         return ret
     elif prompt_type == "recomposer_video_description":
         prompt = "Video Description: {description}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "

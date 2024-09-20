@@ -11,7 +11,7 @@ datasets:
       - IntentQA/val.csv
       # - IntentQA/sub_questions_val.json # created by gpt
       # - IntentQA/sub_qas_val.json # created by gpt
-      # - IntentQA/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
+      # - IntentQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - IntentQA/sub_qas_val_xl.json # created by xl
       # - IntentQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   

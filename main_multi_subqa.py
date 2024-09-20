@@ -181,10 +181,13 @@ def main():
                     # generating sub_questions
                     if cfg.runner_cfg.use_pre_generated_sub_q:
                         # using pre-generated sub_questions
-                        sub_questions = []
+                        sub_questions = [[] for _ in range(bsz)]
+                        # sub_questions = []
                         for b in range(bsz):
                             try:
-                                sub_questions.append(batch['sub_question_list'][b][i])
+                                for j in range(int(cfg.runner_cfg.num_sub_qa_select)):
+                                    sub_questions[b].append(batch['sub_question_list'][b][i+j])
+                                # sub_questions.append(batch['sub_question_list'][b][i])
                             except:
                                 import pdb; pdb.set_trace()
                     else:
@@ -204,9 +207,12 @@ def main():
                     
                     # generating sub_answers
                     if cfg.runner_cfg.use_pre_generated_sub_a:
-                        sub_answers = []
+                        sub_answers = [[] for _ in range(bsz)]
+                        # sub_answers = []
                         for b in range(bsz):
-                            sub_answers.append(batch['sub_answer_list'][b][i])
+                            for j in range(int(cfg.runner_cfg.num_sub_qa_select)):
+                                sub_answers[b].append(batch['sub_answer_list'][b][i+j])
+                            # sub_answers.append(batch['sub_answer_list'][b][i])
                     else:
                         text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
                         sub_answers, _ = answerer(vision, text_inputs)

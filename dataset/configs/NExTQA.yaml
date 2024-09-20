@@ -11,7 +11,7 @@ datasets:
       - NExT_QA/sevila_style/val.json
       # - NExT_QA/sub_questions_val.json # created by gpt
       # - NExT_QA/sub_qas_val.json # created by gpt
-      - NExT_QA/sub_qas_val_fewshot_vqaintrospect_unique.json # created by xl
+      - NExT_QA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - NExT_QA/sub_qas_val_xl.json # created by xl
       # - NExT_QA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
