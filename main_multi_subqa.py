@@ -185,8 +185,8 @@ def main():
                         # sub_questions = []
                         for b in range(bsz):
                             try:
-                                for j in range(int(cfg.runner_cfg.num_sub_qa_select)):
-                                    sub_questions[b].append(batch['sub_question_list'][b][i+j])
+                                for j in range(cfg.runner_cfg.num_sub_qa_select):
+                                    sub_questions[b].append(batch['sub_question_list'][b][(i+j) % cfg.runner_cfg.num_sub_qa_generate])
                                 # sub_questions.append(batch['sub_question_list'][b][i])
                             except:
                                 import pdb; pdb.set_trace()
@@ -210,8 +210,8 @@ def main():
                         sub_answers = [[] for _ in range(bsz)]
                         # sub_answers = []
                         for b in range(bsz):
-                            for j in range(int(cfg.runner_cfg.num_sub_qa_select)):
-                                sub_answers[b].append(batch['sub_answer_list'][b][i+j])
+                            for j in range(cfg.runner_cfg.num_sub_qa_select):
+                                sub_answers[b].append(batch['sub_answer_list'][b][(i+j) % cfg.runner_cfg.num_sub_qa_generate])
                             # sub_answers.append(batch['sub_answer_list'][b][i])
                     else:
                         text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
