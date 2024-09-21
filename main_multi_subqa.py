@@ -6,6 +6,7 @@ from tqdm import tqdm
 from datetime import datetime
 from pprint import pprint
 from collections import OrderedDict
+from itertools import combinations
 import PIL
 import random
 
@@ -94,6 +95,23 @@ def main():
         dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple)
         dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                                 shuffle=False, collate_fn=dataset.collater)
+    
+    if cfg.runner_cfg.sub_mode == "multi_subqa":
+        single_subqa_results = json.load(open(f'{cfg.runner_cfg.single_subqa_output_dir}/results_base.json'))
+        single_subqa_results = {r["question_id"]: r for r in single_subqa_results}
+        def get_combinations(size):
+            return list(combinations(list(range(5)), size))
+
+        # Get all combinations for sizes 2, 3, 4, and 5
+        all_combinations = []
+        for size in range(2, 6):
+            all_combinations.extend(get_combinations(size))
+
+        # Print the list of all combinations
+        print("List of all combinations:")
+        for combo in all_combinations:
+            print(combo)
+    
     print('dataset loading time : ', datetime.now()-s)
     
     if not cfg.runner_cfg.visualize:
@@ -248,6 +266,105 @@ def main():
                     if args.verbose:
                         # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
                         print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            
+            elif cfg.runner_cfg.sub_mode == "multi_subqa_highest": # always use pre-generated sub_q
+                batch_rank_list = []
+                for b in range(bsz):
+                    question_id = batch['question_id'][i]
+                    ss_result = single_subqa_results[question_id]
+                    # ss_text_outputs_lba_list = ss_result['text_outputs_lba_list']
+                    ss_confidences_lba_list = ss_result['confidences_lba_list']
+
+                    indexed_confidences = list(enumerate(ss_confidences_lba_list))
+                    sorted_confidences = sorted(indexed_confidences, key=lambda x: x[1], reverse=True)
+                    rank_list = [0] * len(ss_confidences_lba_list)
+                    for rank, (original_index, _) in enumerate(sorted_confidences):
+                        rank_list[rank] = original_index
+                    batch_rank_list.append(rank_list)
+                
+                # get num_sub_qa_select sub_qas with higher confidences
+                sub_questions = [[] for _ in range(bsz)]
+                sub_answers = [[] for _ in range(bsz)]
+                for b in range(bsz):
+                    for j in range(cfg.runner_cfg.num_sub_qa_select):
+                        idx = batch_rank_list[b][j]
+                        sub_questions.append(batch['sub_question_list'][b][idx])
+                        sub_answers.append(batch['sub_answer_list'][b][idx])
+                
+                # generating recomposed_answers
+                if cfg.datasets_cfg.data_type == "videos":
+                    text_inputs = get_text_input("recomposer_video", 
+                                                main_questions=batch['text_input'], 
+                                                sub_questions=sub_questions, 
+                                                sub_answers=sub_answers,
+                                                candidate_lists=batch['candidate_list'],
+                                                examplar=examplar,
+                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
+                                                video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
+                                                )
+                else:                          # "images"
+                    text_inputs = get_text_input("recomposer_image", 
+                                                main_questions=batch['text_input'], 
+                                                sub_questions=sub_questions, 
+                                                sub_answers=sub_answers)
+                text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                
+                if cfg.runner_cfg.debug:
+                    t_inputs = text_inputs[0]
+                    print('sub_questions text_inputs:', t_inputs)
+                    print('sub_answers text_inputs:', t_inputs)
+                    print('recomposer_video text_inputs:', t_inputs)
+                    
+                text_outputs_lba_list.append(text_outputs_lba)
+                confidences_lba_list.append(confidences_lba)
+                
+                if args.verbose:
+                    # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                    print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            
+            elif cfg.runner_cfg.sub_mode == "multi_subqa_combo": # always use pre-generated sub_q
+                all_combinations = all_combinations
+                for combinations in all_combinations:
+                    sub_questions = [[] for _ in range(bsz)]
+                    sub_answers = [[] for _ in range(bsz)]
+                    for b in range(bsz):
+                        for j in combinations:
+                            sub_questions[b].append(batch['sub_question_list'][b][j])
+                            sub_answers[b].append(batch['sub_answer_list'][b][j])
+                    sub_questions_list.append(sub_questions)
+                    sub_answers_list.append(sub_answers)
+                    
+                    # generating recomposed_answers
+                    if cfg.datasets_cfg.data_type == "videos":
+                        text_inputs = get_text_input("recomposer_video", 
+                                                    main_questions=batch['text_input'], 
+                                                    sub_questions=sub_questions, 
+                                                    sub_answers=sub_answers,
+                                                    candidate_lists=batch['candidate_list'],
+                                                    examplar=examplar,
+                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
+                                                    video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
+                                                    )
+                    else:                          # "images"
+                        text_inputs = get_text_input("recomposer_image", 
+                                                    main_questions=batch['text_input'], 
+                                                    sub_questions=sub_questions, 
+                                                    sub_answers=sub_answers)
+                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                    
+                    if cfg.runner_cfg.debug:
+                        t_inputs = text_inputs[0]
+                        print('sub_questions text_inputs:', t_inputs)
+                        print('sub_answers text_inputs:', t_inputs)
+                        print('recomposer_video text_inputs:', t_inputs)
+                        
+                    text_outputs_lba_list.append(text_outputs_lba)
+                    confidences_lba_list.append(confidences_lba)
+                    
+                    if args.verbose:
+                        # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                        print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+                
                     
             elif cfg.runner_cfg.sub_mode == "description":
                 descriptions_list = []
