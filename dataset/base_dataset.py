@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
 
-def load_dataset(datasets_cfg, split='val', n_supple=0):
+def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl=None):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -38,12 +38,15 @@ def load_dataset(datasets_cfg, split='val', n_supple=0):
         cls = EgoSchemaEvalDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
+
+    ann_paths = [os.path.join(datasets_cfg.root_dir, path) for path in datasets_cfg.ann_paths.get(datasets_cfg.split, split)]
+    ann_paths = [path.replace("xl", xl_or_xxl) for path in ann_paths]
         
     dataset = cls(
         vis_processor=None,
         text_processor=None,
         vis_root=os.path.join(datasets_cfg.root_dir, datasets_cfg.vis_root),
-        ann_paths=[os.path.join(datasets_cfg.root_dir, path) for path in datasets_cfg.ann_paths.get(datasets_cfg.split, split)],
+        ann_paths=ann_paths,
         num_data=datasets_cfg.num_data,
         vqa_acc=datasets_cfg.vqa_acc,
         n_frms=datasets_cfg.get("n_frms", 4),
@@ -246,6 +249,9 @@ Answer: The answer is (A)\n"""
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):
             sub_qas = ""
+            if isinstance(sub_question, str):
+                sub_question = [sub_question]
+                sub_answer = [sub_answer]
             for sq, sa in zip(sub_question, sub_answer):
                 sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])

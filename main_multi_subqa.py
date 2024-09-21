@@ -92,22 +92,21 @@ def main():
         flipped_vqa_model, dataloader = get_flipped_vqa_model(flipped_vqa_args, device="cuda:0")
     
     else:        
-        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple)
+        xl_or_xxl = "xxl" if "xxl" in cfg.runner_cfg.recomposer_name else "xl"
+        print('xl_or_xxl:', xl_or_xxl)
+        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl)
         dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                                 shuffle=False, collate_fn=dataset.collater)
     
-    if cfg.runner_cfg.sub_mode == "multi_subqa":
+    if cfg.runner_cfg.sub_mode == "multi_subqa_highest":
         single_subqa_results = json.load(open(f'{cfg.runner_cfg.single_subqa_output_dir}/results_base.json'))
         single_subqa_results = {r["question_id"]: r for r in single_subqa_results}
-        def get_combinations(size):
-            return list(combinations(list(range(5)), size))
-
+        
+    if cfg.runner_cfg.sub_mode == "multi_subqa_combo":
         # Get all combinations for sizes 2, 3, 4, and 5
         all_combinations = []
         for size in range(2, 6):
-            all_combinations.extend(get_combinations(size))
-
-        # Print the list of all combinations
+            all_combinations.extend(list(combinations(list(range(5)), size)))
         print("List of all combinations:")
         for combo in all_combinations:
             print(combo)
@@ -177,7 +176,9 @@ def main():
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(vision, text_inputs)
-            print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
+            
+            if args.verbose:
+                print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
 
             gt_answers = batch['gt_ans']  # vqa: list[bsz, 10], videoqa: list[bsz]
             gt_answers = [dataset.answer_mapping(ans) for ans in gt_answers]
@@ -189,7 +190,8 @@ def main():
             metric_logger.update(n=bsz, base_acc=sum(acc_base)/bsz)
             metric_logger.update(n=bsz, total_base_acc=total_base_match/total_cnt)
             
-            print("batch['text_input'][0]:", batch['text_input'][0])
+            if args.verbose:
+                print("batch['text_input'][0]:", batch['text_input'][0])
             
             """############################## Decompose & Recompose ##############################"""
             sub_questions_list, sub_answers_list, text_outputs_lba_list, confidences_lba_list = [], [], [], []
@@ -263,23 +265,17 @@ def main():
                     text_outputs_lba_list.append(text_outputs_lba)
                     confidences_lba_list.append(confidences_lba)
                     
-                    if args.verbose:
-                        # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
-                        print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-            
             elif cfg.runner_cfg.sub_mode == "multi_subqa_highest": # always use pre-generated sub_q
                 batch_rank_list = []
                 for b in range(bsz):
-                    question_id = batch['question_id'][i]
+                    question_id = batch['question_id'][b]
                     ss_result = single_subqa_results[question_id]
                     # ss_text_outputs_lba_list = ss_result['text_outputs_lba_list']
                     ss_confidences_lba_list = ss_result['confidences_lba_list']
 
                     indexed_confidences = list(enumerate(ss_confidences_lba_list))
                     sorted_confidences = sorted(indexed_confidences, key=lambda x: x[1], reverse=True)
-                    rank_list = [0] * len(ss_confidences_lba_list)
-                    for rank, (original_index, _) in enumerate(sorted_confidences):
-                        rank_list[rank] = original_index
+                    rank_list = [original_index for original_index, _ in sorted_confidences]
                     batch_rank_list.append(rank_list)
                 
                 # get num_sub_qa_select sub_qas with higher confidences
@@ -288,8 +284,8 @@ def main():
                 for b in range(bsz):
                     for j in range(cfg.runner_cfg.num_sub_qa_select):
                         idx = batch_rank_list[b][j]
-                        sub_questions.append(batch['sub_question_list'][b][idx])
-                        sub_answers.append(batch['sub_answer_list'][b][idx])
+                        sub_questions[b].append(batch['sub_question_list'][b][idx])
+                        sub_answers[b].append(batch['sub_answer_list'][b][idx])
                 
                 # generating recomposed_answers
                 if cfg.datasets_cfg.data_type == "videos":
@@ -318,19 +314,14 @@ def main():
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
                 
-                if args.verbose:
-                    # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
-                    print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-            
             elif cfg.runner_cfg.sub_mode == "multi_subqa_combo": # always use pre-generated sub_q
-                all_combinations = all_combinations
-                for combinations in all_combinations:
+                for _combinations in all_combinations:
                     sub_questions = [[] for _ in range(bsz)]
                     sub_answers = [[] for _ in range(bsz)]
                     for b in range(bsz):
-                        for j in combinations:
-                            sub_questions[b].append(batch['sub_question_list'][b][j])
-                            sub_answers[b].append(batch['sub_answer_list'][b][j])
+                        for idx in _combinations:
+                            sub_questions[b].append(batch['sub_question_list'][b][idx])
+                            sub_answers[b].append(batch['sub_answer_list'][b][idx])
                     sub_questions_list.append(sub_questions)
                     sub_answers_list.append(sub_answers)
                     
@@ -350,6 +341,7 @@ def main():
                                                     main_questions=batch['text_input'], 
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
+                    import pdb; pdb.set_trace()
                     text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                     
                     if cfg.runner_cfg.debug:
@@ -360,12 +352,7 @@ def main():
                         
                     text_outputs_lba_list.append(text_outputs_lba)
                     confidences_lba_list.append(confidences_lba)
-                    
-                    if args.verbose:
-                        # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
-                        print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-                
-                    
+                   
             elif cfg.runner_cfg.sub_mode == "description":
                 descriptions_list = []
                 text_inputs = ["Describe the video in detail. What is happening in the video?" for _ in range(bsz)]
@@ -393,10 +380,6 @@ def main():
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
                 
-                if args.verbose:
-                    # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
-                    print(f'Description: {descriptions[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
-            
             elif cfg.runner_cfg.sub_mode == "frame_sampling":
                 for i in range(cfg.runner_cfg.num_sub_qa_generate):
                     
@@ -412,6 +395,14 @@ def main():
                     text_outputs_lba_list.append(text_outputs_lba)
                     confidences_lba_list.append(confidences_lba)
                     
+            else:
+                raise NotImplementedError(f"{cfg.runner_cfg.sub_mode} is not implemented.")
+            
+            if args.verbose:
+                # print(f'sub_QA: {sub_questions} -> {sub_answers}. LBA: {text_outputs_lba} | {[f"{float(x):.6f}" for x in confidences_lba]}')
+                print(f'text_inputs:\n{text_inputs[0]}')
+                print(f'sub_QA: {sub_questions[0]} -> {sub_answers[0]}. LBA: {text_outputs_lba[0]} | {confidences_lba[0]:.6f}')
+            
             def _convert_nested_list(lists):
                 return [
                     [inner_list[i] for inner_list in lists] 
