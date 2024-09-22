@@ -7,8 +7,8 @@ from pprint import pprint
 
 import torch
 from torch.utils.data import DataLoader
-from transformers import Blip2Processor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
-
+from transformers import Blip2Processor, Blip2ForConditionalGeneration
+from transformers import InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 
 from models.model import VideoBlip2ForConditionalGeneration
 from dataset.base_dataset import load_dataset
@@ -18,17 +18,18 @@ from dataset.VQA_Introspect import VQAIntrospectDataset
 
 
     
-def get_input(processor, device, video_batch, text_inputs):
-    inputs = processor(text=text_inputs, return_tensors="pt", padding=True)
-
-    pixel_values = []
-    for video in video_batch: # video: [n_frms, 640, 480]
-        pixel_values.append(processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
-    inputs["pixel_values"] = torch.stack(pixel_values, dim=0)#.to(device)
-    inputs = inputs.to(device)
-    # print("input_ids:", inputs["input_ids"].shape, inputs["input_ids"].device, "\tpixel_values:", inputs["pixel_values"].shape, inputs["pixel_values"].device)
-    
-    return inputs
+def get_input(data_type, processor, device, vision_batch, text_inputs):
+    if data_type == "images":
+        inputs = processor(text=text_inputs, images=vision_batch, return_tensors="pt", padding=True)
+    else:
+        inputs = processor(text=text_inputs, return_tensors="pt", padding=True)
+        pixel_values = []
+        for video in vision_batch: # video: [n_frms, 640, 480]
+            pixel_values.append(processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
+        inputs["pixel_values"] = torch.stack(pixel_values, dim=0)#.to(device)
+        # print("input_ids:", inputs["input_ids"].shape, inputs["input_ids"].device, "\tpixel_values:", inputs["pixel_values"].shape, inputs["pixel_values"].device)
+        
+    return inputs.to(device)
 
 
 """
@@ -50,8 +51,12 @@ def main():
     cache_dir = os.path.join("/model/", model_name.split("/")[0])
     device = "cuda"
     
-    model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
-    processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
+    if cfg.datasets_cfg.data_type == "images": # dataset_name in ["VQA_Introspect", "AOKVQA", "OKVQA"]:
+        model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
+        processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
+    else: # "videos"
+        model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
+        processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
     # model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
     # processor = InstructBlipVideoProcessor.from_pretrained(processor_name, cache_dir=cache_dir)
     
@@ -110,7 +115,7 @@ def main():
                 prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
                 text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                 
-                inputs = get_input(processor, device, batch["vision"], text_inputs)
+                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
                 
                 generation_params = {
                     "do_sample": True,
@@ -129,7 +134,8 @@ def main():
 
             elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
                 text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
-                inputs = get_input(processor, device, batch["vision"], text_inputs)
+                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                    
                 generation_params = {
                     "do_sample": True,
                     "min_new_tokens": 1,
@@ -170,8 +176,10 @@ def main():
                 prompt = "Question: {sub_question}? Short answer:"
             else:
                 prompt = "{sub_question}?"
+
             text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
-            inputs = get_input(processor, device, batch["vision"], text_inputs)
+            inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+            
             generation_params = {
                 "do_sample": False,
                 "min_new_tokens": 1,

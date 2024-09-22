@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
 
-def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl=None):
+def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset

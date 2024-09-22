@@ -58,6 +58,9 @@ out['confidence'] = torch.exp(pred_logits_qa[:, 0]).cpu().tolist()
 ## Inference
 
 ```bash
+# VTT:  datasets.root_dir=/data/video_datasets/ model.cache_dir=/data/LLMs/
+
+
 # image baseline
 CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
 
