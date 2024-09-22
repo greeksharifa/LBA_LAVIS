@@ -344,7 +344,6 @@ def main():
                                                     main_questions=batch['text_input'], 
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
-                    import pdb; pdb.set_trace()
                     text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                     
                     if cfg.runner_cfg.debug:
@@ -536,6 +535,8 @@ def main():
             else:
                 subqa_type = "sub_qas_val_xl"
                 
+            if cfg.runner_cfg.get("llm_size", ""):
+                subqa_type = cfg.runner_cfg.llm_size + "_" + subqa_type.replace('xl', 'xxl')
                 
             results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
             

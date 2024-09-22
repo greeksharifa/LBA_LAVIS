@@ -10,7 +10,7 @@ from processors.alpro_processors import AlproVideoEvalProcessor
 from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 from accelerate import infer_auto_device_map
 
-from utils.api_chatgpt import call_vision_api, ndarrays_to_base64
+# from utils.api_chatgpt import call_vision_api, ndarrays_to_base64
 
 import numpy as np
 import torch
