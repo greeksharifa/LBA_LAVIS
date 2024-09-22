@@ -104,9 +104,12 @@ def main():
         
     if cfg.runner_cfg.sub_mode == "multi_subqa_combo":
         # Get all combinations for sizes 2, 3, 4, and 5
-        all_combinations = []
-        for size in range(2, 6):
-            all_combinations.extend(list(combinations(list(range(5)), size)))
+        if cfg.runner_cfg.get("all_combinations", False):
+            all_combinations = []
+            for size in range(2, 6):
+                all_combinations.extend(list(combinations(list(range(5)), size)))
+        else:
+            all_combinations = list(combinations(list(range(5)), cfg.runner_cfg.num_sub_qa_select))
         print("List of all combinations:")
         for combo in all_combinations:
             print(combo)
