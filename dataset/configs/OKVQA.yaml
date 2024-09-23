@@ -5,10 +5,9 @@ datasets:
   vqa_acc: True
   ann_paths:
     train:
-      - 'okvqa/annotations/okvqa_train.json'
+      - 'OKVQA/annotations/okvqa_train.json'
     val:
-      - 'okvqa/annotations/vqa_val_eval.json'
-    # test:
-    #   - 'okvqa/annotations/aokvqa_v1p0_test.json'
+      - 'OKVQA/annotations/vqa_val_eval.json'
+      - 'OKVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
 
   vis_root: 'coco/images/'

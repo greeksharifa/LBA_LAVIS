@@ -5,13 +5,14 @@ datasets:
   vqa_acc: True
   ann_paths:
     train:
-      - 'VQA-Introspect/VQAIntrospect_trainv1.0.json'
+      - 'VQA_Introspect/VQAIntrospect_trainv1.0.json'
       - 'VQA/v2/v2_mscoco_train2014_annotations.json'
     val:
-      - 'VQA-Introspect/VQAIntrospect_valv1.0.json'
+      - 'VQA_Introspect/VQAIntrospect_valv1.0.json'
       - 'VQA/v2/v2_mscoco_val2014_annotations.json'
+      - 'VQA_Introspect/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
     # test:
-    #   - 'VQA-Introspect/VQAIntrospect_valv1.0.json'
+    #   - 'VQA_Introspect/VQAIntrospect_valv1.0.json'
     #   - 'VQA/v2/v2_mscoco_val2014_annotations.json'
 
   vis_root: 'coco/images/'

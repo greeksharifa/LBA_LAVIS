@@ -65,22 +65,35 @@ class BaseDataset(Dataset):
         """
         self.vis_root = vis_root
         self.annotation = []
-        for ann_path in ann_paths:
-            if any(ext in ann_path for ext in ['csv', 'tsv']):
-                df = pd.read_csv(ann_path)
-                self.annotation.extend(df.to_dict(orient="records"))
                 
-            elif 'jsonl' in ann_path:
-                with open(ann_path, "r") as f:
-                    self.annotation.extend([json.loads(line) for line in f])
-
+        if len(ann_paths) == 1:
+            ann_path = ann_paths[0]
+        elif len(ann_paths) == 2:
+            ann_path, sub_qas_path = ann_paths
+            if os.path.exists(sub_qas_path):
+                self.sub_qas = json.load(open(sub_qas_path, 'r'))
             else:
-                with open(ann_path, "r") as f:
-                    loaded = json.load(f)
-                    if isinstance(loaded, list):
-                        self.annotation.extend(loaded)
-                    elif isinstance(loaded, dict):
-                       self.annotation.extend([{"sample_id": k, **v} if isinstance(v, dict) else {"sample_id": k, "data": v} for k, v in loaded.items()])
+                raise FileNotFoundError(f"No sub_qas file: {ann_paths[1]}")
+        else:
+            raise ValueError(f"Invalid ann_paths: {ann_paths}")
+        
+        # ann
+        # for ann_path in ann_paths:
+        if any(ext in ann_path for ext in ['csv', 'tsv']):
+            df = pd.read_csv(ann_path)
+            self.annotation.extend(df.to_dict(orient="records"))
+            
+        elif 'jsonl' in ann_path:
+            with open(ann_path, "r") as f:
+                self.annotation.extend([json.loads(line) for line in f])
+
+        else:
+            with open(ann_path, "r") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, list):
+                    self.annotation.extend(loaded)
+                elif isinstance(loaded, dict):
+                    self.annotation.extend([{"sample_id": k, **v} if isinstance(v, dict) else {"sample_id": k, "data": v} for k, v in loaded.items()])
 
         if num_data != -1:
             self.annotation = self.annotation[:num_data]
@@ -216,9 +229,20 @@ Answer: The answer is (A)\n"""
         
     elif prompt_type == "recomposer_image":
         examplar = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\n"
-        prompt = examplar + "Context: {sub_question}? {sub_answer}. Question: {main_question}? Short answer:"
-        return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
-                for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
+        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Short answer:"
+        
+        ret = []
+        for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers):
+            sub_qas = ""
+            if isinstance(sub_question, str):
+                sub_question = [sub_question]
+                sub_answer = [sub_answer]
+            for sq, sa in zip(sub_question, sub_answer):
+                sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
+            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas))
+        return ret
+        # return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
+                # for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
     
     elif prompt_type == "default_video":
         prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
@@ -241,10 +265,11 @@ Answer: The answer is (A)\n"""
         (E) <option 5>
         Answer: The answer is <answer> [EOS]
         """
+    
     elif prompt_type == "recomposer_video":
-        prompt = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
+        examplar = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
         # prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
-        prompt += "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):
@@ -256,8 +281,8 @@ Answer: The answer is (A)\n"""
                 sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas, choices=choices))
-            # ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.'), choices=choices))
         return ret
+    
     elif prompt_type == "recomposer_video_description":
         prompt = "Video Description: {description}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
@@ -266,6 +291,7 @@ Answer: The answer is (A)\n"""
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(description=description, main_question=main_question.rstrip('?'), choices=choices))
         return ret
+    
     else:
         raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
     

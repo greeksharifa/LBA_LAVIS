@@ -74,7 +74,7 @@ def main():
         "Ktype_5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
     }
     vqa_introspect_dataset = VQAIntrospectDataset(None, None, '/data/coco/images/', 
-                                                  ['/data/VQA-Introspect/VQAIntrospect_valv1.0.json', '/data/VQA/v2/v2_mscoco_val2014_annotations.json'])
+                                                  ['/data/VQA_Introspect/VQAIntrospect_valv1.0.json', '/data/VQA/v2/v2_mscoco_val2014_annotations.json'])
 
     prompt_subqa_vqaintrospect = []
     idx_example = 0
@@ -203,12 +203,12 @@ def main():
         json.dump(batch_result, open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "w"), indent=4)
         
         if data_iter_step < 1:
-            for main_question, sub_qas in zip(batch["text_input"], results.items()):
+            for main_question, (qid, sub_qas) in zip(batch["text_input"], results.items()):
+                print(f'Question ID: {qid}')
                 print(f'Main Question: {main_question}\nSub QAs:')
                 pprint(sub_qas, width=300)
             # for main_question, sub_question, sub_answer in zip(batch["text_input"], sub_questions, sub_answers):
             #     print(f'Main Question: {main_question}\nSub Question: {sub_question}\nSub Answer: {sub_answer}\n')
-            # import pdb; pdb.set_trace()
             
     out_path = f"temp/subqa/sub_qas_val_{model_name.split('-')[-1]}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}.json"
     json.dump(results, open(out_path, "w"), indent=4)

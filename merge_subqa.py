@@ -11,8 +11,11 @@ parser.add_argument('--model', type=str)
 args = parser.parse_args()
 
 
+"""
+python merge_subqa.py --model=xl
+"""
 # for dataset_name in ['NExT_QA', 'STAR', 'TVQA', 'VLEP', 'DramaQA', 'IntentQA', 'EgoSchema']:
-for dataset_name in ['NExT_QA', 'STAR', 'VLEP', 'DramaQA']:
+for dataset_name in ['VQA_Introspect', 'AOKVQA', 'OKVQA']:
     beam_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect.json'
     greedy_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_beam_and_greedy.json'
     beam_sub_qas_data = json.load(open(beam_sub_qas_path))

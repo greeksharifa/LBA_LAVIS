@@ -54,6 +54,11 @@ class VQAIntrospectDataset(BaseDataset):
             # self.annotation = random.sample(self.annotation, num_data)
             
         
+        if os.path.exists(ann_paths[2]):
+            self.sub_qas = json.load(open(ann_paths[2], 'r'))
+        else:
+            raise FileNotFoundError(f"No sub_qas file: {ann_paths[2]}")
+        
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
@@ -74,6 +79,7 @@ class VQAIntrospectDataset(BaseDataset):
     
     def __getitem__(self, index):
         ann = self.annotation[index]
+        question_id = ann["question_id"]
 
         # ex. /data/coco/images/val2014/COCO_val2014_000000284623.jpg
         image_path = os.path.join(self.vis_root, f'{self.split}2014', f'COCO_{self.split}2014_000000{ann["image_id"]:06}.jpg')
@@ -86,11 +92,26 @@ class VQAIntrospectDataset(BaseDataset):
         # reasoning_answer_most_common = self.text_processor(ann["reasoning_answer_most_common"])
         reasoning_answer_most_common = ann["reasoning_answer_most_common"]
         
+        
+        sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
+        if sub_qa_list is None:
+            sub_questions = None
+            sub_answers = None
+        elif type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+            sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
+            sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
+        else:
+            sub_questions = sub_qa_list
+            sub_answers = None
+
+        
         return {
             "vision": image,
             "text_input": text_input,
-            "question_id": ann["question_id"],
+            "question_id": question_id,
             "reasoning_answer_most_common": reasoning_answer_most_common,
             "gt_sub_qas": ann["gt_sub_qas"],
             "gt_ans": ann["gt_ans"], # vqav2 answers list of str(len=10)
+            "sub_question_list": sub_questions,
+            "sub_answer_list": sub_answers,
         }
