@@ -8,7 +8,7 @@ datasets:
       - 'ArtVQA/train.json'
     val:
       - 'ArtVQA/val.json'
-      # - 'ArtVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+      - 'ArtVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
     test:
       - 'ArtVQA/test.json'
 

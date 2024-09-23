@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import torch
+import pickle
 
 from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
@@ -96,6 +97,9 @@ class BaseDataset(Dataset):
         elif 'jsonl' in ann_path:
             with open(ann_path, "r") as f:
                 self.annotation.extend([json.loads(line) for line in f])
+        elif 'pkl' in ann_path:
+            with open(ann_path, 'rb') as f:
+                self.annotation = pickle.load(f)
         else:
             with open(ann_path, "r") as f:
                 loaded = json.load(f)
@@ -106,10 +110,6 @@ class BaseDataset(Dataset):
 
         if num_data != -1:
             self.annotation = self.annotation[:num_data]
-            # import random
-            # self.annotation = random.sample(self.annotation, num_data)
-            
-        print('len of self.annotation : ', len(self.annotation))
 
         self.vis_processor = vis_processor
         self.text_processor = text_processor
@@ -119,6 +119,13 @@ class BaseDataset(Dataset):
             setattr(self, k, v)
 
         self._add_instance_ids()
+        
+        print("\n" + self.__class__.__name__)
+        print('vis_processor : ', vis_processor)
+        print('text_processor : ', text_processor)
+        print('vis_root : ', vis_root)
+        print('ann_paths : ', ann_paths)
+        print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
 
     @staticmethod
     def answer_mapping(answer):

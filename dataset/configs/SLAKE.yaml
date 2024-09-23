@@ -8,7 +8,7 @@ datasets:
       - 'Slake1.0/train.json'
     val:
       - 'Slake1.0/validate.json'
-      # - 'Slake1.0/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+      - 'Slake1.0/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
     test:
       - 'Slake1.0/test.json'
 

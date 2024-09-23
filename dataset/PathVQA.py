@@ -22,39 +22,11 @@ class PathVQADataset(BaseDataset):
         'answer': 'neutrophils'
     }
     """
-    def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=..., num_data=-1, **kwargs):
-        # super().__init__(vis_processor, text_processor, vis_root, ann_paths, num_data, **kwargs)
-        
-        # annotations
-        ann_path = ann_paths[0]
-        with open(ann_path, 'rb') as f:
-            self.annotation = pickle.load(f)
-        
-        if num_data != -1:
-            self.annotation = self.annotation[:num_data]
-            
-        # sub_qa
-        if len(ann_paths) == 2:
-            sub_qas_path = ann_paths[1]
-            with open(sub_qas_path, 'rb') as f:
-                self.sub_qas = json.load(open(sub_qas_path, 'r'))
-                
+    def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[], num_data=-1, **kwargs):
+        super().__init__(vis_processor, text_processor, vis_root, ann_paths, num_data, **kwargs)
         
         self.vis_root = os.path.join(vis_root, kwargs["split"])
-        
-        self.vis_processor = vis_processor
-        self.text_processor = text_processor
-        
         self._add_instance_ids(key="question_id", prefix="PathVQA_")
-        
-        
-        print("\n" + self.__class__.__name__)
-        print('vis_processor : ', vis_processor)
-        print('text_processor : ', text_processor)
-        print('vis_root : ', vis_root)
-        print('ann_paths : ', ann_paths)
-        print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
-        
         
     
     def __getitem__(self, index):
