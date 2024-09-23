@@ -18,6 +18,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     elif datasets_cfg.dataset_name == "OKVQA":
         from dataset.OKVQA import OKVQADataset
         cls = OKVQADataset
+    elif datasets_cfg.dataset_name == "PathVQA":
+        from dataset.PathVQA import PathVQADataset
+        cls = PathVQADataset
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
@@ -52,6 +55,8 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
         n_frms=datasets_cfg.get("n_frms", 4),
         datasets_cfg=datasets_cfg,
         n_supple=n_supple, #datasets_cfg.get("n_supple"),
+        data_type=datasets_cfg.data_type,
+        split=split,
     )
     
     return dataset
@@ -82,11 +87,9 @@ class BaseDataset(Dataset):
         if any(ext in ann_path for ext in ['csv', 'tsv']):
             df = pd.read_csv(ann_path)
             self.annotation.extend(df.to_dict(orient="records"))
-            
         elif 'jsonl' in ann_path:
             with open(ann_path, "r") as f:
                 self.annotation.extend([json.loads(line) for line in f])
-
         else:
             with open(ann_path, "r") as f:
                 loaded = json.load(f)
@@ -159,7 +162,16 @@ class BaseDataset(Dataset):
                 
                 # num_match = sum([out == t for t in target])
                 # return min(1.0, num_match / 3.0)
-            else:
+            elif self.data_type == "images":
+                if isinstance(target, list):
+                    return 1.0 if out in target else 0.0
+                    # 리스트에서 최빈값 찾기 
+                    # target = max(set(target), key=target.count)
+                # print('out    : ', out)
+                # print('target : ', target)
+                else:
+                    return 1.0 if out == target else 0.0
+            else: # self.data_type == "videos"
                 if type(out) == str:
                     if len(out) == 1:
                         out = '(' + out + ')'

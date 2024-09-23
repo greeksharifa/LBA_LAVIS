@@ -1,0 +1,15 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - 'PathVQA/qas/train/train_qa.pkl'
+    val:
+      - 'PathVQA/qas/val/val_qa.pkl'
+      # - 'PathVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    test:
+      - 'PathVQA/qas/test/test_qa.pkl'
+
+  vis_root: 'PathVQA/images/'

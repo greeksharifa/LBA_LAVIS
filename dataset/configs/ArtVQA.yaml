@@ -1,0 +1,15 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - 'ArtVQA/train.json'
+    val:
+      - 'ArtVQA/val.json'
+      # - 'ArtVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    test:
+      - 'ArtVQA/test.json'
+
+  vis_root: 'ArtVQA/SemArt/Images/'

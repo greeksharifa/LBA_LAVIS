@@ -1,0 +1,15 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - 'Slake1.0/train.json'
+    val:
+      - 'Slake1.0/validate.json'
+      # - 'Slake1.0/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    test:
+      - 'Slake1.0/test.json'
+
+  vis_root: 'Slake1.0/imgs/'
