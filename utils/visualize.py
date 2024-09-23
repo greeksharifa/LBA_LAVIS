@@ -146,6 +146,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         bin_key = i // M
         bins_lba[bin_key].append(acc_lba)
         
+    pprint(results[0], width=300)
     
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
@@ -212,8 +213,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
     })
     
-    pprint(results[0], width=300)
-    if 'type' in results[0] or results[0]["question_id"][0] in "TCDISPFL": # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
+    if 'type' in results[0]:# or results[0]["question_id"][0] in "TCDISPFL": # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
         match_per_type = {}
         total_per_type = {}
         # total number of each question type
@@ -222,7 +222,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # DramaQA: 3889 { 'Level 2': 2698, 'Level 3': 1189}
         for i, result in enumerate(results):
             
-            question_type = result['type'] if 'type' in results[0] else result["question_id"].split('_')[0]
+            question_type = result['type']# if 'type' in results[0] else result["question_id"].split('_')[0]
             if cfg.datasets_cfg.dataset_name == 'NExTQA':
                 question_type = question_type[0]
             
@@ -271,7 +271,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # if not cfg.runner_cfg.visualize:
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
-            
+
+    print(output_dir.split('/')[-1], end='\t')
     print(cfg.datasets_cfg.dataset_name, end='\t')
     print(cfg.runner_cfg.recomposer_name, end='\t')
     

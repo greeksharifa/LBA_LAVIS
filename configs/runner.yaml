@@ -6,7 +6,7 @@ runner:
   select_high_confidence: True
   train_recomposer_examplar: False
   threshold_lba: False
-  vision_supple: True
+  vision_supple: False
   use_pre_generated_sub_q: True
   use_pre_generated_sub_a: True
   num_sub_qa_generate: 5
@@ -27,7 +27,7 @@ runner:
   output_dir: 'output/'
   print_freq: 50
   use_vqa_tool: False
-  num_bin: 50
+  num_bin: 20
   num_heatmap_row: 10
   # conf_gap: 0.0
   debug: False
