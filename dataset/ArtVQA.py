@@ -15,6 +15,7 @@ except:
 
 class ArtVQADataset(BaseDataset):
     """
+    len: 5124
     {
         'image': '42809-3baptist.jpg', 
         'question': 'what stand next to each other', 
@@ -23,9 +24,9 @@ class ArtVQADataset(BaseDataset):
     }
     """
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
-        super().__init__(vis_processor, text_processor, vis_root, ann_paths)
+        super().__init__(vis_processor, text_processor, vis_root, ann_paths, num_data=num_data, **kwargs)
         
-        self._add_instance_ids(key='question_id')
+        self._add_instance_ids(key='question_id', prefix='ArtVQA_')
     
     def __getitem__(self, index):
         ann = self.annotation[index]
@@ -62,10 +63,11 @@ class ArtVQADataset(BaseDataset):
 
 def main(ann_paths, split):
     dataset = ArtVQADataset(vis_processor=None, text_processor=None, vis_root='/data/ArtVQA/SemArt/Images/', 
-                             ann_paths=ann_paths, num_data=5, split=split)
+                             ann_paths=ann_paths, num_data=-1, split=split)
     for i in range(len(dataset)):
         pprint(dataset[i], width=200)
         break
+    print('len(dataset):', len(dataset))
 
 if __name__ == '__main__':
     split = 'val' # 'train', 'val', 'test'

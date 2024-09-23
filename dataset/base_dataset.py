@@ -21,6 +21,12 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     elif datasets_cfg.dataset_name == "PathVQA":
         from dataset.PathVQA import PathVQADataset
         cls = PathVQADataset
+    elif datasets_cfg.dataset_name == "SLAKE":
+        from dataset.SLAKE import SLAKEDataset
+        cls = SLAKEDataset
+    elif datasets_cfg.dataset_name == "ArtVQA":
+        from dataset.ArtVQA import ArtVQADataset
+        cls = ArtVQADataset
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
@@ -135,9 +141,9 @@ class BaseDataset(Dataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
 
-    def _add_instance_ids(self, key="instance_id"):
+    def _add_instance_ids(self, key="instance_id", prefix=""):
         for idx, ann in enumerate(self.annotation):
-            ann[key] = str(idx)
+            ann[key] = prefix + str(idx)
             
     def get_e_cr_e_ic(self, acc_origin_list, acc_lba_list):
         if self.vqa_acc:

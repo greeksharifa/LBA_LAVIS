@@ -15,6 +15,7 @@ except:
 
 class SLAKEDataset(BaseDataset):
     """
+    len: 2099
     {
         'img_id': 0, 
         'img_name': 'xmlab0/source.jpg', 
@@ -65,10 +66,11 @@ class SLAKEDataset(BaseDataset):
 
 def main(ann_paths, split):
     dataset = SLAKEDataset(vis_processor=None, text_processor=None, vis_root='/data/Slake1.0/imgs/', 
-                             ann_paths=ann_paths, num_data=5, split=split)
+                             ann_paths=ann_paths, num_data=-1, split=split)
     for i in range(len(dataset)):
         pprint(dataset[i], width=200)
         break
+    print('len(dataset):', len(dataset))
 
 if __name__ == '__main__':
     split = 'val' # 'train', 'val', 'test'

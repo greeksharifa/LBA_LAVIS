@@ -15,6 +15,7 @@ except:
 
 class PathVQADataset(BaseDataset):
     """
+    len: 6279
     {
         'image': 'val_0261', 
         'question': 'What have lost their nuclei?', 
@@ -44,7 +45,7 @@ class PathVQADataset(BaseDataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
-        self._add_instance_ids(key="question_id")
+        self._add_instance_ids(key="question_id", prefix="PathVQA_")
         
         
         print("\n" + self.__class__.__name__)
@@ -91,10 +92,11 @@ class PathVQADataset(BaseDataset):
 
 def main(ann_paths, split):
     dataset = PathVQADataset(vis_processor=None, text_processor=None, vis_root='/data/PathVQA/images/', 
-                             ann_paths=ann_paths, num_data=5, split=split)
+                             ann_paths=ann_paths, num_data=-1, split=split)
     for i in range(len(dataset)):
         pprint(dataset[i], width=200)
         break
+    print('len(dataset):', len(dataset))
 
 if __name__ == '__main__':
     split = 'val' # 'train', 'val', 'test'
