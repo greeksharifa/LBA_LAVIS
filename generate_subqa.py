@@ -192,15 +192,17 @@ def main():
 
             # store to results    
             for b in range(bsz):
-                if question_ids[b] not in results:
-                    results[question_ids[b]] = []
+                # if question_ids[b] not in results:
+                #     results[question_ids[b]] = []
+                if question_ids[b] not in batch_result:
                     batch_result[question_ids[b]] = []
-                
                 # if sub_questions[b].endswith('?'):
-                results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
+                #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
                 batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
             
         json.dump(batch_result, open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "w"), indent=4)
+        results.update(batch_result)
         
         if data_iter_step < 1:
             for main_question, (qid, sub_qas) in zip(batch["text_input"], results.items()):
