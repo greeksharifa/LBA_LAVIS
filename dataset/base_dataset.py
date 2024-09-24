@@ -87,8 +87,6 @@ class BaseDataset(Dataset):
             ann_path, sub_qas_path = ann_paths
             if os.path.exists(sub_qas_path):
                 self.sub_qas = json.load(open(sub_qas_path, 'r'))
-            else:
-                raise FileNotFoundError(f"No sub_qas file: {ann_paths[1]}")
         else:
             raise ValueError(f"Invalid ann_paths: {ann_paths}")
         

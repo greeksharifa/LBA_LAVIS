@@ -56,8 +56,6 @@ class VQAIntrospectDataset(BaseDataset):
         if len(ann_paths) == 3:
             if os.path.exists(ann_paths[2]):
                 self.sub_qas = json.load(open(ann_paths[2], 'r'))
-            else:
-                raise FileNotFoundError(f"No sub_qas file: {ann_paths[2]}")
             
         self.vis_processor = vis_processor
         self.text_processor = text_processor
