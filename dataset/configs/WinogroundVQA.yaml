@@ -1,0 +1,15 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - 'facebook/winoground'
+    val:
+      - 'facebook/winoground'
+      - 'WinogroundVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    test:
+      - 'facebook/winoground'
+
+  vis_root: 'dummy_vis_path'

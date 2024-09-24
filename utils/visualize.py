@@ -134,10 +134,6 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     baseline_acc_list = [match / N for match in baseline_match_list]
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
-    pprint(results[123], width=300)
-    print(acc_base_list[:20])
-    print(acc_lba_list[:20])
-    # import pdb; pdb.set_trace()
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
     results.sort(key=lambda x: x['confidence_lba'])

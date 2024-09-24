@@ -28,6 +28,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     elif datasets_cfg.dataset_name == "ArtVQA":
         from dataset.ArtVQA import ArtVQADataset
         cls = ArtVQADataset
+    elif datasets_cfg.dataset_name == "WinogroundVQA":
+        from dataset.WinogroundVQA import WinogroundVQADataset
+        cls = WinogroundVQADataset
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
@@ -167,6 +170,16 @@ class BaseDataset(Dataset):
         - outputs: str          or list of str.         shape: [bsz]
         - targets: list of str  or list of list of str. shape: [bsz, 10]
         """
+        if isinstance(outputs, str):
+            outputs = outputs.lower()
+        elif isinstance(outputs, list):
+            outputs = [output.lower() for output in outputs]
+        
+        if isinstance(targets, str):
+            targets = targets.lower()
+        elif isinstance(targets, list):
+            targets = [target.lower() for target in targets]
+        
         def _get_acc(out, target):
             if self.vqa_acc:
                 return out in target

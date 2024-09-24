@@ -58,7 +58,7 @@ class SLAKEDataset(BaseDataset):
             "vision": image,
             "text_input": text_input,
             "question_id": question_id,
-            "gt_ans": ann["answer"], # vqav2 answers list of str(len=10)
+            "gt_ans": ann["answer"].lower(), # vqav2 answers list of str(len=10)
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
         }

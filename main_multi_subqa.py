@@ -144,7 +144,9 @@ def main():
             examplar = get_train_examplar(cfg.datasets_cfg)
         except:
             examplar = ""
-        print('examplar:', examplar)
+        if cfg.runner_cfg.train_recomposer_examplar:
+            print('examplar:', examplar)
+            
         results = []
         wrong2right, right2wrong = 0, 0
         wrong, right = 0, 0
@@ -430,7 +432,6 @@ def main():
             if args.verbose:
                 print(f'indices: {indices[0]}, LBA: {final_text_outputs_lba[0]} | {final_confidences_lba[0]}')
             
-            
             """##############################      Save result      ##############################"""
             for i in range(bsz):
                 result = OrderedDict({
@@ -534,8 +535,10 @@ def main():
                 subqa_type = "sub_qas_val_xl_fvu"#"sub_qas_val_fewshot_vqaintrospect_unique"
             else:
                 subqa_type = "sub_qas_val_xl"
-                
-            if cfg.runner_cfg.get("llm_size", ""):
+              
+            if cfg.runner_cfg.num_sub_qa_select > 1:  
+                subqa_type = cfg.runner_cfg.llm_size + f"_select{cfg.runner_cfg.num_sub_qa_select}_" + subqa_type.replace('xl', 'xxl')
+            elif cfg.runner_cfg.get("llm_size", ""):
                 subqa_type = cfg.runner_cfg.llm_size + "_" + subqa_type.replace('xl', 'xxl')
                 
             results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
