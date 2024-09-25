@@ -55,7 +55,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             conf_list = conf_list[::-1]
             print(f'conf_list: {conf_list[:2]} ... {conf_list[-2:]}')
             # conf_list = list(np.linspace(0, 0.0001, 201))[:-1] + list(np.linspace(0.0001, 0.01, 199))[:-1] + list(np.linspace(0.01, 1, 991))
-            for conf_gap in conf_list:
+            for c_idx, conf_gap in enumerate(conf_list):
                 cur_match = total_base_match
                 
                 for i, result in enumerate(results):
@@ -71,7 +71,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                         max_match = cur_match
                         max_conf_gap = conf_gap
                 
-                print(f'\rconf_gap: {conf_gap:.6g}\t max_conf_gap: {max_conf_gap:.6g}\t | I(tau_1): {np.log2(1/conf_gap):.2f}\t I(max_tau_1): {np.log2(1/max_conf_gap):.2f}\t | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 20)
+                tau2 = f'{conf_gap:.6g}'
+                max_tau2 = f'{max_conf_gap:.6g}'
+                print(f'\ri: {c_idx:4d} | tau2: {tau2:15s} tau2: {max_tau2:15s} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -226,14 +228,18 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     print(f'saved config path is {os.path.join(output_dir, "config.yaml")}')
 
-    
-    metrics = OrderedDict({
-        "max_conf_gap         ": f'{max_conf_gap:.6g}',
-        "log_max_conf_gap     ": f'{np.log2(1/max_conf_gap):.2f}',
-        "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
-        "Previous_work_acc    ": f'{baseline_max_match / N * 100:.2f}%',
-        "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
-    })
+    if cfg.runner_cfg.select_high_confidence:
+        metrics = OrderedDict({
+            "max_tau2          ": f'{max_conf_gap:.6g}',
+            "log_max_tau2      ": f'{np.log2(1/max_conf_gap):.2f}',
+            "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
+            "max_acc_by_tau    ": f'{max(final_acc_list) * 100:.2f}%',
+        })
+    else:
+        metrics = OrderedDict({
+            "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
+            "Previous_work_acc ": f'{baseline_max_match / N * 100:.2f}%',
+        })
     
     if 'type' in results[0]:# or results[0]["question_id"][0] in "TCDISPFL": # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
         match_per_type = {}
@@ -278,13 +284,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 if q_type.startswith(_q) and total_per_type[q_type] > 0:
                     qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
                     # print(f'{q_type:<21s}: {qtype_v}')
-                    metrics[f'{q_type:<21s}'] = qtype_v
+                    metrics[f'{q_type:<18s}'] = qtype_v
     
     metrics.update({
-        "max_arg_confidence   ": f'{max_arg_confidence:.6f}',
-        "confidence_percentile": f'{confidence_percentile:.2f}%',
-        "E_CR                 ": f'{e_cr:.2f}%',
-        "E_IC                 ": f'{e_ic:.2f}%',
+        "max_arg_conf      ": f'{max_arg_confidence:.6f}',
+        "conf_percentile   ": f'{confidence_percentile:.2f}%',
+        "E_CR              ": f'{e_cr:.2f}%',
+        "E_IC              ": f'{e_ic:.2f}%',
         # "min_match            ": f'{min_match / N * 100:.2f}%',
     })
     

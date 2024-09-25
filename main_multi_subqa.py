@@ -691,11 +691,7 @@ def main():
 
             # Display the DataFrame as a table
             print(df.to_string())
-            import pdb; pdb.set_trace()
-            
-            pprint(metrics_dict, width=300)
             print(f'\nbest_pick_subq: {best_num_pick_subq}')
-            pprint(best_metrics, width=300)
         else:
             try:
                 num_pick_subq = cfg.runner_cfg.num_pick_subq
