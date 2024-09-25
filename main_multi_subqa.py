@@ -45,6 +45,7 @@ def parse_args():
     # verbose
     parser.add_argument('--verbose', action='store_true', help='verbose')
     parser.add_argument('--visualize_high_confidence', default=True, type=bool, help='select high confidence')
+    parser.add_argument('--test_all_pick_subq', action='store_true', help='visualize all num_sub_qa_select')
     
     parser.add_argument(
         "--options",
@@ -481,6 +482,11 @@ def main():
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
     else:
+        try:
+            num_pick_subq = cfg.runner_cfg.num_pick_subq
+        except:
+            num_pick_subq = cfg.runner_cfg.num_pick_subq = cfg.runner_cfg.num_sub_qa_generate
+            
         if cfg.runner_cfg.get("sevila_visualize", False):
             # python main_multi_subqa.py --options runner.visualize=True runner.sevila_visualize=True runner.output_dir="output/visualize_sevila/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="VLEP" runner.num_sub_qa_generate=1 runner.visualize_xl=True
             total_base_match, total_cnt = 0., 0
@@ -507,8 +513,7 @@ def main():
                 total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
                 total_cnt += 1
                 
-            # for i in [0, 3, 4]:
-            for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
+            for i in range(0, num_pick_subq):
                 results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/{i}/result/val_epochbest.json'))
                 for r in results_subqa:
                     _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
@@ -575,8 +580,7 @@ def main():
             total_accuracy = results_base["is_correct"].mean()
             print(f'IGVLM total_accuracy: {total_accuracy * 100:.2f}%')
                 
-            # for i in [0, 3, 4]:
-            for i in range(0, cfg.runner_cfg.num_sub_qa_generate):
+            for i in range(0, num_pick_subq):
                 results_subqa = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/{i}/ffn=6/result.csv', index_col=0)
                 for idx, row in results_subqa.iterrows():
                     _results[row['question_id']][f'text_output_lba_list'].append(map_prediction_to_answer_v2(row))
@@ -653,14 +657,13 @@ def main():
                     # max_confidence_lba = max(result['confidences_lba_list'])
                     # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
                     # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
-                    max_confidence_lba = max(result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate])
-                    idx_max_confidence_lba = result['confidences_lba_list'][:cfg.runner_cfg.num_sub_qa_generate].index(max_confidence_lba)
-                    text_output_lba = result['text_outputs_lba_list'][:cfg.runner_cfg.num_sub_qa_generate][idx_max_confidence_lba]
+                    max_confidence_lba = max(result['confidences_lba_list'][:num_pick_subq])
+                    idx_max_confidence_lba = result['confidences_lba_list'][:num_pick_subq].index(max_confidence_lba)
+                    text_output_lba = result['text_outputs_lba_list'][:num_pick_subq][idx_max_confidence_lba]
                     
                     result['text_output_lba'] = text_output_lba
                     result['confidence_lba'] = max_confidence_lba
                 
-            
             print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
             
     try:
@@ -669,7 +672,54 @@ def main():
         pass
     # import pdb; pdb.set_trace()
     """##############################     Report metrics     ##############################"""
-    visualize(results, dataset, cfg, output_dir, total_base_match)
+    best_metrics = {
+        "max_acc_by_tau       ": "0.0%",
+    }
+    metrics_dict = {}
+    best_pick_subq = 0
+    if args.test_all_pick_subq:
+        for pick_subq in range(1, 6):
+            cfg.runner_cfg.pick_subq = pick_subq
+            result_path = os.path.join(output_dir, 'results_base.json')
+            results = json.load(open(result_path, 'r'))
+            print('load results from:', result_path)
+            
+            total_base_match, total_cnt = 0, 0
+            
+            for result in results:
+                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                total_base_match += acc_base
+                total_cnt += 1
+                
+                # select highest confidence_lba among sub_qa
+                if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
+                    # result['confidences_lba_list'] = [result['confidences_lba_list'][i] for i in idxs]
+                    # result['text_outputs_lba_list'] = [result['text_outputs_lba_list'][i] for i in idxs]
+                    # max_confidence_lba = max(result['confidences_lba_list'])
+                    # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
+                    # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
+                    max_confidence_lba = max(result['confidences_lba_list'][:pick_subq])
+                    idx_max_confidence_lba = result['confidences_lba_list'][:pick_subq].index(max_confidence_lba)
+                    text_output_lba = result['text_outputs_lba_list'][:pick_subq][idx_max_confidence_lba]
+                    
+                    result['text_output_lba'] = text_output_lba
+                    result['confidence_lba'] = max_confidence_lba
+                
+            
+            print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
+            
+            metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
+            if float(metrics["max_acc_by_tau       "][:-1]) > float(best_metrics["max_acc_by_tau       "][:-1]):
+                best_metrics = metrics
+                best_pick_subq = pick_subq
+            metrics_dict[pick_subq] = metrics
+        
+        pprint(metrics_dict, width=300)
+        print(f'best_pick_subq: {best_pick_subq}')
+        pprint(best_metrics, width=300)
+        
+    else:
+        visualize(results, dataset, cfg, output_dir, total_base_match)
     
 
 if __name__ == '__main__':

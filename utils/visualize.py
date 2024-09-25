@@ -44,7 +44,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         max_conf_gap = 0.0
     
         if cfg.runner_cfg.select_high_confidence:
-            conf_list = list(np.linspace(0, 0.01, 201))[:-1] + list(np.linspace(0.01, 1, 991))
+            conf_list = list(np.linspace(0, 0.0001, 201))[:-1] + list(np.linspace(0.0001, 0.01, 199))[:-1] + list(np.linspace(0.01, 1, 991))
             # import pdb; pdb.set_trace()
             for conf_gap in conf_list:
                 cur_match = total_base_match
@@ -62,7 +62,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                         max_match = cur_match
                         max_conf_gap = conf_gap
                 
-                print(f'\rconf_gap: {conf_gap:.5f} max_conf_gap: {max_conf_gap:.5f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+                print(f'\rconf_gap: {conf_gap:.7f} max_conf_gap: {max_conf_gap:.7f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -219,7 +219,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
 
     
     metrics = OrderedDict({
-        "max_conf_gap         ": f'{max_conf_gap:.5f}',
+        "max_conf_gap         ": f'{max_conf_gap:.7f}',
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
         "Previous_work_acc    ": f'{baseline_max_match / N * 100:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
@@ -284,6 +284,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
 
+    print('output_dir\t', 'dataset\t', 'recomposer\t')
+    print('select_high_confidence\t', 'train_recomposer_examplar\t', 'vision_supple\t', 'use_pre_generated_sub_q\t')
+    print('num_sub_qa_generate\t', 'num_sub_qa_select\t', 'pick_subq\t', 'max_conf_gap\t')
     print(saved_output_dir.split('/')[-1], end='\t')
     print(cfg.datasets_cfg.dataset_name, end='\t')
     print(cfg.runner_cfg.recomposer_name, end='\t')
@@ -294,6 +297,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.get("use_pre_generated_sub_q", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_select", 1), end='\t')
+    print(cfg.runner_cfg.get("pick_subq", cfg.runner_cfg.get("num_sub_qa_generate", 1)), end='\t')
     print(f'{max_conf_gap:.5f}', end='\t')
 
 
@@ -304,6 +308,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 if q_type.startswith(_q) and total_per_type[q_type] > 0:
                     print(f'\t{match_per_type[q_type] / total_per_type[q_type] * 100:.2f}', end='')
     print('\n')
+    
+    return metrics
 
 
 def draw_heatmap(raw_data, output_dir, key, col_num):
