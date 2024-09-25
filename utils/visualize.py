@@ -44,8 +44,17 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         max_conf_gap = 0.0
     
         if cfg.runner_cfg.select_high_confidence:
-            conf_list = list(np.linspace(0, 0.0001, 201))[:-1] + list(np.linspace(0.0001, 0.01, 199))[:-1] + list(np.linspace(0.01, 1, 991))
-            # import pdb; pdb.set_trace()
+            conf_list = []
+            conf_value = 1.0
+            for _ in range(500):
+                conf_list.append(conf_value)
+                conf_value *= 0.98
+            for _ in range(500):
+                conf_list.append(conf_value)
+                conf_value *= 0.6
+            conf_list = conf_list[::-1]
+            print(f'conf_list: {conf_list[:2]} ... {conf_list[-2:]}')
+            # conf_list = list(np.linspace(0, 0.0001, 201))[:-1] + list(np.linspace(0.0001, 0.01, 199))[:-1] + list(np.linspace(0.01, 1, 991))
             for conf_gap in conf_list:
                 cur_match = total_base_match
                 
@@ -62,7 +71,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                         max_match = cur_match
                         max_conf_gap = conf_gap
                 
-                print(f'\rconf_gap: {conf_gap:.7f} max_conf_gap: {max_conf_gap:.7f}, acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end='')
+                print(f'\rconf_gap: {conf_gap:.6g}\t max_conf_gap: {max_conf_gap:.6g}\t | I(tau_1): {np.log2(1/conf_gap):.2f}\t I(max_tau_1): {np.log2(1/max_conf_gap):.2f}\t | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 20)
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -219,7 +228,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
 
     
     metrics = OrderedDict({
-        "max_conf_gap         ": f'{max_conf_gap:.7f}',
+        "max_conf_gap         ": f'{max_conf_gap:.6g}',
+        "log_max_conf_gap     ": f'{np.log2(1/max_conf_gap):.2f}',
         "acc_origin           ": f'{total_base_match / N * 100:.2f}%',
         "Previous_work_acc    ": f'{baseline_max_match / N * 100:.2f}%',
         "max_acc_by_tau       ": f'{max(final_acc_list) * 100:.2f}%', 
@@ -297,7 +307,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(cfg.runner_cfg.get("use_pre_generated_sub_q", False), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_generate", 1), end='\t')
     print(cfg.runner_cfg.get("num_sub_qa_select", 1), end='\t')
-    print(cfg.runner_cfg.get("pick_subq", cfg.runner_cfg.get("num_sub_qa_generate", 1)), end='\t')
+    print(cfg.runner_cfg.get("num_pick_subq", cfg.runner_cfg.get("num_sub_qa_generate", 1)), end='\t')
     print(f'{max_conf_gap:.5f}', end='\t')
 
 

@@ -684,6 +684,15 @@ def main():
                     best_num_pick_subq = num_pick_subq
                 metrics_dict[num_pick_subq] = metrics
             
+            df = pd.DataFrame.from_dict(metrics_dict, orient='index')
+
+            # Clean up column names by removing extra spaces
+            df.columns = df.columns.str.strip()
+
+            # Display the DataFrame as a table
+            print(df.to_string())
+            import pdb; pdb.set_trace()
+            
             pprint(metrics_dict, width=300)
             print(f'\nbest_pick_subq: {best_num_pick_subq}')
             pprint(best_metrics, width=300)
