@@ -301,12 +301,12 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     print(f'{max_conf_gap:.5f}', end='\t')
 
 
-    print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
-    if 'type' in results[0]:
-        for _q in "TCDISPFL":
-            for q_type in match_per_type.keys():
-                if q_type.startswith(_q) and total_per_type[q_type] > 0:
-                    print(f'\t{match_per_type[q_type] / total_per_type[q_type] * 100:.2f}', end='')
+    # print(f'copy and paste: {total_base_match / N * 100:.2f}\t{max(final_acc_list) * 100:.2f}\t{max_arg_confidence:.6f}\t{confidence_percentile:.2f}\t{e_cr:.2f}\t{e_ic:.2f}', end='')
+    # if 'type' in results[0]:
+    #     for _q in "TCDISPFL":
+    #         for q_type in match_per_type.keys():
+    #             if q_type.startswith(_q) and total_per_type[q_type] > 0:
+    #                 print(f'\t{match_per_type[q_type] / total_per_type[q_type] * 100:.2f}', end='')
     print('\n')
     
     return metrics

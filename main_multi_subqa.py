@@ -67,7 +67,7 @@ def main():
         args.cfg_path = os.path.join(cfg.runner_cfg.output_dir, 'config.yaml')
         cfg = Config(args)
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
-    print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
+    # print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
 
     if not cfg.runner_cfg.visualize:
         output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))

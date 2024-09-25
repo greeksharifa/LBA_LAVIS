@@ -26,7 +26,7 @@ runner:
 
   # output & log
   output_dir: 'output/'
-  print_freq: 50
+  print_freq: 20
   use_vqa_tool: False
   num_bin: 20
   num_heatmap_row: 10
