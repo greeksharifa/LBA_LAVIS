@@ -168,19 +168,30 @@ class BaseDataset(Dataset):
         - outputs: str          or list of str.         shape: [bsz]
         - targets: list of str  or list of list of str. shape: [bsz, 10]
         """
-        if isinstance(outputs, str):
-            outputs = outputs.lower()
-        elif isinstance(outputs, list):
-            outputs = [output.lower() for output in outputs]
-        
-        if isinstance(targets, str):
-            targets = targets.lower()
-        elif isinstance(targets, list):
-            targets = [target.lower() for target in targets]
         
         def _get_acc(out, target):
+            if self.data_type == "videos":
+                if type(out) == str:
+                    if len(out) == 1:
+                        out = '(' + out + ')'
+                    elif len(out) > 3 and out[0] == '(':
+                        out = out[:3]
+                    if '0' <= out[1] <= '4':
+                        out = '(' + chr(ord(out[1]) + 17) + ')'
+                        
+            # convert to lower case string
+            out = str(out).lower()
+            
             if self.vqa_acc:
-                return out in target
+                assert isinstance(target, list), f"Invalid target type (expected list): {type(target)}, {target}"
+                target = [str(t).lower() for t in target]
+                return 1.0 if out in target else 0.0
+            else:
+                target = str(target).lower()
+                return 1.0 if out == target else 0.0
+            
+            if self.vqa_acc:
+                return out.lower() in [t.lower() for t in target]
                 # if match1ok:
                 #     return out in target
                 
@@ -188,13 +199,13 @@ class BaseDataset(Dataset):
                 # return min(1.0, num_match / 3.0)
             elif self.data_type == "images":
                 if isinstance(target, list):
-                    return 1.0 if out in target else 0.0
+                    return 1.0 if out.lower() in [t.lower() for t in target] else 0.0
                     # 리스트에서 최빈값 찾기 
                     # target = max(set(target), key=target.count)
                 # print('out    : ', out)
                 # print('target : ', target)
                 else:
-                    return 1.0 if out == target else 0.0
+                    return 1.0 if out.lower() == target.lower() else 0.0
             else: # self.data_type == "videos"
                 if type(out) == str:
                     if len(out) == 1:

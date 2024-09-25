@@ -1,14 +1,31 @@
 import json
 import os
 from PIL import Image
+from pprint import pprint
 
 import torch
 from torch.utils.data import DataLoader
 
-from dataset.base_dataset import BaseDataset
+try:
+    from dataset.base_dataset import BaseDataset
+except:
+    from base_dataset import BaseDataset
 
 
 class VQAIntrospectDataset(BaseDataset):
+    """
+    {   
+        'gt_ans': ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
+        'gt_sub_qas': [('is there sand and whitewater?', 'yes'), ('are the woman on the horses near to the sea?', 'yes')],
+        'question_id': '565248001',
+        'reasoning_answer_most_common': 'yes',
+        'sub_answer_list': ['yes', 'riding horses', 'sunny', 'yes', 'yes'],
+        'sub_question_list': ['Yes there is sand?', 'Yes they are?', 'What is the weather like?', 'Are they at the beach?', 'Yes they are at the beach?'],
+        'text_input': 'are they at the beach?',
+        'vision': <PIL.Image.Image image mode=RGB size=640x483 at 0x7FE5D9B01420>
+    }
+    len(dataset): 22793
+    """
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs): # vqa_acc=True, 
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
@@ -64,15 +81,9 @@ class VQAIntrospectDataset(BaseDataset):
         for k, v in kwargs.items():
             setattr(self, k, v)
         
-        import spacy
-        self.lemmatizer = spacy.load("en_core_web_sm")
+        # import spacy
+        # self.lemmatizer = spacy.load("en_core_web_sm")
         
-        self.split = "val"
-        if "train" in ann_paths[0]:
-            self.split = "train"
-        elif "test" in ann_paths[0]:
-            self.split = "test"
-
         self._add_instance_ids()
     
     def __getitem__(self, index):
@@ -113,3 +124,25 @@ class VQAIntrospectDataset(BaseDataset):
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
         }
+
+
+def main(ann_paths, split):
+    dataset = VQAIntrospectDataset(vis_processor=None, text_processor=None, 
+                                   vis_root='/data/coco/images/', 
+                                   ann_paths=ann_paths, 
+                                   num_data=-1, split=split)
+    
+    for i in range(len(dataset)):
+        pprint(dataset[i], width=300)
+        break
+    print('len(dataset):', len(dataset))
+
+if __name__ == '__main__':
+    split = 'val' # 'train', 'val', 'test'
+    ann_paths = [
+        '/data/VQA_Introspect/VQAIntrospect_valv1.0.json',
+        '/data/VQA/v2/v2_mscoco_val2014_annotations.json',
+        '/data/VQA_Introspect/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    ]
+    main(ann_paths, split)
+    

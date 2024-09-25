@@ -109,6 +109,9 @@ def main():
         question_ids = batch["question_id"]
         bsz = len(batch["question_id"])
         
+        if all(qid in results for qid in question_ids):
+            continue
+        
         batch_result = {}
         for i in range(cfg.runner_cfg.num_sub_qa_generate):
             if cfg.runner_cfg.sub_mode == "beam_and_greedy":   # Generate Sub-Questions by Huggingface model

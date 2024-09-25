@@ -1,11 +1,15 @@
 import json
 import os
 from PIL import Image
+from pprint import pprint
 
 import torch
 from torch.utils.data import DataLoader
 
-from dataset.base_dataset import BaseDataset
+try:
+    from dataset.base_dataset import BaseDataset
+except:
+    from base_dataset import BaseDataset
 
 
 class OKVQADataset(BaseDataset):
@@ -17,6 +21,15 @@ class OKVQADataset(BaseDataset):
         "image": "val2014/COCO_val2014_000000297147.jpg", 
         "dataset": "OKVQA"
     },
+    {
+        'gt_ans': ['race', 'race', 'race', 'race', 'race', 'race', 'motocross', 'motocross', 'ride', 'ride'],
+        'question_id': 2971475,
+        'sub_answer_list': ['transportation', 'racing', 'a motorcycle', 'motorcycle', 'racing'],
+        'sub_question_list': ['What is the object used for?', 'What kind of sport can you use this for?', 'What can you use this for?', 'What is this object used for?', 'What sport can this be used for?'],
+        'text_input': 'What sport can you use this for?',
+        'vision': <PIL.Image.Image image mode=RGB size=640x480 at 0x7FC92C4C98D0>
+    }
+    len(dataset): 5046
     """
     
     def __getitem__(self, index):
@@ -50,3 +63,24 @@ class OKVQADataset(BaseDataset):
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
         }
+        
+        
+def main(ann_paths, split):
+    dataset = OKVQADataset(vis_processor=None, text_processor=None, 
+                            vis_root='/data/coco/images/', 
+                            ann_paths=ann_paths, 
+                            num_data=-1, split=split)
+    
+    for i in range(len(dataset)):
+        pprint(dataset[i], width=300)
+        break
+    print('len(dataset):', len(dataset))
+
+if __name__ == '__main__':
+    split = 'val' # 'train', 'val', 'test'
+    ann_paths = [
+        '/data/OKVQA/annotations/vqa_val_eval.json',
+        '/data/OKVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    ]
+    main(ann_paths, split)
+    

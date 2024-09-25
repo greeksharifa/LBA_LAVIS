@@ -26,6 +26,7 @@ def get_conf_rank(results, key, H):
 
 
 def visualize(results, dataset, cfg, output_dir, total_base_match):
+    saved_output_dir = output_dir
     if cfg.runner_cfg.visualize:
         output_dir = 'temp/'
     key = 'confidence_lba' if cfg.runner_cfg.get("threshold_lba", False) else 'confidence_base'
@@ -74,6 +75,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     heatmap_data = {
         'number': [[0 for _ in range(H)] for _ in range(H)],
         'change': [[0 for _ in range(H)] for _ in range(H)],
+        'change_abs': [[0 for _ in range(H)] for _ in range(H)],
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
@@ -110,6 +112,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # if not cfg.runner_cfg.select_high_confidence or result['rank_base'] < result['rank_lba']:
             heatmap_data['number'][H-1-result['rank_lba']][result['rank_base']] += 1
             heatmap_data['change'][H-1-result['rank_lba']][result['rank_base']] += acc_lba - acc_base
+            
+        if result['confidence_lba'] != 0. and result['confidence_base'] != 0.:
+            x_i = int(-2*(np.log(result['confidence_lba'])-1e-20))
+            y_i = int(H+2*(np.log(result['confidence_base'])-1e-20))
+            # print(result['confidence_lba'], result['confidence_base'], x_i, y_i)
+            if 0 <= x_i < H and 0 <= y_i < H:
+                heatmap_data['change_abs'][x_i][y_i] += acc_lba - acc_base
             
         # scatter plot
         if acc_base == 0 and acc_lba == 0:
@@ -179,6 +188,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # draw heatmap
     draw_heatmap2(heatmap_data['number'], output_dir, 'number', H)
     draw_heatmap2(heatmap_data['change'], output_dir, 'change', H)
+    draw_heatmap2(heatmap_data['change_abs'], output_dir, 'change_abs', H)
     
     # draw scatter plot
     plt.figure(figsize=(6,6))
@@ -196,6 +206,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     # hue_order=[1, 0, -1], 
                     size='size', sizes=(3, 7))
     # plt.legend(title='Class', labels=[label_map[i] for i in range(4)])
+    plt.xlim(-5, 0)
+    plt.ylim(-5, 0)
     plt.title(f'{cfg.datasets_cfg.dataset_name}')
     plt.xlabel('log Confidence score, Baseline')
     plt.ylabel('log Confidence score, LBA')
@@ -272,7 +284,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
 
-    print(output_dir.split('/')[-1], end='\t')
+    print(saved_output_dir.split('/')[-1], end='\t')
     print(cfg.datasets_cfg.dataset_name, end='\t')
     print(cfg.runner_cfg.recomposer_name, end='\t')
     
@@ -337,11 +349,18 @@ def draw_heatmap2(data, output_dir, key, H):
         sns.heatmap(data_array, annot=True, cmap=sel_colmap, norm=sel_norm, fmt='+d')
 
     # Set title
-    plt.xlabel('Base Confidence(rel %)')
-    plt.ylabel('LBA Confidence(rel %)')
-    plt.xticks(range(0, H+1), [round(100*i/H) for i in range(H+1)])
-    plt.yticks(range(0, H+1), [round(100/H*(H-i)) for i in range(H+1)])
-    plt.title(f'Base -> LBA {key}')
+    if key == 'change_abs':
+        plt.xlabel('Base Confidence')
+        plt.ylabel('LBA Confidence')
+        plt.xticks(range(0, H+1, 2), [round(i-H//2) for i in range(H//2+1)])
+        plt.yticks(range(0, H+1, 2), [round(-i) for i in range(H//2+1)])
+        plt.title(f'Base -> LBA {key}')
+    else:
+        plt.xlabel('Base Confidence(rel %)')
+        plt.ylabel('LBA Confidence(rel %)')
+        plt.xticks(range(0, H+1), [round(100*i/H) for i in range(H+1)])
+        plt.yticks(range(0, H+1), [round(100/H*(H-i)) for i in range(H+1)])
+        plt.title(f'Base -> LBA {key}')
 
     # Show the plot
     # plt.show()

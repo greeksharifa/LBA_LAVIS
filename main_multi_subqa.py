@@ -144,6 +144,8 @@ def main():
             examplar = get_train_examplar(cfg.datasets_cfg)
         except:
             examplar = ""
+        if cfg.runner_cfg.get("no_examplar", False):
+            examplar = ""
         if cfg.runner_cfg.train_recomposer_examplar:
             print('examplar:', examplar)
             
@@ -590,6 +592,48 @@ def main():
                 r['confidence_lba'] = max_confidence_lba
                 # r['type'] = r["type"].split("_")[0] #v["question_id"].split("_")[0]
                 results.append(r) 
+        
+        elif cfg.runner_cfg.get("chatgpt_visualize", False):
+            results_base_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_before.json'
+            results_base = json.load(open(results_base_path, 'r'))
+            print('load results from:', results_base_path)
+            
+            results_lba_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_after_select{cfg.runner_cfg.num_sub_qa_select}.json'
+            results_lba = json.load(open(results_lba_path, 'r'))
+            print('load results from:', results_lba_path)
+            
+            # import pdb; pdb.set_trace()
+            total_base_match, total_cnt = 0., 0
+            
+            confs = []
+            results = []
+            for base_k, base_v in results_base.items():
+                r = base_v
+                r['type'] = base_v["question_id"][0]
+                r['text_output_lba'] = results_lba[base_k]['text_output_lba']
+                if all(a not in 'ABCDE' for a in r['gt_ans']):
+                    r['text_output_lba'] = r['text_output_base']
+                r['confidence_lba'] = results_lba[base_k]['confidence_lba']
+                
+                r['confidence_base'] = np.exp(np.exp(r['confidence_base']))
+                r['confidence_lba'] = np.exp(np.exp(r['confidence_lba']))
+                
+                total_base_match += base_v['text_output_base'] == base_v['gt_ans']
+                total_cnt += 1
+                print(r['confidence_base'], r['confidence_lba'])
+                confs.append(r['confidence_base'])
+                
+                results.append(r)
+            
+            print('results[0]:', results[0])
+            print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
+            
+            # histrogram of confs
+            import matplotlib.pyplot as plt
+            plt.hist(confs, bins=100)
+            plt.show()
+            plt.savefig('zzconfidences.png', dpi=300)
+        
         else:
             result_path = os.path.join(output_dir, 'results_base.json')
             results = json.load(open(result_path, 'r'))
