@@ -366,7 +366,8 @@ class Recomposer(nn.Module):
                 "min_new_tokens": 1,
                 "max_new_tokens": 100 if generate_sub_q else 10,
                 "return_dict_in_generate": True,
-                "output_scores": True
+                "output_scores": True,
+                "clean_up_tokenization_spaces": True,
             }
             if beam_search:
                 generation_params["num_beams"] = 5

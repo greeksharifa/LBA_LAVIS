@@ -481,245 +481,222 @@ def main():
 
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
-    else:
-        try:
-            num_pick_subq = cfg.runner_cfg.num_pick_subq
-        except:
-            num_pick_subq = cfg.runner_cfg.num_pick_subq = cfg.runner_cfg.num_sub_qa_generate
-            
-        if cfg.runner_cfg.get("sevila_visualize", False):
-            # python main_multi_subqa.py --options runner.visualize=True runner.sevila_visualize=True runner.output_dir="output/visualize_sevila/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="VLEP" runner.num_sub_qa_generate=1 runner.visualize_xl=True
-            total_base_match, total_cnt = 0., 0
-            _results = {}
-            dataset_name = cfg.datasets_cfg.dataset_name.lower()
-            if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
-                subqa_type = "sub_qas_val_xl_Ktype"
-            elif cfg.runner_cfg.get("visualize_xl", False):
-                subqa_type = "sub_qas_val_xl"
-            elif cfg.runner_cfg.get("visualize_fvu", False):
-                subqa_type = "sub_qas_val_fvu"
-            else:
-                subqa_type = "sub_qas_val"
-            results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/base/result/val_epochbest.json'))
-            for r in results_base:
-                _results[r['qid']] = {
-                    "question_id": r["qid"],
-                    "gt_ans": r["target"],
-                    "text_output_base": r["prediction"],
-                    "confidence_base": r["confidence"],
-                    "text_output_lba_list": [],
-                    "confidence_lba_list": [],
-                }
-                total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
-                total_cnt += 1
-                
-            for i in range(0, num_pick_subq):
-                results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/{i}/result/val_epochbest.json'))
-                for r in results_subqa:
-                    _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
-                    _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
-            
-            results = []
-            for k, v in _results.items():
-                max_confidence_lba = max(v['confidence_lba_list'])
-                idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
-                text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
-                r = v
-                r['text_output_lba'] = text_output_lba
-                r['confidence_lba'] = max_confidence_lba
-                r['type'] = v["question_id"].split("_")[0]
-                results.append(r) 
-            
-        elif cfg.runner_cfg.get("IGVLM_visualize", False):
-            # python main_multi_subqa.py --options runner.visualize=True runner.IGVLM_visualize=True runner.output_dir="output/visualize_IGVLM/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="TVQA" runner.num_sub_qa_generate=4 runner.visualize_xl=True
-            total_base_match, total_cnt = 0., 0
-            _results = {}
-            dataset_name = cfg.datasets_cfg.dataset_name
-            
-            if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
-                subqa_type = "sub_qas_val_xl_Ktype"
-            elif cfg.runner_cfg.get("visualize_xl_fvu", False):
-                subqa_type = "sub_qas_val_xl_fvu"#"sub_qas_val_fewshot_vqaintrospect_unique"
-            else:
-                subqa_type = "sub_qas_val_xl"
-              
-            if cfg.runner_cfg.num_sub_qa_select > 1:  
-                subqa_type = cfg.runner_cfg.llm_size + f"_select{cfg.runner_cfg.num_sub_qa_select}_" + subqa_type.replace('xl', 'xxl')
-            elif cfg.runner_cfg.get("llm_size", ""):
-                subqa_type = cfg.runner_cfg.llm_size + "_" + subqa_type.replace('xl', 'xxl')
-                
-            results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
-            
-            results_base["predicted_answer"] = results_base.apply(map_prediction_to_answer_v2, axis=1)
-            results_base["is_correct"] = results_base["predicted_answer"] == results_base["answer"]
-            
-            for idx, row in results_base.iterrows():
-                pred_base = map_prediction_to_answer_v2(row)
-                _results[row['question_id']] = {
-                    "question_id": str(row["question_id"]),
-                    # "type": row["question_type"],
-                    "gt_ans": row["answer"],
-                    "text_output_base": pred_base,
-                    "confidence_base": row["confidence_score"],
-                    "text_output_lba_list": [],
-                    "confidence_lba_list": [],
-                }
-                if "question_type" in row:
-                    _results[row['question_id']]["type"] = row["question_type"].split("_")[0]
-                total_base_match += pred_base == row["answer"]
-                total_cnt += 1
-                
-                ours_match = pred_base == row["answer"]
-                IGVLM_match = row["predicted_answer"] == row["answer"]
-                if ours_match != IGVLM_match:
-                    import pdb; pdb.set_trace()
-                pass
-            
-            print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
-            
-            total_accuracy = results_base["is_correct"].mean()
-            print(f'IGVLM total_accuracy: {total_accuracy * 100:.2f}%')
-                
-            for i in range(0, num_pick_subq):
-                results_subqa = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/{i}/ffn=6/result.csv', index_col=0)
-                for idx, row in results_subqa.iterrows():
-                    _results[row['question_id']][f'text_output_lba_list'].append(map_prediction_to_answer_v2(row))
-                    _results[row['question_id']][f'confidence_lba_list'].append(row["confidence_score"])
-            
-            results = []
-            for k, v in _results.items():
-                max_confidence_lba = max(v['confidence_lba_list'])
-                idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
-                text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
-                r = v
-                r['text_output_lba'] = text_output_lba
-                r['confidence_lba'] = max_confidence_lba
-                # r['type'] = r["type"].split("_")[0] #v["question_id"].split("_")[0]
-                results.append(r) 
         
-        elif cfg.runner_cfg.get("chatgpt_visualize", False):
-            results_base_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_before.json'
-            results_base = json.load(open(results_base_path, 'r'))
-            print('load results from:', results_base_path)
-            
-            results_lba_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_after_select{cfg.runner_cfg.num_sub_qa_select}.json'
-            results_lba = json.load(open(results_lba_path, 'r'))
-            print('load results from:', results_lba_path)
-            
-            # import pdb; pdb.set_trace()
-            total_base_match, total_cnt = 0., 0
-            
-            confs = []
-            results = []
-            for base_k, base_v in results_base.items():
-                r = base_v
-                r['type'] = base_v["question_id"][0]
-                r['text_output_lba'] = results_lba[base_k]['text_output_lba']
-                if all(a not in 'ABCDE' for a in r['gt_ans']):
-                    r['text_output_lba'] = r['text_output_base']
-                r['confidence_lba'] = results_lba[base_k]['confidence_lba']
-                
-                r['confidence_base'] = np.exp(np.exp(r['confidence_base']))
-                r['confidence_lba'] = np.exp(np.exp(r['confidence_lba']))
-                
-                total_base_match += base_v['text_output_base'] == base_v['gt_ans']
-                total_cnt += 1
-                print(r['confidence_base'], r['confidence_lba'])
-                confs.append(r['confidence_base'])
-                
-                results.append(r)
-            
-            print('results[0]:', results[0])
-            print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
-            
-            # histrogram of confs
-            import matplotlib.pyplot as plt
-            plt.hist(confs, bins=100)
-            plt.show()
-            plt.savefig('zzconfidences.png', dpi=300)
-        
-        else:
-            result_path = os.path.join(output_dir, 'results_base.json')
-            results = json.load(open(result_path, 'r'))
-            print('load results from:', result_path)
-            
-            total_base_match, total_cnt = 0, 0
-            
-            for result in results:
-                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-                total_base_match += acc_base
-                total_cnt += 1
-                
-                # select highest confidence_lba among sub_qa
-                if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
-                    # result['confidences_lba_list'] = [result['confidences_lba_list'][i] for i in idxs]
-                    # result['text_outputs_lba_list'] = [result['text_outputs_lba_list'][i] for i in idxs]
-                    # max_confidence_lba = max(result['confidences_lba_list'])
-                    # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
-                    # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
-                    max_confidence_lba = max(result['confidences_lba_list'][:num_pick_subq])
-                    idx_max_confidence_lba = result['confidences_lba_list'][:num_pick_subq].index(max_confidence_lba)
-                    text_output_lba = result['text_outputs_lba_list'][:num_pick_subq][idx_max_confidence_lba]
-                    
-                    result['text_output_lba'] = text_output_lba
-                    result['confidence_lba'] = max_confidence_lba
-                
-            print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
-            
-    try:
-        print('recomposer.model.__class__.__name__:', recomposer.model.__class__.__name__)
-    except:
-        pass
-    # import pdb; pdb.set_trace()
-    """##############################     Report metrics     ##############################"""
-    best_metrics = {
-        "max_acc_by_tau       ": "0.0%",
-    }
-    metrics_dict = {}
-    best_pick_subq = 0
-    if args.test_all_pick_subq:
-        for pick_subq in range(1, 6):
-            cfg.runner_cfg.pick_subq = pick_subq
-            result_path = os.path.join(output_dir, 'results_base.json')
-            results = json.load(open(result_path, 'r'))
-            print('load results from:', result_path)
-            
-            total_base_match, total_cnt = 0, 0
-            
-            for result in results:
-                acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-                total_base_match += acc_base
-                total_cnt += 1
-                
-                # select highest confidence_lba among sub_qa
-                if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
-                    # result['confidences_lba_list'] = [result['confidences_lba_list'][i] for i in idxs]
-                    # result['text_outputs_lba_list'] = [result['text_outputs_lba_list'][i] for i in idxs]
-                    # max_confidence_lba = max(result['confidences_lba_list'])
-                    # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
-                    # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
-                    max_confidence_lba = max(result['confidences_lba_list'][:pick_subq])
-                    idx_max_confidence_lba = result['confidences_lba_list'][:pick_subq].index(max_confidence_lba)
-                    text_output_lba = result['text_outputs_lba_list'][:pick_subq][idx_max_confidence_lba]
-                    
-                    result['text_output_lba'] = text_output_lba
-                    result['confidence_lba'] = max_confidence_lba
-                
-            
-            print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
-            
-            metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
-            if float(metrics["max_acc_by_tau       "][:-1]) > float(best_metrics["max_acc_by_tau       "][:-1]):
-                best_metrics = metrics
-                best_pick_subq = pick_subq
-            metrics_dict[pick_subq] = metrics
-        
-        pprint(metrics_dict, width=300)
-        print(f'best_pick_subq: {best_pick_subq}')
-        pprint(best_metrics, width=300)
-        
-    else:
         visualize(results, dataset, cfg, output_dir, total_base_match)
+    else:
+        def _load_results(_num_pick_subq):         
+            if cfg.runner_cfg.get("sevila_visualize", False):
+                # python main_multi_subqa.py --options runner.visualize=True runner.sevila_visualize=True runner.output_dir="output/visualize_sevila/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="VLEP" runner.num_sub_qa_generate=1 runner.visualize_xl=True
+                total_base_match, total_cnt = 0., 0
+                _results = {}
+                dataset_name = cfg.datasets_cfg.dataset_name.lower()
+                if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
+                    subqa_type = "sub_qas_val_xl_Ktype"
+                elif cfg.runner_cfg.get("visualize_xl", False):
+                    subqa_type = "sub_qas_val_xl"
+                elif cfg.runner_cfg.get("visualize_fvu", False):
+                    subqa_type = "sub_qas_val_fvu"
+                else:
+                    subqa_type = "sub_qas_val"
+                results_base = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/base/result/val_epochbest.json'))
+                for r in results_base:
+                    _results[r['qid']] = {
+                        "question_id": r["qid"],
+                        "gt_ans": r["target"],
+                        "text_output_base": r["prediction"],
+                        "confidence_base": r["confidence"],
+                        "text_output_lba_list": [],
+                        "confidence_lba_list": [],
+                    }
+                    total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
+                    total_cnt += 1
+                    
+                for i in range(0, _num_pick_subq):
+                    results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/{i}/result/val_epochbest.json'))
+                    for r in results_subqa:
+                        _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
+                        _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
+                
+                _loaded_results = []
+                for k, v in _results.items():
+                    max_confidence_lba = max(v['confidence_lba_list'])
+                    idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
+                    text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                    r = v
+                    r['text_output_lba'] = text_output_lba
+                    r['confidence_lba'] = max_confidence_lba
+                    r['type'] = v["question_id"].split("_")[0]
+                    _loaded_results.append(r) 
+                
+            elif cfg.runner_cfg.get("IGVLM_visualize", False):
+                # python main_multi_subqa.py --options runner.visualize=True runner.IGVLM_visualize=True runner.output_dir="output/visualize_IGVLM/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="TVQA" runner.num_sub_qa_generate=4 runner.visualize_xl=True
+                total_base_match, total_cnt = 0., 0
+                _results = {}
+                dataset_name = cfg.datasets_cfg.dataset_name
+                
+                if cfg.runner_cfg.get("sub_mode", "subqa") == "Ktype":
+                    subqa_type = "sub_qas_val_xl_Ktype"
+                elif cfg.runner_cfg.get("visualize_xl_fvu", False):
+                    subqa_type = "sub_qas_val_xl_fvu"#"sub_qas_val_fewshot_vqaintrospect_unique"
+                else:
+                    subqa_type = "sub_qas_val_xl"
+                
+                if cfg.runner_cfg.num_sub_qa_select > 1:  
+                    subqa_type = cfg.runner_cfg.llm_size + f"_select{cfg.runner_cfg.num_sub_qa_select}_" + subqa_type.replace('xl', 'xxl')
+                elif cfg.runner_cfg.get("llm_size", ""):
+                    subqa_type = cfg.runner_cfg.llm_size + "_" + subqa_type.replace('xl', 'xxl')
+                    
+                results_base = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv', index_col=0)
+                
+                results_base["predicted_answer"] = results_base.apply(map_prediction_to_answer_v2, axis=1)
+                results_base["is_correct"] = results_base["predicted_answer"] == results_base["answer"]
+                
+                for idx, row in results_base.iterrows():
+                    pred_base = map_prediction_to_answer_v2(row)
+                    _results[row['question_id']] = {
+                        "question_id": str(row["question_id"]),
+                        # "type": row["question_type"],
+                        "gt_ans": row["answer"],
+                        "text_output_base": pred_base,
+                        "confidence_base": row["confidence_score"],
+                        "text_output_lba_list": [],
+                        "confidence_lba_list": [],
+                    }
+                    if "question_type" in row:
+                        _results[row['question_id']]["type"] = row["question_type"].split("_")[0]
+                    total_base_match += pred_base == row["answer"]
+                    total_cnt += 1
+                    
+                    ours_match = pred_base == row["answer"]
+                    IGVLM_match = row["predicted_answer"] == row["answer"]
+                    if ours_match != IGVLM_match:
+                        import pdb; pdb.set_trace()
+                    pass
+                
+                print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
+                
+                total_accuracy = results_base["is_correct"].mean()
+                print(f'IGVLM total_accuracy: {total_accuracy * 100:.2f}%')
+                    
+                for i in range(0, _num_pick_subq):
+                    results_subqa = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/{i}/ffn=6/result.csv', index_col=0)
+                    for idx, row in results_subqa.iterrows():
+                        _results[row['question_id']][f'text_output_lba_list'].append(map_prediction_to_answer_v2(row))
+                        _results[row['question_id']][f'confidence_lba_list'].append(row["confidence_score"])
+                
+                _loaded_results = []
+                for k, v in _results.items():
+                    max_confidence_lba = max(v['confidence_lba_list'])
+                    idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
+                    text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                    r = v
+                    r['text_output_lba'] = text_output_lba
+                    r['confidence_lba'] = max_confidence_lba
+                    # r['type'] = r["type"].split("_")[0] #v["question_id"].split("_")[0]
+                    _loaded_results.append(r) 
+            
+            elif cfg.runner_cfg.get("chatgpt_visualize", False):
+                # TODO _num_pick_subq
+                results_base_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_before.json'
+                results_base = json.load(open(results_base_path, 'r'))
+                print('load results from:', results_base_path)
+                
+                results_lba_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_NExTQA_maina_after_select{cfg.runner_cfg.num_sub_qa_select}.json'
+                results_lba = json.load(open(results_lba_path, 'r'))
+                print('load results from:', results_lba_path)
+                
+                # import pdb; pdb.set_trace()
+                total_base_match, total_cnt = 0., 0
+                
+                confs = []
+                _loaded_results = []
+                for base_k, base_v in results_base.items():
+                    r = base_v
+                    r['type'] = base_v["question_id"][0]
+                    r['text_output_lba'] = results_lba[base_k]['text_output_lba']
+                    if all(a not in 'ABCDE' for a in r['gt_ans']):
+                        r['text_output_lba'] = r['text_output_base']
+                    r['confidence_lba'] = results_lba[base_k]['confidence_lba']
+                    
+                    r['confidence_base'] = np.exp(np.exp(r['confidence_base']))
+                    r['confidence_lba'] = np.exp(np.exp(r['confidence_lba']))
+                    
+                    total_base_match += base_v['text_output_base'] == base_v['gt_ans']
+                    total_cnt += 1
+                    print(r['confidence_base'], r['confidence_lba'])
+                    confs.append(r['confidence_base'])
+                    
+                    _loaded_results.append(r)
+                
+                print('results[0]:', _loaded_results[0])
+                print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
+                
+                # histrogram of confs
+                import matplotlib.pyplot as plt
+                plt.hist(confs, bins=100)
+                plt.show()
+                plt.savefig('zzconfidences.png', dpi=300)
+            
+            else:
+                result_path = os.path.join(output_dir, 'results_base.json')
+                _loaded_results = json.load(open(result_path, 'r'))
+                print('load results from:', result_path)
+                
+                total_base_match, total_cnt = 0, 0
+                
+                for result in _loaded_results:
+                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                    total_base_match += acc_base
+                    total_cnt += 1
+                    
+                    # select highest confidence_lba among sub_qa
+                    if "confidences_lba_list" in result and "text_outputs_lba_list" in result:
+                        # result['confidences_lba_list'] = [result['confidences_lba_list'][i] for i in idxs]
+                        # result['text_outputs_lba_list'] = [result['text_outputs_lba_list'][i] for i in idxs]
+                        # max_confidence_lba = max(result['confidences_lba_list'])
+                        # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
+                        # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
+                        max_confidence_lba = max(result['confidences_lba_list'][:_num_pick_subq])
+                        idx_max_confidence_lba = result['confidences_lba_list'][:_num_pick_subq].index(max_confidence_lba)
+                        text_output_lba = result['text_outputs_lba_list'][:_num_pick_subq][idx_max_confidence_lba]
+                        
+                        result['text_output_lba'] = text_output_lba
+                        result['confidence_lba'] = max_confidence_lba
+                    
+                print(f'loaded config path is {args.cfg_path}')#os.path.join(output_dir, "config.yaml")}')
+
+            return _loaded_results, total_base_match, total_cnt
+        
+        if args.test_all_pick_subq:
+            best_metrics = {
+                "max_acc_by_tau       ": "0.0%",
+            }
+            metrics_dict = {}
+            best_num_pick_subq = 0
+            
+            for num_pick_subq in range(1, 6):
+                cfg.runner_cfg.num_pick_subq = num_pick_subq
+                results, total_base_match, total_cnt = _load_results(num_pick_subq)
+                
+                metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
+                if float(metrics["max_acc_by_tau       "][:-1]) > float(best_metrics["max_acc_by_tau       "][:-1]):
+                    best_metrics = metrics
+                    best_num_pick_subq = num_pick_subq
+                metrics_dict[num_pick_subq] = metrics
+            
+            pprint(metrics_dict, width=300)
+            print(f'\nbest_pick_subq: {best_num_pick_subq}')
+            pprint(best_metrics, width=300)
+        else:
+            try:
+                num_pick_subq = cfg.runner_cfg.num_pick_subq
+            except:
+                num_pick_subq = cfg.runner_cfg.num_pick_subq = cfg.runner_cfg.num_sub_qa_generate
+            
+            results, total_base_match, total_cnt = _load_results(num_pick_subq)    
+            
+            visualize(results, dataset, cfg, output_dir, total_base_match)
+                
     
 
 if __name__ == '__main__':
