@@ -669,7 +669,7 @@ def main():
         
         if args.test_all_pick_subq:
             best_metrics = {
-                "max_acc_by_tau       ": "0.0%",
+                "max_acc_by_tau    ": "0.0%",
             }
             metrics_dict = {}
             best_num_pick_subq = 0
@@ -679,7 +679,7 @@ def main():
                 results, total_base_match, total_cnt = _load_results(num_pick_subq)
                 
                 metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
-                if float(metrics["max_acc_by_tau       "][:-1]) > float(best_metrics["max_acc_by_tau       "][:-1]):
+                if float(metrics["max_acc_by_tau    "][:-1]) > float(best_metrics["max_acc_by_tau    "][:-1]):
                     best_metrics = metrics
                     best_num_pick_subq = num_pick_subq
                 metrics_dict[num_pick_subq] = metrics
@@ -692,6 +692,7 @@ def main():
             # Display the DataFrame as a table
             print(df.to_string())
             print(f'\nbest_pick_subq: {best_num_pick_subq}')
+            pprint(best_metrics, width=300)
         else:
             try:
                 num_pick_subq = cfg.runner_cfg.num_pick_subq

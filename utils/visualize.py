@@ -231,7 +231,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     if cfg.runner_cfg.select_high_confidence:
         metrics = OrderedDict({
             "max_tau2          ": f'{max_conf_gap:.6g}',
-            "log_max_tau2      ": f'{np.log2(1/max_conf_gap):.2f}',
+            "1/log2(max_tau2)  ": f'{np.log2(1/max_conf_gap):.2f}',
             "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
             "max_acc_by_tau    ": f'{max(final_acc_list) * 100:.2f}%',
         })
@@ -282,7 +282,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         for _q in "TCDISPFL":
             for q_type in match_per_type.keys():
                 if q_type.startswith(_q) and total_per_type[q_type] > 0:
-                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
+                    # qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
+                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}%'
                     # print(f'{q_type:<21s}: {qtype_v}')
                     metrics[f'{q_type:<18s}'] = qtype_v
     
