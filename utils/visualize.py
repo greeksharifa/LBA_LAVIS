@@ -73,7 +73,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 
                 tau2 = f'{conf_gap:.6g}'
                 max_tau2 = f'{max_conf_gap:.6g}'
-                print(f'\ri: {c_idx:4d} | tau2: {tau2:15s} tau2: {max_tau2:15s} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
+                print(f'\rc_idx: {c_idx:4d} | tau2: {tau2:15s} max_tau2: {max_tau2:15s} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -231,14 +231,14 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     if cfg.runner_cfg.select_high_confidence:
         metrics = OrderedDict({
             "max_tau2          ": f'{max_conf_gap:.6g}',
-            "1/log2(max_tau2)  ": f'{np.log2(1/max_conf_gap):.2f}',
+            "I(max_tau2)       ": f'{np.log2(1/max_conf_gap):.2f}',
             "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
-            "max_acc_by_tau    ": f'{max(final_acc_list) * 100:.2f}%',
+            "max_acc_by_tau    ": f'{max(final_acc_list) * 100:.2f}%',# = {max(final_acc_list)} / {N}',
         })
     else:
         metrics = OrderedDict({
-            "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
-            "Previous_work_acc ": f'{baseline_max_match / N * 100:.2f}%',
+            "acc_origin        ": f'{total_base_match / N * 100:.2f}% = {total_base_match} / {N}',
+            "Previous_work_acc ": f'{baseline_max_match / N * 100:.2f}% = {baseline_max_match} / {N}',
         })
     
     if 'type' in results[0]:# or results[0]["question_id"][0] in "TCDISPFL": # cfg.datasets_cfg.dataset_name in ['DramaQA', 'NExTQA', 'STAR']:
@@ -283,13 +283,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             for q_type in match_per_type.keys():
                 if q_type.startswith(_q) and total_per_type[q_type] > 0:
                     # qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'
-                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}%'
+                    qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}%'# = {match_per_type[q_type]} / {total_per_type[q_type]}'
                     # print(f'{q_type:<21s}: {qtype_v}')
                     metrics[f'{q_type:<18s}'] = qtype_v
     
     metrics.update({
         "max_arg_conf      ": f'{max_arg_confidence:.6f}',
-        "conf_percentile   ": f'{confidence_percentile:.2f}%',
+        "conf_%            ": f'{confidence_percentile:.2f}%',
         "E_CR              ": f'{e_cr:.2f}%',
         "E_IC              ": f'{e_ic:.2f}%',
         # "min_match            ": f'{min_match / N * 100:.2f}%',

@@ -13,6 +13,7 @@ DramaQA_vid_error_list.json
 generate_subqa_*
 utils/api_chatgpt.py
 call_chatgpt.py
+zz_chatgpt_confidences.png
 
 # data / model
 llm/
