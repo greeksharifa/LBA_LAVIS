@@ -9,8 +9,11 @@ from transformers import InstructBlipProcessor, InstructBlipForConditionalGenera
 from processors.alpro_processors import AlproVideoEvalProcessor
 from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 from accelerate import infer_auto_device_map
+# from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+# from qwen_vl_utils import process_vision_info
 
 # from utils.api_chatgpt import call_vision_api, ndarrays_to_base64
+from utils.utils import ndarrays_to_base64
 
 import numpy as np
 import torch
@@ -312,6 +315,39 @@ class Recomposer(nn.Module):
             # video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
             # samples["video"] = video
             output_text, output_scores = self.model.generate(samples)
+        elif "Qwen" in self.model_name:
+            messages = []
+            for vis, txt in zip(vision, text_inputs):
+                vis_type = "video" if vis.ndim == 3 else "image" # shape: such as [n_frms, 640, 480] or [640, 480]
+                if vis_type == "video":
+                    base64_vis = ndarrays_to_base64(vis)
+                else:
+                    base64_vis = ndarrays_to_base64([vis])[0]
+                    
+                messages.append([{
+                    "role": "user",
+                    "content": [
+                        {"type": vis_type, vis_type: base64_vis},
+                        {"type": "text", "text": txt},
+                    ],
+                }])
+                
+                texts = [
+                    self.processor.apply_chat_template(msg, tokenize=False, add_generation_prompt=True)
+                    for msg in messages
+                ]
+                image_inputs, video_inputs = process_vision_info(messages)
+                inputs = self.processor(
+                    text=texts,
+                    images=image_inputs,
+                    videos=video_inputs,
+                    padding=True,
+                    return_tensors="pt",
+                )
+                if self.cfg.runner_cfg.device_map != "auto":
+                    inputs = inputs.to(self.model.device) # "cuda"
+            
+                
             
         else:
             try:
@@ -353,6 +389,9 @@ class Recomposer(nn.Module):
             
             if self.cfg.runner_cfg.device_map != "auto":
                 inputs = inputs.to(self.model.device) # "cuda"
+            else:
+                inputs = inputs.to(dtype=torch.float16)
+                # inputs = inputs.to("cpu")
                 
             # debug
             if self.cfg.runner_cfg.debug:
@@ -377,6 +416,10 @@ class Recomposer(nn.Module):
                 # generation_params["temperature"] = 0.9
                 # generation_params["top_k"] = 50
                 
+            # print('inputs.device:', inputs.device)
+            # print('self.model.device:', self.model.device)
+            # import pdb; pdb.set_trace()
+            
             outputs = self.model.generate(
                 **inputs,
                 **generation_params

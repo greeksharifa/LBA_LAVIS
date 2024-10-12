@@ -22,11 +22,41 @@ def get_input(data_type, processor, device, vision_batch, text_inputs):
     if data_type == "images":
         inputs = processor(text=text_inputs, images=vision_batch, return_tensors="pt", padding=True)
     else:
-        inputs = processor(text=text_inputs, return_tensors="pt", padding=True)
-        pixel_values = []
-        for video in vision_batch: # video: [n_frms, 640, 480]
-            pixel_values.append(processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
-        inputs["pixel_values"] = torch.stack(pixel_values, dim=0)#.to(device)
+        # import pdb; pdb.set_trace()
+        if "Qwen" in processor.__class__.__name__:
+            from qwen_vl_utils import process_vision_info
+            image_inputs, video_inputs = process_vision_info(text_inputs)
+            inputs = processor(
+                text=[text_inputs],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            inputs = inputs.to(device)
+        elif "llama" in processor.__class__.__name__:
+            messages = []
+            for video, txt in zip(vision_batch, text_inputs):
+                message = {
+                    "role": "user",
+                    "content": [{"type": "image"} for _ in range(len(video))] + [{"type": "text", "text": txt}],
+                }
+                messages.append(message)
+            
+            processed_txt = processor.apply_chat_template(messages, add_generation_prompt=True)
+            
+            inputs = processor(
+                text=processed_txt,
+                images=vision_batch,
+                padding=True,
+                return_tensors="pt",
+            )
+        else:
+            inputs = processor(text=text_inputs, return_tensors="pt", padding=True)
+            pixel_values = []
+            for video in vision_batch: # video: [n_frms, 640, 480]
+                pixel_values.append(processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
+            inputs["pixel_values"] = torch.stack(pixel_values, dim=0)#.to(device)
         # print("input_ids:", inputs["input_ids"].shape, inputs["input_ids"].device, "\tpixel_values:", inputs["pixel_values"].shape, inputs["pixel_values"].device)
         
     return inputs.to(device)
@@ -38,9 +68,12 @@ usage:
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="Ktype" datasets.dataset_name="DramaQA" runner.batch_size=2 datasets.num_data=5 runner.num_sub_qa_generate=6 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
+
+CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
+CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 """
 def main():
-    N_SUPPLE = 1
+    N_SUPPLE = 0
     args = parse_args()
     cfg = Config(args)
     setup_seeds(cfg)
@@ -51,9 +84,40 @@ def main():
     cache_dir = os.path.join("/model/", model_name.split("/")[0])
     device = "cuda"
     
-    if cfg.datasets_cfg.data_type == "images": # dataset_name in ["VQA_Introspect", "AOKVQA", "OKVQA"]:
+    if "Qwen" in model_name:
+        from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+        from qwen_vl_utils import process_vision_info
+
+        model = Qwen2VLForConditionalGeneration.from_pretrained(
+            model_name, # "Qwen/Qwen2-VL-7B-Instruct",
+            torch_dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2",
+            device_map="auto",
+            cache_dir="/model/Qwen/"
+        )
+
+        # default processer
+        processor = AutoProcessor.from_pretrained(
+            model_name, # "Qwen/Qwen2-VL-7B-Instruct",
+            cache_dir="/model/Qwen/",
+        )
+        
+    elif "llama" in model_name:
+        from transformers import MllamaForConditionalGeneration, AutoProcessor
+        # model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
+
+        model = MllamaForConditionalGeneration.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16,
+            device_map="auto",
+            cache_dir="/model/llama/",
+        )
+        processor = AutoProcessor.from_pretrained(model_name, cache_dir="/model/llama/",)
+        
+    elif cfg.datasets_cfg.data_type == "images": # dataset_name in ["VQA_Introspect", "AOKVQA", "OKVQA"]:
         model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
         processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
+        
     else: # "videos"
         model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
         processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
@@ -74,7 +138,8 @@ def main():
         "Ktype_5": "What is the detailed information of {entity}?", # Contents, 원래는 K7
     }
     vqa_introspect_dataset = VQAIntrospectDataset(None, None, '/data/coco/images/', 
-                                                  ['/data/VQA_Introspect/VQAIntrospect_valv1.0.json', '/data/VQA/v2/v2_mscoco_val2014_annotations.json'])
+                                                  ['/data/VQA_Introspect/VQAIntrospect_valv1.0.json', '/data/VQA/v2/v2_mscoco_val2014_annotations.json'],
+                                                  num_data=-1, split='val')
 
     prompt_subqa_vqaintrospect = []
     idx_example = 0
@@ -214,12 +279,16 @@ def main():
                 pprint(sub_qas, width=300)
             # for main_question, sub_question, sub_answer in zip(batch["text_input"], sub_questions, sub_answers):
             #     print(f'Main Question: {main_question}\nSub Question: {sub_question}\nSub Answer: {sub_answer}\n')
-            
-    out_path = f"temp/subqa/sub_qas_val_{model_name.split('-')[-1]}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}.json"
+        
+    if "Qwen" in model_name:
+        tag = model_name.split('/')[-1].replace('-', '_')
+    else:
+        tag = model_name.split('-')[-1]
+    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{model_name.split('-')[-1]}_{cfg.runner_cfg.sub_mode}.json"
+    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     

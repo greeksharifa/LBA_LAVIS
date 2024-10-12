@@ -1,4 +1,27 @@
 
+def map_prediction_to_answer(out):
+    out = str(out)
+    out = out.replace('\u200b', '')
+    
+    
+    for i in range(2):
+        if len(out) < i + 1:
+            continue
+        if out[i] in ["A", "B", "C", "D", "E"]:
+            return '(' + out[i] + ')'
+        if out[i] in list(range(5)):
+            return '(' + chr(ord('A') + out[i]) + ')'
+    
+    for answer in ["A", "B", "C", "D", "E"]:
+        if answer + ':' in out:
+            return '(' + answer + ')'
+        if answer + ')' in out:
+            return '(' + answer + ')'
+    
+    return None
+    
+    
+
 def map_prediction_to_answer_v2(row):
     answer_column = None
     if isinstance(row["pred"], str):

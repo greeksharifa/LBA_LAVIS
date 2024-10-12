@@ -158,8 +158,14 @@ class BaseDataset(Dataset):
             e_cr = sum([1 if acc_lba > acc_origin and acc_origin < 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc < 0.5 else 0 for acc in acc_origin_list]) * 100
             e_ic = sum([1 if acc_lba < acc_origin and acc_origin > 0.5 else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc > 0.5 else 0 for acc in acc_origin_list]) * 100
         else:
-            e_cr = sum([1 if acc_lba and not acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if not acc_origin else 0 for acc_origin in acc_origin_list]) * 100
-            e_ic = sum([1 if not acc_lba and acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+            try:
+                e_cr = sum([1 if acc_lba and not acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if not acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+            except:
+                e_cr = 0.
+            try:
+                e_ic = sum([1 if not acc_lba and acc_origin else 0 for acc_origin, acc_lba in zip(acc_origin_list, acc_lba_list)]) / sum([1 if acc_origin else 0 for acc_origin in acc_origin_list]) * 100
+            except:
+                e_ic = 0.
         return e_cr, e_ic
     
     def get_accuracy(self, outputs, targets):#, match1ok=False):
@@ -172,11 +178,12 @@ class BaseDataset(Dataset):
         def _get_acc(out, target):
             if self.data_type == "videos":
                 if type(out) == str:
+                    out = out.replace('\u200b', '')
                     if len(out) == 1:
                         out = '(' + out + ')'
                     elif len(out) > 3 and out[0] == '(':
                         out = out[:3]
-                    if '0' <= out[1] <= '4':
+                    if len(out) >= 2 and '0' <= out[1] <= '4':
                         out = '(' + chr(ord(out[1]) + 17) + ')'
                         
             # convert to lower case string
@@ -337,6 +344,15 @@ Answer: The answer is (A)\n"""
         for description, main_question, candidate_list in zip(kwargs.get('descriptions'), main_questions, candidate_lists):
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(description=description, main_question=main_question.rstrip('?'), choices=choices))
+        return ret
+    
+    elif prompt_type == "recomposer_video_irrelevant_info":
+        prompt = "Context: {irr_info}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        
+        ret = []
+        for irr_info, main_question, candidate_list in zip(kwargs.get('irr_info_list'), main_questions, candidate_lists):
+            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+            ret.append(prompt.format(irr_info=irr_info, main_question=main_question.rstrip('?'), choices=choices))
         return ret
     
     else:

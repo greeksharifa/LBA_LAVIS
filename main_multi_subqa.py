@@ -1,3 +1,4 @@
+import logging
 import argparse
 import os
 import json
@@ -60,6 +61,8 @@ def parse_args():
 
 
 def main():
+    logging.disable(logging.INFO) # disable INFO and DEBUG logging everywhere
+    logging.disable(logging.WARNING) # disable WARNING, INFO and DEBUG logging everywhere
     args = parse_args()
     cfg = Config(args)
     setup_seeds(cfg)
@@ -384,6 +387,29 @@ def main():
                 text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
                 # sub_questions_list = descriptions_list
                 # sub_answers_list = 
+                text_outputs_lba_list.append(text_outputs_lba)
+                confidences_lba_list.append(confidences_lba)
+                
+            elif cfg.runner_cfg.sub_mode == "irrelevant_info":
+                irr_info_list = ["One plus one equals two." for _ in range(bsz)]
+                
+                # generating recomposed_answers
+                if cfg.datasets_cfg.data_type == "videos":
+                    text_inputs = get_text_input("recomposer_video_irrelevant_info", 
+                                                main_questions=batch['text_input'], 
+                                                irr_info_list=irr_info_list,
+                                                candidate_lists=batch['candidate_list'],
+                                                examplar=examplar,
+                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                else:                          # "images"
+                    raise NotImplementedError("description mode is not implemented for images")
+                
+                if cfg.runner_cfg.debug:
+                    print('sub_questions text_inputs:', text_inputs)
+                    print('sub_answers text_inputs:', text_inputs)
+                    print('recomposer_video text_inputs:', text_inputs)
+                text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                
                 text_outputs_lba_list.append(text_outputs_lba)
                 confidences_lba_list.append(confidences_lba)
                 
@@ -719,9 +745,24 @@ def main():
                         # max_confidence_lba = max(result['confidences_lba_list'])
                         # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
                         # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
-                        max_confidence_lba = max(result['confidences_lba_list'][:_num_pick_subq])
-                        idx_max_confidence_lba = result['confidences_lba_list'][:_num_pick_subq].index(max_confidence_lba)
-                        text_output_lba = result['text_outputs_lba_list'][:_num_pick_subq][idx_max_confidence_lba]
+                        from utils.llava_answer_eval import map_prediction_to_answer
+                        filtered_texts, filtered_confs = [], []
+                        for text_output_lba, confidence_lba in zip(result['text_outputs_lba_list'], result['confidences_lba_list']):
+                            if map_prediction_to_answer(text_output_lba):
+                                filtered_texts.append(text_output_lba)
+                                filtered_confs.append(confidence_lba)
+                        
+                        if len(filtered_texts) == 0:
+                            filtered_texts = result['text_outputs_lba_list']
+                            filtered_confs = result['confidences_lba_list']
+                        
+                        max_confidence_lba = max(filtered_confs[:_num_pick_subq])
+                        idx_max_confidence_lba = filtered_confs[:_num_pick_subq].index(max_confidence_lba)
+                        text_output_lba = filtered_texts[:_num_pick_subq][idx_max_confidence_lba]
+                        
+                        # max_confidence_lba = max(result['confidences_lba_list'][:_num_pick_subq])
+                        # idx_max_confidence_lba = result['confidences_lba_list'][:_num_pick_subq].index(max_confidence_lba)
+                        # text_output_lba = result['text_outputs_lba_list'][:_num_pick_subq][idx_max_confidence_lba]
                         
                         result['text_output_lba'] = text_output_lba
                         result['confidence_lba'] = max_confidence_lba
