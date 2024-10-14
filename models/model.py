@@ -264,25 +264,44 @@ class Recomposer(nn.Module):
         # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
         if model_type == "answerer":
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
-            self.processor = Blip2Processor.from_pretrained(model_name)
+            self.processor = Blip2Processor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "blip2" in model_name: # "flan-t5" in model_name or "blip2-opt-" in model_name:
-            self.processor = Blip2Processor.from_pretrained(model_name)
+            self.processor = Blip2Processor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
         elif "instructblip" in model_name:
-            self.processor = InstructBlipVideoProcessor.from_pretrained(model_name)
+            self.processor = InstructBlipVideoProcessor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
             # self.processor = InstructBlipProcessor.from_pretrained(model_name)
             # self.model = InstructBlipForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
         elif "Video-LLaVA" in model_name:
             from transformers import VideoLlavaProcessor, VideoLlavaForConditionalGeneration
-            self.processor = VideoLlavaProcessor.from_pretrained(model_name)
+            self.processor = VideoLlavaProcessor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = VideoLlavaForConditionalGeneration.from_pretrained(
                 model_name, 
                 cache_dir=cache_dir, #os.path.join(cache_dir, "LanguageBind/"), 
                 device_map="auto",
                 attn_implementation=None,
             )
+        elif "Qwen" in model_name:
+            from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+            self.processor = AutoProcessor.from_pretrained(model_name, cache_dir=cache_dir)
+            # default: Load the model on the available device(s)
+            # self.model = Qwen2VLForConditionalGeneration.from_pretrained(
+            #     model_name, 
+            #     cache_dir=cache_dir, 
+            #     torch_dtype="auto", 
+            #     device_map=device_map
+            # )
+            # We recommend enabling flash_attention_2 for better acceleration and memory saving, especially in multi-image and video scenarios.
+            self.model = Qwen2VLForConditionalGeneration.from_pretrained(
+                model_name,
+                torch_dtype=torch.bfloat16,
+                attn_implementation="flash_attention_2",
+                cache_dir=cache_dir,
+                device_map=device_map,
+            )
+
         else:
             raise NotImplementedError(f"Invalid Recomposer model name: {model_name}")
         
@@ -316,13 +335,20 @@ class Recomposer(nn.Module):
             # samples["video"] = video
             output_text, output_scores = self.model.generate(samples)
         elif "Qwen" in self.model_name:
+            from qwen_vl_utils import process_vision_info
+            
             messages = []
+            # print('start', '#' * 100)
+            # print(text_inputs[0])
+            # print('end  ', '#' * 100)
             for vis, txt in zip(vision, text_inputs):
-                vis_type = "video" if vis.ndim == 3 else "image" # shape: such as [n_frms, 640, 480] or [640, 480]
+                # shape: such as [n_frms, 640, 480] or [640, 480]
+                vis_type = "video" if type(vis) == list else "image"
+                # vis_type = "video" if vis.ndim == 3 else "image" 
                 if vis_type == "video":
-                    base64_vis = ndarrays_to_base64(vis)
+                    base64_vis = ndarrays_to_base64(vis, add_prefix=True)
                 else:
-                    base64_vis = ndarrays_to_base64([vis])[0]
+                    base64_vis = ndarrays_to_base64([vis], add_prefix=True)[0]
                     
                 messages.append([{
                     "role": "user",
@@ -332,22 +358,129 @@ class Recomposer(nn.Module):
                     ],
                 }])
                 
-                texts = [
-                    self.processor.apply_chat_template(msg, tokenize=False, add_generation_prompt=True)
-                    for msg in messages
-                ]
-                image_inputs, video_inputs = process_vision_info(messages)
-                inputs = self.processor(
-                    text=texts,
-                    images=image_inputs,
-                    videos=video_inputs,
-                    padding=True,
-                    return_tensors="pt",
-                )
-                if self.cfg.runner_cfg.device_map != "auto":
-                    inputs = inputs.to(self.model.device) # "cuda"
+            texts = [
+                self.processor.apply_chat_template(msg, tokenize=False, add_generation_prompt=True)
+                for msg in messages
+            ]
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = self.processor(
+                text=texts,
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            if self.cfg.runner_cfg.device_map != "auto":
+                inputs = inputs.to(self.model.device) # "cuda"
             
                 
+            generated_ids = self.model.generate(**inputs, max_new_tokens=128)
+            generated_ids_trimmed = [
+                out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = self.processor.batch_decode(
+                generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            )
+            
+            ret_c = []
+            for output in output_text:
+                try:
+                    if "I am " in output and "% confident in my answer." in output:
+                        ret_c.append(float(output.split('I am ')[-1].split('%')[0]))
+                    else:
+                        ret_c.append(float(output.split('2) ')[-1].split('\n')[-1][-5:]))
+                except:
+                    ret_c.append(0.000)
+            # ret_c = [float(output.split('2) ')[-1].split('\n')[-1]) for output in output_text]
+            
+            
+            ################ get output
+            messages = []
+            for vis, txt in zip(vision, text_inputs):
+                txt = txt.replace(
+                    "1) What is the answer?\n2) Print how confident you are in your answer, between 0.000 and 1.000.\nAnswer: ",
+                    "Answer: The answer is "
+                )
+                # shape: such as [n_frms, 640, 480] or [640, 480]
+                vis_type = "video" if type(vis) == list else "image"
+                # vis_type = "video" if vis.ndim == 3 else "image" 
+                if vis_type == "video":
+                    base64_vis = ndarrays_to_base64(vis, add_prefix=True)
+                else:
+                    base64_vis = ndarrays_to_base64([vis], add_prefix=True)[0]
+                    
+                messages.append([{
+                    "role": "user",
+                    "content": [
+                        {"type": vis_type, vis_type: base64_vis},
+                        {"type": "text", "text": txt},
+                    ],
+                }])
+                
+            texts = [
+                self.processor.apply_chat_template(msg, tokenize=False, add_generation_prompt=True)
+                for msg in messages
+            ]
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = self.processor(
+                text=texts,
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            if self.cfg.runner_cfg.device_map != "auto":
+                inputs = inputs.to(self.model.device) # "cuda"
+            
+                
+            generated_ids = self.model.generate(**inputs, max_new_tokens=128)
+            generated_ids_trimmed = [
+                out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = self.processor.batch_decode(
+                generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            )
+            
+            from utils.llava_answer_eval import map_prediction_to_answer
+            
+            print('output_text, ret_c:')
+            from pprint import pprint
+            pprint(output_text, width=300)
+            pprint(ret_c, width=300)
+            return output_text, ret_c
+            
+
+            # ret_o, ret_c = [], []
+            # for output in output_text:
+            #     if "1)" in output and "2)" in output:
+            #         for option in ["A", "B", "C", "D", "E"]:
+            #             if f"{option})" in output:
+            #                 ret_o.append('(' + option + ')')
+            #                 break
+            #         else:
+            #             ret_o.append(output)
+                        
+            #         ret_c.append(float(output.split('2) ')[-1]))
+            #     else:
+            #         for option in ["A", "B", "C", "D", "E"]:
+            #             if f"{option}" in output:
+            #                 ret_o.append('(' + option + ')')
+            #                 ret_c.append(0.000)
+            #                 break
+            #         else:
+            #             pass
+            #         ret_o.append(output)
+            #         ret_c.append(float(output.split('2) ')[-1]))
+            
+            # print('ret_o, ret_c:', ret_o, ret_c)
+            
+            # return ret_o, ret_c
+            
+            # if "1)" in output_text[0] and "2)" in output_text[0]:
+            #     if "A)" in output_text[0]:
+            print(output_text)
+            # import pdb; pdb.set_trace()
+            return output_text, [float(t.split('2) ')[-1]) for t in output_text]
             
         else:
             try:

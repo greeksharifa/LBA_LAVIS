@@ -41,7 +41,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     if type(cfg.runner_cfg.get("max_conf_gap", None)) == float:# is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap
     else:
-        max_conf_gap = 0.0
+        max_conf_gap = 1e-100# 0.0
     
         if cfg.runner_cfg.select_high_confidence:
             conf_list = []

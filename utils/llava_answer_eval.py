@@ -1,7 +1,8 @@
 
 def map_prediction_to_answer(out):
-    out = str(out)
+    out = str(out).strip()
     out = out.replace('\u200b', '')
+    out = out.replace('The answer is ', '')
     
     
     for i in range(2):
@@ -17,6 +18,14 @@ def map_prediction_to_answer(out):
             return '(' + answer + ')'
         if answer + ')' in out:
             return '(' + answer + ')'
+        if answer in out:
+            return '(' + answer + ')'
+    
+    for answer in ["0", "1", "2", "3", "4"]:
+        if answer + ':' in out:
+            return '(' + chr(ord('A') + int(answer)) + ')'
+        # if answer + ')' in out:
+        #     return '(' + chr(ord('A') + int(answer)) + ')'
     
     return None
     

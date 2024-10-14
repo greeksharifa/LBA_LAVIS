@@ -170,6 +170,8 @@ def main():
                         print(f'{k}: {len(v)} {len(v[0])} {v[0][0].shape}')
                     elif isinstance(v, list) and isinstance(v[0], list) and isinstance(v[0][0], list) and hasattr(v[0][0][0], "shape"):
                         print(f'{k}: {len(v)} {len(v[0])} {len(v[0][0])} {v[0][0][0].shape}')
+                    elif k == "vpath":
+                        print(f'{k}: {len(v)}, {len(v[0])}, {v[0][0]}, ...')
                     elif k != "candidate_list":
                         print(f'{k}: {v}')
 
@@ -183,7 +185,8 @@ def main():
                                                 candidate_lists=batch['candidate_list'],
                                                 add_examplar="blip2" not in cfg.runner_cfg.recomposer_name,
                                                 video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
-                                                )
+                                                qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
+                                            )
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
             text_outputs_base, confidences_base = recomposer(vision, text_inputs)
@@ -259,6 +262,7 @@ def main():
                                                     examplar=examplar,
                                                     train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
                                                     video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
+                                                    qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
                                                     )
                     else:                          # "images"
                         text_inputs = get_text_input("recomposer_image", 

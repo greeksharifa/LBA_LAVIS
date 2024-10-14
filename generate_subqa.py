@@ -25,15 +25,37 @@ def get_input(data_type, processor, device, vision_batch, text_inputs):
         # import pdb; pdb.set_trace()
         if "Qwen" in processor.__class__.__name__:
             from qwen_vl_utils import process_vision_info
-            image_inputs, video_inputs = process_vision_info(text_inputs)
+            from utils.utils import ndarrays_to_base64
+            
+            messages_batch = []
+            
+            # import pdb; pdb.set_trace()
+            for video, text_input in zip(vision_batch, text_inputs):
+                base64_images = ndarrays_to_base64(video)
+                image_content = [{"type": "image", "image": "data:image;base64," + base64_images[i]} for i in range(len(video))]
+                messages = [
+                    # {"role": "system", "content": "You are a helpful assistant."},
+                    {
+                        "role": "user",
+                        "content": image_content + [{"type": "text", "text": text_input}],
+                    }
+                ]
+                messages_batch.append(messages)
+            
+            texts_batch = [
+                processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                for messages in messages_batch
+            ]
+            
+            image_inputs, video_inputs = process_vision_info(messages)
             inputs = processor(
-                text=[text_inputs],
+                text=texts_batch,
                 images=image_inputs,
                 videos=video_inputs,
                 padding=True,
                 return_tensors="pt",
             )
-            inputs = inputs.to(device)
+            
         elif "llama" in processor.__class__.__name__:
             messages = []
             for video, txt in zip(vision_batch, text_inputs):
@@ -68,6 +90,9 @@ usage:
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="Ktype" datasets.dataset_name="DramaQA" runner.batch_size=2 datasets.num_data=5 runner.num_sub_qa_generate=6 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
+
+CUDA_VISIBLE_DEVICES=2 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="Qwen/Qwen2-VL-7B-Instruct"
+CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="Qwen/Qwen2-VL-7B-Instruct"
 
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
@@ -159,7 +184,7 @@ def main():
         
         prompt += "Reasoning Question: {main_question}? Perception Question:"
         prompt_subqa_vqaintrospect.append(prompt)
-    pprint(prompt_subqa_vqaintrospect, width=300)
+    # pprint(prompt_subqa_vqaintrospect, width=300)
     
     temp_dir = f"temp/files/{cfg.datasets_cfg.dataset_name}/{cfg.runner_cfg.sub_mode}/"
     os.makedirs(temp_dir, exist_ok=True)
@@ -198,6 +223,8 @@ def main():
                     generation_params["top_p"] = 0.8
                 
                 outputs = model.generate(**inputs, **generation_params)
+                if "Qwen" in model_name:
+                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
                 sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
             elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
@@ -214,6 +241,8 @@ def main():
                     generation_params["length_penalty"] = -1
                     
                 outputs = model.generate(**inputs, **generation_params)
+                if "Qwen" in model_name:
+                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
                 sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
             elif cfg.runner_cfg.sub_mode == "Ktype": # Generate Sub-Questions by Ktype
@@ -256,6 +285,8 @@ def main():
                 "length_penalty": -1
             }
             outputs = model.generate(**inputs, **generation_params)
+            if "Qwen" in model_name:
+                outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
             sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
 
             # store to results    
