@@ -8,6 +8,7 @@ import pickle
 
 from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
+from utils.llava_answer_eval import map_prediction_to_answer
 
 def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     if datasets_cfg.dataset_name == "VQA_Introspect":
@@ -178,13 +179,17 @@ class BaseDataset(Dataset):
         def _get_acc(out, target):
             if self.data_type == "videos":
                 if type(out) == str:
-                    out = out.replace('\u200b', '')
-                    if len(out) == 1:
-                        out = '(' + out + ')'
-                    elif len(out) > 3 and out[0] == '(':
-                        out = out[:3]
-                    if len(out) >= 2 and '0' <= out[1] <= '4':
-                        out = '(' + chr(ord(out[1]) + 17) + ')'
+                    temp_out = map_prediction_to_answer(out)
+                    if temp_out is None:
+                        out = out.replace('\u200b', '')
+                        if len(out) == 1:
+                            out = '(' + out + ')'
+                        elif len(out) > 3 and out[0] == '(':
+                            out = out[:3]
+                        if len(out) >= 2 and '0' <= out[1] <= '4':
+                            out = '(' + chr(ord(out[1]) + 17) + ')'
+                    else:
+                        out = temp_out
                         
             # convert to lower case string
             out = str(out).lower()
@@ -268,6 +273,7 @@ Choices:
 (D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
 (E) Because Dokyung needed Haeyoung1 to go to the police station.
 Answer: The answer is (A)\n"""
+
     # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
@@ -299,31 +305,33 @@ Answer: The answer is (A)\n"""
                 # for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
     
     elif prompt_type == "default_video":
-        prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
-        prompt += "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
-        # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        if kwargs.get("qwen_prompt", False):
+            prompt = "Question: {main_question}?\nChoices:\n{choices}\n\n"
+            prompt += "1) What is the answer?\n"
+            prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
+            # prompt += "Example answer: (A), 0.857\n"
+            prompt += "Answer: "
+        else:
+            prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
+            prompt += "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
             choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
             ret.append(prompt.format(main_question=main_question.rstrip('?'), choices=choices))
         return ret
-        
-        """
-        [SOS] Video: <v_1> <v_2> · · · <v_Nv>
-        Question: <question>
-        Choices:
-        (A) <option 1>
-        (B) <option 2>
-        (C) <option 3>
-        (D) <option 4>
-        (E) <option 5>
-        Answer: The answer is <answer> [EOS]
-        """
     
     elif prompt_type == "recomposer_video":
-        examplar = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
-        # prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
-        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        if kwargs.get("qwen_prompt", False):
+            prompt = "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\n\n"
+            prompt += "1) What is the answer?\n"
+            prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
+            # prompt += "Example answer: (A), 0.857\n"
+            prompt += "Answer: "
+        else:
+            examplar = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
+            # prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer, candidate_list in zip(main_questions, sub_questions, sub_answers, candidate_lists):

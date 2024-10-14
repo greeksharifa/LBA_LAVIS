@@ -163,6 +163,7 @@ class VideoEvalDataset(BaseDataset):
         return {
             "vision": frms, # frms, # list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
+            # "vpath": vpath,
             "text_input": question,
             "question_id": question_id,
             "gt_ans": gt_ans,

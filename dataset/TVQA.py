@@ -53,6 +53,7 @@ class TVQAEvalDataset(VideoEvalDataset):
         return {
             "vision": frms, # frms, # 이름은 image지만 list of ndarray, 즉 video랑 비슷
             "vision_supple": frms_supple, # list of list of ndarray
+            # "vpath": image_paths,
             "text_input": question,
             "question_id": question_id,
             "gt_ans": gt_ans,
