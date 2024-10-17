@@ -231,7 +231,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     if cfg.runner_cfg.select_high_confidence:
         metrics = OrderedDict({
             "max_tau2          ": f'{max_conf_gap:.6g}',
-            "I(max_tau2)       ": f'{np.log2(1/max_conf_gap):.2f}',
+            "I(max_tau2)       ": f'{np.log2(1/(max_conf_gap+1e-100)):.2f}',
             "acc_origin        ": f'{total_base_match / N * 100:.2f}%',
             "max_acc_by_tau    ": f'{max(final_acc_list) * 100:.2f}%',# = {max(final_acc_list)} / {N}',
         })
@@ -293,6 +293,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "E_CR              ": f'{e_cr:.2f}%',
         "E_IC              ": f'{e_ic:.2f}%',
         # "min_match            ": f'{min_match / N * 100:.2f}%',
+        "final_acc         ": f'{final_acc_list[-1] * 100:.2f}%',
     })
     
     print("metrics:", json.dumps(metrics, indent=4))

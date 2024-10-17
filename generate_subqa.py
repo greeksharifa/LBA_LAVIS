@@ -96,6 +96,9 @@ CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewsh
 
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
+
+CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=10 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
+
 """
 def main():
     N_SUPPLE = 0
@@ -108,6 +111,7 @@ def main():
     # model_name = processor_name
     cache_dir = os.path.join("/model/", model_name.split("/")[0])
     device = "cuda"
+    N = cfg.runner_cfg.num_sub_qa_generate
     
     if "Qwen" in model_name:
         from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
@@ -168,7 +172,7 @@ def main():
 
     prompt_subqa_vqaintrospect = []
     idx_example = 0
-    for i in range(cfg.runner_cfg.num_sub_qa_generate):
+    for i in range(N):
         prompt = ""
         fewshot_num = cfg.runner_cfg.get("fewshot_num", 5)
         for _ in range(fewshot_num):
@@ -203,103 +207,162 @@ def main():
             continue
         
         batch_result = {}
-        for i in range(cfg.runner_cfg.num_sub_qa_generate):
-            if cfg.runner_cfg.sub_mode == "beam_and_greedy":   # Generate Sub-Questions by Huggingface model
-                prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
-                text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
-                
-                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
-                
-                generation_params = {
-                    "do_sample": True,
-                    "min_new_tokens": 1,
-                    "max_new_tokens": 100,
-                }
-                beam_search = i==0
-                if beam_search:
-                    generation_params["num_beams"] = 5
-                    generation_params["length_penalty"] = -1
-                else:
-                    generation_params["top_p"] = 0.8
-                
-                outputs = model.generate(**inputs, **generation_params)
-                if "Qwen" in model_name:
-                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-                sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
-
-            elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
-                text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
-                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
-                    
-                generation_params = {
-                    "do_sample": True,
-                    "min_new_tokens": 1,
-                    "max_new_tokens": 100,
-                    "num_beams" : i+1,
-                }
-                if i != 0:
-                    generation_params["length_penalty"] = -1
-                    
-                outputs = model.generate(**inputs, **generation_params)
-                if "Qwen" in model_name:
-                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-                sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
-
-            elif cfg.runner_cfg.sub_mode == "Ktype": # Generate Sub-Questions by Ktype
-                sub_questions = []
-                for question in batch["text_input"]:
-                    tokens = nltk.word_tokenize(question)
-                    tagged = nltk.pos_tag(tokens)
-                    # Perform named entity recognition
-                    entities = nltk.ne_chunk(tagged)
-                    
-                    entity_name = None
-                    for subtree in entities:
-                        if isinstance(subtree, nltk.Tree):
-                            entity_name = " ".join([token for token, pos in subtree.leaves()])
-                            entity_type = subtree.label()
-                            break
-                    else: # get the last noun or last word token in case of no named entity in question
-                        nouns = [word for word, pos in tagged if pos in ['NN', 'NNS', 'NNP', 'NNPS']]
-                        entity_name = nouns[0] if len(nouns) > 0 else tokens[-2]
-                    
-                    assert isinstance(entity_name, str), f"entity_name is not str but {type(entity_name)}."
-                    sub_questions.append(prompt_Ktype[f"Ktype_{i}"].format(entity=entity_name))
-            else:
-                raise ValueError(f"Invalid sub_mode: {cfg.runner_cfg.sub_mode}")
-                        
-            # Generate Sub-Answers
-            if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"]:
-                prompt = "Question: {sub_question}? Short answer:"
-            else:
-                prompt = "{sub_question}?"
-
-            text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
+        if cfg.runner_cfg.sub_mode == "beam": # TODO
+            # Generate Sub-Questions 
+            prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+            text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
+            
             inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
             
-            generation_params = {
-                "do_sample": False,
-                "min_new_tokens": 1,
-                "max_new_tokens": 10 if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
-                "num_beams": 5,
-                "length_penalty": -1
-            }
-            outputs = model.generate(**inputs, **generation_params)
-            if "Qwen" in model_name:
-                outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-            sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
-
-            # store to results    
-            for b in range(bsz):
-                # if question_ids[b] not in results:
-                #     results[question_ids[b]] = []
-                if question_ids[b] not in batch_result:
-                    batch_result[question_ids[b]] = []
-                # if sub_questions[b].endswith('?'):
-                # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
-                #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
-                batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+            outputs = model.generate(
+                **inputs,
+                min_new_tokens=1,
+                max_new_tokens=100,
+                num_beams=N,
+                num_return_sequences=N,
+                length_penalty=-1,
+                # return_dict_in_generate=True,
+                # output_scores=True,
+            )
+            pprint(processor.batch_decode(model.generate(**inputs, min_new_tokens=1, max_new_tokens=100, num_beams=10, num_return_sequences=10, length_penalty=-1, no_repeat_ngram_size=2), skip_special_tokens=True), width=300)
+            # if "Qwen" in model_name:
+            #     outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+            sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
+            import pdb; pdb.set_trace()
             
+            for i in range(N):
+                # TODO
+                
+                # Generate Sub-Answers
+                if cfg.runner_cfg.sub_mode in ["beam_and_greedy", "fewshot_vqaintrospect"]:
+                    prompt = "Question: {sub_question}? Short answer:"
+                else:
+                    prompt = "{sub_question}?"
+
+                text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
+                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                
+                generation_params = {
+                    "do_sample": False,
+                    "min_new_tokens": 1,
+                    "max_new_tokens": 10 if cfg.runner_cfg.sub_mode in ["beam_and_greedy", "fewshot_vqaintrospect"] else 100,
+                    "num_beams": 5,
+                    "length_penalty": -1
+                }
+                outputs = model.generate(**inputs, **generation_params)
+                if "Qwen" in model_name:
+                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
+
+                # store to results    
+                for b in range(bsz):
+                    # if question_ids[b] not in results:
+                    #     results[question_ids[b]] = []
+                    if question_ids[b] not in batch_result:
+                        batch_result[question_ids[b]] = []
+                    # if sub_questions[b].endswith('?'):
+                    # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
+                    #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                    batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                    
+        else:
+            for i in range(N):
+                if cfg.runner_cfg.sub_mode == "beam_and_greedy":   # Generate Sub-Questions by Huggingface model
+                    prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+                    text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
+                    
+                    inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                    
+                    generation_params = {
+                        "do_sample": True,
+                        "min_new_tokens": 1,
+                        "max_new_tokens": 100,
+                    }
+                    beam_search = i==0
+                    if beam_search:
+                        generation_params["num_beams"] = 5
+                        generation_params["length_penalty"] = -1
+                    else:
+                        generation_params["top_p"] = 0.8
+                    
+                    outputs = model.generate(**inputs, **generation_params)
+                    if "Qwen" in model_name:
+                        outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                    sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
+
+                elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
+                    text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
+                    inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                        
+                    generation_params = {
+                        "do_sample": True,
+                        "min_new_tokens": 1,
+                        "max_new_tokens": 100,
+                        "num_beams" : i+1,
+                    }
+                    if i != 0:
+                        generation_params["length_penalty"] = -1
+                        
+                    outputs = model.generate(**inputs, **generation_params)
+                    if "Qwen" in model_name:
+                        outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                    sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
+
+                elif cfg.runner_cfg.sub_mode == "Ktype": # Generate Sub-Questions by Ktype
+                    sub_questions = []
+                    for question in batch["text_input"]:
+                        tokens = nltk.word_tokenize(question)
+                        tagged = nltk.pos_tag(tokens)
+                        # Perform named entity recognition
+                        entities = nltk.ne_chunk(tagged)
+                        
+                        entity_name = None
+                        for subtree in entities:
+                            if isinstance(subtree, nltk.Tree):
+                                entity_name = " ".join([token for token, pos in subtree.leaves()])
+                                entity_type = subtree.label()
+                                break
+                        else: # get the last noun or last word token in case of no named entity in question
+                            nouns = [word for word, pos in tagged if pos in ['NN', 'NNS', 'NNP', 'NNPS']]
+                            entity_name = nouns[0] if len(nouns) > 0 else tokens[-2]
+                        
+                        assert isinstance(entity_name, str), f"entity_name is not str but {type(entity_name)}."
+                        sub_questions.append(prompt_Ktype[f"Ktype_{i}"].format(entity=entity_name))
+                else:
+                    raise ValueError(f"Invalid sub_mode: {cfg.runner_cfg.sub_mode}")
+                            
+                # Generate Sub-Answers
+                if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"]:
+                    prompt = "Question: {sub_question}? Short answer:"
+                else:
+                    prompt = "{sub_question}?"
+
+                text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
+                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                
+                generation_params = {
+                    "do_sample": False,
+                    "min_new_tokens": 1,
+                    "max_new_tokens": 10 if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
+                    "num_beams": 5,
+                    "length_penalty": -1
+                }
+                outputs = model.generate(**inputs, **generation_params)
+                if "Qwen" in model_name:
+                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
+
+                # store to results    
+                for b in range(bsz):
+                    # if question_ids[b] not in results:
+                    #     results[question_ids[b]] = []
+                    if question_ids[b] not in batch_result:
+                        batch_result[question_ids[b]] = []
+                    # if sub_questions[b].endswith('?'):
+                    # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
+                    #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                    batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                
         json.dump(batch_result, open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "w"), indent=4)
         results.update(batch_result)
         
