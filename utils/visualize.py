@@ -73,7 +73,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 
                 tau2 = f'{conf_gap:.6g}'
                 max_tau2 = f'{max_conf_gap:.6g}'
-                print(f'\rc_idx: {c_idx:4d} | tau2: {tau2:15s} max_tau2: {max_tau2:15s} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
+                print(f'\rc_idx: {c_idx:4d} | tau2: {tau2:15s} max_tau2: {max_tau2:15s} | cur_acc: {cur_match / N * 100:.2f} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
