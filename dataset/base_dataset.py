@@ -177,7 +177,7 @@ class BaseDataset(Dataset):
         """
         
         def _get_acc(out, target):
-            if self.data_type == "videos":
+            if self.data_type == "videos": # False: #
                 if type(out) == str:
                     temp_out = map_prediction_to_answer(out)
                     if temp_out is None:
@@ -228,11 +228,12 @@ class BaseDataset(Dataset):
                         out = '(' + chr(ord(out[1]) + 17) + ')'
                 return 1.0 if out == target else 0.0
             
-        if isinstance(outputs, (str, int)):
+        if not isinstance(outputs, list):# isinstance(outputs, (str, int)):
             acc = _get_acc(outputs, targets)
             return acc
         else:
             acc_list = []
+            # import pdb; pdb.set_trace()
             for out, target_list in zip(outputs, targets):
                 acc = _get_acc(out, target_list)
                 acc_list.append(acc)

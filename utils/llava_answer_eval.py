@@ -16,6 +16,8 @@ def map_prediction_to_answer(out):
     for answer in ["A", "B", "C", "D", "E"]:
         if answer + ':' in out:
             return '(' + answer + ')'
+        if answer + '.' in out:
+            return '(' + answer + ')'
         if answer + ')' in out:
             return '(' + answer + ')'
         if answer in out:
@@ -23,6 +25,8 @@ def map_prediction_to_answer(out):
     
     for answer in ["0", "1", "2", "3", "4"]:
         if answer + ':' in out:
+            return '(' + chr(ord('A') + int(answer)) + ')'
+        if answer + '.' in out:
             return '(' + chr(ord('A') + int(answer)) + ')'
         # if answer + ')' in out:
         #     return '(' + chr(ord('A') + int(answer)) + ')'
@@ -50,7 +54,8 @@ def map_prediction_to_answer_v2(row):
         elif "E:" in row["pred"] or "E)" in row["pred"]:
             answer_column = "a4"
     if answer_column in ["a0", "a1", "a2", "a3", "a4"]:
-        return row[answer_column]
+        return '(' + chr(ord('A') + int(answer_column[1])) + ')'
+        # return row[answer_column]
     elif answer_column:
         print(prediction_letter)
     return "None"
