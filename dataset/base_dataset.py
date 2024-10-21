@@ -32,6 +32,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     elif datasets_cfg.dataset_name == "WinogroundVQA":
         from dataset.WinogroundVQA import WinogroundVQADataset
         cls = WinogroundVQADataset
+    elif datasets_cfg.dataset_name == "GQA":
+        from dataset.GQA import GQADataset
+        cls = GQADataset
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset

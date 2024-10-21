@@ -7,7 +7,8 @@
 - or SeViLA
 
 ```bash
-conda create -n LBA python=3.10
+conda create -n LBA_Uv2 python=3.10 -y 
+conda activate LBA_Uv2
 conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.7 -c pytorch -c nvidia -y
 cd SeViLA && pip install -e .
 pip install transformers==4.44.2 sentencepiece protobuf
