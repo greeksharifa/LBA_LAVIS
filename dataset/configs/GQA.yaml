@@ -1,0 +1,13 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: True
+  ann_paths:
+    train:
+      - 'GQA/train_balanced_questions.json'
+    val:
+      - 'GQA/val_balanced_questions.json'
+      - 'GQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+
+  vis_root: 'coco/images/'

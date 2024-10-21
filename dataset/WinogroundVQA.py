@@ -67,7 +67,6 @@ class WinogroundVQADataset(BaseDataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
-        # self.vqa_acc = vqa_acc
         for k, v in kwargs.items():
             setattr(self, k, v)
 

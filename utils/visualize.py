@@ -92,6 +92,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     for i, result in enumerate(results):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'])
         acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
@@ -113,7 +114,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             confidence_percentile = (i+1) / N * 100
             
         # baseline
-        baseline_cur_match += acc_lba - acc_base
+        baseline_cur_match += acc_base_kh - acc_base # baseline_cur_match += acc_lba - acc_base
         baseline_match_list.append(baseline_cur_match)
         if baseline_cur_match > baseline_max_match:
             baseline_max_match = baseline_cur_match

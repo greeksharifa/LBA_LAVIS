@@ -57,11 +57,9 @@ class VQA_radDataset(BaseDataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
         
-        # self.vqa_acc = vqa_acc
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-        # import pdb; pdb.set_trace()
         self._add_instance_ids(key="question_id", prefix="VQA_rad_")
         
         print("\n" + self.__class__.__name__)
@@ -100,9 +98,6 @@ class VQA_radDataset(BaseDataset):
 def main(ann_paths, split):
     dataset = VQA_radDataset(vis_processor=None, text_processor=None, vis_root='dummy_vis_root', 
                              ann_paths=ann_paths, num_data=-1, split=split)
-    
-    from matplotlib import pyplot as plt
-    import torch
 
     for i in range(len(dataset)):
         print('*' * 100)
