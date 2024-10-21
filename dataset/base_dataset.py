@@ -263,18 +263,9 @@ def get_text_input(
     candidate_lists: List[List[str]]=[],
     gt_answers:List[str]=[],
     question_ids:List[str]=[],
+    examplar: str="",
     **kwargs,
 ):
-    video_default_examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
-Question: Why did Dokyung pull Haeyoung1's arm hard?
-Choices:
-(A) Dokyung pulled Haeyoung1's arm to hug her hard.
-(B) It is because Dokyung did not want Haeyoung1 to fall.
-(C) This is because Dokyung and Haeyoung1 were dancing on the street.
-(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
-(E) Because Dokyung needed Haeyoung1 to go to the police station.
-Answer: The answer is (A)\n"""
-
     # add <video> in front of prompt if video_llava
     if prompt_type == "default_image": # for default vqa or generating sub-answer
         prompt = "Question: {main_question}? Short answer:"
@@ -313,8 +304,7 @@ Answer: The answer is (A)\n"""
             # prompt += "Example answer: (A), 0.857\n"
             prompt += "Answer: "
         else:
-            prompt = video_default_examplar if kwargs.get("add_examplar", False) else ""
-            prompt += "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            prompt = examplar + "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
             # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
@@ -330,7 +320,6 @@ Answer: The answer is (A)\n"""
             # prompt += "Example answer: (A), 0.857\n"
             prompt += "Answer: "
         else:
-            examplar = kwargs.get("examplar") if kwargs.get("train_recomposer_examplar", False) else video_default_examplar
             # prompt += "Context: {sub_question}? {sub_answer}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
             prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
@@ -356,7 +345,7 @@ Answer: The answer is (A)\n"""
         return ret
     
     elif prompt_type == "recomposer_video_irrelevant_info":
-        prompt = "Context: {irr_info}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        prompt = examplar + "Context: {irr_info}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
         
         ret = []
         for irr_info, main_question, candidate_list in zip(kwargs.get('irr_info_list'), main_questions, candidate_lists):

@@ -9,9 +9,9 @@ datasets:
       - TVQA/sevila_style/train.json
     val:
       - TVQA/sevila_style/val.json
-      # - TVQA/sub_questions_val.json # created by gpt
-      # - TVQA/sub_qas_val.json # created by gpt
       - TVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      # - TVQA/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
+      # - TVQA/sub_qas_val_chatgpt.json # created by gpt
       # - TVQA/sub_qas_val_xl.json # created by xl
       # - TVQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   

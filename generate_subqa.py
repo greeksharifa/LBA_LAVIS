@@ -378,11 +378,11 @@ def main():
         tag = model_name.split('/')[-1].replace('-', '_')
     else:
         tag = model_name.split('-')[-1]
-    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}.json"
+    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}_N{N}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}.json"
+    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_N{N}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     

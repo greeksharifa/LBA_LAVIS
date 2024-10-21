@@ -4,7 +4,7 @@ runner:
   sub_mode: "subqa" # "description"
   # settings
   select_high_confidence: True
-  train_recomposer_examplar: False
+  examplar: "default" # ["default", "train", "none"]
   threshold_lba: False
   vision_supple: False
   use_pre_generated_sub_q: True

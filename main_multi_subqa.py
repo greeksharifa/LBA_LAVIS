@@ -96,8 +96,8 @@ def main():
         flipped_vqa_model, dataloader = get_flipped_vqa_model(flipped_vqa_args, device="cuda:0")
     
     else:        
-        xl_or_xxl = "xxl" if "xxl" in cfg.runner_cfg.recomposer_name else "xl"
-        xl_or_xxl = "xl" if "xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name else "xxl"
+        # xl_or_xxl = "xxl" if "xxl" in cfg.runner_cfg.recomposer_name else "xl"
+        xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name else "xxl"
         print('xl_or_xxl:', xl_or_xxl)
         dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl)
         dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
@@ -145,14 +145,35 @@ def main():
         print_freq = max(1, int(len(dataloader) / cfg.runner_cfg.print_freq))
         # print('print_freq:', print_freq)
 
-        try:
-            examplar = get_train_examplar(cfg.datasets_cfg)
-        except:
+        if cfg.runner_cfg.examplar == "train":
+            try:
+                examplar = get_train_examplar(cfg.datasets_cfg)
+            except:
+                examplar = ""
+        elif cfg.runner_cfg.examplar == "default":
+            examplar = """Context: Who is waving his hand with a smile? Haeyoung1 is waving her hand with a smile. Who is about to hug Haeyoung1? Dokyung is about to hug Haeyoung1.
+Question: Why did Dokyung pull Haeyoung1's arm hard?
+Choices:
+(A) Dokyung pulled Haeyoung1's arm to hug her hard.
+(B) It is because Dokyung did not want Haeyoung1 to fall.
+(C) This is because Dokyung and Haeyoung1 were dancing on the street.
+(D) Dokyung pulled Haeyoung1's arm since Haeyoung1 tried to run away.
+(E) Because Dokyung needed Haeyoung1 to go to the police station.
+Answer: The answer is (A)\n"""
+        elif cfg.runner_cfg.examplar == "none":
             examplar = ""
+        
+        """
         if cfg.runner_cfg.get("no_examplar", False):
             examplar = ""
-        if cfg.runner_cfg.train_recomposer_examplar:
-            print('examplar:', examplar)
+        else:
+            try:
+                examplar = get_train_examplar(cfg.datasets_cfg)
+            except:
+                examplar = ""
+            if cfg.runner_cfg.train_recomposer_examplar:
+                print('examplar:', examplar)
+        """
             
         results = []
         wrong2right, right2wrong = 0, 0
@@ -184,7 +205,6 @@ def main():
                 text_inputs = get_text_input("default_video", 
                                                 main_questions=batch['text_input'], 
                                                 candidate_lists=batch['candidate_list'],
-                                                add_examplar="blip2" not in cfg.runner_cfg.recomposer_name,
                                                 video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
                                                 qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
                                             )
@@ -261,7 +281,6 @@ def main():
                                                     sub_answers=sub_answers,
                                                     candidate_lists=batch['candidate_list'],
                                                     examplar=examplar,
-                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
                                                     video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
                                                     qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
                                                     )
@@ -311,7 +330,6 @@ def main():
                                                 sub_answers=sub_answers,
                                                 candidate_lists=batch['candidate_list'],
                                                 examplar=examplar,
-                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
                                                 video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
                                                 )
                 else:                          # "images"
@@ -349,7 +367,6 @@ def main():
                                                     sub_answers=sub_answers,
                                                     candidate_lists=batch['candidate_list'],
                                                     examplar=examplar,
-                                                    train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar,
                                                     video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
                                                     )
                     else:                          # "images"
@@ -380,8 +397,7 @@ def main():
                                                 main_questions=batch['text_input'], 
                                                 descriptions=descriptions,
                                                 candidate_lists=batch['candidate_list'],
-                                                examplar=examplar,
-                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                                                examplar=examplar,)
                 else:                          # "images"
                     raise NotImplementedError("description mode is not implemented for images")
                 
@@ -404,8 +420,7 @@ def main():
                                                 main_questions=batch['text_input'], 
                                                 irr_info_list=irr_info_list,
                                                 candidate_lists=batch['candidate_list'],
-                                                examplar=examplar,
-                                                train_recomposer_examplar=cfg.runner_cfg.train_recomposer_examplar)
+                                                examplar=examplar,)
                 else:                          # "images"
                     raise NotImplementedError("description mode is not implemented for images")
                 

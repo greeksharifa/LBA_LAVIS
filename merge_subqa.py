@@ -8,6 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str)
 parser.add_argument('--dataset', type=str)
+parser.add_argument('--N', type=str, default="")
 
 args = parser.parse_args()
 
@@ -22,9 +23,11 @@ dataset_names = ['PathVQA', 'ArtVQA', 'SLAKE']
 if args.dataset:
     dataset_names = args.dataset.split(',')
     
+N_tag = f"_N{args.N}" if args.N else ""
+    
 for dataset_name in dataset_names:
-    beam_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect.json'
-    greedy_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_beam_and_greedy.json'
+    beam_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect{N_tag}.json'
+    greedy_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_beam_and_greedy{N_tag}.json'
     beam_sub_qas_data = json.load(open(beam_sub_qas_path))
     greedy_sub_qas_data = json.load(open(greedy_sub_qas_path))
     print(dataset_name, "beam\t", next(iter(beam_sub_qas_data.items())))
@@ -67,4 +70,4 @@ for dataset_name in dataset_names:
             
         # print(result)
         # break
-    json.dump(results, open(f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect_unique.json', 'w'), indent=4)
+    json.dump(results, open(f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect_unique{N_tag}.json', 'w'), indent=4)
