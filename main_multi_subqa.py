@@ -607,10 +607,11 @@ Answer: The answer is (A)\n"""
                 
                 for idx, row in results_base.iterrows():
                     pred_base = map_prediction_to_answer_v2(row)
+                    gt_ans = '(' + chr(int(row["answer_number"]) + ord('A')) + ')'
                     _results[row['question_id']] = {
                         "question_id": str(row["question_id"]),
                         # "type": row["question_type"],
-                        "gt_ans": row["answer"],
+                        "gt_ans": gt_ans, #row["answer"],
                         "text_output_base": pred_base,
                         "confidence_base": row["confidence_score"],
                         "text_output_lba_list": [],
@@ -618,11 +619,11 @@ Answer: The answer is (A)\n"""
                     }
                     if "question_type" in row:
                         _results[row['question_id']]["type"] = row["question_type"].split("_")[0]
-                    total_base_match += pred_base == row["answer"]
+                    total_base_match += pred_base == gt_ans#row["answer"]
                     total_cnt += 1
                     
-                    ours_match = pred_base == row["answer"]
-                    IGVLM_match = row["predicted_answer"] == row["answer"]
+                    ours_match = pred_base == gt_ans#row["answer"]
+                    IGVLM_match = row["predicted_answer"] == gt_ans#row["answer"]
                     if ours_match != IGVLM_match:
                         import pdb; pdb.set_trace()
                     pass
@@ -648,6 +649,7 @@ Answer: The answer is (A)\n"""
                     r['confidence_lba'] = max_confidence_lba
                     # r['type'] = r["type"].split("_")[0] #v["question_id"].split("_")[0]
                     _loaded_results.append(r) 
+                # import pdb; pdb.set_trace()
             
             elif cfg.runner_cfg.get("chatgpt_visualize", False):
                 # TODO _num_pick_subq

@@ -1,0 +1,15 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  ann_paths:
+    train:
+      - 'flaviagiammarino/vqa-rad'
+    val:
+      - 'flaviagiammarino/vqa-rad'
+      - 'VQA_rad/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
+    test:
+      - 'flaviagiammarino/vqa-rad'
+
+  vis_root: 'dummy_vis_path'

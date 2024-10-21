@@ -151,6 +151,8 @@ class BaseDataset(Dataset):
         self.text_processor = text_processor
 
     def _add_instance_ids(self, key="instance_id", prefix=""):
+        # for i in range(len(self.annotation)):
+        #     self.annotation[i][key] = prefix + str(i)
         for idx, ann in enumerate(self.annotation):
             ann[key] = prefix + str(idx)
             
