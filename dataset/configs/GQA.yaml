@@ -10,4 +10,4 @@ datasets:
       - 'GQA/val_balanced_questions.json'
       - 'GQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json'
 
-  vis_root: 'coco/images/'
+  vis_root: 'GQA/images/'

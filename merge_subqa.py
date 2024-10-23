@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 
 """
-python merge_subqa.py --model=xl
+python merge_subqa.py --model=xl [--N=10] [--dataset="PathVQA,ArtVQA,SLAKE"]
 """
 # dataset_names = ['NExT_QA', 'STAR', 'TVQA', 'VLEP', 'DramaQA', 'IntentQA', 'EgoSchema']
 # dataset_names = ['VQA_Introspect', 'AOKVQA', 'OKVQA']
@@ -23,10 +23,15 @@ dataset_names = ['PathVQA', 'ArtVQA', 'SLAKE']
 if args.dataset:
     dataset_names = args.dataset.split(',')
     
-N_tag = f"_N{args.N}" if args.N else ""
+if args.N:
+    N = int(args.N)
+    N_tag = f"_N{N}"
+else:
+    N = 5
+    N_tag = ""
     
 for dataset_name in dataset_names:
-    beam_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect{N_tag}.json'
+    beam_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect.json'
     greedy_sub_qas_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_beam_and_greedy{N_tag}.json'
     beam_sub_qas_data = json.load(open(beam_sub_qas_path))
     greedy_sub_qas_data = json.load(open(greedy_sub_qas_path))
@@ -48,7 +53,7 @@ for dataset_name in dataset_names:
         greedy_dict = greedy_sub_qas_data[k][1:]
         # Convert the dictionary values back to a list
         for gk, gv in greedy_dict:
-            if len(unique_dict) >= 5:
+            if len(unique_dict) >= N:
                 break
             key = gk.capitalize().rstrip('?') + '?'
             value = gv.rstrip('.')
@@ -62,7 +67,7 @@ for dataset_name in dataset_names:
         for uk, uv in unique_dict.items():
             result.append([uk, uv])
 
-        while len(result) < 5:
+        while len(result) < N:
             result.append(result[-1])
         
         results[k] = result
@@ -70,4 +75,14 @@ for dataset_name in dataset_names:
             
         # print(result)
         # break
-    json.dump(results, open(f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect_unique{N_tag}.json', 'w'), indent=4)
+    out_path = f'/data/{dataset_name}/sub_qas_val_{args.model}_fewshot_vqaintrospect_unique{N_tag}.json'
+    json.dump(results, open(out_path, 'w'), indent=4)
+    
+    # verify
+    data = json.load(open(out_path))
+    for k, v in data.items():
+        if len(v) != N:
+            print("Error: len(v) != N")
+            print(k, len(v))
+            print(v)
+            break

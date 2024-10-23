@@ -800,7 +800,7 @@ Answer: The answer is (A)\n"""
             metrics_dict = {}
             best_num_pick_subq = 0
             
-            for num_pick_subq in range(1, 6):
+            for num_pick_subq in range(1, cfg.runner_cfg.num_sub_qa_generate+1):
                 cfg.runner_cfg.num_pick_subq = num_pick_subq
                 results, total_base_match, total_cnt = _load_results(num_pick_subq)
                 
