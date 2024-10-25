@@ -25,7 +25,7 @@ plt.scatter(green_x, green_y, color='green', label='right → wrong')
 plt.scatter(red_x, red_y, color='red', label='wrong → right')
 
 # tau_1
-plt.plot([-2, -2], [-5, 0], 'k-', linewidth=1)  # k- means black solid line
+plt.plot([-2.3, -2.3], [-5, 0], 'k-', linewidth=1)  # k- means black solid line
 # tau_2
 plt.plot([-5, 0], [-5, 0], 'k-', linewidth=1)  # k- means black solid line
 

@@ -17,13 +17,13 @@ from main_multi_subqa import parse_args, setup_seeds
 from dataset.VQA_Introspect import VQAIntrospectDataset
 
 
-    
-def get_input(data_type, processor, device, vision_batch, text_inputs):
+
+def get_input(model_name, data_type, processor, device, vision_batch, text_inputs):
     if data_type == "images":
         inputs = processor(text=text_inputs, images=vision_batch, return_tensors="pt", padding=True)
     else:
         # import pdb; pdb.set_trace()
-        if "Qwen" in processor.__class__.__name__:
+        if "Qwen" in model_name:# processor.__class__.__name__:
             from qwen_vl_utils import process_vision_info
             from utils.utils import ndarrays_to_base64
             
@@ -56,7 +56,7 @@ def get_input(data_type, processor, device, vision_batch, text_inputs):
                 return_tensors="pt",
             )
             
-        elif "llama" in processor.__class__.__name__:
+        elif "llama" in model_name:# processor.__class__.__name__:
             messages = []
             for video, txt in zip(vision_batch, text_inputs):
                 message = {
@@ -117,7 +117,23 @@ def main():
     else:
         N_tag = ""
     
-    if "Qwen" in model_name:
+    tokenizer = None
+    if "VideoLLaMA" in model_name:
+        if cfg.runner_cfg.batch_size != 1:
+            raise ValueError("batch_size should be 1 for VideoLLaMA.")
+        import sys
+        sys.path.append('./VideoLLaMA2/')
+        from VideoLLaMA2.videollama2 import model_init
+        from VideoLLaMA2.videollama2.utils import disable_torch_init
+        disable_torch_init()
+        model, processor, tokenizer = model_init(
+            model_name, 
+            cache_dir=cache_dir, 
+            # device_map=device_map,
+        )
+        processor = processor[cfg.datasets_cfg.data_type[:-1]]
+        pass
+    elif "Qwen" in model_name:
         from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
         from qwen_vl_utils import process_vision_info
 
@@ -216,7 +232,7 @@ def main():
             prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
             text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
             
-            inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+            inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
             
             outputs = model.generate(
                 **inputs,
@@ -244,7 +260,7 @@ def main():
                     prompt = "{sub_question}?"
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
-                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                 
                 generation_params = {
                     "do_sample": False,
@@ -275,8 +291,12 @@ def main():
                     prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
                     text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                     
-                    inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
-                    
+                    if "VideoLLaMA" in model_name:
+                        from VideoLLaMA2.videollama2 import mm_infer
+                        image_or_video = processor(batch["vision"][0])
+                    else:
+                        inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
+                        
                     generation_params = {
                         "do_sample": True,
                         "min_new_tokens": 1,
@@ -288,15 +308,25 @@ def main():
                         generation_params["length_penalty"] = -1
                     else:
                         generation_params["top_p"] = 0.8
-                    
-                    outputs = model.generate(**inputs, **generation_params)
+                        
+                    if "VideoLLaMA" in model_name:
+                        outputs, o_score = mm_infer(
+                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                        )
+                    else:
+                        outputs = model.generate(**inputs, **generation_params)
                     if "Qwen" in model_name:
                         outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                        
                     sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
                 elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
                     text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
-                    inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                    if "VideoLLaMA" in model_name:
+                        from VideoLLaMA2.videollama2 import mm_infer
+                        image_or_video = processor(batch["vision"][0])
+                    else:
+                        inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                         
                     generation_params = {
                         "do_sample": True,
@@ -307,9 +337,15 @@ def main():
                     if i != 0:
                         generation_params["length_penalty"] = -1
                         
-                    outputs = model.generate(**inputs, **generation_params)
+                    if "VideoLLaMA" in model_name:
+                        outputs, o_score = mm_infer(
+                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                        )
+                    else:
+                        outputs = model.generate(**inputs, **generation_params)
                     if "Qwen" in model_name:
                         outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                        
                     sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
                 elif cfg.runner_cfg.sub_mode == "Ktype": # Generate Sub-Questions by Ktype
@@ -342,7 +378,7 @@ def main():
                     prompt = "{sub_question}?"
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
-                inputs = get_input(cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs)
+                inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                 
                 generation_params = {
                     "do_sample": False,

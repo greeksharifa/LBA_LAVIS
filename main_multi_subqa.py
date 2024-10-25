@@ -199,6 +199,8 @@ Answer: The answer is (A)\n"""
 
             bsz = len(batch['vision'])
             vision = batch['vision']
+            # if "VideoLLaMA" in cfg.runner_cfg.recomposer_name:
+            #     vision = batch['vpath']
             
             """##############################  Baseline Inference   ##############################"""    
             if cfg.datasets_cfg.data_type == "videos":

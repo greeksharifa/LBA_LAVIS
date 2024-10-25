@@ -6,7 +6,6 @@ import os
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
-from processors.alpro_processors import AlproVideoEvalProcessor
 from transformers import InstructBlipVideoImageProcessor, InstructBlipVideoProcessor, InstructBlipVideoForConditionalGeneration
 from accelerate import infer_auto_device_map
 # from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
@@ -260,8 +259,7 @@ class Recomposer(nn.Module):
         model_name = cfg.runner_cfg.get(f"{model_type}_name")
         cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
         device_map = cfg.runner_cfg.device_map # if cfg.runner_cfg.device_map else device
-        # self.processor = AlproVideoEvalProcessor(cfg.datasets_cfg.vis_processor.eval)
-        # self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cfg.model_cfg.cache_dir).to(device)
+        
         if model_type == "answerer":
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
             self.processor = Blip2Processor.from_pretrained(model_name, cache_dir=cache_dir)
@@ -286,7 +284,7 @@ class Recomposer(nn.Module):
         elif "VideoLLaMA" in model_name:
             import sys
             sys.path.append('./VideoLLaMA2/')
-            from VideoLLaMA2.videollama2 import model_init, mm_infer
+            from VideoLLaMA2.videollama2 import model_init
             from VideoLLaMA2.videollama2.utils import disable_torch_init
             disable_torch_init()
             self.model, self.processor, self.tokenizer = model_init(
@@ -294,6 +292,7 @@ class Recomposer(nn.Module):
                 cache_dir=cache_dir, 
                 device_map=device_map,
             )
+            self.processor = self.processor[cfg.datasets_cfg.data_type[:-1]]
         elif "Qwen" in model_name:
             from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
             self.qwen_prompt = cfg.runner_cfg.get("qwen_prompt", False)
@@ -339,8 +338,34 @@ class Recomposer(nn.Module):
 
     def forward(self, vision, text_inputs, generate_sub_q=False, beam_search=True):
         if "VideoLLaMA" in self.model_name:
-            pass
+            from VideoLLaMA2.videollama2 import mm_infer, mm_infer_batch
+            
+            output_text, output_scores = [], []
+            for vis, txt in zip(vision, text_inputs):
+                image_or_video = self.processor(vis)
+                o_text, o_score = mm_infer(
+                    image_or_video, txt, self.model, self.tokenizer, modal="video", beam_search=beam_search,
+                )
+                output_text.append(o_text[0].replace('Answer: ', ''))
+                output_scores.append(o_score[0])
+            
+            # vpath = vision # video path or list of image path
+            # vision = self.processor(vpath)
+            
+            # image_or_videos = []
+            # for v in vision:
+            #     image_or_videos.append(self.processor(v))
+            
+            # image_or_videos = torch.stack(image_or_videos)
+            
+            # output_text, output_scores = mm_infer_batch(
+            #     image_or_videos, text_inputs, self.model, self.tokenizer, modal="video"
+            # )
+            # print('output_text:', output_text)
+            # print('output_scores:', output_scores)
+            # import pdb; pdb.set_trace()
         
+            pass
         elif "Qwen" in self.model_name:
             from qwen_vl_utils import process_vision_info
             
@@ -510,16 +535,17 @@ class Recomposer(nn.Module):
                 else:
                     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
             except:
-                
-            # if isinstance(vision[0], Image.Image):
-            #     # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
-            #     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
-            # elif isinstance(vision[0], np.ndarray): # video. type: List[np.ndarray]
-            #     inputs = self.processor(vision, text=text_inputs, return_tensors="pt", padding=True)
-            #     # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
-            # # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
-            #     # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
-            # else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
+                """
+                # if isinstance(vision[0], Image.Image):
+                #     # [bsz, W, H] -> [bsz, 3, 224, 224]     | [64, 640, 480] -> [64, 3, 224, 224]
+                #     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
+                # elif isinstance(vision[0], np.ndarray): # video. type: List[np.ndarray]
+                #     inputs = self.processor(vision, text=text_inputs, return_tensors="pt", padding=True)
+                #     # inputs = self.processor(videos=images, text=text_inputs, return_tensors="pt", padding=True)
+                # # elif isinstance(images[0], list): # video. type: List[List[np.ndarray]]
+                #     # inputs = self.processor(images, text=text_inputs, return_tensors="pt", padding=True)
+                # else: #isinstance(images[0], PIL.Image): # video. type: List[Image.Image]
+                """
                 # images: [bsz, n_frms, W, H] = [8, 5, 1024, 768]
                 inputs = self.processor(text=text_inputs, return_tensors="pt", padding=True) # [64, 29]
 
@@ -532,9 +558,6 @@ class Recomposer(nn.Module):
                 # 미적용중.."""# [bsz, n_frms, 3, 224, 224] -> [bsz, 3, n_frms, 224, 224]"""
                 inputs["pixel_values"] = stacked#.transpose(2, 1)
 
-            # inputs = self.processor(images, text_inputs, return_tensors="pt", padding=True).to(self.device)
-            # out = self.model.generate(**inputs)
-            # return self.processor.batch_decode(out, skip_special_tokens=True)
             
             if self.cfg.runner_cfg.device_map != "auto":
                 inputs = inputs.to(self.model.device) # "cuda"

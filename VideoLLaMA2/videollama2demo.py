@@ -24,8 +24,10 @@ def inference():
     model_path = 'DAMO-NLP-SG/VideoLLaMA2.1-7B-16F'
     # Base model inference (only need to replace model_path)
     # model_path = 'DAMO-NLP-SG/VideoLLaMA2.1-7B-16F-Base'
-    model, processor, tokenizer = model_init(model_path, cache_dir="/model/videollama/")
-    output = mm_infer(processor[modal](modal_path), instruct, model=model, tokenizer=tokenizer, do_sample=False, modal=modal)
+    model, processor, tokenizer = model_init(model_path, cache_dir="/data/LLMs/videollama/")
+    image_or_video = processor[modal](modal_path)
+    import pdb; pdb.set_trace()
+    output = mm_infer(image_or_video, instruct, model=model, tokenizer=tokenizer, do_sample=False, modal=modal)
 
     print(output)
 
