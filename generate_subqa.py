@@ -112,6 +112,10 @@ def main():
     cache_dir = os.path.join("/model/", model_name.split("/")[0])
     device = "cuda"
     N = cfg.runner_cfg.num_sub_qa_generate
+    if N != 5:
+        N_tag = f"_N{N}"
+    else:
+        N_tag = ""
     
     if "Qwen" in model_name:
         from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
@@ -378,11 +382,11 @@ def main():
         tag = model_name.split('/')[-1].replace('-', '_')
     else:
         tag = model_name.split('-')[-1]
-    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}_N{N}.json"
+    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}{N_tag}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_N{N}.json"
+    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}{N_tag}.json"
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     

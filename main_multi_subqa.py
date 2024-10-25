@@ -97,7 +97,7 @@ def main():
     
     else:        
         # xl_or_xxl = "xxl" if "xxl" in cfg.runner_cfg.recomposer_name else "xl"
-        xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name else "xxl"
+        xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
         print('xl_or_xxl:', xl_or_xxl)
         dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl)
         dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
@@ -206,7 +206,8 @@ Answer: The answer is (A)\n"""
                                                 main_questions=batch['text_input'], 
                                                 candidate_lists=batch['candidate_list'],
                                                 video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
-                                                qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
+                                                qwen_prompt=cfg.runner_cfg.get("qwen_prompt", False),
+                                                # qwen_prompt="Qwen" in cfg.runner_cfg.recomposer_name,
                                             )
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
@@ -282,7 +283,8 @@ Answer: The answer is (A)\n"""
                                                     candidate_lists=batch['candidate_list'],
                                                     examplar=examplar,
                                                     video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
-                                                    qwen_prompt = "Qwen" in cfg.runner_cfg.recomposer_name,
+                                                    qwen_prompt=cfg.runner_cfg.get("qwen_prompt", False),
+                                                    # qwen_prompt="Qwen" in cfg.runner_cfg.recomposer_name,
                                                     )
                     else:                          # "images"
                         text_inputs = get_text_input("recomposer_image", 

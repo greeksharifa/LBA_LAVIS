@@ -2,7 +2,7 @@
 
 datasets:
   data_type: images # [images|videos|features]
-  vqa_acc: True
+  vqa_acc: False
   ann_paths:
     train:
       - 'GQA/train_balanced_questions.json'

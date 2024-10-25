@@ -35,6 +35,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl"):
     elif datasets_cfg.dataset_name == "GQA":
         from dataset.GQA import GQADataset
         cls = GQADataset
+    elif datasets_cfg.dataset_name == "VQA_rad":
+        from dataset.VQA_rad import VQA_radDataset
+        cls = VQA_radDataset
     elif datasets_cfg.dataset_name == "DramaQA":
         from dataset.DramaQA import DramaQAEvalDataset
         cls = DramaQAEvalDataset
