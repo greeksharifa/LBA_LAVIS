@@ -283,6 +283,17 @@ class Recomposer(nn.Module):
                 device_map="auto",
                 attn_implementation=None,
             )
+        elif "VideoLLaMA" in model_name:
+            import sys
+            sys.path.append('./VideoLLaMA2/')
+            from VideoLLaMA2.videollama2 import model_init, mm_infer
+            from VideoLLaMA2.videollama2.utils import disable_torch_init
+            disable_torch_init()
+            self.model, self.processor, self.tokenizer = model_init(
+                model_name, 
+                cache_dir=cache_dir, 
+                device_map=device_map,
+            )
         elif "Qwen" in model_name:
             from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
             self.qwen_prompt = cfg.runner_cfg.get("qwen_prompt", False)
@@ -327,19 +338,9 @@ class Recomposer(nn.Module):
 
 
     def forward(self, vision, text_inputs, generate_sub_q=False, beam_search=True):
-        if self.model_name == "sevila":# in self.cfg.runner_cfg.recomposer_name and self.cfg.runner_cfg.answerer_name is None:
-            samples = text_inputs
-
-            pixel_values = []
-            for video in vision: # video: [n_frms, 640, 480]
-                # [n_frms, 640, 480] -> [n_frms, 3, 224, 224]
-                pixel_values.append(self.processor(images=video, return_tensors="pt", padding=True)['pixel_values'])  # [n_frms, 3, 224, 224]
-            # [n_frms, 3, 224, 224] -> [bsz, n_frms, 3, 224, 224]
-            samples["video"] = torch.stack(pixel_values, dim=0)#.to(self.model.device)
-            
-            # video = self.processor(vision, return_tensors="pt", padding=True)['pixel_values'].to(self.model.device)
-            # samples["video"] = video
-            output_text, output_scores = self.model.generate(samples)
+        if "VideoLLaMA" in self.model_name:
+            pass
+        
         elif "Qwen" in self.model_name:
             from qwen_vl_utils import process_vision_info
             
