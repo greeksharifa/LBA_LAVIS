@@ -112,10 +112,11 @@ def mm_infer(image_or_video, instruct, model, tokenizer, modal='video', **kwargs
                 pad_token_id=tokenizer.eos_token_id,
             )
 
-        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        # print(outputs)
+        output_texts = tokenizer.batch_decode(output_ids, skip_special_tokens=True)#[0].strip()
+        output_texts = [t.strip() for t in output_texts]
+        # print(output_texts)
         # import pdb; pdb.set_trace()
-        return outputs, None
+        return output_texts, None
     
     else:
         with torch.inference_mode():

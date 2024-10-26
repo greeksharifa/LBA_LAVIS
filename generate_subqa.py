@@ -310,15 +310,15 @@ def main():
                         generation_params["top_p"] = 0.8
                         
                     if "VideoLLaMA" in model_name:
-                        outputs, o_score = mm_infer(
+                        sub_questions, o_score = mm_infer(
                             image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
                         )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
-                    if "Qwen" in model_name:
-                        outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-                        
-                    sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
+                        if "Qwen" in model_name:
+                            outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                            
+                        sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
                 elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
                     text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
@@ -338,15 +338,15 @@ def main():
                         generation_params["length_penalty"] = -1
                         
                     if "VideoLLaMA" in model_name:
-                        outputs, o_score = mm_infer(
+                        sub_questions, o_score = mm_infer(
                             image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
                         )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
-                    if "Qwen" in model_name:
-                        outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-                        
-                    sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
+                        if "Qwen" in model_name:
+                            outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                            
+                        sub_questions = processor.batch_decode(outputs, skip_special_tokens=True)
 
                 elif cfg.runner_cfg.sub_mode == "Ktype": # Generate Sub-Questions by Ktype
                     sub_questions = []
@@ -378,7 +378,11 @@ def main():
                     prompt = "{sub_question}?"
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
-                inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
+                if "VideoLLaMA" in model_name:
+                    from VideoLLaMA2.videollama2 import mm_infer
+                    image_or_video = processor(batch["vision"][0])
+                else:
+                    inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                 
                 generation_params = {
                     "do_sample": False,
@@ -387,10 +391,17 @@ def main():
                     "num_beams": 5,
                     "length_penalty": -1
                 }
-                outputs = model.generate(**inputs, **generation_params)
-                if "Qwen" in model_name:
-                    outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
-                sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
+                
+                if "VideoLLaMA" in model_name:
+                    sub_answers, o_score = mm_infer(
+                        image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                    )
+                else:
+                    outputs = model.generate(**inputs, **generation_params)
+                    if "Qwen" in model_name:
+                        outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
+                        
+                    sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
 
                 # store to results    
                 for b in range(bsz):
