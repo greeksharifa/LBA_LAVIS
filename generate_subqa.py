@@ -109,7 +109,7 @@ def main():
     processor_name = model_name
     # processor_name = "Salesforce/instructblip-flan-t5-xl"
     # model_name = processor_name
-    cache_dir = os.path.join("/model/", model_name.split("/")[0])
+    cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split("/")[0])
     device = "cuda"
     N = cfg.runner_cfg.num_sub_qa_generate
     if N != 5:
@@ -387,7 +387,7 @@ def main():
                 generation_params = {
                     "do_sample": False,
                     "min_new_tokens": 1,
-                    "max_new_tokens": 10 if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
+                    "max_new_tokens": 100 if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
                     "num_beams": 5,
                     "length_penalty": -1
                 }

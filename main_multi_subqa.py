@@ -96,10 +96,13 @@ def main():
         flipped_vqa_model, dataloader = get_flipped_vqa_model(flipped_vqa_args, device="cuda:0")
     
     else:        
-        # xl_or_xxl = "xxl" if "xxl" in cfg.runner_cfg.recomposer_name else "xl"
         xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
         print('xl_or_xxl:', xl_or_xxl)
-        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl)
+        if "Qwen" in cfg.runner_cfg.recomposer_name:
+            model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+        else:
+            model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
+        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl, model_tag=model_tag)
         dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                                 shuffle=False, collate_fn=dataset.collater)
     
