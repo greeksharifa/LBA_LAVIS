@@ -297,6 +297,7 @@ Answer: The answer is (A)\n"""
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
                     text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                    import pdb; pdb.set_trace()
                     
                     if cfg.runner_cfg.debug:
                         t_inputs = text_inputs[0]

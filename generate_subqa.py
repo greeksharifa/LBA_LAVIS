@@ -173,7 +173,7 @@ def main():
     # model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
     # processor = InstructBlipVideoProcessor.from_pretrained(processor_name, cache_dir=cache_dir)
     
-    dataset = load_dataset(cfg.datasets_cfg, n_supple=N_SUPPLE)
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=N_SUPPLE, model_tag=model_name.split("/")[-1])
     dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
 
@@ -433,7 +433,7 @@ def main():
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    out_path = f"/data/{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}{N_tag}.json"
+    out_path = os.path.join(cfg.datasets_cfg.root_dir, f"{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}{N_tag}.json")
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
