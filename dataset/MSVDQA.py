@@ -20,15 +20,28 @@ class MSVDQAEvalDataset(VideoEvalDataset):
     <class 'list'>
     len: 6415
     
-    val_q.json
+    val_qa.json
     [
-        {'answer': 'someone', 'id': 30933, 'question': 'who pours liquid from a plastic container into a ziploc bag containing meat pieces?', 'video_id': 1201}, 
+        {
+            'answer': 'someone', 
+            'id': 30933, 
+            'question': 'who pours liquid from a plastic container into a ziploc bag containing meat pieces?', 
+            'video_id': 1201
+        }, 
         {'answer': 'man', 'id': 30934, 'question': 'who pours a seasoning liquid from a plastic container over chicken pieces placed in a plastic pouch?', 'video_id': 1201},
         ...
     ]
+    
+    youtube_mapping.txt (if loaded by readlines())
+    [
+        '-4wsuPCjDBc_5_15 vid1\n', 
+        '-7KMZQEsJW4_205_208 vid2\n', 
+        '-8y1Q0rA3n8_108_115 vid3\n',
+        ...
+        'zzit5b_-ukg_5_20 vid1970'
+    ]
     """
     
-    '''
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths, num_data=-1, **kwargs):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         
@@ -37,9 +50,9 @@ class MSVDQAEvalDataset(VideoEvalDataset):
         self.n_frms = kwargs['n_frms'] # default: 4
         
         if len(ann_paths) == 2:
-            ann_path = ann_paths
+            ann_path, youtube_mapping_path = ann_paths
         else:
-            ann_path, sub_qas_path = ann_paths
+            ann_path, youtube_mapping_path, sub_qas_path = ann_paths
             if os.path.exists(sub_qas_path):
                 self.sub_qas = json.load(open(sub_qas_path, 'r'))
                 
@@ -49,18 +62,17 @@ class MSVDQAEvalDataset(VideoEvalDataset):
         for k, v in kwargs.items():
             setattr(self, k, v)
             
-        q_data = json.load(open(ann_q_path, 'r'))
-        a_data = json.load(open(ann_a_path, 'r'))
+        qa_data = json.load(open(ann_path, 'r'))
+        map_data = open(youtube_mapping_path, 'r').readlines()
         
-        for q, a in zip(q_data, a_data):
-            assert q['question_id'] == a['question_id']
-            self.annotation.append({
-                'video': q['video_name'],
-                'question': q['question'],
-                'question_id': q['question_id'],
-                'answer': a['answer'],
-                'type': a['type'],
-            })
+        for qa in qa_data:
+            original_vid = qa["video_id"]
+            vid = map_data[original_vid - 1].split()[0]
+            
+            qa["video_id"] = vid
+            qa["original_vid"] = f'vid{original_vid}'
+            
+            self.annotation.append(qa)
         
         self._add_instance_ids()
                 
@@ -70,12 +82,12 @@ class MSVDQAEvalDataset(VideoEvalDataset):
         print('vis_root : ', vis_root)
         print('ann_paths : ', ann_paths)
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
-    ''' 
+
                 
     def __getitem__(self, index):
         ann = self.annotation[index]
         vid = ann["video_id"]
-        question_id = ann["id"]
+        question_id = str(ann["id"])
         
         vpath = os.path.join(self.vis_root, f'v_{vid}.mp4')
         

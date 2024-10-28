@@ -6,13 +6,15 @@ datasets:
   vqa_acc: False
   ann_paths:
     train:
-      - MSRVTTQA/sevila_style/train.json
+      - MSRVTTQA/train_qa.json
+      - MSRVTTQA/youtube_mapping.txt
     val:
-      - MSRVTTQA/sevila_style/val.json
-      # - MSRVTTQA/sub_questions_val.json # created by gpt
-      # - MSRVTTQA/sub_qas_val.json # created by gpt
+      - MSRVTTQA/val_qa.json
+      - MSRVTTQA/youtube_mapping.txt
       - MSRVTTQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      # - MSRVTTQA/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
+      # - MSRVTTQA/sub_qas_val_chatgpt.json # created by gpt
       # - MSRVTTQA/sub_qas_val_xl.json # created by xl
       # - MSRVTTQA/sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
-  vis_root: MSRVTTQA/videos/
+  vis_root: MSRVTTQA/TrainValVideo/

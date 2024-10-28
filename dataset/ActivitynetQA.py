@@ -22,13 +22,21 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
     
     val_q.json
     [
-        {'video_name': 'TIEzvhv6xaI', 'question': 'is the no.3 athlete playing indoor', 'question_id': 'v_TIEzvhv6xaI_2'},
+        {
+            'video_name': 'TIEzvhv6xaI', 
+            'question': 'is the no.3 athlete playing indoor', 
+            'question_id': 'v_TIEzvhv6xaI_2'
+        },
         {'video_name': '7X3wPRKuAsU', 'question': 'is the athlete wearing long sleeve', 'question_id': 'v_7X3wPRKuAsU_3'},
         ...
     ]
     val_a.json
     [
-        {'answer': 'yes', 'type': 3, 'question_id': 'v_TIEzvhv6xaI_2'},
+        {
+            'answer': 'yes', 
+            'type': 3, 
+            'question_id': 'v_TIEzvhv6xaI_2'
+        },
         {'answer': 'no', 'type': 3, 'question_id': 'v_7X3wPRKuAsU_3'},
         ...
     ]
@@ -57,7 +65,13 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
         q_data = json.load(open(ann_q_path, 'r'))
         a_data = json.load(open(ann_a_path, 'r'))
         
-        for q, a in zip(q_data, a_data):
+        
+        if num_data == -1: # use all dataset
+            len_loaded = len(q_data)
+        else:
+            len_loaded = min(len(q_data), num_data)
+        
+        for i, (q, a) in enumerate(zip(q_data, a_data)):
             assert q['question_id'] == a['question_id']
             self.annotation.append({
                 'video': q['video_name'],
@@ -66,6 +80,8 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
                 'answer': a['answer'],
                 'type': a['type'],
             })
+            if len(self.annotation) >= len_loaded: # 0 <= num_data <= i:
+                break
         
         self._add_instance_ids()
                 
