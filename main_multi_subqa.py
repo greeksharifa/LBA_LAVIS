@@ -72,16 +72,8 @@ def main():
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
     # print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
 
-    if not cfg.runner_cfg.visualize:
-        output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
-        os.makedirs(output_dir)
-        OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
-    else:
-        print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
-        output_dir = cfg.runner_cfg.output_dir
-    
-    s = datetime.now()
-    
+    s = datetime.now()    
+    # dataset
     if cfg.runner_cfg.sub_mode == "frame_sampling":
         n_supple = cfg.runner_cfg.num_frame_sampling
     elif cfg.runner_cfg.vision_supple:
@@ -89,22 +81,24 @@ def main():
     else:
         n_supple = 0
     
-    if cfg.runner_cfg.recomposer_name == "flipped_vqa":
-        import pickle
-        from flipped_vqa.get_model import get_flipped_vqa_model
-        flipped_vqa_args = pickle.load(open(cfg.runner_cfg.flipped_vqa_args_pkl_path, 'rb'))
-        flipped_vqa_model, dataloader = get_flipped_vqa_model(flipped_vqa_args, device="cuda:0")
-    
-    else:        
-        xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
-        print('xl_or_xxl:', xl_or_xxl)
-        if "Qwen" in cfg.runner_cfg.recomposer_name:
-            model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+    xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
+    if "Qwen" in cfg.runner_cfg.recomposer_name:
+        model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+    else:
+        model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
+    print('xl_or_xxl:', xl_or_xxl)
+    print('model_tag:', model_tag)
+
+    ann_paths = [os.path.join(cfg.datasets_cfg.root_dir, path) for path in cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')]
+    if len(ann_paths) >= 2:
+        if os.path.exists(ann_paths[1].replace("xl", model_tag)):
+            cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", model_tag)
         else:
-            model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
-        dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, xl_or_xxl=xl_or_xxl, model_tag=model_tag)
-        dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
-                                shuffle=False, collate_fn=dataset.collater)
+            cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", xl_or_xxl)
+
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths)
+    dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
+                            shuffle=False, collate_fn=dataset.collater)
     
     if cfg.runner_cfg.sub_mode == "multi_subqa_highest":
         single_subqa_results = json.load(open(f'{cfg.runner_cfg.single_subqa_output_dir}/results_base.json'))
@@ -123,6 +117,16 @@ def main():
             print(combo)
     
     print('dataset loading time : ', datetime.now()-s)
+    
+    
+    if not cfg.runner_cfg.visualize:
+        output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
+        os.makedirs(output_dir)
+        OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
+    else:
+        print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
+        output_dir = cfg.runner_cfg.output_dir
+    
     
     if not cfg.runner_cfg.visualize:
         s = datetime.now()
@@ -297,7 +301,6 @@ Answer: The answer is (A)\n"""
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
                     text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
-                    import pdb; pdb.set_trace()
                     
                     if cfg.runner_cfg.debug:
                         t_inputs = text_inputs[0]

@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
 from utils.llava_answer_eval import map_prediction_to_answer
 
-def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl", model_tag=None):
+def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[]):#xl_or_xxl="xl", model_tag=None):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -59,13 +59,13 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, xl_or_xxl="xl", model_ta
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
 
-    ann_paths = [os.path.join(datasets_cfg.root_dir, path) for path in datasets_cfg.ann_paths.get(datasets_cfg.split, split)]
-    # ann_paths = [path.replace("xl", xl_or_xxl) for path in ann_paths]
-    if len(ann_paths) == 2:
-        if os.path.exists(ann_paths[1].replace("xl", model_tag)):
-            ann_paths[1] = ann_paths[1].replace("xl", model_tag)
-        else:
-            ann_paths[1] = ann_paths[1].replace("xl", xl_or_xxl)
+    # ann_paths = [os.path.join(datasets_cfg.root_dir, path) for path in datasets_cfg.ann_paths.get(datasets_cfg.split, split)]
+    # # ann_paths = [path.replace("xl", xl_or_xxl) for path in ann_paths]
+    # if len(ann_paths) >= 2:
+    #     if os.path.exists(ann_paths[1].replace("xl", model_tag)):
+    #         ann_paths[-1] = ann_paths[-1].replace("xl", model_tag)
+    #     else:
+    #         ann_paths[-1] = ann_paths[-1].replace("xl", xl_or_xxl)
         
     dataset = cls(
         vis_processor=None,
