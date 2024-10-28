@@ -311,7 +311,8 @@ def main():
                         
                     if "VideoLLaMA" in model_name:
                         sub_questions, o_score = mm_infer(
-                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], 
+                            **generation_params
                         )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
@@ -339,7 +340,8 @@ def main():
                         
                     if "VideoLLaMA" in model_name:
                         sub_questions, o_score = mm_infer(
-                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], 
+                            **generation_params
                         )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
@@ -387,7 +389,7 @@ def main():
                 generation_params = {
                     "do_sample": False,
                     "min_new_tokens": 1,
-                    "max_new_tokens": 100 if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
+                    "max_new_tokens": 100,# if cfg.runner_cfg.sub_mode in ["subqa", "fewshot_vqaintrospect"] else 100,
                     "num_beams": 5,
                     "length_penalty": -1
                 }

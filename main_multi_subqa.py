@@ -220,7 +220,7 @@ Answer: The answer is (A)\n"""
                                             )
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
-            text_outputs_base, confidences_base = recomposer(vision, text_inputs)
+            text_outputs_base, confidences_base = recomposer(vision, text_inputs, max_new_tokens=10)
             
             if args.verbose:
                 print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
@@ -267,7 +267,7 @@ Answer: The answer is (A)\n"""
                             sub_questions = decomposer(text_inputs)
                         else:
                             beam_search = i==0
-                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search)
+                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search, max_new_tokens=100)
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers
@@ -280,7 +280,7 @@ Answer: The answer is (A)\n"""
                             # sub_answers.append(batch['sub_answer_list'][b][i])
                     else:
                         text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                        sub_answers, _ = answerer(vision, text_inputs)
+                        sub_answers, _ = answerer(vision, text_inputs, max_new_tokens=100)
                     sub_answers_list.append(sub_answers)
                     
                     # generating recomposed_answers
@@ -300,7 +300,7 @@ Answer: The answer is (A)\n"""
                                                     main_questions=batch['text_input'], 
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
-                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs)
+                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs, max_new_tokens=10)
                     
                     if cfg.runner_cfg.debug:
                         t_inputs = text_inputs[0]

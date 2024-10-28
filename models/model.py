@@ -336,7 +336,7 @@ class Recomposer(nn.Module):
         # print('self.processor.image_processor:', self.processor.image_processor)
 
 
-    def forward(self, vision, text_inputs, generate_sub_q=False, beam_search=True):
+    def forward(self, vision, text_inputs, generate_sub_q=False, beam_search=True, max_new_tokens=100):
         if "VideoLLaMA" in self.model_name:
             from VideoLLaMA2.videollama2 import mm_infer, mm_infer_batch
             
@@ -344,7 +344,9 @@ class Recomposer(nn.Module):
             for vis, txt in zip(vision, text_inputs):
                 image_or_video = self.processor(vis)
                 o_text, o_score = mm_infer(
-                    image_or_video, txt, self.model, self.tokenizer, modal="video", beam_search=beam_search,
+                    image_or_video, txt, self.model, self.tokenizer, modal="video", 
+                    beam_search=beam_search, 
+                    max_new_tokens=max_new_tokens
                 )
                 output_text.append(o_text[0].replace('Answer: ', ''))
                 output_scores.append(o_score[0])
