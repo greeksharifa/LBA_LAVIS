@@ -1,0 +1,20 @@
+
+
+datasets:
+  data_type: videos # [images|videos|features]
+  n_frms: 4
+  vqa_acc: False
+  ann_paths:
+    train:
+      - activitynet/activitynet-qa/dataset/train_q.json
+      - activitynet/activitynet-qa/dataset/train_a.json
+    val:
+      - activitynet/activitynet-qa/dataset/val_q.json
+      - activitynet/activitynet-qa/dataset/val_a.json
+      - activitynet/activitynet-qa/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      # - activitynet/activitynet-qa//sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
+      # - activitynet/activitynet-qa//sub_qas_val_chatgpt.json # created by gpt
+      # - activitynet/activitynet-qa//sub_qas_val_xl.json # created by xl
+      # - activitynet/activitynet-qa//sub_qas_val_xl_Ktype.json # created by xl, Ktype
+  
+  vis_root: activitynet/video/

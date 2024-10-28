@@ -1,0 +1,18 @@
+
+
+datasets:
+  data_type: videos # [images|videos|features]
+  n_frms: 4
+  vqa_acc: False
+  ann_paths:
+    train:
+      - MSVD/qa/train_qa.json
+    val:
+      - MSVD/qa/val_qa.json
+      - MSVD/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      # - MSVD/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
+      # - MSVD/sub_qas_val_chatgpt.json # created by gpt
+      # - MSVD/sub_qas_val_xl.json # created by xl
+      # - MSVD/sub_qas_val_xl_Ktype.json # created by xl, Ktype
+  
+  vis_root: MSVD/YouTubeClips/
