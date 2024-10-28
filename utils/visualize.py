@@ -83,6 +83,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     confidence_percentile = 0.
     acc_base_list, acc_lba_list = [], []
     bins_base = [[] for _ in range(N // M + 1)]
+    bins_lba = [[] for _ in range(N // M + 1)]
     heatmap_data = {
         'number': [[0 for _ in range(H)] for _ in range(H)],
         'change': [[0 for _ in range(H)] for _ in range(H)],
@@ -99,6 +100,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         
         bin_key = i // M
         bins_base[bin_key].append(acc_base)
+        bins_lba[bin_key].append(acc_lba)
         
         if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + max_conf_gap > result['confidence_lba']: # 높은것만 선택
             pass
@@ -157,15 +159,15 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
     
-    results.sort(key=lambda x: x['confidence_lba'])
-    bins_lba = [[] for _ in range(N // M + 1)]
+    # results.sort(key=lambda x: x['confidence_lba'])
+    # bins_lba = [[] for _ in range(N // M + 1)]
     
-    for i, result in enumerate(results):
-        # bins_lba
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+    # for i, result in enumerate(results):
+    #     # bins_lba
+    #     acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
         
-        bin_key = i // M
-        bins_lba[bin_key].append(acc_lba)
+    #     bin_key = i // M
+    #     bins_lba[bin_key].append(acc_lba)
         
     pprint(results[0], width=300)
     
