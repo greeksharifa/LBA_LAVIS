@@ -492,21 +492,22 @@ def main():
             # for main_question, sub_question, sub_answer in zip(batch["text_input"], sub_questions, sub_answers):
             #     print(f'Main Question: {main_question}\nSub Question: {sub_question}\nSub Answer: {sub_answer}\n')
         
-    if "Qwen" in model_name:
-        tag = model_name.split('/')[-1].replace('-', '_')
-    else:
-        tag = model_name.split('-')[-1]
-    out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}{N_tag}.json"
-    json.dump(results, open(out_path, "w"), indent=4)
-    print(f"Results saved to {out_path}")
-    
-    out_path = os.path.join(cfg.datasets_cfg.root_dir, f"{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}{N_tag}.json")
-    json.dump(results, open(out_path, "w"), indent=4)
-    print(f"Results saved to {out_path}")
     
     if args.save_temp:
         print(f"Temp files saved to {temp_dir}")
     else:
+        if "Qwen" in model_name:
+            tag = model_name.split('/')[-1].replace('-', '_')
+        else:
+            tag = model_name.split('-')[-1]
+        out_path = f"temp/subqa/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}_{cfg.datasets_cfg.dataset_name}{N_tag}.json"
+        json.dump(results, open(out_path, "w"), indent=4)
+        print(f"Results saved to {out_path}")
+        
+        out_path = os.path.join(cfg.datasets_cfg.root_dir, f"{cfg.datasets_cfg.dataset_name}/sub_qas_val_{tag}_{cfg.runner_cfg.sub_mode}{N_tag}.json")
+        json.dump(results, open(out_path, "w"), indent=4)
+        print(f"Results saved to {out_path}")
+        
         shutil.rmtree(temp_dir)
         print(f"Temp files removed.")
 
