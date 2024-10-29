@@ -173,7 +173,23 @@ def main():
     # model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
     # processor = InstructBlipVideoProcessor.from_pretrained(processor_name, cache_dir=cache_dir)
     
-    dataset = load_dataset(cfg.datasets_cfg, n_supple=N_SUPPLE, model_tag=model_name.split("/")[-1])
+    
+    xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
+    if "Qwen" in cfg.runner_cfg.recomposer_name:
+        model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+    else:
+        model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
+    print('xl_or_xxl:', xl_or_xxl)
+    print('model_tag:', model_tag)
+
+    ann_paths = [os.path.join(cfg.datasets_cfg.root_dir, path) for path in cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')]
+    if len(ann_paths) >= 2:
+        if os.path.exists(ann_paths[1].replace("xl", model_tag)):
+            cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", model_tag)
+        else:
+            cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", xl_or_xxl)
+    
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=N_SUPPLE, ann_paths=ann_paths)#model_tag=model_name.split("/")[-1])
     dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
 
@@ -456,8 +472,8 @@ def main():
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    shutil.rmtree(temp_dir)
-    print(f"Temp files removed.")
+    # shutil.rmtree(temp_dir)
+    # print(f"Temp files removed.")
 
 if __name__ == '__main__':
     main()
