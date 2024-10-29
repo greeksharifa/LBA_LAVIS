@@ -13,8 +13,29 @@ from transformers import InstructBlipVideoProcessor, InstructBlipVideoForConditi
 from models.model import VideoBlip2ForConditionalGeneration
 from dataset.base_dataset import load_dataset
 from configs.config import Config
-from main_multi_subqa import parse_args, setup_seeds
+from main_multi_subqa import setup_seeds
 from dataset.VQA_Introspect import VQAIntrospectDataset
+
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='LBA method')
+    parser.add_argument("--cfg-path", default='configs/runner.yaml', help="path to configuration file.")
+    # verbose
+    parser.add_argument('--verbose', action='store_true', help='verbose')
+    # remove temp files
+    parser.add_argument('--remove_temp', action='store_true', help='remove temp files')
+    
+    parser.add_argument(
+        "--options",
+        nargs="+",
+        help="override some settings in the used config, the key-value pair "
+        "in xxx=yyy format will be merged into config file (deprecate), "
+        "change to --cfg-options instead.",
+    )
+    
+    args = parser.parse_args()
+    return args
 
 
 
@@ -472,8 +493,11 @@ def main():
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    # shutil.rmtree(temp_dir)
-    # print(f"Temp files removed.")
+    if args.remove_temp:
+        shutil.rmtree(temp_dir)
+        print(f"Temp files removed.")
+    else:
+        print(f"Temp files saved to {temp_dir}")
 
 if __name__ == '__main__':
     main()
