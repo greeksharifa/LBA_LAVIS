@@ -306,12 +306,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     with open(os.path.join(output_dir, "evaluate.txt"), "w") as f:
         f.write(json.dumps(metrics, indent=4) + "\n")
 
-    print('output_dir\t', 'dataset\t', 'recomposer\t')
+    print('output_dir\t', 'dataset\t', 'recomposer\t', 'gen q model\t')
     print('select_high_confidence\t', 'train_recomposer_examplar\t', 'vision_supple\t', 'use_pre_generated_sub_q\t')
     print('num_sub_qa_generate\t', 'num_sub_qa_select\t', 'pick_subq\t', 'max_conf_gap\t')
     print(saved_output_dir.split('/')[-1], end='\t')
     print(cfg.datasets_cfg.dataset_name, end='\t')
     print(cfg.runner_cfg.recomposer_name, end='\t')
+    print(cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1], end='\t')
     
     print(cfg.runner_cfg.get("select_high_confidence", False), end='\t')
     print(cfg.runner_cfg.get("train_recomposer_examplar", False), end='\t')

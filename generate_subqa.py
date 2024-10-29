@@ -24,7 +24,7 @@ def parse_args():
     # verbose
     parser.add_argument('--verbose', action='store_true', help='verbose')
     # remove temp files
-    parser.add_argument('--remove_temp', action='store_true', help='remove temp files')
+    parser.add_argument('--save_temp', action='store_true', help='save temp files')
     
     parser.add_argument(
         "--options",
@@ -111,15 +111,19 @@ usage:
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="Ktype" datasets.dataset_name="DramaQA" runner.batch_size=2 datasets.num_data=5 runner.num_sub_qa_generate=6 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
+CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=10 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
 
+# Qwen/Qwen2-VL-7B-Instruct
 CUDA_VISIBLE_DEVICES=2 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="Qwen/Qwen2-VL-7B-Instruct"
 CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="Qwen/Qwen2-VL-7B-Instruct"
 
+# Llama-3.2-11B-Vision-Instruct
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 
-CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam" datasets.dataset_name="DramaQA" runner.batch_size=12 runner.num_sub_qa_generate=10 runner.recomposer_name="Salesforce/blip2-flan-t5-xl"
-
+# videollama
+CUDA_VISIBLE_DEVICES=2 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
+CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
 """
 def main():
     N_SUPPLE = 0
@@ -493,11 +497,11 @@ def main():
     json.dump(results, open(out_path, "w"), indent=4)
     print(f"Results saved to {out_path}")
     
-    if args.remove_temp:
+    if args.save_temp:
+        print(f"Temp files saved to {temp_dir}")
+    else:
         shutil.rmtree(temp_dir)
         print(f"Temp files removed.")
-    else:
-        print(f"Temp files saved to {temp_dir}")
 
 if __name__ == '__main__':
     main()
