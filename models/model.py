@@ -368,8 +368,8 @@ class Recomposer(nn.Module):
                 max_new_tokens=max_new_tokens
             )
             output_text = [o[0].replace('Answer: ', '') for o in output_text]
-            print('output_text:', output_text)
-            print('output_scores:', output_scores)
+            # print('output_text:', output_text)
+            # print('output_scores:', output_scores)
             # import pdb; pdb.set_trace()
         
             pass

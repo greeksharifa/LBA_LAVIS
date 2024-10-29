@@ -288,7 +288,7 @@ def mm_infer_batch(image_or_videos, instructs, model, tokenizer, modal='video', 
         output_texts = tokenizer.batch_decode(output_ids, skip_special_tokens=True)
         output_texts = [t.strip() for t in output_texts]
         # output_texts = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        print(output_texts)
+        # print(output_texts)
         # import pdb; pdb.set_trace()
         return output_texts, "dummy_score"
     
