@@ -25,6 +25,8 @@ def parse_args():
     parser.add_argument('--verbose', action='store_true', help='verbose')
     # remove temp files
     parser.add_argument('--save_temp', action='store_true', help='save temp files')
+    parser.add_argument('--start', type=int, default=0, help='start index')
+    parser.add_argument('--end', type=int, default=1000000, help='end index')
     
     parser.add_argument(
         "--options",
@@ -128,6 +130,9 @@ CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewsh
 def main():
     N_SUPPLE = 0
     args = parse_args()
+    if args.start != 0 or args.end != 1000000:
+        print(f"Start: {args.start}, End: {args.end}")
+        args.save_temp = True
     cfg = Config(args)
     setup_seeds(cfg)
     model_name = cfg.runner_cfg.recomposer_name
@@ -256,6 +261,8 @@ def main():
     
     results = {}
     for data_iter_step, batch in enumerate(tqdm(dataloader)):
+        if data_iter_step < args.start or data_iter_step >= args.end:
+            continue
         if os.path.exists(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json")):
             batch_result = json.load(open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "r"))
             results.update(batch_result)
