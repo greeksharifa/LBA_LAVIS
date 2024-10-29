@@ -56,6 +56,15 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[]):#xl_or_xxl
     elif datasets_cfg.dataset_name == "EgoSchema":
         from dataset.EgoSchema import EgoSchemaEvalDataset
         cls = EgoSchemaEvalDataset
+    elif datasets_cfg.dataset_name == "ActivityNetQA":
+        from dataset.ActivityNetQA import ActivityNetQADataset
+        cls = ActivityNetQADataset
+    elif datasets_cfg.dataset_name == "MSVDQA":
+        from dataset.MSVDQA import MSVDQADataset
+        cls = MSVDQADataset
+    elif datasets_cfg.dataset_name == "MSRVTTQA":
+        from dataset.MSRVTTQA import MSRVTTQADataset
+        cls = MSRVTTQADataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
 
@@ -311,7 +320,7 @@ def get_text_input(
     
     elif prompt_type == "default_video":
         if kwargs.get("qwen_prompt", False):
-            prompt = "Question: {main_question}?\nChoices:\n{choices}\n\n"
+            prompt = "Question: {main_question}?\nChoices:\n{choices}\n"
             prompt += "1) What is the answer?\n"
             prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
             # prompt += "Example answer: (A), 0.857\n"
@@ -319,15 +328,20 @@ def get_text_input(
         else:
             prompt = examplar + "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
             # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+        
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
-            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
-            ret.append(prompt.format(main_question=main_question.rstrip('?'), choices=choices))
+            if candidate_list is None: # open-ended
+                prompt = prompt.replace("Choices:\n{choices}\n", "")
+                ret.append(prompt.format(main_question=main_question.rstrip('?')))
+            else:                      # multi-choice
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), choices=choices))
         return ret
     
     elif prompt_type == "recomposer_video":
         if kwargs.get("qwen_prompt", False):
-            prompt = "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\n\n"
+            prompt = "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\n"
             prompt += "1) What is the answer?\n"
             prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
             # prompt += "Example answer: (A), 0.857\n"
@@ -344,8 +358,14 @@ def get_text_input(
                 sub_answer = [sub_answer]
             for sq, sa in zip(sub_question, sub_answer):
                 sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
-            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
-            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas, choices=choices))
+                
+            if candidate_list is None: # open-ended
+                prompt = prompt.replace("Choices:\n{choices}\n", "")
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas))
+            else:                      # multi-choice
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas, choices=choices))
+            
         return ret
     
     elif prompt_type == "recomposer_video_description":

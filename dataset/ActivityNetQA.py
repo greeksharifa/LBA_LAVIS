@@ -15,7 +15,7 @@ from dataset.video import read_video_pyav
 from dataset.VideoQA import VideoEvalDataset
 
 
-class ActivityNetQAEvalDataset(VideoEvalDataset):
+class ActivityNetQADataset(VideoEvalDataset):
     """
     <class 'list'>
     len: 18000
@@ -73,6 +73,8 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
         
         for i, (q, a) in enumerate(zip(q_data, a_data)):
             assert q['question_id'] == a['question_id']
+            if not os.path.exists(os.path.join(vis_root, f'v_{q["video_name"]}.mp4')):
+                continue
             self.annotation.append({
                 'video': q['video_name'],
                 'question': q['question'],
@@ -112,7 +114,10 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
         gt_ans = ann["answer"]
         
         sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
-        if type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+        if sub_qa_list is None:
+            sub_questions = None
+            sub_answers = None
+        elif type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
             sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
             sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
         else:
@@ -126,6 +131,8 @@ class ActivityNetQAEvalDataset(VideoEvalDataset):
             "text_input": question,
             "question_id": question_id,
             "gt_ans": gt_ans,
+            "candidate_list": None,
+            # "answer_sentence": candidate_list[gt_ans],
             "type": ann['type'],
             "vid": vid,
             "sub_question_list": sub_questions,

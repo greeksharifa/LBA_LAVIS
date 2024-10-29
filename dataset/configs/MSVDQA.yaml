@@ -7,8 +7,10 @@ datasets:
   ann_paths:
     train:
       - MSVD/qa/train_qa.json
+      - MSVD/youtube_mapping.txt
     val:
       - MSVD/qa/val_qa.json
+      - MSVD/youtube_mapping.txt
       - MSVD/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - MSVD/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - MSVD/sub_qas_val_chatgpt.json # created by gpt

@@ -7,10 +7,8 @@ datasets:
   ann_paths:
     train:
       - MSRVTTQA/train_qa.json
-      - MSRVTTQA/youtube_mapping.txt
     val:
       - MSRVTTQA/val_qa.json
-      - MSRVTTQA/youtube_mapping.txt
       - MSRVTTQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - MSRVTTQA/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - MSRVTTQA/sub_qas_val_chatgpt.json # created by gpt
