@@ -119,8 +119,8 @@ def main():
     
     tokenizer = None
     if "VideoLLaMA" in model_name:
-        if cfg.runner_cfg.batch_size != 1:
-            raise ValueError("batch_size should be 1 for VideoLLaMA.")
+        # if cfg.runner_cfg.batch_size != 1:
+        #     raise ValueError("batch_size should be 1 for VideoLLaMA.")
         import sys
         sys.path.append('./VideoLLaMA2/')
         from VideoLLaMA2.videollama2 import model_init
@@ -292,8 +292,12 @@ def main():
                     text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                     
                     if "VideoLLaMA" in model_name:
-                        from VideoLLaMA2.videollama2 import mm_infer
-                        image_or_video = processor(batch["vision"][0])
+                        from VideoLLaMA2.videollama2 import mm_infer_batch
+                        image_or_videos = []
+                        for v in batch["vision"]:
+                            image_or_videos.append(processor(v))
+                        image_or_videos = torch.stack(image_or_videos)
+                        # image_or_video = processor(batch["vision"][0])
                     else:
                         inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                         
@@ -310,10 +314,14 @@ def main():
                         generation_params["top_p"] = 0.8
                         
                     if "VideoLLaMA" in model_name:
-                        sub_questions, o_score = mm_infer(
-                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], 
+                        sub_questions, o_score = mm_infer_batch(
+                            image_or_videos, text_inputs, model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1],
                             **generation_params
                         )
+                        # sub_questions, o_score = mm_infer(
+                        #     image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], 
+                        #     **generation_params
+                        # )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
                         if "Qwen" in model_name:
@@ -324,8 +332,12 @@ def main():
                 elif cfg.runner_cfg.sub_mode == "fewshot_vqaintrospect":
                     text_inputs = [prompt_subqa_vqaintrospect[i].format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                     if "VideoLLaMA" in model_name:
-                        from VideoLLaMA2.videollama2 import mm_infer
-                        image_or_video = processor(batch["vision"][0])
+                        from VideoLLaMA2.videollama2 import mm_infer_batch
+                        image_or_videos = []
+                        for v in batch["vision"]:
+                            image_or_videos.append(processor(v))
+                        image_or_videos = torch.stack(image_or_videos)
+                        # image_or_video = processor(batch["vision"][0])
                     else:
                         inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                         
@@ -339,8 +351,8 @@ def main():
                         generation_params["length_penalty"] = -1
                         
                     if "VideoLLaMA" in model_name:
-                        sub_questions, o_score = mm_infer(
-                            image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], 
+                        sub_questions, o_score = mm_infer_batch(
+                            image_or_videos, text_inputs, model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1],
                             **generation_params
                         )
                     else:
@@ -381,8 +393,12 @@ def main():
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
                 if "VideoLLaMA" in model_name:
-                    from VideoLLaMA2.videollama2 import mm_infer
-                    image_or_video = processor(batch["vision"][0])
+                        from VideoLLaMA2.videollama2 import mm_infer_batch
+                        image_or_videos = []
+                        for v in batch["vision"]:
+                            image_or_videos.append(processor(v))
+                        image_or_videos = torch.stack(image_or_videos)
+                        # image_or_video = processor(batch["vision"][0])
                 else:
                     inputs = get_input(model_name, cfg.datasets_cfg.data_type, processor, device, batch["vision"], text_inputs, tokenizer)
                 
@@ -395,8 +411,9 @@ def main():
                 }
                 
                 if "VideoLLaMA" in model_name:
-                    sub_answers, o_score = mm_infer(
-                        image_or_video, text_inputs[0], model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1], **generation_params
+                    sub_answers, o_score = mm_infer_batch(
+                        image_or_videos, text_inputs, model, tokenizer, modal=cfg.datasets_cfg.data_type[:-1],
+                        **generation_params
                     )
                 else:
                     outputs = model.generate(**inputs, **generation_params)

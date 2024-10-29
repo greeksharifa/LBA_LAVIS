@@ -95,7 +95,7 @@ def mm_infer(image_or_video, instruct, model, tokenizer, modal='video', **kwargs
     temperature = kwargs.get('temperature', 0.2 if do_sample else 0.0)
     top_p = kwargs.get('top_p', 0.9)
     max_new_tokens = kwargs.get('max_new_tokens', 100)
-    
+    import pdb; pdb.set_trace()
     if not kwargs.get('beam_search', False):
         with torch.inference_mode():
             output_ids = model.generate(
@@ -209,37 +209,67 @@ def mm_infer_get_input(image_or_video, instruct, model, tokenizer, modal='video'
         'input_ids': input_ids,
         'attention_masks': attention_masks,
         'tensor': tensor,
-        'stopping_criteria': [stopping_criteria],
+        'stopping_criteria': stopping_criteria,
     }
     return inputs
 
 
 def mm_infer_batch(image_or_videos, instructs, model, tokenizer, modal='video', **kwargs):
-    batch_input_ids = []
-    batch_attention_masks = []
+    input_ids_list = []
+    attention_masks_list = []
     batch_tensor = []
     batch_stopping_criteria = []
     
-    import pdb; pdb.set_trace()
     
     for image_or_video, instruct in zip(image_or_videos, instructs):
         inputs = mm_infer_get_input(image_or_video, instruct, model, tokenizer, modal, **kwargs)
-        batch_input_ids.append(inputs['input_ids'])
-        batch_attention_masks.append(inputs['attention_masks'])
-        batch_tensor.append(inputs['tensor'])
+        input_ids_list.append(inputs['input_ids'])
+        attention_masks_list.append(inputs['attention_masks'])
+        batch_tensor.extend(inputs['tensor'])
         batch_stopping_criteria.append(inputs['stopping_criteria'])
         
-    batch_input_ids = torch.stack(batch_input_ids)
-    batch_attention_masks = torch.stack(batch_attention_masks)
-    batch_tensor = torch.stack(batch_tensor)
+    '''
+    for stopping_criteria in batch_stopping_criteria:
+        print(stopping_criteria)
+        print(stopping_criteria.keywords)
+        print(stopping_criteria.keyword_ids)
+        print(tokenizer.decode(stopping_criteria.keyword_ids[0]))
+    '''
+        
+    # import pdb; pdb.set_trace()
+        
+    # zero padding to make batch
+    # input_ids and attention_masks
+    # ex) ids.shape : [1,71] -> [1, max_len]
+    max_len = max([ids.shape[-1] for ids in input_ids_list])
+    batch_input_ids, batch_attention_masks = [], []
+    for ids, masks in zip(input_ids_list, attention_masks_list):
+        pad_len = max_len - ids.shape[-1]
+        
+        pad_ids = torch.full((1, pad_len), tokenizer.pad_token_id, dtype=torch.long, device=ids.device)
+        batch_input_ids.append(torch.cat([pad_ids, ids], dim=-1))
+        
+        pad_masks = torch.full((1, pad_len), 0, dtype=torch.long, device=masks.device)
+        batch_attention_masks.append(torch.cat([pad_masks, masks], dim=-1))
+        
+    # import pdb; pdb.set_trace()
+    batch_input_ids = torch.cat(batch_input_ids, dim=0)
+    batch_attention_masks = torch.cat(batch_attention_masks, dim=0)
+    # batch_tensor = torch.stack(batch_tensor, dim=0)
+    
+    stopping_criteria = batch_stopping_criteria[0]
+    stopping_criteria.start_len = max_len
+    
+        
     
     num_beams = kwargs.get('num_beams', 5)
     do_sample = kwargs.get('do_sample', False)
     temperature = kwargs.get('temperature', 0.2 if do_sample else 0.0)
     top_p = kwargs.get('top_p', 0.9)
-    max_new_tokens = kwargs.get('max_new_tokens', 10)
+    max_new_tokens = kwargs.get('max_new_tokens', 100)
 
-    if kwargs.get('beam_search', False):
+    # import pdb; pdb.set_trace()
+    if not kwargs.get('beam_search', False):
         with torch.inference_mode():
             output_ids = model.generate(
                 batch_input_ids,
@@ -251,14 +281,16 @@ def mm_infer_batch(image_or_videos, instructs, model, tokenizer, modal='video', 
                 max_new_tokens=max_new_tokens,
                 top_p=top_p,
                 use_cache=True,
-                stopping_criteria=[batch_stopping_criteria],
+                stopping_criteria=[stopping_criteria],
                 pad_token_id=tokenizer.eos_token_id,
             )
 
-        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        print(outputs)
-        import pdb; pdb.set_trace()
-        return outputs
+        output_texts = tokenizer.batch_decode(output_ids, skip_special_tokens=True)
+        output_texts = [t.strip() for t in output_texts]
+        # output_texts = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        print(output_texts)
+        # import pdb; pdb.set_trace()
+        return output_texts
     
     else:
         with torch.inference_mode():
@@ -272,7 +304,7 @@ def mm_infer_batch(image_or_videos, instructs, model, tokenizer, modal='video', 
                 max_new_tokens=max_new_tokens,
                 top_p=top_p,
                 use_cache=True,
-                stopping_criteria=[batch_stopping_criteria],
+                stopping_criteria=[stopping_criteria],
                 pad_token_id=tokenizer.eos_token_id,
                 return_dict_in_generate=True,
                 output_scores=True,

@@ -220,8 +220,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     # hue_order=[1, 0, -1], 
                     size='size', sizes=(3, 7))
     # plt.legend(title='Class', labels=[label_map[i] for i in range(4)])
-    plt.xlim(-5, 0)
-    plt.ylim(-5, 0)
+    min_lim = min(min(scatter_df['conf_base']), min(scatter_df['conf_lba']))
+    plt.xlim(min_lim, 0)
+    plt.ylim(min_lim, 0)
     plt.title(f'{cfg.datasets_cfg.dataset_name}')
     plt.xlabel('log Confidence score, Baseline')
     plt.ylabel('log Confidence score, LBA')
