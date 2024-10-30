@@ -63,36 +63,33 @@ out['confidence'] = torch.exp(pred_logits_qa[:, 0]).cpu().tolist()
 
 
 # image baseline
-CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
+CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
 
 
 # video baseline
-CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1
+CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
 
 # sevila
-CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" runner.batch_size=6 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=True runner.vision_supple=False runner.num_sub_qa_generate=1 datasets.n_frms=32 
+CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=32 runner.batch_size=6 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=True runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
 
 # video_llava
-CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" runner.batch_size=8 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True use_pre_generated_sub_q=False runner.num_sub_qa_generate=1 datasets.n_frms=4
+CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=4 runner.batch_size=8 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True use_pre_generated_sub_q=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
+
+# video llama 2
+CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --options runner.sub_mode="subqa" datasets.dataset_name="VLEP" datasets.n_frms=8 runner.batch_size=4 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F" datasets.num_data=-1 runner.select_high_confidence=True runner.num_sub_qa_generate=5 runner.num_sub_qa_select=1 datasets.root_dir="/data/video_datasets/" model.cache_dir="/data/LLMs/videollama/" runner.examplar="none"
 
 
 # video description
-CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="" runner.batch_size=16 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True datasets.n_frms=8 runner.sub_mode="description" model.cache_dir="/data/LLMs/" datasets.root_dir="/data/video_datasets"
+CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True datasets.n_frms=8 runner.sub_mode="description" model.cache_dir="/data/LLMs/" datasets.root_dir="/data/video_datasets"
 
 
 # instructblip
 CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="DramaQA" runner.batch_size=6 runner.recomposer_name="Salesforce/instructblip-flan-t5-xl" runner.decomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True runner.num_sub_qa_generate=1 datasets.n_frms=4
 
-# use_pre_generated_sub_q
-CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="DramaQA" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True runner.use_pre_generated_sub_q=True runner.num_sub_qa_generate=3 datasets.n_frms=4
-
-# instructblip & use_pre_generated_sub_q
-CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="DramaQA" runner.batch_size=6 runner.recomposer_name="Salesforce/instructblip-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True runner.use_pre_generated_sub_q=True runner.num_sub_qa_generate=3 datasets.n_frms=4
-
 
 # visualize
-python main_multi_subqa.py --options runner.visualize=True runner.output_dir="output/"
-python main_multi_subqa.py --options runner.visualize=True runner.sub_mode="subqa" datasets.root_dir="/data/" runner.select_high_confidence=True runner.max_conf_gap=False runner.output_dir="output/20240820_185932"
+python main_multi_subqa.py --options runner.visualize=True datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=False runner.max_conf_gap=None runner.num_sub_qa_generate=1 runner.output_dir="output/20241025_202514"
+python main_multi_subqa.py --test_all_pick_subq --options runner.visualize=True datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None runner.output_dir="output/20241025_202514"
 ```
 
 
