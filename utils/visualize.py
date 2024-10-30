@@ -158,18 +158,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     
     # E_CR, E_IC: Error Correction raio / Error Induction ratio
     e_cr, e_ic = dataset.get_e_cr_e_ic(acc_base_list, acc_lba_list)
-    
-    # results.sort(key=lambda x: x['confidence_lba'])
-    # bins_lba = [[] for _ in range(N // M + 1)]
-    
-    # for i, result in enumerate(results):
-    #     # bins_lba
-    #     acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
         
-    #     bin_key = i // M
-    #     bins_lba[bin_key].append(acc_lba)
-        
-    pprint(results[0], width=300)
+    # pprint(results[0], width=300)
     
     plt.figure(figsize=(6,8))
     plt.subplot(2, 1, 1)
@@ -221,6 +211,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     size='size', sizes=(3, 7))
     # plt.legend(title='Class', labels=[label_map[i] for i in range(4)])
     min_lim = min(min(scatter_df['conf_base']), min(scatter_df['conf_lba']))
+    print(f'min_lim: {min_lim}')
+    if np.isinf(min_lim) or np.isnan(min_lim):
+        min_lim = -5
     plt.xlim(min_lim, 0)
     plt.ylim(min_lim, 0)
     plt.title(f'{cfg.datasets_cfg.dataset_name}')
@@ -283,7 +276,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # print("match_per_type:", match_per_type)
         # print("total_per_type:", total_per_type)
         
-        for _q in "TCDISPFL":
+        for _q in "TCDISPFLBNO":
             for q_type in match_per_type.keys():
                 if q_type.startswith(_q) and total_per_type[q_type] > 0:
                     # qtype_v = f'{match_per_type[q_type] / total_per_type[q_type] * 100:4.2f}% = {match_per_type[q_type]:6.1f} / {total_per_type[q_type]:5d}'

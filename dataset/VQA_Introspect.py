@@ -49,8 +49,25 @@ class VQAIntrospectDataset(BaseDataset):
                 if introspect["pred_q_type"] == "invalid":
                     continue
                 for sub_qa in sub_qa_list:
+                    if sub_qa["sub_answer"] == '':
+                        continue
                     if sub_qa["sub_answer"] == 'yea':
                         sub_qa["sub_answer"] = 'yes'
+                    
+                    # wrong GT sub QA
+                    if kwargs.get("gt_sub_qa", "no") == "wrong":
+                        # Boolean
+                        if sub_qa["sub_answer"] == "yes":
+                            sub_qa["sub_answer"] = "no"
+                        elif sub_qa["sub_answer"] == "no":
+                            sub_qa["sub_answer"] = "yes"
+                        else:
+                            try:
+                                # Number
+                                sub_qa["sub_answer"] = str(int(sub_qa["sub_answer"]) + 1)
+                            except:
+                                sub_qa["sub_answer"] = "not " + sub_qa["sub_answer"]
+                    
                     gt_sub_qas.append(
                         (sub_qa["sub_question"], sub_qa["sub_answer"])
                     )
@@ -58,12 +75,17 @@ class VQAIntrospectDataset(BaseDataset):
             v.update({
                 "gt_sub_qas": gt_sub_qas,
                 "question_id": k,
-                "gt_ans": vqav2_answers[k]# v["reasoning_answer_most_common"]# 
+                "gt_ans": vqav2_answers[k]
             })
-            
-            self.annotation.append(v)
-            # if 0 <= num_data <= len(self.annotation):
-            #     break
+            if v['reasoning_answer_most_common'] in ["yes", "no"]:
+                v['type'] = 'Boolean'
+            elif v['reasoning_answer_most_common'] in "0123456789":
+                v['type'] = 'Number'
+            else:
+                v['type'] = 'Other'
+            if len(gt_sub_qas) >= 2:
+                self.annotation.append(v)
+            # self.annotation.append(v)
             
         if num_data != -1:
             self.annotation = self.annotation[:num_data]
@@ -81,10 +103,15 @@ class VQAIntrospectDataset(BaseDataset):
         for k, v in kwargs.items():
             setattr(self, k, v)
         
-        # import spacy
-        # self.lemmatizer = spacy.load("en_core_web_sm")
-        
         self._add_instance_ids()
+        
+        print("\n" + self.__class__.__name__)
+        print('vis_processor : ', vis_processor)
+        print('text_processor : ', text_processor)
+        print('vis_root : ', vis_root)
+        print('ann_paths : ', ann_paths)
+        print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
+
     
     def __getitem__(self, index):
         ann = self.annotation[index]
@@ -102,16 +129,20 @@ class VQAIntrospectDataset(BaseDataset):
         reasoning_answer_most_common = ann["reasoning_answer_most_common"]
         
         
-        sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
-        if sub_qa_list is None:
-            sub_questions = None
-            sub_answers = None
-        elif type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
-            sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
-            sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
+        if self.gt_sub_qa == "no":
+            sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
+            if sub_qa_list is None:
+                sub_questions = None
+                sub_answers = None
+            elif type(sub_qa_list[0]) == list: # include sub_questions and sub_answers
+                sub_questions = [sub_qa[0] for sub_qa in sub_qa_list]
+                sub_answers = [sub_qa[1] for sub_qa in sub_qa_list]
+            else:
+                sub_questions = sub_qa_list
+                sub_answers = None
         else:
-            sub_questions = sub_qa_list
-            sub_answers = None
+            sub_questions = [sub_qa[0] for sub_qa in ann["gt_sub_qas"]]
+            sub_answers = [sub_qa[1] for sub_qa in ann["gt_sub_qas"]]
 
         
         return {
@@ -121,6 +152,7 @@ class VQAIntrospectDataset(BaseDataset):
             "reasoning_answer_most_common": reasoning_answer_most_common,
             "gt_sub_qas": ann["gt_sub_qas"],
             "gt_ans": ann["gt_ans"], # vqav2 answers list of str(len=10)
+            "type": ann["type"],
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
         }

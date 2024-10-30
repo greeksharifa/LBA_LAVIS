@@ -47,6 +47,8 @@ def parse_args():
     parser.add_argument('--verbose', action='store_true', help='verbose')
     parser.add_argument('--visualize_high_confidence', default=True, type=bool, help='select high confidence')
     parser.add_argument('--test_all_pick_subq', action='store_true', help='visualize all num_sub_qa_select')
+    # wrong_gt_sub_qa
+    parser.add_argument('--gt_sub_qa', type=str, default="no", choices=["no", "right", "wrong"], help='determine right/wrong GT sub QA or not')
     
     parser.add_argument(
         "--options",
@@ -96,7 +98,7 @@ def main():
         else:
             cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", xl_or_xxl)
 
-    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths)
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths, **args.__dict__)
     dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
     

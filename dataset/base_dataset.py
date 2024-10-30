@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
 from utils.llava_answer_eval import map_prediction_to_answer
 
-def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[]):#xl_or_xxl="xl", model_tag=None):
+def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):#xl_or_xxl="xl", model_tag=None):
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -88,6 +88,7 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[]):#xl_or_xxl
         n_supple=n_supple, #datasets_cfg.get("n_supple"),
         data_type=datasets_cfg.data_type,
         split=split,
+        **kwargs
     )
     
     return dataset
