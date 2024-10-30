@@ -195,8 +195,15 @@ Answer: The answer is (A)\n"""
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
             # if all question_id saved in output_dir/files/questionid.json, skip
             for question_id in batch['question_id']:
-                if not os.path.exists(os.path.join(output_dir, f'files/{question_id}.json')):
+                saved_path = os.path.join(output_dir, f'files/{question_id}.json')
+                if not os.path.exists(saved_path):
                     break
+                result = json.load(open(saved_path))
+                text_output_base = result['text_output_base']
+                gt_answer = result['gt_ans']
+                total_base_match += dataset.get_accuracy([text_output_base], [gt_answer])[0]
+                total_cnt += 1
+                results.append(result)
             else:
                 continue
             
@@ -285,14 +292,23 @@ Answer: The answer is (A)\n"""
                     # generating sub_answers
                     if cfg.runner_cfg.use_pre_generated_sub_a:
                         sub_answers = [[] for _ in range(bsz)]
-                        # sub_answers = []
                         for b in range(bsz):
                             for j in range(cfg.runner_cfg.num_sub_qa_select):
                                 sub_answers[b].append(batch['sub_answer_list'][b][(i+j) % cfg.runner_cfg.num_sub_qa_generate])
-                            # sub_answers.append(batch['sub_answer_list'][b][i])
                     else:
-                        text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                        sub_answers, _ = answerer(vision, text_inputs, max_new_tokens=100)
+                        # print('sub_questions:', sub_questions)
+
+                        sub_answers = [[] for _ in range(bsz)]
+                        for j in range(cfg.runner_cfg.num_sub_qa_select):
+                            s_qs = [s_q[j] for s_q in sub_questions]
+                            text_inputs = get_text_input("sub_answer", sub_questions=s_qs)
+                            s_as, _ = answerer(vision, text_inputs, max_new_tokens=100)
+                            for b in range(bsz):
+                                sub_answers[b].append(s_as[b])
+                                
+                        # text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
+                        # sub_answers, _ = answerer(vision, text_inputs, max_new_tokens=100)
+                        # print('sub_answers:', sub_answers)
                     sub_answers_list.append(sub_answers)
                     
                     # generating recomposed_answers

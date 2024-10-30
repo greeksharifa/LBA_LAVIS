@@ -264,6 +264,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                     predict = result['text_output_lba']
             else:
                 predict = result['text_output_base']
+            # predict = result['text_output_lba']           # irrelevent GT sub_qa
             
             acc = dataset.get_accuracy(predict, target)
             if question_type not in match_per_type:

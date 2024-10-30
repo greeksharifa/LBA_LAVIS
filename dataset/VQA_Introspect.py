@@ -42,6 +42,7 @@ class VQAIntrospectDataset(BaseDataset):
         print('len of vqav2_answers : ', len(vqav2_answers))
         
         self.annotation = []
+        _q, _a = 'are the skiers ski tips facing left?', 'yes'  # irrelevent GT sub_qa
         for k, v in vqa_introspect_annotation.items(): # add question_id(str) and sub_qas(list of list: [N_i,2]) to each sample
             gt_sub_qas = []
             for introspect in v["introspect"]:
@@ -72,6 +73,7 @@ class VQAIntrospectDataset(BaseDataset):
                         (sub_qa["sub_question"], sub_qa["sub_answer"])
                     )
             gt_sub_qas = list(set(gt_sub_qas))
+            # gt_sub_qas = [(_q, _a)] + gt_sub_qas  # irrelevent GT sub_qa
             v.update({
                 "gt_sub_qas": gt_sub_qas,
                 "question_id": k,
@@ -83,9 +85,13 @@ class VQAIntrospectDataset(BaseDataset):
                 v['type'] = 'Number'
             else:
                 v['type'] = 'Other'
-            if len(gt_sub_qas) >= 2:
+                
+            if kwargs.get("gt_sub_qa", "no") != "no":
+                if len(gt_sub_qas) >= 2:                # irrelevent GT sub_qa: len>=3
+                    self.annotation.append(v)
+                    _q, _a = gt_sub_qas[-1]             # irrelevent GT sub_qa
+            else:
                 self.annotation.append(v)
-            # self.annotation.append(v)
             
         if num_data != -1:
             self.annotation = self.annotation[:num_data]
