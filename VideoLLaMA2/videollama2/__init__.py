@@ -95,7 +95,8 @@ def mm_infer(image_or_video, instruct, model, tokenizer, modal='video', **kwargs
     temperature = kwargs.get('temperature', 0.2 if do_sample else 0.0)
     top_p = kwargs.get('top_p', 0.9)
     max_new_tokens = kwargs.get('max_new_tokens', 100)
-    import pdb; pdb.set_trace()
+    
+    
     if not kwargs.get('beam_search', False):
         with torch.inference_mode():
             output_ids = model.generate(

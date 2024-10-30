@@ -340,34 +340,40 @@ class Recomposer(nn.Module):
         if "VideoLLaMA" in self.model_name:
             from VideoLLaMA2.videollama2 import mm_infer, mm_infer_batch
             
-            # output_text, output_scores = [], []
-            # for vis, txt in zip(vision, text_inputs):
-            #     image_or_video = self.processor(vis)
-            #     o_text, o_score = mm_infer(
-            #         image_or_video, txt, self.model, self.tokenizer, modal="video", 
-            #         beam_search=beam_search, 
-            #         max_new_tokens=max_new_tokens
-            #     )
-            #     output_text.append(o_text[0].replace('Answer: ', ''))
-            #     output_scores.append(o_score[0])
+            modal = "video" if type(vision[0]) == list else "image"
+            # print('modal:', modal)
+            
+            # '''
+            output_text, output_scores = [], []
+            for vis, txt in zip(vision, text_inputs):
+                image_or_video = self.processor(vis)
+                o_text, o_score = mm_infer(
+                    image_or_video, txt, self.model, self.tokenizer, modal=modal, 
+                    beam_search=beam_search, 
+                    max_new_tokens=max_new_tokens
+                )
+                output_text.append(o_text[0].replace('Answer: ', ''))
+                output_scores.append(o_score[0])
+            # '''
             
             # vpath = vision # video path or list of image path
             # vision = self.processor(vpath)
             
+            '''
             image_or_videos = []
             for v in vision:
                 image_or_videos.append(self.processor(v))
                 
-            # import pdb; pdb.set_trace()
-            
             image_or_videos = torch.stack(image_or_videos)
             
             output_text, output_scores = mm_infer_batch(
-                image_or_videos, text_inputs, self.model, self.tokenizer, modal="video",
+                image_or_videos, text_inputs, self.model, self.tokenizer, modal=modal,
                 beam_search=beam_search, 
                 max_new_tokens=max_new_tokens
             )
             output_text = [o[0].replace('Answer: ', '') for o in output_text]
+            '''
+            
             # print('output_text:', output_text)
             # print('output_scores:', output_scores)
             # import pdb; pdb.set_trace()

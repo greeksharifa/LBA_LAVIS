@@ -120,12 +120,17 @@ def main():
     
     
     if not cfg.runner_cfg.visualize:
-        output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
-        os.makedirs(output_dir)
-        OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
+        if cfg.runner_cfg.output_dir != 'output/':
+            output_dir = cfg.runner_cfg.output_dir
+        else:
+            output_dir = os.path.join(cfg.runner_cfg.output_dir, datetime.now().strftime('%Y%m%d_%H%M%S'))
+            os.makedirs(output_dir)
+            os.makedirs(os.path.join(output_dir, "files"))
+            OmegaConf.save(config=cfg.config, f=os.path.join(output_dir, "config.yaml"))
     else:
         print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
         output_dir = cfg.runner_cfg.output_dir
+    print('output_dir:', output_dir)
     
     
     if not cfg.runner_cfg.visualize:
@@ -186,6 +191,13 @@ Answer: The answer is (A)\n"""
         wrong2right, right2wrong = 0, 0
         wrong, right = 0, 0
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
+            # if all question_id saved in output_dir/files/questionid.json, skip
+            for question_id in batch['question_id']:
+                if not os.path.exists(os.path.join(output_dir, f'files/{question_id}.json')):
+                    break
+            else:
+                continue
+            
             if args.verbose and data_iter_step == 0:
                 print('batch:')
                 for k, v in batch.items():
@@ -206,8 +218,6 @@ Answer: The answer is (A)\n"""
 
             bsz = len(batch['vision'])
             vision = batch['vision']
-            # if "VideoLLaMA" in cfg.runner_cfg.recomposer_name:
-            #     vision = batch['vpath']
             
             """##############################  Baseline Inference   ##############################"""    
             if cfg.datasets_cfg.data_type == "videos":
@@ -528,6 +538,7 @@ Answer: The answer is (A)\n"""
                     result['type'] = batch['type'][i]
                     
                 results.append(result)
+                json.dump(result, open(os.path.join(output_dir, f'files/{result["question_id"]}.json'), 'w'), indent=4)
             
             if args.verbose:
                 print(f'\nwrong: {wrong} wrong2right: {wrong2right}, right2wrong: {right2wrong} right: {right} total_cnt: {total_cnt}')
