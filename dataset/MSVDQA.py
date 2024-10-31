@@ -73,6 +73,10 @@ class MSVDQADataset(VideoEvalDataset):
             qa["original_vid"] = f'vid{original_vid}'
             
             self.annotation.append(qa)
+            
+        if kwargs.get("eval_chatgpt", False):
+            print("eval_chatgpt")
+            self.create_openai_client()
         
         self._add_instance_ids()
                 

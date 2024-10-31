@@ -84,6 +84,10 @@ class VideoEvalDataset(BaseDataset):
                 print(f'\r{i+1:6d}/{len_loaded:6d} : {vid}', end='')
                 
                 self.annotation.append(sample)
+            
+        if kwargs.get("eval_chatgpt", False):
+            print("eval_chatgpt")
+            self.create_openai_client()
 
         self._add_instance_ids()
         
@@ -99,7 +103,10 @@ class VideoEvalDataset(BaseDataset):
            
     # @staticmethod
     def answer_mapping(self, answer):
-        return self.ANSWER_MAPPING[answer]
+        try:    # multi-choice
+            return self.ANSWER_MAPPING[answer]
+        except: # open-ended
+            return answer
 
     
     def image_path_sampling(self, image_paths):

@@ -59,8 +59,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 cur_match = total_base_match
                 
                 for i, result in enumerate(results):
-                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-                    acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+                    acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
                     
                     if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
                         pass
@@ -92,9 +92,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
     for i, result in enumerate(results):
-        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
-        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'])
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'])
+        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=result['main_question'])
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
         
@@ -266,7 +266,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 predict = result['text_output_base']
             # predict = result['text_output_lba']           # irrelevent GT sub_qa
             
-            acc = dataset.get_accuracy(predict, target)
+            acc = dataset.get_accuracy(predict, target, main_question=result['main_question'])
             if question_type not in match_per_type:
                 match_per_type[question_type] = 0
                 total_per_type[question_type] = 0

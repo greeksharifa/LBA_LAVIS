@@ -49,6 +49,8 @@ def parse_args():
     parser.add_argument('--test_all_pick_subq', action='store_true', help='visualize all num_sub_qa_select')
     # wrong_gt_sub_qa
     parser.add_argument('--gt_sub_qa', type=str, default="no", choices=["no", "right", "wrong"], help='determine right/wrong GT sub QA or not')
+    # for open-ended, evaluate by GPT-3.5
+    parser.add_argument('--eval_chatgpt', action='store_true', help='for open-ended, evaluate by GPT-3.5. only available in visualize mode')
     
     parser.add_argument(
         "--options",
@@ -72,6 +74,10 @@ def main():
         args.cfg_path = os.path.join(cfg.runner_cfg.output_dir, 'config.yaml')
         cfg = Config(args)
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
+    if args.eval_chatgpt and not cfg.runner_cfg.visualize:
+        raise ValueError("eval_chatgpt is only available in visualize mode.")
+    if args.eval_chatgpt and not cfg.datasets_cfg.open_ended:
+        raise ValueError("eval_chatgpt is only available in open-ended dataset.")
     # print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
 
     s = datetime.now()    
@@ -98,10 +104,6 @@ def main():
         else:
             cfg.datasets_cfg.ann_paths.get(cfg.datasets_cfg.split, 'val')[-1] = ann_paths[-1] = ann_paths[-1].replace("xl", xl_or_xxl)
 
-    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths, **args.__dict__)
-    dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
-                            shuffle=False, collate_fn=dataset.collater)
-    
     if cfg.runner_cfg.sub_mode == "multi_subqa_highest":
         single_subqa_results = json.load(open(f'{cfg.runner_cfg.single_subqa_output_dir}/results_base.json'))
         single_subqa_results = {r["question_id"]: r for r in single_subqa_results}
@@ -133,6 +135,10 @@ def main():
         print(type(cfg.runner_cfg.output_dir), cfg.runner_cfg.output_dir)
         output_dir = cfg.runner_cfg.output_dir
     print('output_dir:', output_dir)
+    
+    dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths, **args.__dict__, output_dir=output_dir)
+    dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
+                            shuffle=False, collate_fn=dataset.collater)
     
     
     if not cfg.runner_cfg.visualize:
@@ -177,17 +183,6 @@ Answer: The answer is (A)\n"""
         elif cfg.runner_cfg.examplar == "none":
             examplar = ""
         
-        """
-        if cfg.runner_cfg.get("no_examplar", False):
-            examplar = ""
-        else:
-            try:
-                examplar = get_train_examplar(cfg.datasets_cfg)
-            except:
-                examplar = ""
-            if cfg.runner_cfg.train_recomposer_examplar:
-                print('examplar:', examplar)
-        """
             
         results = []
         wrong2right, right2wrong = 0, 0
@@ -239,7 +234,7 @@ Answer: The answer is (A)\n"""
                                             )
             else:                          # "images"
                 text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
-            text_outputs_base, confidences_base = recomposer(vision, text_inputs, max_new_tokens=10)
+            text_outputs_base, confidences_base = recomposer(vision, text_inputs, max_new_tokens=50)
             
             if args.verbose:
                 print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
@@ -328,7 +323,7 @@ Answer: The answer is (A)\n"""
                                                     main_questions=batch['text_input'], 
                                                     sub_questions=sub_questions, 
                                                     sub_answers=sub_answers)
-                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs, max_new_tokens=10)
+                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs, max_new_tokens=50)
                     
                     if cfg.runner_cfg.debug:
                         t_inputs = text_inputs[0]

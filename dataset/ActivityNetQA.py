@@ -84,6 +84,10 @@ class ActivityNetQADataset(VideoEvalDataset):
             })
             if len(self.annotation) >= len_loaded: # 0 <= num_data <= i:
                 break
+            
+        if kwargs.get("eval_chatgpt", False):
+            print("eval_chatgpt")
+            self.create_openai_client()
         
         self._add_instance_ids()
                 

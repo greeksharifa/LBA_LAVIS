@@ -4,6 +4,7 @@ datasets:
   data_type: videos # [images|videos|features]
   n_frms: 4
   vqa_acc: False
+  open_ended: True
   ann_paths:
     train:
       - MSVDQA/qa/train_qa.json

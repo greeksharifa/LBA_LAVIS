@@ -1,4 +1,5 @@
 import os
+import ast
 import json
 from typing import List
 import numpy as np
@@ -150,6 +151,53 @@ class BaseDataset(Dataset):
         print('ann_paths : ', ann_paths)
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
 
+    def create_openai_client(self):
+        api_key = json.load(open("api_key.json", "r"))["LBA"]
+        from openai import OpenAI
+        self.client = OpenAI(api_key=api_key)
+        self.response_list = json.load(open(os.path.join(self.output_dir, "response_list.json"), 'r'))
+    
+    def get_openai_eval_response(self, pred_answer, gt_answer, main_question):
+        message = [
+            {
+                "role": "system",
+                "content":
+                    "You are an intelligent chatbot designed for evaluating the correctness of generative outputs for question-answer pairs. "
+                    "Your task is to compare the predicted answer with the correct answer and determine if they match meaningfully. Here's how you can accomplish the task:"
+                    "------"
+                    "##INSTRUCTIONS: "
+                    "- Focus on the meaningful match between the predicted answer and the correct answer.\n"
+                    "- Consider synonyms or paraphrases as valid matches.\n"
+                    "- Evaluate the correctness of the prediction compared to the answer."
+            },
+            {
+                "role": "user",
+                "content":
+                    "Please evaluate the following video-based question-answer pair:\n\n"
+                    f"Question: {main_question}\n"
+                    f"Correct Answer: {gt_answer}\n"
+                    f"Predicted Answer: {pred_answer}\n\n"
+                    "Provide your evaluation only as a yes/no and score where the score is an integer value between 0 and 5, with 5 indicating the highest meaningful match. "
+                    "Please generate the response in the form of a Python dictionary string with keys 'pred' and 'score', where value of 'pred' is  a string of 'yes' or 'no' and value of 'score' is in INTEGER, not STRING."
+                    "DO NOT PROVIDE ANY OTHER OUTPUT TEXT OR EXPLANATION. Only provide the Python dictionary string. "
+                    "For example, your response should look like this: {'pred': 'yes', 'score': 4.8}."
+            }
+        ]
+        completion = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=message,
+            temperature=0.7,
+            max_tokens=800,
+            top_p=0.95,
+            frequency_penalty=0,
+            presence_penalty=0,
+            stop=None
+        )
+        response_message = completion.choices[0].message["content"]
+        response_dict = ast.literal_eval(response_message)
+        
+        return response_dict
+
     @staticmethod
     def answer_mapping(answer):
         return answer
@@ -192,12 +240,36 @@ class BaseDataset(Dataset):
                 e_ic = 0.
         return e_cr, e_ic
     
-    def get_accuracy(self, outputs, targets):#, match1ok=False):
+    def get_accuracy(self, outputs, targets, main_question):#, match1ok=False):
         """
         args
         - outputs: str          or list of str.         shape: [bsz]
         - targets: list of str  or list of list of str. shape: [bsz, 10]
         """
+        # eval_chatgpt
+        if hasattr(self, "eval_chatgpt") and hasattr(self, "client"):
+            instance = {
+                "main_question": main_question,
+                "outputs": outputs,
+                "targets": targets
+            }
+            for saved_response in self.response_list:
+                if saved_response["main_question"] == main_question and saved_response["outputs"] == outputs and saved_response["targets"] == targets:
+                    response_dict = {
+                        "pred": saved_response["pred"],
+                        "score": saved_response["score"]
+                    }
+                    return response_dict["pred"]
+            else:
+                response_dict = self.get_openai_eval_response(pred_answer=outputs, gt_answer=targets, main_question=main_question)
+                self.response_list.append({
+                    "main_question": main_question,
+                    "outputs": outputs,
+                    "targets": targets,
+                    "pred": response_dict["pred"],
+                    "score": response_dict["score"]
+                })
+                return response_dict["pred"]
         
         def _get_acc(out, target):
             if self.data_type == "videos": # False: #
@@ -225,31 +297,6 @@ class BaseDataset(Dataset):
                 target = str(target).lower()
                 return 1.0 if out == target else 0.0
             
-            if self.vqa_acc:
-                return out.lower() in [t.lower() for t in target]
-                # if match1ok:
-                #     return out in target
-                
-                # num_match = sum([out == t for t in target])
-                # return min(1.0, num_match / 3.0)
-            elif self.data_type == "images":
-                if isinstance(target, list):
-                    return 1.0 if out.lower() in [t.lower() for t in target] else 0.0
-                    # 리스트에서 최빈값 찾기 
-                    # target = max(set(target), key=target.count)
-                # print('out    : ', out)
-                # print('target : ', target)
-                else:
-                    return 1.0 if out.lower() == target.lower() else 0.0
-            else: # self.data_type == "videos"
-                if type(out) == str:
-                    if len(out) == 1:
-                        out = '(' + out + ')'
-                    elif len(out) > 3 and out[0] == '(':
-                        out = out[:3]
-                    if '0' <= out[1] <= '4':
-                        out = '(' + chr(ord(out[1]) + 17) + ')'
-                return 1.0 if out == target else 0.0
             
         if not isinstance(outputs, list):# isinstance(outputs, (str, int)):
             acc = _get_acc(outputs, targets)
@@ -333,6 +380,7 @@ def get_text_input(
         ret = []
         for main_question, candidate_list in zip(main_questions, candidate_lists):
             if candidate_list is None: # open-ended
+                # prompt = prompt.replace("Choices:\n{choices}\nAnswer: The answer is ", "Short answer: ")
                 prompt = prompt.replace("Choices:\n{choices}\n", "")
                 ret.append(prompt.format(main_question=main_question.rstrip('?')))
             else:                      # multi-choice
@@ -361,6 +409,7 @@ def get_text_input(
                 sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
                 
             if candidate_list is None: # open-ended
+                # prompt = prompt.replace("Choices:\n{choices}\nAnswer: The answer is ", "Short answer: ")
                 prompt = prompt.replace("Choices:\n{choices}\n", "")
                 ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas))
             else:                      # multi-choice
