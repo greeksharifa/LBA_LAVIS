@@ -135,7 +135,7 @@ class VQAIntrospectDataset(BaseDataset):
         reasoning_answer_most_common = ann["reasoning_answer_most_common"]
         
         
-        if self.gt_sub_qa == "no":
+        if getattr(self, "gt_sub_qa", "no") == "no":
             sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
             if sub_qa_list is None:
                 sub_questions = None
