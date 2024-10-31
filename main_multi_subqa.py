@@ -867,7 +867,7 @@ Answer: The answer is (A)\n"""
             
             visualize(results, dataset, cfg, output_dir, total_base_match)
                 
-    
+    print('completed in ', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 if __name__ == '__main__':
     main()

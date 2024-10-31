@@ -240,7 +240,7 @@ class BaseDataset(Dataset):
                 e_ic = 0.
         return e_cr, e_ic
     
-    def get_accuracy(self, outputs, targets, main_question):#, match1ok=False):
+    def get_accuracy(self, outputs, targets, main_question=None):#, match1ok=False):
         """
         args
         - outputs: str          or list of str.         shape: [bsz]
