@@ -1,6 +1,6 @@
 import logging
 import argparse
-import os
+import os, shutil
 import json
 from omegaconf import OmegaConf
 from tqdm import tqdm
@@ -559,7 +559,8 @@ Answer: The answer is (A)\n"""
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
         print(f'results saved at {result_path}')
-
+        shutil.rmtree(os.path.join(output_dir, "files"))
+        print('temp files removed:', os.path.join(output_dir, "files"))
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
         
