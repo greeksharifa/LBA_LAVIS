@@ -255,13 +255,30 @@ def main():
         prompt_subqa_vqaintrospect.append(prompt)
     # pprint(prompt_subqa_vqaintrospect, width=300)
     
-    temp_dir = f"temp/files/{cfg.datasets_cfg.dataset_name}/{cfg.runner_cfg.sub_mode}/"
+    if "Qwen" in cfg.runner_cfg.recomposer_name:
+        model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+    else:
+        model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
+    
+    temp_dir = f"temp/files/{cfg.datasets_cfg.dataset_name}/{model_tag}/{cfg.runner_cfg.sub_mode}/"
     os.makedirs(temp_dir, exist_ok=True)
     
     results = {}
     for data_iter_step, batch in enumerate(tqdm(dataloader)):
         if data_iter_step < args.start or data_iter_step >= args.end:
             continue
+        
+        # if all question_id saved in output_dir/files/questionid.json, skip
+        for question_id in batch['question_id']:
+            saved_path = os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{question_id}.json")
+            if not os.path.exists(saved_path):
+                break
+            result = json.load(open(saved_path))
+            results[question_id] = result
+        else:
+            continue
+    
+        
         if os.path.exists(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json")):
             batch_result = json.load(open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "r"))
             results.update(batch_result)
@@ -480,7 +497,9 @@ def main():
                     #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
                     batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
                 
-        json.dump(batch_result, open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{data_iter_step}.json"), "w"), indent=4)
+        
+        for k, v in batch_result.items():
+            json.dump(v, open(os.path.join(temp_dir, f"{cfg.datasets_cfg.dataset_name}_{k}.json"), "w"), indent=4)
         results.update(batch_result)
         
         if data_iter_step < 1:
