@@ -12,10 +12,10 @@ datasets:
     val:
       - ActivityNetQA/activitynet-qa/dataset/val_q.json
       - ActivityNetQA/activitynet-qa/dataset/val_a.json
-      # - ActivityNetQA/activitynet-qa/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
-      # - ActivityNetQA/activitynet-qa//sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
-      # - ActivityNetQA/activitynet-qa//sub_qas_val_chatgpt.json # created by gpt
-      # - ActivityNetQA/activitynet-qa//sub_qas_val_xl.json # created by xl
-      # - ActivityNetQA/activitynet-qa//sub_qas_val_xl_Ktype.json # created by xl, Ktype
+      - ActivityNetQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      # - ActivityNetQA//sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
+      # - ActivityNetQA//sub_qas_val_chatgpt.json # created by gpt
+      # - ActivityNetQA//sub_qas_val_xl.json # created by xl
+      # - ActivityNetQA//sub_qas_val_xl_Ktype.json # created by xl, Ktype
   
   vis_root: ActivityNetQA/video/

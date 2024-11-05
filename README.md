@@ -63,14 +63,14 @@ out['confidence'] = torch.exp(pred_logits_qa[:, 0]).cpu().tolist()
 
 
 # image baseline
-CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
+CUDA_VISIBLE_DEVICES=5 python main_multi_subqa.py --verbose --options datasets.dataset_name="AOKVQA" runner.batch_size=32 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.num_sub_qa_generate=5runner.num_sub_qa_select=1 
 
 
 # video baseline
-CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=False runner.threshold_lba=False runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
+CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="VLEP" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True runner.num_sub_qa_generate=5 runner.num_sub_qa_select=1 
 
 # sevila
-CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=32 runner.batch_size=6 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=True runner.vision_supple=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
+CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=32 runner.batch_size=6 runner.recomposer_name="sevila" datasets.num_data=-1 runner.select_high_confidence=True runner.train_recomposer_examplar=True runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
 
 # video_llava
 CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=4 runner.batch_size=8 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True use_pre_generated_sub_q=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
