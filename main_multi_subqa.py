@@ -74,10 +74,11 @@ def main():
         args.cfg_path = os.path.join(cfg.runner_cfg.output_dir, 'config.yaml')
         cfg = Config(args)
     os.environ['HF_HOME'] = cfg.runner_cfg.HF_HOME
-    if args.eval_chatgpt and not cfg.runner_cfg.visualize:
-        raise ValueError("eval_chatgpt is only available in visualize mode.")
-    if args.eval_chatgpt and not cfg.datasets_cfg.open_ended:
-        raise ValueError("eval_chatgpt is only available in open-ended dataset.")
+    if args.eval_chatgpt:
+        if not cfg.runner_cfg.visualize:
+            raise ValueError("eval_chatgpt is only available in visualize mode.")
+        if not cfg.datasets_cfg.open_ended:
+            raise ValueError("eval_chatgpt is only available in open-ended dataset.")
     # print('cfg:\n', cfg._convert_node_to_json(cfg.config), sep='')
 
     s = datetime.now()    
@@ -139,6 +140,9 @@ def main():
     dataset = load_dataset(cfg.datasets_cfg, n_supple=n_supple, ann_paths=ann_paths, **args.__dict__, output_dir=output_dir)
     dataloader = DataLoader(dataset, batch_size=cfg.runner_cfg.batch_size,
                             shuffle=False, collate_fn=dataset.collater)
+    
+    if args.eval_chatgpt:
+        dataset.create_openai_client()
     
     
     if not cfg.runner_cfg.visualize:
@@ -788,11 +792,18 @@ Answer: The answer is (A)\n"""
                 result_path = os.path.join(output_dir, 'results_base.json')
                 _loaded_results = json.load(open(result_path, 'r'))
                 print('load results from:', result_path)
+
+                # _loaded_results = _loaded_results[:1000]
+                # len print
+                print(f'len(_loaded_results): {len(_loaded_results)}')
+                
+                # if args.eval_chatgpt:
+                #     eval_chatgpt_results = json.load(open(os.path.join(output_dir, 'eval_chatgpt_results.json'), 'r'))
                 
                 total_base_match, total_cnt = 0, 0
                 
-                for result in _loaded_results:
-                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'])
+                for result in tqdm(_loaded_results):
+                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
                     total_base_match += acc_base
                     total_cnt += 1
                     
@@ -803,7 +814,9 @@ Answer: The answer is (A)\n"""
                         # max_confidence_lba = max(result['confidences_lba_list'])
                         # idx_max_confidence_lba = result['confidences_lba_list'].index(max_confidence_lba)
                         # text_output_lba = result['text_outputs_lba_list'][idx_max_confidence_lba]
+                    
                         from utils.llava_answer_eval import map_prediction_to_answer
+                        
                         filtered_texts, filtered_confs = [], []
                         for text_output_lba, confidence_lba in zip(result['text_outputs_lba_list'], result['confidences_lba_list']):
                             if map_prediction_to_answer(text_output_lba):
@@ -818,6 +831,39 @@ Answer: The answer is (A)\n"""
                         idx_max_confidence_lba = filtered_confs[:_num_pick_subq].index(max_confidence_lba)
                         text_output_lba = filtered_texts[:_num_pick_subq][idx_max_confidence_lba]
                         
+                        '''
+                        filtered_texts, filtered_confs = [], []
+                        if args.eval_chatgpt:
+                            filtered_eval_chatgpt_texts = []
+                        
+                        for i in range(len(result['text_outputs_lba_list'])):
+                            if map_prediction_to_answer(text_output_lba):
+                                filtered_texts.append(result['text_outputs_lba_list'][i])
+                                filtered_confs.append(result['confidences_lba_list'][i])
+                                if args.eval_chatgpt:
+                                    filtered_eval_chatgpt_texts.append(eval_chatgpt_results[result['question_id']]['lba'][i])
+                        
+                        
+                        if len(filtered_texts) == 0:
+                            filtered_texts = result['text_outputs_lba_list']
+                            filtered_confs = result['confidences_lba_list']
+                            if args.eval_chatgpt:
+                                filtered_eval_chatgpt_texts = eval_chatgpt_results[result['question_id']]['lba']
+                        
+                        max_confidence_lba = max(filtered_confs[:_num_pick_subq])
+                        idx_max_confidence_lba = filtered_confs[:_num_pick_subq].index(max_confidence_lba)
+                        text_output_lba = filtered_texts[:_num_pick_subq][idx_max_confidence_lba]
+                        if args.eval_chatgpt:
+                            chatgpt_result = filtered_eval_chatgpt_texts[:_num_pick_subq][idx_max_confidence_lba]
+                            if chatgpt_result == "yes":
+                                text_output_lba = result["gt_ans"]
+                            else:
+                                pass # text_output_lba = "None"
+                            if eval_chatgpt_results[result['question_id']]['base'] == "yes":
+                                result['text_output_base'] = result["gt_ans"]
+                            else:
+                                pass # result['text_output_base'] = "None"
+                        '''
                         # max_confidence_lba = max(result['confidences_lba_list'][:_num_pick_subq])
                         # idx_max_confidence_lba = result['confidences_lba_list'][:_num_pick_subq].index(max_confidence_lba)
                         # text_output_lba = result['text_outputs_lba_list'][:_num_pick_subq][idx_max_confidence_lba]
@@ -867,6 +913,10 @@ Answer: The answer is (A)\n"""
             results, total_base_match, total_cnt = _load_results(num_pick_subq)    
             
             visualize(results, dataset, cfg, output_dir, total_base_match)
+        
+        if args.eval_chatgpt:
+            save_path = dataset.save_response_list()
+            print('chatgpt eval result saved at (response_list):', save_path)
                 
     print('completed in ', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 

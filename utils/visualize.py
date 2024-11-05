@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 from pprint import pprint
 from collections import Counter, OrderedDict
+from tqdm import tqdm
 
 import numpy as np
 import pandas as pd
@@ -91,7 +92,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
-    for i, result in enumerate(results):
+    for i, result in enumerate(tqdm(results)):
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
         acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=result['main_question'])
         acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])

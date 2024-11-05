@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 import pickle
+from pprint import pprint
 
 from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
@@ -152,10 +153,39 @@ class BaseDataset(Dataset):
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
 
     def create_openai_client(self):
-        api_key = json.load(open("api_key.json", "r"))["LBA"]
+        api_key = json.load(open("temp/api_key.json", "r"))["LBA"]
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key)
-        self.response_list = json.load(open(os.path.join(self.output_dir, "response_list.json"), 'r'))
+        
+        """
+        self.response_list:
+        [
+            {
+                "main_question": ...,
+                "outputs": ...,
+                "targets": ...,
+                "pred": "yes" or "no",
+                "score": 0.0 ~ 5.0
+            },
+            {
+                "main_question": "what are three people sitting on?",
+                "outputs": "The three people in the video are sitting on a couch.",
+                "targets": "couch",
+                "pred": "yes",
+                "score": 5
+            }
+        ]
+        """
+        path = os.path.join(self.output_dir, "response_list.json")
+        if os.path.exists(path):
+            self.response_list = json.load(open(path, 'r'))
+        else:
+            self.response_list = []
+            
+    def save_response_list(self):
+        save_path = os.path.join(self.output_dir, "response_list.json")
+        json.dump(self.response_list, open(save_path, 'w'), indent=4)
+        return save_path
     
     def get_openai_eval_response(self, pred_answer, gt_answer, main_question):
         message = [
@@ -193,7 +223,8 @@ class BaseDataset(Dataset):
             presence_penalty=0,
             stop=None
         )
-        response_message = completion.choices[0].message["content"]
+        # import pdb; pdb.set_trace()
+        response_message = completion.choices[0].message.content
         response_dict = ast.literal_eval(response_message)
         
         return response_dict
@@ -248,19 +279,19 @@ class BaseDataset(Dataset):
         """
         # eval_chatgpt
         if hasattr(self, "eval_chatgpt") and hasattr(self, "client"):
-            instance = {
-                "main_question": main_question,
-                "outputs": outputs,
-                "targets": targets
-            }
+            
             for saved_response in self.response_list:
                 if saved_response["main_question"] == main_question and saved_response["outputs"] == outputs and saved_response["targets"] == targets:
                     response_dict = {
                         "pred": saved_response["pred"],
                         "score": saved_response["score"]
                     }
-                    return response_dict["pred"]
+                    break
+                    # return response_dict["pred"]
             else:
+                # print('start', '-' * 80)
+                # pprint(saved_response, width=300)
+                # print('end ', '-' * 80)
                 response_dict = self.get_openai_eval_response(pred_answer=outputs, gt_answer=targets, main_question=main_question)
                 self.response_list.append({
                     "main_question": main_question,
@@ -269,7 +300,11 @@ class BaseDataset(Dataset):
                     "pred": response_dict["pred"],
                     "score": response_dict["score"]
                 })
-                return response_dict["pred"]
+                # return response_dict["pred"]
+            if response_dict["pred"] == "yes":
+                return 1.0
+            else:
+                return 0.0
         
         def _get_acc(out, target):
             if self.data_type == "videos": # False: #
@@ -311,6 +346,7 @@ class BaseDataset(Dataset):
     
     
 def get_train_examplar(datasets_cfg):
+    
     train_dataset = load_dataset(datasets_cfg, split='train')
     example = train_dataset[0]
     
