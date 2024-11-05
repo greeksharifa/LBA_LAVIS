@@ -793,7 +793,8 @@ Answer: The answer is (A)\n"""
                 _loaded_results = json.load(open(result_path, 'r'))
                 print('load results from:', result_path)
 
-                # _loaded_results = _loaded_results[:1000]
+                if cfg.datasets_cfg.num_data != -1:
+                    _loaded_results = _loaded_results[:cfg.datasets_cfg.num_data]
                 # len print
                 print(f'len(_loaded_results): {len(_loaded_results)}')
                 
@@ -885,6 +886,9 @@ Answer: The answer is (A)\n"""
             for num_pick_subq in range(1, cfg.runner_cfg.num_sub_qa_generate+1):
                 cfg.runner_cfg.num_pick_subq = num_pick_subq
                 results, total_base_match, total_cnt = _load_results(num_pick_subq)
+                if args.eval_chatgpt:
+                    save_path = dataset.save_response_list()
+                    print('chatgpt eval result saved at (response_list):', save_path)
                 
                 metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
                 if float(metrics["max_acc_by_tau    "].split('%')[0]) > float(best_metrics["max_acc_by_tau    "].split('%')[0]):
@@ -914,9 +918,9 @@ Answer: The answer is (A)\n"""
             
             visualize(results, dataset, cfg, output_dir, total_base_match)
         
-        if args.eval_chatgpt:
-            save_path = dataset.save_response_list()
-            print('chatgpt eval result saved at (response_list):', save_path)
+            if args.eval_chatgpt:
+                save_path = dataset.save_response_list()
+                print('chatgpt eval result saved at (response_list):', save_path)
                 
     print('completed in ', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
