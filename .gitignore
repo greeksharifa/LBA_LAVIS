@@ -1,6 +1,7 @@
 # submodules
 Ask-Anything/
 flipped_vqa/
+llava
 
 # demo / temp
 temp.py

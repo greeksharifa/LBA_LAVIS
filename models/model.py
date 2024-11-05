@@ -281,6 +281,41 @@ class Recomposer(nn.Module):
                 device_map="auto",
                 attn_implementation=None,
             )
+        
+        elif "LLaVA-NeXT-Video" in model_name:
+            from transformers import LlavaNextVideoProcessor, LlavaNextVideoForConditionalGeneration
+            self.processor = LlavaNextVideoProcessor.from_pretrained(model_name, cache_dir=cache_dir)
+            self.model = LlavaNextVideoForConditionalGeneration.from_pretrained(
+                model_name, 
+                torch_dtype=torch.float16, 
+                low_cpu_mem_usage=True, 
+                cache_dir=cache_dir, 
+                device_map=device_map,
+            )
+        
+        elif "LLaVA-Video" in model_name: # TODO
+            from llava.model.builder import load_pretrained_model
+            from llava.mm_utils import get_model_name_from_path, process_images, tokenizer_image_token
+            from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, IGNORE_INDEX
+            from llava.conversation import conv_templates, SeparatorStyle
+
+            model_name = "lmms-lab/LLaVA-Video-7B-Qwen2"
+            # cache_dir = "/model/llava/"
+            
+            self.tokenizer, self.model, self.image_processor, self.max_length = load_pretrained_model(
+                model_name, 
+                None, 
+                "llava_qwen", 
+                torch_dtype="bfloat16", 
+                device_map=device_map,
+                cache_dir=cache_dir,
+                attn_implementation = "flash_attention_2",
+                # attn_implementation=None,
+            )  # Add any other thing you want to pass in llava_model_args
+            self.model.eval()
+            
+            
+        
         elif "VideoLLaMA" in model_name:
             import sys
             sys.path.append('./VideoLLaMA2/')
@@ -379,6 +414,59 @@ class Recomposer(nn.Module):
             # import pdb; pdb.set_trace()
         
             pass
+        
+        elif "LLaVA-NeXT-Video" in self.model_name: # TODO
+            if len(vision) != 1:
+                raise ValueError("LLaVA-NeXT-Video model only supports single video input.")
+            conversation = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": text_inputs[0]},
+                        {"type": "video"},
+                        ],
+                },
+            ]
+            prompt = self.processor.apply_chat_template(conversation, add_generation_prompt=True)
+            
+            video_batch = [np.array(v) for v in vision][0]
+            
+            inputs = self.processor(text=prompt, videos=video_batch, padding=True, return_tensors="pt")
+            
+            
+            if self.cfg.runner_cfg.device_map != "auto":
+                inputs = inputs.to(self.model.device) # "cuda"
+            else:
+                inputs = inputs.to(dtype=torch.float16)
+                
+            
+            generation_params = {
+                "do_sample": False,
+                "min_new_tokens": 1,
+                "max_new_tokens": max_new_tokens,
+                "return_dict_in_generate": True,
+                "output_scores": True,
+                # "clean_up_tokenization_spaces": True,
+            }
+            if beam_search:
+                generation_params["num_beams"] = 5
+                generation_params["length_penalty"] = -1
+            else:
+                generation_params["top_p"] = 0.8
+            
+            outputs = self.model.generate(
+                **inputs,
+                **generation_params
+            )
+            
+            output_text = self.processor.decode(outputs[0][2:], skip_special_tokens=True)
+            output_text = output_text.split('ASSISTANT: ')[-1]
+                
+            output_scores = outputs.sequences_scores
+                
+        elif "LLaVA-Video" in self.model_name: # TODO
+            pass
+        
         elif "Qwen" in self.model_name:
             from qwen_vl_utils import process_vision_info
             

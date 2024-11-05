@@ -247,7 +247,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # DramaQA: 3889 { 'Level 2': 2698, 'Level 3': 1189}
         for i, result in enumerate(results):
             
-            question_type = result['type']# if 'type' in results[0] else result["question_id"].split('_')[0]
+            question_type = str(result['type'])# if 'type' in results[0] else result["question_id"].split('_')[0]
             if cfg.datasets_cfg.dataset_name == 'NExTQA':
                 question_type = question_type[0]
             

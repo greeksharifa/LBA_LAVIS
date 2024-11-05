@@ -4,6 +4,7 @@ import json
 import nltk
 from tqdm import tqdm
 from pprint import pprint
+import numpy as np
 
 import torch
 from torch.utils.data import DataLoader
@@ -51,26 +52,41 @@ def get_input(model_name, data_type, processor, device, vision_batch, text_input
             from utils.utils import ndarrays_to_base64
             
             messages_batch = []
+            # texts_batch = []
             
             # import pdb; pdb.set_trace()
             for video, text_input in zip(vision_batch, text_inputs):
-                base64_images = ndarrays_to_base64(video)
-                image_content = [{"type": "image", "image": "data:image;base64," + base64_images[i]} for i in range(len(video))]
-                messages = [
-                    # {"role": "system", "content": "You are a helpful assistant."},
-                    {
-                        "role": "user",
-                        "content": image_content + [{"type": "text", "text": text_input}],
-                    }
-                ]
+                base64_frames = ndarrays_to_base64(video, add_prefix=True)
+                messages = [{
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "video",
+                            "video": base64_frames,
+                        },
+                        {"type": "text", "text": text_input},
+                    ],
+                }]
+                # base64_images = ndarrays_to_base64(video)
+                # image_content = [{"type": "image", "image": "data:image;base64," + base64_images[i]} for i in range(len(video))]
+                # messages = [
+                #     # {"role": "system", "content": "You are a helpful assistant."},
+                #     {
+                #         "role": "user",
+                #         "content": image_content + [{"type": "text", "text": text_input}],
+                #     }
+                # ]
                 messages_batch.append(messages)
+                # texts_batch.append(processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True))
+                
             
             texts_batch = [
                 processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
                 for messages in messages_batch
             ]
             
-            image_inputs, video_inputs = process_vision_info(messages)
+            image_inputs, video_inputs = process_vision_info(messages_batch)
+            # import pdb; pdb.set_trace()
             inputs = processor(
                 text=texts_batch,
                 images=image_inputs,
@@ -78,6 +94,27 @@ def get_input(model_name, data_type, processor, device, vision_batch, text_input
                 padding=True,
                 return_tensors="pt",
             )
+            
+        elif "LLaVA-NeXT-Video" in model_name:
+            conversations = []
+            for video, text_input in zip(vision_batch, text_inputs):
+                conversation = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "video"},
+                            {"type": "text", "text": text_input},
+                        ],
+                    }
+                ]
+                conversations.append(conversation)
+            
+            prompt = processor.apply_chat_template(conversations, add_generation_prompt=True)
+            
+            video_batch = [np.array(v) for v in vision_batch]
+            
+            inputs = processor(text=prompt, videos=video_batch, padding=True, return_tensors="pt")
+            
             
         elif "llama" in model_name:# processor.__class__.__name__:
             messages = []
@@ -104,7 +141,10 @@ def get_input(model_name, data_type, processor, device, vision_batch, text_input
             inputs["pixel_values"] = torch.stack(pixel_values, dim=0)#.to(device)
         # print("input_ids:", inputs["input_ids"].shape, inputs["input_ids"].device, "\tpixel_values:", inputs["pixel_values"].shape, inputs["pixel_values"].device)
         
-    return inputs.to(device)
+    if device == "auto":
+        return inputs
+    else:
+        return inputs.to(device)
 
 
 """
@@ -126,6 +166,9 @@ CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewsh
 # videollama
 CUDA_VISIBLE_DEVICES=2 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
 CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
+
+# "llava-hf/LLaVA-NeXT-Video-7B-hf"
+
 """
 def main():
     N_SUPPLE = 0
@@ -140,7 +183,10 @@ def main():
     # processor_name = "Salesforce/instructblip-flan-t5-xl"
     # model_name = processor_name
     cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split("/")[0])
-    device = "cuda"
+    if torch.cuda.device_count() > 1:
+        device = "auto"
+    else:
+        device = "cuda"
     N = cfg.runner_cfg.num_sub_qa_generate
     if N != 5:
         N_tag = f"_N{N}"
@@ -162,6 +208,18 @@ def main():
         )
         processor = processor[cfg.datasets_cfg.data_type[:-1]]
         pass
+
+    elif "LLaVA-NeXT-Video" in model_name:
+        from transformers import LlavaNextVideoProcessor, LlavaNextVideoForConditionalGeneration
+        processor = LlavaNextVideoProcessor.from_pretrained(model_name, cache_dir=cache_dir)
+        model = LlavaNextVideoForConditionalGeneration.from_pretrained(
+            model_name, 
+            torch_dtype=torch.float16, 
+            low_cpu_mem_usage=True, 
+            cache_dir=cache_dir, 
+            device_map=cfg.runner_cfg.device_map,
+        )
+    
     elif "Qwen" in model_name:
         from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
         from qwen_vl_utils import process_vision_info
@@ -178,6 +236,8 @@ def main():
         processor = AutoProcessor.from_pretrained(
             model_name, # "Qwen/Qwen2-VL-7B-Instruct",
             cache_dir="/model/Qwen/",
+            min_pixels = 256 * 28 * 28,
+            max_pixels = 1280 * 28 * 28,
         )
         
     elif "llama" in model_name:
@@ -256,7 +316,7 @@ def main():
     # pprint(prompt_subqa_vqaintrospect, width=300)
     
     if "Qwen" in cfg.runner_cfg.recomposer_name:
-        model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
+        model_tag = "Qwen2VL" # cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
     else:
         model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
     
@@ -372,6 +432,11 @@ def main():
                     }
                     beam_search = i==0
                     if beam_search:
+                        if "Qwen" in model_name:
+                            model.generation_config.temperature=None
+                            model.generation_config.top_p=None
+                            model.generation_config.top_k=None
+                            generation_params["do_sample"] = False
                         generation_params["num_beams"] = 5
                         generation_params["length_penalty"] = -1
                     else:
@@ -412,6 +477,11 @@ def main():
                         "num_beams" : i+1,
                     }
                     if i != 0:
+                        if "Qwen" in model_name:
+                            model.generation_config.temperature=None
+                            model.generation_config.top_p=None
+                            model.generation_config.top_k=None
+                            generation_params["do_sample"] = False
                         generation_params["length_penalty"] = -1
                         
                     if "VideoLLaMA" in model_name:
@@ -454,6 +524,9 @@ def main():
                     prompt = "Question: {sub_question}? Short answer:"
                 else:
                     prompt = "{sub_question}?"
+                    
+                if "LLaVA-NeXT-Video" in model_name:
+                    sub_questions = [sub_question.split("ASSISTANT: ")[-1] for sub_question in sub_questions]
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
                 if "VideoLLaMA" in model_name:
@@ -473,6 +546,11 @@ def main():
                     "num_beams": 5,
                     "length_penalty": -1
                 }
+                if "Qwen" in model_name:
+                    model.generation_config.temperature=None
+                    model.generation_config.top_p=None
+                    model.generation_config.top_k=None
+                    generation_params["do_sample"] = False
                 
                 if "VideoLLaMA" in model_name:
                     sub_answers, o_score = mm_infer_batch(
@@ -485,6 +563,8 @@ def main():
                         outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
                         
                     sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
+                    if "LLaVA-NeXT-Video" in model_name:
+                        sub_answers = [sub_answer.split("ASSISTANT: ")[-1] for sub_answer in sub_answers]
 
                 # store to results    
                 for b in range(bsz):
