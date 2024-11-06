@@ -176,15 +176,25 @@ class BaseDataset(Dataset):
             }
         ]
         """
-        path = os.path.join(self.output_dir, "response_list.json")
+        path = os.path.join(self.output_dir, "response_df.csv")
         if os.path.exists(path):
-            self.response_list = json.load(open(path, 'r'))
+            self.response_df = pd.read_csv(path) 
+            # self.response_list = json.load(open(path, 'r'))
         else:
-            self.response_list = []
+            required_columns = [
+                "main_question",
+                "outputs",
+                "targets",
+                "pred",
+                "score"
+            ]
+            self.response_df = pd.DataFrame(columns=required_columns)
+            # self.response_list = []
             
     def save_response_list(self):
-        save_path = os.path.join(self.output_dir, "response_list.json")
-        json.dump(self.response_list, open(save_path, 'w'), indent=4)
+        save_path = os.path.join(self.output_dir, "response_df.csv")
+        self.response_df.to_csv(save_path, index=False)
+        # json.dump(self.response_list, open(save_path, 'w'), indent=4)
         return save_path
     
     def get_openai_eval_response(self, pred_answer, gt_answer, main_question):
@@ -279,7 +289,28 @@ class BaseDataset(Dataset):
         """
         # eval_chatgpt
         if hasattr(self, "eval_chatgpt") and hasattr(self, "client"):
+            # Apply the condition to filter the DataFrame
+            matching_row = self.response_df[(self.response_df["main_question"] == main_question) & 
+                            (self.response_df["outputs"] == outputs) & 
+                            (self.response_df["targets"] == targets)]
+            if not matching_row.empty:
+                response_dict = {
+                    "pred": matching_row.iloc[0]["pred"],
+                    "score": matching_row.iloc[0]["score"]
+                }
+            else:
+                response_dict = self.get_openai_eval_response(pred_answer=outputs, gt_answer=targets, main_question=main_question)
+
+                self.response_df = pd.concat([self.response_df, pd.DataFrame([{
+                    "main_question": main_question,
+                    "outputs": outputs,
+                    "targets": targets,
+                    "pred": response_dict["pred"],
+                    "score": response_dict["score"]
+                }])], ignore_index=True)
             
+            
+            '''
             for saved_response in self.response_list:
                 if saved_response["main_question"] == main_question and saved_response["outputs"] == outputs and saved_response["targets"] == targets:
                     response_dict = {
@@ -301,6 +332,8 @@ class BaseDataset(Dataset):
                     "score": response_dict["score"]
                 })
                 # return response_dict["pred"]
+            '''
+            
             if response_dict["pred"] == "yes":
                 return 1.0
             else:

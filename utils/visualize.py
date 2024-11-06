@@ -39,6 +39,20 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     results = get_conf_rank(results, key, H)
     
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
+    
+    # acc_base_cache, acc_lba_cache = [], []
+    # for i, result in enumerate(tqdm(results)):
+    #     acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+    #     acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+    #     acc_base_cache.append(acc_base)
+    #     acc_lba_cache.append(acc_lba)
+    acc_base_list, acc_lba_list = [], []
+    for i, result in enumerate(tqdm(results)):
+        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+        acc_base_list.append(acc_base)
+        acc_lba_list.append(acc_lba)
+    
     if type(cfg.runner_cfg.get("max_conf_gap", None)) == float:# is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap
     else:
@@ -59,9 +73,11 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             for c_idx, conf_gap in enumerate(conf_list):
                 cur_match = total_base_match
                 
-                for i, result in enumerate(results):
-                    acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
-                    acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+                for i, result in enumerate(tqdm(results)):
+                    # acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+                    # acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+                    acc_base = acc_base_list[i]
+                    acc_lba = acc_lba_list[i]
                     
                     if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + conf_gap > result['confidence_lba']: # 높은것만 선택
                         pass
@@ -74,7 +90,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 
                 tau2 = f'{conf_gap:.6g}'
                 max_tau2 = f'{max_conf_gap:.6g}'
-                print(f'\rc_idx: {c_idx:4d} | tau2: {tau2:15s} max_tau2: {max_tau2:15s} | cur_acc: {cur_match / N * 100:.2f} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}', end=' ' * 4)
+                print(f'\033[F\033[F\rc_idx: {c_idx:4d} | tau2: {tau2:15s} max_tau2: {max_tau2:15s} | cur_acc: {cur_match / N * 100:.2f} | acc_base: {total_base_match / N * 100:.2f}, max_acc: {max_match / N * 100:.2f}')#, end=' ' * 4)
     print()
         
     max_match, cur_match, min_match = total_base_match, total_base_match, total_base_match
@@ -82,7 +98,6 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     match_list, baseline_match_list = [cur_match], [cur_match]
     max_arg_confidence = -1e10
     confidence_percentile = 0.
-    acc_base_list, acc_lba_list = [], []
     bins_base = [[] for _ in range(N // M + 1)]
     bins_lba = [[] for _ in range(N // M + 1)]
     heatmap_data = {
@@ -93,11 +108,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
     for i, result in enumerate(tqdm(results)):
-        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+        # acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
+        # acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+        # acc_base_list.append(acc_base)
+        # acc_lba_list.append(acc_lba)
+        acc_base = acc_base_list[i]
+        acc_lba = acc_lba_list[i]
         acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=result['main_question'])
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
-        acc_base_list.append(acc_base)
-        acc_lba_list.append(acc_lba)
         
         bin_key = i // M
         bins_base[bin_key].append(acc_base)

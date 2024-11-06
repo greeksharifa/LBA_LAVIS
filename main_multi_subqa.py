@@ -595,7 +595,7 @@ Answer: The answer is (A)\n"""
                         "gt_ans": r["target"],
                         "text_output_base": r["prediction"],
                         "confidence_base": r["confidence"],
-                        "text_output_lba_list": [],
+                        "text_outputs_lba_list": [],
                         "confidence_lba_list": [],
                     }
                     total_base_match += dataset.get_accuracy(r['prediction'], r['target'])
@@ -604,14 +604,14 @@ Answer: The answer is (A)\n"""
                 for i in range(0, _num_pick_subq):
                     results_subqa = json.load(open(f'SeViLA/lavis/result_{dataset_name}_{subqa_type}/{i}/result/val_epochbest.json'))
                     for r in results_subqa:
-                        _results[r['qid']][f'text_output_lba_list'].append(r["prediction"])
+                        _results[r['qid']][f'text_outputs_lba_list'].append(r["prediction"])
                         _results[r['qid']][f'confidence_lba_list'].append(r["confidence"])
                 
                 _loaded_results = []
                 for k, v in _results.items():
                     max_confidence_lba = max(v['confidence_lba_list'])
                     idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
-                    text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                    text_output_lba = v['text_outputs_lba_list'][idx_max_confidence_lba]
                     r = v
                     r['text_output_lba'] = text_output_lba
                     r['confidence_lba'] = max_confidence_lba
@@ -650,11 +650,12 @@ Answer: The answer is (A)\n"""
                     gt_ans = '(' + chr(int(row["answer_number"]) + ord('A')) + ')'
                     _results[row['question_id']] = {
                         "question_id": str(row["question_id"]),
+                        "main_question": row["question"],
                         # "type": row["question_type"],
                         "gt_ans": gt_ans, #row["answer"],
                         "text_output_base": pred_base,
                         "confidence_base": row["confidence_score"],
-                        "text_output_lba_list": [],
+                        "text_outputs_lba_list": [],
                         "confidence_lba_list": [],
                     }
                     if "question_type" in row:
@@ -676,14 +677,14 @@ Answer: The answer is (A)\n"""
                 for i in range(0, _num_pick_subq):
                     results_subqa = pd.read_csv(f'output/IGVLM/result_{dataset_name}_{subqa_type}/{i}/ffn=6/result.csv', index_col=0)
                     for idx, row in results_subqa.iterrows():
-                        _results[row['question_id']][f'text_output_lba_list'].append(map_prediction_to_answer_v2(row))
+                        _results[row['question_id']][f'text_outputs_lba_list'].append(map_prediction_to_answer_v2(row))
                         _results[row['question_id']][f'confidence_lba_list'].append(row["confidence_score"])
                 
                 _loaded_results = []
                 for k, v in _results.items():
                     max_confidence_lba = max(v['confidence_lba_list'])
                     idx_max_confidence_lba = v['confidence_lba_list'].index(max_confidence_lba)
-                    text_output_lba = v['text_output_lba_list'][idx_max_confidence_lba]
+                    text_output_lba = v['text_outputs_lba_list'][idx_max_confidence_lba]
                     r = v
                     r['text_output_lba'] = text_output_lba
                     r['confidence_lba'] = max_confidence_lba
@@ -886,15 +887,16 @@ Answer: The answer is (A)\n"""
             for num_pick_subq in range(1, cfg.runner_cfg.num_sub_qa_generate+1):
                 cfg.runner_cfg.num_pick_subq = num_pick_subq
                 results, total_base_match, total_cnt = _load_results(num_pick_subq)
-                if args.eval_chatgpt:
-                    save_path = dataset.save_response_list()
-                    print('chatgpt eval result saved at (response_list):', save_path)
                 
                 metrics = visualize(results, dataset, cfg, output_dir, total_base_match)
                 if float(metrics["max_acc_by_tau    "].split('%')[0]) > float(best_metrics["max_acc_by_tau    "].split('%')[0]):
                     best_metrics = metrics
                     best_num_pick_subq = num_pick_subq
                 metrics_dict[num_pick_subq] = metrics
+                
+                if args.eval_chatgpt:
+                    save_path = dataset.save_response_list()
+                    print('chatgpt eval result saved at (response_list):', save_path)
             
             df = pd.DataFrame.from_dict(metrics_dict, orient='index')
 
