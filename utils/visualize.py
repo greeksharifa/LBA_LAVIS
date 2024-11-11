@@ -48,8 +48,9 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     #     acc_lba_cache.append(acc_lba)
     acc_base_list, acc_lba_list = [], []
     for i, result in enumerate(tqdm(results)):
-        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
-        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
+        main_question = result['main_question'] if 'main_question' in result else None
+        acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=main_question)
+        acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=main_question)
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
     
@@ -83,7 +84,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                         pass
                     else: # 무조건 lba 선택
                         cur_match += acc_lba - acc_base
-                    
+
                     if cur_match > max_match:
                         max_match = cur_match
                         max_conf_gap = conf_gap
@@ -114,17 +115,25 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         # acc_lba_list.append(acc_lba)
         acc_base = acc_base_list[i]
         acc_lba = acc_lba_list[i]
-        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=result['main_question'])
+        main_question = result['main_question'] if 'main_question' in result else None
+        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=main_question)
         
         bin_key = i // M
         bins_base[bin_key].append(acc_base)
         bins_lba[bin_key].append(acc_lba)
         
-        if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + max_conf_gap > result['confidence_lba']: # 높은것만 선택
-            pass
-        else: # 무조건 lba 선택
-            cur_match += acc_lba - acc_base
         
+        if cfg.runner_cfg.get("select_low_confidence", False): # conf가 낮은것만 선택하는 ablation
+            if result['confidence_base'] < result['confidence_lba']: 
+                pass # base conf가 낮으면 base 선택
+            else:
+                cur_match += acc_lba - acc_base # lba conf가 낮으면 lba 선택
+        else:
+            if cfg.runner_cfg.select_high_confidence and result['confidence_base'] + max_conf_gap > result['confidence_lba']: # 높은것만 선택
+                pass
+            else: # 무조건 lba 선택
+                cur_match += acc_lba - acc_base
+            
         match_list.append(cur_match)
         min_match = min(min_match, cur_match)
         
@@ -284,7 +293,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 predict = result['text_output_base']
             # predict = result['text_output_lba']           # irrelevent GT sub_qa
             
-            acc = dataset.get_accuracy(predict, target, main_question=result['main_question'])
+            main_question = result['main_question'] if 'main_question' in result else None
+            acc = dataset.get_accuracy(predict, target, main_question=main_question)
             if question_type not in match_per_type:
                 match_per_type[question_type] = 0
                 total_per_type[question_type] = 0

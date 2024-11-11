@@ -14,6 +14,16 @@ except:
 
 class VQAIntrospectDataset(BaseDataset):
     """
+    # raw data
+    {'image_id': 370475,
+    'introspect': [{'pred_q_type': 'invalid', 'sub_qa': [{'sub_answer': 'yes', 'sub_question': 'are the skiers ski tips facing left?'}]},
+                    {'pred_q_type': 'perception', 'sub_qa': [{'sub_answer': 'yes', 'sub_question': 'is the higher part of  the hill behind the person?'}]},
+                    {'pred_q_type': 'invalid', 'sub_qa': [{'sub_answer': 'yes', 'sub_question': 'are the skiers ski tips facing left?'}]},
+                    {'pred_q_type': 'perception', 'sub_qa': [{'sub_answer': 'yes', 'sub_question': 'is the higher part of  the hill behind the person?'}]}],
+    'reasoning_answer_most_common': 'down',
+    'reasoning_question': 'is the skier going up, down, or moving laterally?'
+    }
+    # getitem
     {   
         'gt_ans': ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes'],
         'gt_sub_qas': [('is there sand and whitewater?', 'yes'), ('are the woman on the horses near to the sea?', 'yes')],

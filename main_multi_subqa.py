@@ -647,7 +647,14 @@ Answer: The answer is (A)\n"""
                 
                 for idx, row in results_base.iterrows():
                     pred_base = map_prediction_to_answer_v2(row)
-                    gt_ans = '(' + chr(int(row["answer_number"]) + ord('A')) + ')'
+                    # others
+                    # gt_ans = '(' + chr(int(row["answer_number"]) + ord('A')) + ')'
+                    # EgoSchema
+                    for i in range(5):
+                        if row[f"a{i}"] == row["answer"]:
+                            gt_ans = '(' + chr(i + ord('A')) + ')'
+                            break
+                        
                     _results[row['question_id']] = {
                         "question_id": str(row["question_id"]),
                         "main_question": row["question"],
@@ -828,8 +835,13 @@ Answer: The answer is (A)\n"""
                         if len(filtered_texts) == 0:
                             filtered_texts = result['text_outputs_lba_list']
                             filtered_confs = result['confidences_lba_list']
+                            
+                        def _find_kth_largest_sort(nums, k=1):
+                            nums.sort(reverse=True)
+                            return nums[k-1]
                         
-                        max_confidence_lba = max(filtered_confs[:_num_pick_subq])
+                        # max_confidence_lba = max(filtered_confs[:_num_pick_subq])
+                        max_confidence_lba = _find_kth_largest_sort(filtered_confs[:_num_pick_subq], cfg.runner_cfg.get("kth_largest", 1))
                         idx_max_confidence_lba = filtered_confs[:_num_pick_subq].index(max_confidence_lba)
                         text_output_lba = filtered_texts[:_num_pick_subq][idx_max_confidence_lba]
                         
