@@ -108,6 +108,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     }
     scatter_data = [] # pd.DataFrame(columns=['conf_base', 'conf_lba', 'acc_change'])
     
+    only_select_lba = total_base_match
     for i, result in enumerate(tqdm(results)):
         # acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
         # acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=result['main_question'])
@@ -116,7 +117,7 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         acc_base = acc_base_list[i]
         acc_lba = acc_lba_list[i]
         main_question = result['main_question'] if 'main_question' in result else None
-        acc_base_kh = dataset.get_accuracy(result['text_outputs_lba_list'][0], result['gt_ans'], main_question=main_question)
+        acc_base_kh = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=main_question)
         
         bin_key = i // M
         bins_base[bin_key].append(acc_base)
@@ -133,6 +134,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
                 pass
             else: # 무조건 lba 선택
                 cur_match += acc_lba - acc_base
+        # cur_match += acc_lba - acc_base # for sel=5. pick=gen=1
+        only_select_lba += acc_lba - acc_base
             
         match_list.append(cur_match)
         min_match = min(min_match, cur_match)
@@ -319,7 +322,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         "E_CR              ": f'{e_cr:.2f}%',
         "E_IC              ": f'{e_ic:.2f}%',
         # "min_match            ": f'{min_match / N * 100:.2f}%',
-        "final_acc         ": f'{final_acc_list[-1] * 100:.2f}%',
+        # "final_acc         ": f'{final_acc_list[-1] * 100:.2f}%',
+        "only_lba_acc      ": f'{only_select_lba / N * 100:.2f}%',
     })
     
     print("metrics:", json.dumps(metrics, indent=4))
