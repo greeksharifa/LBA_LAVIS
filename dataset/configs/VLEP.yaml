@@ -9,7 +9,8 @@ datasets:
       - VLEP/sevila_style/train.json
     val:
       - VLEP/sevila_style/val.json
-      - VLEP/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      - VLEP/sub_qas_val_xl_beam_and_greedy_N1.json
+      # - VLEP/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - VLEP/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - VLEP/sub_qas_val_chatgpt.json # created by gpt
       # - VLEP/sub_qas_val_xl.json # created by xl

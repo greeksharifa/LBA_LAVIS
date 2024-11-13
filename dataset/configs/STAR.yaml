@@ -9,7 +9,8 @@ datasets:
       - STAR/sevila_style/train.json
     val:
       - STAR/sevila_style/val.json
-      - STAR/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      - STAR/sub_qas_val_xl_beam_and_greedy_N1.json
+      # - STAR/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - STAR/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - STAR/sub_qas_val_chatgpt.json # created by gpt
       # - STAR/sub_qas_val_xl.json # created by xl
