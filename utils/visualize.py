@@ -295,12 +295,13 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             else:
                 predict = result['text_output_base']
             # predict = result['text_output_lba']           # irrelevent GT sub_qa
+            # print(i, result['type'], result['confidence_base'], result['confidence_lba'], result['gt_ans'], predict)
             
             main_question = result['main_question'] if 'main_question' in result else None
             acc = dataset.get_accuracy(predict, target, main_question=main_question)
             if question_type not in match_per_type:
-                match_per_type[question_type] = 0
-                total_per_type[question_type] = 0
+                match_per_type[question_type] = 1
+                total_per_type[question_type] = 1
             else:
                 match_per_type[question_type] += acc
                 total_per_type[question_type] += 1
