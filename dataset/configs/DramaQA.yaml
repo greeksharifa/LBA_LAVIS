@@ -9,7 +9,8 @@ datasets:
       - AnotherMissOh/AnotherMissOhQA_train_set.json
     val:
       - AnotherMissOh/AnotherMissOhQA_val_set.json
-      - AnotherMissOh/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      - AnotherMissOh/sub_qas_val_xl_beam_and_greedy_N1.json
+      # - AnotherMissOh/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - AnotherMissOh/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - AnotherMissOh/sub_qas_val_chatgpt.json # created by gpt
       # - AnotherMissOh/sub_qas_val_xl.json # created by xl

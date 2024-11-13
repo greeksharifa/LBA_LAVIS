@@ -9,7 +9,8 @@ datasets:
       - NExT_QA/sevila_style/train.json
     val:
       - NExT_QA/sevila_style/val.json
-      - NExT_QA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
+      - NExT_QA/sub_qas_val_xl_beam_and_greedy_N1.json
+      # - NExT_QA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json # created by xl
       # - NExT_QA/sub_qas_val_xl_fewshot_vqaintrospect_unique_N10.json # created by xl
       # - NExT_QA/sub_qas_val_chatgpt.json # created by gpt
       # - NExT_QA/sub_qas_val_xl.json # created by xl

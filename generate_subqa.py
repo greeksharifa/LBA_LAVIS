@@ -435,6 +435,9 @@ def main():
                             generation_params["do_sample"] = False
                         generation_params["num_beams"] = 5
                         generation_params["length_penalty"] = -1
+                        if N == 1:
+                            generation_params["return_dict_in_generate"] = True
+                            generation_params["output_scores"] = True
                     else:
                         generation_params["top_p"] = 0.8
                         
@@ -449,6 +452,10 @@ def main():
                         # )
                     else:
                         outputs = model.generate(**inputs, **generation_params)
+                        if N == 1: 
+                            sub_questions_scores = outputs.sequences_scores.tolist() # torch.exp(outputs.sequences_scores).tolist()
+                            outputs = outputs.sequences
+                            
                         if "Qwen" in model_name:
                             outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
                             
@@ -542,6 +549,10 @@ def main():
                     "num_beams": 5,
                     "length_penalty": -1
                 }
+                if N == 1:
+                    generation_params["return_dict_in_generate"] = True
+                    generation_params["output_scores"] = True
+                    
                 if "Qwen" in model_name:
                     model.generation_config.temperature=None
                     model.generation_config.top_p=None
@@ -555,6 +566,10 @@ def main():
                     )
                 else:
                     outputs = model.generate(**inputs, **generation_params)
+                    if N == 1: 
+                        sub_answers_scores = outputs.sequences_scores.tolist() # torch.exp(outputs.sequences_scores).tolist()
+                        outputs = outputs.sequences
+                        
                     if "Qwen" in model_name:
                         outputs = [out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, outputs)]
                         
@@ -571,7 +586,11 @@ def main():
                     # if sub_questions[b].endswith('?'):
                     # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
                     #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
-                    batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
+                    # import pdb; pdb.set_trace()
+                    if N == 1:
+                        batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b], sub_questions_scores[b], sub_answers_scores[b]))
+                    else:
+                        batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
                 
         
         for k, v in batch_result.items():
