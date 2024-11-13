@@ -163,10 +163,6 @@ CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewsh
 CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 
-# videollama
-CUDA_VISIBLE_DEVICES=2 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
-CUDA_VISIBLE_DEVICES=3 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="NExTQA" datasets.n_frms=8 runner.batch_size=12 runner.num_sub_qa_generate=5 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F"
-
 # "llava-hf/LLaVA-NeXT-Video-7B-hf"
 
 """

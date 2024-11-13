@@ -75,9 +75,6 @@ CUDA_VISIBLE_DEVICES=2 python main_multi_subqa.py --verbose --options datasets.d
 # video_llava
 CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --verbose --options datasets.dataset_name="NExTQA" datasets.n_frms=4 runner.batch_size=8 runner.recomposer_name="LanguageBind/Video-LLaVA-7B-hf" datasets.num_data=-1 runner.select_high_confidence=True runner.vision_supple=True use_pre_generated_sub_q=False runner.num_sub_qa_generate=1 runner.num_sub_qa_select=1 
 
-# video llama 2
-CUDA_VISIBLE_DEVICES=4 python main_multi_subqa.py --options runner.sub_mode="subqa" datasets.dataset_name="VLEP" datasets.n_frms=8 runner.batch_size=4 runner.recomposer_name="DAMO-NLP-SG/VideoLLaMA2.1-7B-16F" datasets.num_data=-1 runner.select_high_confidence=True runner.num_sub_qa_generate=5 runner.num_sub_qa_select=1 datasets.root_dir="/data/video_datasets/" model.cache_dir="/data/LLMs/videollama/" runner.examplar="none"
-
 
 # video description
 CUDA_VISIBLE_DEVICES=1 python main_multi_subqa.py --verbose --options datasets.dataset_name="" runner.batch_size=12 runner.recomposer_name="Salesforce/blip2-flan-t5-xl" datasets.num_data=-1 runner.select_high_confidence=True datasets.n_frms=8 runner.sub_mode="description" model.cache_dir="/data/LLMs/" datasets.root_dir="/data/video_datasets"
