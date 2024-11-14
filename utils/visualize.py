@@ -14,13 +14,13 @@ from utils.colors import Colors
 
 
 def get_conf_rank(results, key, H, dataset_name):
-    subqa_infos = json.load(open(f'/data/video_datasets/{dataset_name}/sub_qas_val_xl_beam_and_greedy_N1.json', 'r'))
-    for result, (qid, subqa_info) in zip(results, subqa_infos.items()):
-        assert str(result['question_id']) == str(qid), f"{result['question_id']} != {qid}"
-        subqa_info = subqa_info[0]
-        # import pdb; pdb.set_trace()
-        result['confidence_subq'] = subqa_info[2] #/ len(subqa_info[0].split()) # perplexity
-        result['confidence_suba'] = subqa_info[3] #/ len(subqa_info[1].split()) # perplexity
+    # subqa_infos = json.load(open(f'/data/video_datasets/{dataset_name}/sub_qas_val_xl_beam_and_greedy_N1.json', 'r'))
+    # for result, (qid, subqa_info) in zip(results, subqa_infos.items()):
+    #     assert str(result['question_id']) == str(qid), f"{result['question_id']} != {qid}"
+    #     subqa_info = subqa_info[0]
+    #     # import pdb; pdb.set_trace()
+    #     result['confidence_subq'] = subqa_info[2] #/ len(subqa_info[0].split()) # perplexity
+    #     result['confidence_suba'] = subqa_info[3] #/ len(subqa_info[1].split()) # perplexity
     
     reverse_key = 'confidence_lba' if key == 'confidence_base' else 'confidence_base'
     results.sort(key=lambda x: x[reverse_key])
@@ -31,7 +31,7 @@ def get_conf_rank(results, key, H, dataset_name):
     for i, result in enumerate(results):
         result[f'rank_{key.split("_")[-1]}'] = int(i / N * H)
         
-    results.sort(key=lambda x: x['confidence_suba'])
+    # results.sort(key=lambda x: x['confidence_suba'])
         
     return results
 

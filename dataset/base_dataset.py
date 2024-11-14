@@ -420,7 +420,8 @@ def get_text_input(
         
     elif prompt_type == "recomposer_image":
         examplar = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\n"
-        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Short answer:"
+        # prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Short answer:"
+        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}\nAnswer: The answer is "
         
         ret = []
         for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers):

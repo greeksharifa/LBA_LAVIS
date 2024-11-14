@@ -45,8 +45,14 @@ class AOKVQADataset(BaseDataset):
 
         # image = self.vis_processor(image)
         # text_input = self.text_processor(ann["question"])
-        text_input = ann["question"]
         
+        if self.vqa_acc:
+            text_input = ann["question"]
+            gt_ans = ann["direct_answers"] # vqav2 answers list of str(len=10)
+        else:
+            text_input = ann["question"].rstrip('?') + "?\n"
+            text_input += '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(ann["choices"])])
+            gt_ans = f'({chr(65 + ann["correct_choice_idx"])})'
         
         sub_qa_list = self.sub_qas[str(question_id)] if hasattr(self, 'sub_qas') else None
         if sub_qa_list is None:
@@ -64,7 +70,7 @@ class AOKVQADataset(BaseDataset):
             "vision": image,
             "text_input": text_input,
             "question_id": question_id,
-            "gt_ans": ann["direct_answers"], # vqav2 answers list of str(len=10)
+            "gt_ans": gt_ans, 
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
         } 
