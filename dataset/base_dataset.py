@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 import pickle
+import string
 from pprint import pprint
 
 from torch.utils.data import Dataset
@@ -67,6 +68,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):
     elif datasets_cfg.dataset_name == "MSRVTTQA":
         from dataset.MSRVTTQA import MSRVTTQADataset
         cls = MSRVTTQADataset
+    elif datasets_cfg.dataset_name == "MMMU":
+        from dataset.MMMU import MMMUDataset
+        cls = MMMUDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
 
@@ -89,6 +93,7 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):
         datasets_cfg=datasets_cfg,
         n_supple=n_supple, #datasets_cfg.get("n_supple"),
         data_type=datasets_cfg.data_type,
+        open_ended=datasets_cfg.open_ended,
         split=split,
         **kwargs
     )
@@ -134,7 +139,11 @@ class BaseDataset(Dataset):
                     self.annotation.extend([{"sample_id": k, **v} if isinstance(v, dict) else {"sample_id": k, "data": v} for k, v in loaded.items()])
 
         if num_data != -1:
-            self.annotation = self.annotation[:num_data]
+            if num_data < len(self.annotation):
+                # uniform_sampling
+                idxs = np.linspace(0, len(self.annotation)-1, num_data, dtype=int)
+                self.annotation = [self.annotation[i] for i in idxs]
+                # self.annotation = self.annotation[:num_data]
 
         self.vis_processor = vis_processor
         self.text_processor = text_processor
@@ -151,6 +160,7 @@ class BaseDataset(Dataset):
         print('vis_root : ', vis_root)
         print('ann_paths : ', ann_paths)
         print('type(self.annotation), len(self.annotation):', type(self.annotation), len(self.annotation))
+        self.cnt = 0
 
     def create_openai_client(self):
         api_key = json.load(open("temp/api_key.json", "r"))["LBA"]
@@ -340,29 +350,25 @@ class BaseDataset(Dataset):
                 return 0.0
         
         def _get_acc(out, target):
-            if self.data_type == "videos": # False: #
+            if not self.open_ended: # True or False
                 if type(out) == str:
-                    temp_out = map_prediction_to_answer(out)
-                    if temp_out is None:
-                        out = out.replace('\u200b', '')
-                        if len(out) == 1:
-                            out = '(' + out + ')'
-                        elif len(out) > 3 and out[0] == '(':
-                            out = out[:3]
-                        if len(out) >= 2 and '0' <= out[1] <= '4':
-                            out = '(' + chr(ord(out[1]) + 17) + ')'
-                    else:
-                        out = temp_out
-                        
+                    out = map_prediction_to_answer(out)
+                
             # convert to lower case string
             out = str(out).lower()
+            out = out.rstrip('.').rstrip(',')
             
             if self.vqa_acc:
                 assert isinstance(target, list), f"Invalid target type (expected list): {type(target)}, {target}"
-                target = [str(t).lower() for t in target]
+                target = [str(t).lower().rstrip('.').rstrip(',') for t in target]
                 return 1.0 if out in target else 0.0
             else:
-                target = str(target).lower()
+                target = str(target).lower().rstrip('.').rstrip(',')
+                if target in string.ascii_lowercase + string.ascii_uppercase:
+                    target = '(' + target + ')'
+                # if self.cnt < 3:
+                #     print('out, target : ', out, target)
+                #     self.cnt += 1
                 return 1.0 if out == target else 0.0
             
             
@@ -403,41 +409,89 @@ def get_text_input(
     gt_answers:List[str]=[],
     question_ids:List[str]=[],
     examplar: str="",
+    model_name="",
     **kwargs,
 ):
-    # add <video> in front of prompt if video_llava
-    if prompt_type == "default_image": # for default vqa or generating sub-answer
-        prompt = "Question: {main_question}? Short answer:"
-        return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
-    
+    if "image" in prompt_type or "video" in prompt_type: 
+        # print("default_image")
+        # print(candidate_lists)
+        '''
+        Context:\n{sub_qas}                                                 | if recomposer
+        {main_question}?                                                    | every case
+        {choices}\n                                                         | if multi-choice
+        Answer with the option's letter from the given choices directly.    | if multi-choice
+        Answer the question using a single word or phrase.                  | if open-ended
+        
+        '''
+        ret = []
+        for i in range(len(main_questions)):            
+            # context
+            if "recomposer" in prompt_type: # recomposer_image
+                sub_question = sub_questions[i]
+                sub_answer = sub_answers[i]
+                sub_qas = ""
+                if isinstance(sub_question, str):
+                    sub_question = [sub_question]
+                    sub_answer = [sub_answer]
+                for sq, sa in zip(sub_question, sub_answer):
+                    sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
+                prompt = f"Context:\n{sub_qas}\n"
+            else:                           # decomposer_image
+                prompt = ""
+                
+            # main_question
+            main_question = main_questions[i]
+            prompt += f"{main_question.rstrip('?')}?\n"
+            
+            # choices and instructions
+            if candidate_lists and candidate_lists[i] is not None:
+                candidate_list = candidate_lists[i]
+                # choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                choices = '\n'.join([f"{chr(65+i)}. {c}" for i, c in enumerate(candidate_list)])
+                prompt += f"{choices}\n"
+                prompt += "Answer with the option's letter from the given choices directly."
+            else:
+                prompt += "Answer the question using a single word or phrase."
+
+            ret.append(prompt)
+        
+        return ret
+        
     elif prompt_type == "decomposer":
         prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
         return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
     
     elif prompt_type == "sub_answer":
-        prompt = "Question: {sub_question}? Short answer:"
+        if "llava-hf/llava-v1.6" in model_name:
+            prompt = "{sub_question}?\nAnswer the question using a single word or phrase."
+        else:
+            prompt = "Question: {sub_question}? Short answer:"
         return [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
         
-    elif prompt_type == "recomposer_image":
-        examplar = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\n"
-        # prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Short answer:"
-        prompt = examplar + "Context:\n{sub_qas}Question: {main_question}\nAnswer: The answer is "
+    if "video" in prompt_type:
+        if prompt_type == "recomposer_video_description":
+            prompt = "Video Description: {description}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            
+            ret = []
+            for description, main_question, candidate_list in zip(kwargs.get('descriptions'), main_questions, candidate_lists):
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(description=description, main_question=main_question.rstrip('?'), choices=choices))
+            return ret
         
-        ret = []
-        for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers):
-            sub_qas = ""
-            if isinstance(sub_question, str):
-                sub_question = [sub_question]
-                sub_answer = [sub_answer]
-            for sq, sa in zip(sub_question, sub_answer):
-                sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
-            ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas))
-        return ret
-        # return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
-                # for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
+        # elif prompt_type == "recomposer_video_irrelevant_info":
+            
+        else:
+            pass # TODO
+            prompt = examplar + "Context: {irr_info}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            
+            ret = []
+            for irr_info, main_question, candidate_list in zip(kwargs.get('irr_info_list'), main_questions, candidate_lists):
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(irr_info=irr_info, main_question=main_question.rstrip('?'), choices=choices))
+            return ret
     
     elif prompt_type == "default_video":
-        if kwargs.get("qwen_prompt", False):
+        if "Qwen" in model_name:
             prompt = "Question: {main_question}?\nChoices:\n{choices}\n"
             prompt += "1) What is the answer?\n"
             prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
@@ -459,7 +513,7 @@ def get_text_input(
         return ret
     
     elif prompt_type == "recomposer_video":
-        if kwargs.get("qwen_prompt", False):
+        if "Qwen" in model_name:
             prompt = "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\n"
             prompt += "1) What is the answer?\n"
             prompt += "2) Print how confident you are in your answer, between 0 and 100.\n"
@@ -488,24 +542,76 @@ def get_text_input(
             
         return ret
     
-    elif prompt_type == "recomposer_video_description":
-        prompt = "Video Description: {description}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
-        
-        ret = []
-        for description, main_question, candidate_list in zip(kwargs.get('descriptions'), main_questions, candidate_lists):
-            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
-            ret.append(prompt.format(description=description, main_question=main_question.rstrip('?'), choices=choices))
-        return ret
-    
-    elif prompt_type == "recomposer_video_irrelevant_info":
-        prompt = examplar + "Context: {irr_info}.\nQuestion: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
-        
-        ret = []
-        for irr_info, main_question, candidate_list in zip(kwargs.get('irr_info_list'), main_questions, candidate_lists):
-            choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
-            ret.append(prompt.format(irr_info=irr_info, main_question=main_question.rstrip('?'), choices=choices))
-        return ret
-    
     else:
         raise NotImplementedError(f"Invalid prompt type: {prompt_type}")
     
+
+def _backup():
+    """
+    if prompt_type == "default_image": # for default vqa or generating sub-answer
+        # print("default_image")
+        # print(candidate_lists)
+        if candidate_lists:
+
+            if "llava-hf/llava-v1.6" in model_name:
+                '''
+                <question>
+                A. <option_1>
+                B. <option_2>
+                C. <option_3>
+                D. <option_4>
+                Answer with the option's letter from the given choices directly.
+                '''
+                prompt = "{main_question}?\n{choices}\nAnswer with the option's letter from the given choices directly."
+            else:
+                prompt = "{main_question}?\n{choices}\nAnswer with the option's letter from the given choices directly."
+                # prompt = "Question: {main_question}?\nChoices:\n{choices}\nAnswer with the option's letter from the given choices directly."
+            ret = []
+            for main_question, candidate_list in zip(main_questions, candidate_lists):
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), choices=choices))
+            return ret
+                
+        else:
+            if "llava-hf/llava-v1.6" in model_name:
+                prompt = "{main_question}?\nAnswer the question using a single word or phrase."
+            else:
+                prompt = "Question: {main_question}? Short answer:"
+            return [prompt.format(main_question=main_question.rstrip('?')) for main_question in main_questions]
+        
+      
+    elif prompt_type == "recomposer_image":
+        examplar = "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\n"
+        # print("recomposer_image")
+        # print(candidate_lists)
+        if candidate_lists:
+            # prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer: The answer is "
+            prompt = examplar + "Context:\n{sub_qas}Question: {main_question}?\nChoices:\n{choices}\nAnswer with the option's letter from the given choices directly."
+        else:
+            prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Answer the question using a single word or phrase."
+            # prompt = examplar + "Context:\n{sub_qas}Question: {main_question}? Short answer:"
+            # prompt = examplar + "Context:\n{sub_qas}Question: {main_question}\nAnswer: The answer is "
+        
+        ret = []
+        for i in range(len(main_questions)):
+            main_question = main_questions[i]
+            sub_question = sub_questions[i]
+            sub_answer = sub_answers[i]
+            sub_qas = ""
+            if isinstance(sub_question, str):
+                sub_question = [sub_question]
+                sub_answer = [sub_answer]
+            for sq, sa in zip(sub_question, sub_answer):
+                sub_qas += f"{sq.rstrip('?')}? {sa.rstrip('.')}.\n"
+            if candidate_lists:
+                candidate_list = candidate_lists[i]
+                choices = '\n'.join([f"({chr(65+i)}) {c}" for i, c in enumerate(candidate_list)])
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas, choices=choices))
+            else:
+                ret.append(prompt.format(main_question=main_question.rstrip('?'), sub_qas=sub_qas))
+        return ret
+        # return [prompt.format(main_question=main_question.rstrip('?'), sub_question=sub_question.rstrip('?'), sub_answer=sub_answer.rstrip('.')) 
+                # for main_question, sub_question, sub_answer in zip(main_questions, sub_questions, sub_answers)]
+    
+    """
+    pass

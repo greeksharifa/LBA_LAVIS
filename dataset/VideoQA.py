@@ -84,6 +84,14 @@ class VideoEvalDataset(BaseDataset):
                 print(f'\r{i+1:6d}/{len_loaded:6d} : {vid}', end='')
                 
                 self.annotation.append(sample)
+        
+        if num_data != -1:
+            if num_data < len(self.annotation):
+                # uniform_sampling
+                idxs = np.linspace(0, len(self.annotation)-1, num_data, dtype=int)
+                self.annotation = [self.annotation[i] for i in idxs]
+                # self.annotation = self.annotation[:num_data]
+
             
         if kwargs.get("eval_chatgpt", False):
             print("eval_chatgpt")

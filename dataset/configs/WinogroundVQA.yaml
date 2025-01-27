@@ -3,6 +3,7 @@
 datasets:
   data_type: images # [images|videos|features]
   vqa_acc: False
+  open_ended: True
   ann_paths:
     train:
       - 'facebook/winoground'

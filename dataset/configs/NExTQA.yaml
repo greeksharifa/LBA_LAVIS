@@ -4,6 +4,7 @@ datasets:
   data_type: videos # [images|videos|features]
   n_frms: 4
   vqa_acc: False
+  open_ended: False
   ann_paths:
     train:
       - NExT_QA/sevila_style/train.json

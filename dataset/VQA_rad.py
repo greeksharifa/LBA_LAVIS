@@ -3,6 +3,7 @@ import os
 from PIL import Image
 from pprint import pprint
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -52,7 +53,11 @@ class VQA_radDataset(BaseDataset):
 
         
         if num_data != -1:
-            self.annotation = self.annotation[:num_data]
+            if num_data < len(self.annotation):
+                # uniform_sampling
+                idxs = np.linspace(0, len(self.annotation)-1, num_data, dtype=int)
+                self.annotation = [self.annotation[i] for i in idxs]
+                # self.annotation = self.annotation[:num_data]
 
         self.vis_processor = vis_processor
         self.text_processor = text_processor

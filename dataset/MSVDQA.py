@@ -74,6 +74,15 @@ class MSVDQADataset(VideoEvalDataset):
             
             self.annotation.append(qa)
             
+        
+        if num_data != -1:
+            if num_data < len(self.annotation):
+                # uniform_sampling
+                idxs = np.linspace(0, len(self.annotation)-1, num_data, dtype=int)
+                self.annotation = [self.annotation[i] for i in idxs]
+                # self.annotation = self.annotation[:num_data]
+
+            
         if kwargs.get("eval_chatgpt", False):
             print("eval_chatgpt")
             self.create_openai_client()

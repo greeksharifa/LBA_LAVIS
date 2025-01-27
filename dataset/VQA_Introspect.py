@@ -3,6 +3,7 @@ import os
 from PIL import Image
 from pprint import pprint
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -104,9 +105,11 @@ class VQAIntrospectDataset(BaseDataset):
                 self.annotation.append(v)
             
         if num_data != -1:
-            self.annotation = self.annotation[:num_data]
-            # import random
-            # self.annotation = random.sample(self.annotation, num_data)
+            if num_data < len(self.annotation):
+                # uniform_sampling
+                idxs = np.linspace(0, len(self.annotation)-1, num_data, dtype=int)
+                self.annotation = [self.annotation[i] for i in idxs]
+                # self.annotation = self.annotation[:num_data]
             
         if len(ann_paths) == 3:
             if os.path.exists(ann_paths[2]):

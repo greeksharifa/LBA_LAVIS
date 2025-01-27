@@ -3,6 +3,7 @@
 datasets:
   data_type: images # [images|videos|features]
   vqa_acc: True
+  open_ended: True
   ann_paths:
     train:
       - 'VQA_Introspect/VQAIntrospect_trainv1.0.json'

@@ -1,0 +1,20 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  open_ended: False
+  ann_paths:
+    # train:
+    #   - 'MMMU/mmmu_dataset_concatenated.pkl'
+      # - 'MMMU/mmmu_json/dev.json'
+    val:
+      - 'MMMU/mmmu_json/validation.json'
+      # - 'MMMU/MMMU'
+      # - 'MMMU/mmmu_dataset_concatenated.pkl'
+      - 'MMMU/sub_qas_val_hf_fewshot_vqaintrospect_unique.json'
+    # test:
+    #   - 'MMMU/mmmu_dataset_concatenated.pkl'
+      # - 'MMMU/mmmu_json/test.json'
+
+  vis_root: 'dummy_vis_path'
