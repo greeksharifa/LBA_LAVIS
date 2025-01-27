@@ -43,8 +43,36 @@ def parse_args():
 
 
 def get_input(model_name, data_type, processor, device, vision_batch, text_inputs):
+    # import pdb; pdb.set_trace()
+
     if data_type == "images":
-        inputs = processor(text=text_inputs, images=vision_batch, return_tensors="pt", padding=True)
+        if "llava-hf/llava-v1.6" in model_name:
+            prompts = []
+            images = []
+            for image, text_input in zip(vision_batch, text_inputs):
+                content_images = []
+                if isinstance(image, list):
+                    for _ in range(len(image)):
+                        content_images.append({"type": "image"})
+                else:
+                    content_images.append({"type": "image"})
+                conversation = [
+                    {
+                        "role": "user",
+                        "content": [{"type": "text", "text": text_input}] + content_images,
+                    },
+                ]
+                prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+                prompts.append(prompt)
+                
+                if isinstance(image, list):
+                    images.extend(image) # list of image
+                else:
+                    images.append(image) # one image
+                
+            inputs = processor(images=images, text=prompts, padding=True, return_tensors="pt")
+        else:
+            inputs = processor(text=text_inputs, images=vision_batch, return_tensors="pt", padding=True)
     else:
         # import pdb; pdb.set_trace()
         if "Qwen" in model_name:# processor.__class__.__name__:
@@ -115,6 +143,7 @@ def get_input(model_name, data_type, processor, device, vision_batch, text_input
             
             inputs = processor(text=prompt, videos=video_batch, padding=True, return_tensors="pt")
             
+        
             
         elif "llama" in model_name:# processor.__class__.__name__:
             messages = []
@@ -164,6 +193,10 @@ CUDA_VISIBLE_DEVICES=4 python generate_subqa.py --options runner.sub_mode="beam_
 CUDA_VISIBLE_DEVICES=5 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="DramaQA" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="meta-llama/Llama-3.2-11B-Vision-Instruct"
 
 # "llava-hf/LLaVA-NeXT-Video-7B-hf"
+
+# "llava-hf/llava-v1.6-mistral-7b-hf"
+CUDA_VISIBLE_DEVICES=8 python generate_subqa.py --options runner.sub_mode="beam_and_greedy" datasets.dataset_name="MMMU" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="llava-hf/llava-v1.6-mistral-7b-hf"
+CUDA_VISIBLE_DEVICES=8 python generate_subqa.py --options runner.sub_mode="fewshot_vqaintrospect" datasets.dataset_name="MMMU" runner.batch_size=1 runner.num_sub_qa_generate=5 runner.recomposer_name="llava-hf/llava-v1.6-mistral-7b-hf"
 
 """
 def main():
@@ -215,6 +248,15 @@ def main():
             cache_dir=cache_dir, 
             device_map=cfg.runner_cfg.device_map,
         )
+    
+    elif "llava-hf/llava-v1.6" in model_name:
+        from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+        processor = LlavaNextProcessor.from_pretrained(model_name, cache_dir=cache_dir)
+        processor.tokenizer.padding_side = "left"
+        model = LlavaNextForConditionalGeneration.from_pretrained(model_name, torch_dtype=torch.float16, low_cpu_mem_usage=True, 
+                                                                attn_implementation="flash_attention_2",
+                                                                cache_dir=cache_dir, device_map="auto")
+        model.generation_config.pad_token_id = processor.tokenizer.pad_token_id
     
     elif "Qwen" in model_name:
         from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
@@ -408,6 +450,7 @@ def main():
         else:
             for i in range(N):
                 if cfg.runner_cfg.sub_mode == "beam_and_greedy":   # Generate Sub-Questions by Huggingface model
+                    print(i, 'main_question:', batch["text_input"])
                     prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
                     text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                     
@@ -451,7 +494,12 @@ def main():
                         #     **generation_params
                         # )
                     else:
-                        outputs = model.generate(**inputs, **generation_params)
+                        try:
+                            outputs = model.generate(**inputs, **generation_params)
+                        except Exception as e:
+                            print(e)
+                            import pdb; pdb.set_trace()
+                            raise ValueError(f"Error in generating sub-questions: {e}")
                         if N == 1: 
                             sub_questions_scores = outputs.sequences_scores.tolist() # torch.exp(outputs.sequences_scores).tolist()
                             outputs = outputs.sequences
@@ -530,6 +578,8 @@ def main():
                     
                 if "LLaVA-NeXT-Video" in model_name:
                     sub_questions = [sub_question.split("ASSISTANT: ")[-1] for sub_question in sub_questions]
+                elif "llava-hf/llava-v1.6" in model_name:
+                    sub_questions = [sub_question.split('[/INST]')[-1].strip() for sub_question in sub_questions]
 
                 text_inputs = [prompt.format(sub_question=sub_question.rstrip('?')) for sub_question in sub_questions]
                 if "VideoLLaMA" in model_name:
@@ -576,6 +626,8 @@ def main():
                     sub_answers = processor.batch_decode(outputs, skip_special_tokens=True)
                     if "LLaVA-NeXT-Video" in model_name:
                         sub_answers = [sub_answer.split("ASSISTANT: ")[-1] for sub_answer in sub_answers]
+                    elif "llava-hf/llava-v1.6" in model_name:
+                        sub_answers = [sub_answer.split('[/INST]')[-1].strip() for sub_answer in sub_answers]
 
                 # store to results    
                 for b in range(bsz):

@@ -31,7 +31,15 @@ def map_prediction_to_answer(out):
         # if answer + ')' in out:
         #     return '(' + chr(ord('A') + int(answer)) + ')'
     
-    return None
+    out = out.replace('\u200b', '')
+    if len(out) == 1:
+        out = '(' + out + ')'
+    elif len(out) > 3 and out[0] == '(':
+        out = out[:3]
+    if len(out) >= 2 and '0' <= out[1] <= '4':
+        out = '(' + chr(ord(out[1]) + 17) + ')'
+    
+    return out
     
     
 

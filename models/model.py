@@ -259,6 +259,9 @@ class Recomposer(nn.Module):
         model_name = cfg.runner_cfg.get(f"{model_type}_name")
         cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
         device_map = cfg.runner_cfg.device_map # if cfg.runner_cfg.device_map else device
+        print('model_name:', model_name)
+        print('cache_dir:', cache_dir)
+        print('device_map:', device_map)
         
         if model_type == "answerer":
             cache_dir = os.path.join(cfg.model_cfg.cache_dir, model_name.split('/')[0])
@@ -267,6 +270,14 @@ class Recomposer(nn.Module):
         elif "blip2" in model_name: # "flan-t5" in model_name or "blip2-opt-" in model_name:
             self.processor = Blip2Processor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = VideoBlip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map="auto")
+        elif "llava-hf/llava-v1.6" in model_name:
+            from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+            self.processor = LlavaNextProcessor.from_pretrained(model_name, cache_dir=cache_dir)
+            self.processor.tokenizer.padding_side = "left"
+            self.model = LlavaNextForConditionalGeneration.from_pretrained(model_name, torch_dtype=torch.float16, low_cpu_mem_usage=True, 
+                                                                           use_flash_attention_2=True,
+                                                                           cache_dir=cache_dir, device_map="auto")
+            self.model.generation_config.pad_token_id = self.processor.tokenizer.pad_token_id
         elif "instructblip" in model_name:
             self.processor = InstructBlipVideoProcessor.from_pretrained(model_name, cache_dir=cache_dir)
             self.model = InstructBlipVideoForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir, device_map=device_map)#.to(device)
@@ -633,6 +644,41 @@ class Recomposer(nn.Module):
                     # video_llava_text_inputs = [video_llava_prompt.format(text_input=text_input.replace("Answer: The answer is ", "ASSISTANT: ")) for text_input in text_inputs]
                     video_llava_text_inputs = [f'USER: <video>\n{text_input.replace("Answer: The answer is ", "Answer with one of (A), (B), (C), (D), or (E). ASSISTANT: ")}' for text_input in text_inputs]
                     inputs = self.processor(videos=vision, text=video_llava_text_inputs, return_tensors="pt", padding=True)
+                elif "llava-hf/llava-v1.6" in self.model_name: # image
+                    prompts = []
+                    images = []
+                    for image, text_input in zip(vision, text_inputs):
+                        '''conversation = [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": text_input},
+                                    {"type": "image"},
+                                ],
+                            },
+                        ]'''
+                        content_images = []
+                        if isinstance(image, list):
+                            for _ in range(len(image)):
+                                content_images.append({"type": "image"})
+                        else:
+                            content_images.append({"type": "image"})
+                        conversation = [
+                            {
+                                "role": "user",
+                                "content": [{"type": "text", "text": text_input}] + content_images,
+                            },
+                        ]
+                        prompt = self.processor.apply_chat_template(conversation, add_generation_prompt=True)
+                        prompts.append(prompt)
+                        
+                        if isinstance(image, list): 
+                            images.extend(image) # list of image
+                        else:
+                            images.append(image) # one image
+                    # import pdb; pdb.set_trace()
+                    inputs = self.processor(images=images, text=prompts, padding=True, return_tensors="pt")#.to("cuda:0")
+                    # inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
                 else:
                     inputs = self.processor(vision, text_inputs, return_tensors="pt", padding=True)
             except:
@@ -676,7 +722,7 @@ class Recomposer(nn.Module):
             generation_params = {
                 "do_sample": generate_sub_q,
                 "min_new_tokens": 1,
-                "max_new_tokens": 100 if generate_sub_q else 10,
+                "max_new_tokens": 100 if generate_sub_q else 10, #  self.cfg.runner_cfg.max_new_tokens
                 "return_dict_in_generate": True,
                 "output_scores": True,
                 # "clean_up_tokenization_spaces": True,
@@ -700,6 +746,9 @@ class Recomposer(nn.Module):
             output_text = self.processor.batch_decode(
                 outputs.sequences, skip_special_tokens=True
             )
+            if "llava-hf/llava-v1.6" in self.model_name:
+                output_text = [o.split('[/INST]')[-1].strip() for o in output_text] # MMMU
+                # output_text = [o.split('[/INST]')[-1].strip().split()[0].replace('.', '').replace(',', '') for o in output_text] # others
             try:
                 # <class 'transformers.generation.utils.BeamSearchEncoderDecoderOutput'>
                 # odict_keys(['sequences', 'sequences_scores', 'scores', 'beam_indices'])

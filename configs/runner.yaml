@@ -22,6 +22,10 @@ runner:
   device_map: "cuda" # ['auto', 0, 1, ...]
   qwen_prompt: False
 
+  max_new_tokens_subq: 100
+  max_new_tokens_suba: 100
+  max_new_tokens_maina: 50
+
   batch_size: 32 # xl: image:32, video: 16 or 12
   seed: 44
 

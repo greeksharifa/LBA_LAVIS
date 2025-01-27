@@ -91,7 +91,9 @@ def main():
         n_supple = 0
     
     xl_or_xxl = "xl" if "-xl" in cfg.runner_cfg.recomposer_name or "7b" in cfg.runner_cfg.recomposer_name.lower() else "xxl"
-    if "Qwen" in cfg.runner_cfg.recomposer_name:
+    if cfg.runner_cfg.get("model_tag", None):
+        model_tag = cfg.runner_cfg.model_tag
+    elif "Qwen" in cfg.runner_cfg.recomposer_name:
         model_tag = cfg.runner_cfg.recomposer_name.split('/')[-1].replace('-', '_')
     else:
         model_tag = cfg.runner_cfg.recomposer_name.split('-')[-1]
@@ -200,7 +202,7 @@ Answer: The answer is (A)\n"""
                 result = json.load(open(saved_path))
                 text_output_base = result['text_output_base']
                 gt_answer = result['gt_ans']
-                total_base_match += dataset.get_accuracy([text_output_base], [gt_answer])[0]
+                total_base_match += dataset.get_accuracy(text_output_base, gt_answer)
                 total_cnt += 1
                 results.append(result)
             else:
@@ -228,17 +230,18 @@ Answer: The answer is (A)\n"""
             vision = batch['vision']
             
             """##############################  Baseline Inference   ##############################"""    
+            # import pdb; pdb.set_trace()
             if cfg.datasets_cfg.data_type == "videos":
                 text_inputs = get_text_input("default_video", 
                                                 main_questions=batch['text_input'], 
                                                 candidate_lists=batch['candidate_list'],
-                                                video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
-                                                qwen_prompt=False,#cfg.runner_cfg.get("qwen_prompt", False),
-                                                # qwen_prompt="Qwen" in cfg.runner_cfg.recomposer_name,
+                                                model=cfg.runner_cfg.recomposer_name,
                                             )
             else:                          # "images"
-                text_inputs = get_text_input("default_image", main_questions=batch['text_input'])
-            text_outputs_base, confidences_base = recomposer(vision, text_inputs, max_new_tokens=50)
+                text_inputs = get_text_input("default_image", 
+                                             main_questions=batch['text_input'],
+                                             candidate_lists=batch.get('candidate_list', []))
+            text_outputs_base, confidences_base = recomposer(vision, text_inputs, max_new_tokens=cfg.runner_cfg.max_new_tokens_maina)
             
             if args.verbose:
                 print(f'{data_iter_step:5d}/{len(dataloader)} \t base: ', text_outputs_base[0], ' | ', confidences_base[0])
@@ -285,7 +288,7 @@ Answer: The answer is (A)\n"""
                             sub_questions = decomposer(text_inputs)
                         else:
                             beam_search = i==0
-                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search, max_new_tokens=100)
+                            sub_questions, _ = decomposer(vision, text_inputs, generate_sub_q=True, beam_search=beam_search, max_new_tokens=cfg.runner_cfg.max_new_tokens_subq)
                     sub_questions_list.append(sub_questions)
                     
                     # generating sub_answers
@@ -301,16 +304,18 @@ Answer: The answer is (A)\n"""
                         for j in range(cfg.runner_cfg.num_sub_qa_select):
                             s_qs = [s_q[j] for s_q in sub_questions]
                             text_inputs = get_text_input("sub_answer", sub_questions=s_qs)
-                            s_as, _ = answerer(vision, text_inputs, max_new_tokens=100)
+                            s_as, _ = answerer(vision, text_inputs, max_new_tokens=cfg.runner_cfg.max_new_tokens_suba)
                             for b in range(bsz):
                                 sub_answers[b].append(s_as[b])
                                 
                         # text_inputs = get_text_input("sub_answer", sub_questions=sub_questions)
-                        # sub_answers, _ = answerer(vision, text_inputs, max_new_tokens=100)
+                        # sub_answers, _ = answerer(vision, text_inputs, max_new_tokens=cfg.runner_cfg.max_new_tokens_suba)
                         # print('sub_answers:', sub_answers)
                     sub_answers_list.append(sub_answers)
                     
                     # generating recomposed_answers
+                    # import pdb; pdb.set_trace()
+
                     if cfg.datasets_cfg.data_type == "videos":
                         text_inputs = get_text_input("recomposer_video", 
                                                     main_questions=batch['text_input'], 
@@ -318,16 +323,15 @@ Answer: The answer is (A)\n"""
                                                     sub_answers=sub_answers,
                                                     candidate_lists=batch['candidate_list'],
                                                     examplar=examplar,
-                                                    video_llava="Video-LLaVA" in cfg.runner_cfg.recomposer_name,
-                                                    qwen_prompt=False,#cfg.runner_cfg.get("qwen_prompt", False),
-                                                    # qwen_prompt="Qwen" in cfg.runner_cfg.recomposer_name,
+                                                    model_name=cfg.runner_cfg.recomposer_name,
                                                     )
                     else:                          # "images"
                         text_inputs = get_text_input("recomposer_image", 
                                                     main_questions=batch['text_input'], 
                                                     sub_questions=sub_questions, 
-                                                    sub_answers=sub_answers)
-                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs, max_new_tokens=50)
+                                                    sub_answers=sub_answers,
+                                                    candidate_lists=batch.get('candidate_list', []))
+                    text_outputs_lba, confidences_lba = recomposer(vision, text_inputs, max_new_tokens=cfg.runner_cfg.max_new_tokens_maina)
                     
                     if cfg.runner_cfg.debug:
                         t_inputs = text_inputs[0]
@@ -620,6 +624,7 @@ Answer: The answer is (A)\n"""
                 
             elif cfg.runner_cfg.get("IGVLM_visualize", False):
                 # python main_multi_subqa.py --options runner.visualize=True runner.IGVLM_visualize=True runner.output_dir="output/visualize_IGVLM/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="TVQA" runner.num_sub_qa_generate=4 runner.visualize_xl=True
+                # python main_multi_subqa.py --options runner.visualize=True runner.IGVLM_visualize=True runner.output_dir="output/visualize_IGVLM/" runner.sub_mode="subqa" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=None datasets.dataset_name="DramaQA" runner.num_sub_qa_generate=5 runner.num_sub_qa_select=2 runner.llm_size="34b" runner.visualize_xl_fvu=True
                 total_base_match, total_cnt = 0., 0
                 _results = {}
                 dataset_name = cfg.datasets_cfg.dataset_name
@@ -635,7 +640,7 @@ Answer: The answer is (A)\n"""
                 #     subqa_type = cfg.runner_cfg.llm_size + f"_select{cfg.runner_cfg.num_sub_qa_select}_" + subqa_type.replace('xl', 'xxl')
                 # elif cfg.runner_cfg.get("llm_size", ""):
                 #     subqa_type = cfg.runner_cfg.llm_size + "_" + subqa_type.replace('xl', 'xxl')
-                    
+                
                 subqa_type = cfg.runner_cfg.llm_size + f"_select{cfg.runner_cfg.num_sub_qa_select}_" + subqa_type.replace('xl', 'xxl')
                 if not os.path.exists(f'output/IGVLM/result_{dataset_name}_{subqa_type}/base/ffn=6/result.csv'):
                     subqa_type = subqa_type.replace('xxl', 'xl')
@@ -700,6 +705,7 @@ Answer: The answer is (A)\n"""
                 # import pdb; pdb.set_trace()
             
             elif cfg.runner_cfg.get("chatgpt_visualize", False):
+                # python main_multi_subqa.py --options runner.visualize=True runner.chatgpt_visualize=True runner.output_dir="output/visualize_sevila/" datasets.root_dir="/data1/" runner.baseline=False runner.select_high_confidence=True runner.max_conf_gap=0.127368 datasets.dataset_name="NExTQA" runner.num_sub_qa_generate=5
                 # TODO _num_pick_subq
                 results_base_path = f'/data/ywjang/chatgpt_result/{cfg.datasets_cfg.dataset_name}/chatgpt_result_{cfg.datasets_cfg.dataset_name}_maina_before.json'
                 results_base = json.load(open(results_base_path, 'r'))
@@ -716,8 +722,18 @@ Answer: The answer is (A)\n"""
                 _loaded_results = []
                 for base_k, base_v in results_base.items():
                     r = base_v
-                    r['type'] = base_v["question_id"][0]
+                    # print(results_lba['text_input'])
+                    
+                    cannot_check = False
+                    for cannot_string in ["I'm unable to", "I'm sorry", "I don't know", "I don't have", "I can't", "I cannot"]:
+                        for text_input in results_lba[base_k]['text_input']:
+                            if cannot_string in text_input:
+                                cannot_check = True
+                                break
+                    if cannot_check:
+                        continue
 
+                    r['type'] = base_v["question_id"][0]
                     # dict_keys(['question_id', 'text_input', 'main_question', 'gt_ans', 'confidence_lba', 'text_output_lba', 'api_result_text_lba', 'logprobs_contents_lba'])
                     
                     if type(results_lba[base_k]['confidence_lba']) == list:
@@ -731,20 +747,24 @@ Answer: The answer is (A)\n"""
                         r['text_output_lba'] = results_lba[base_k]['text_output_lba']
                         
                         
-                    if all(a not in r['text_output_lba'] for a in 'ABCDE'):
+                    if all(a not in r['text_output_lba'] for a in 'ABCDEFGHIJ'):
                         r['text_output_lba'] = r['text_output_base']
                     
                     r['confidence_base'] = np.exp(r['confidence_base'])
                     r['confidence_lba'] = np.exp(max_confidence_lba)
                     
-                    total_base_match += base_v['text_output_base'] == base_v['gt_ans']
+                    # import pdb; pdb.set_trace()
+                    acc_base = dataset.get_accuracy(base_v['text_output_base'], base_v['gt_ans'])
+                    total_base_match += acc_base
+                    # total_base_match += base_v['text_output_base'] == base_v['gt_ans']
                     total_cnt += 1
                     # print(r['confidence_base'], r['confidence_lba'])
                     confs.append(r['confidence_base'])
                     
                     _loaded_results.append(r)
                     
-                
+                print('len(_loaded_results):', len(_loaded_results))
+                print('len(results_base):', len(results_base))
                 print('results[0]:', _loaded_results[0])
                 print(f'total_base_match: {total_base_match}, total_cnt: {total_cnt}, accuracy: {total_base_match/total_cnt * 100:.2f}%')
                 
@@ -812,6 +832,12 @@ Answer: The answer is (A)\n"""
                 total_base_match, total_cnt = 0, 0
                 
                 for result in tqdm(_loaded_results):
+                    if "llava-hf/llava-v1.6" in cfg.runner_cfg.recomposer_name:
+                        if len(result['text_output_base']) >= 1:
+                            result['text_output_base'] = result['text_output_base'].split()[0].replace('.', '').replace(',', '')
+                        if len(result['text_output_lba']) >= 1:
+                            result['text_output_lba'] = result['text_output_lba'].split()[0].replace('.', '').replace(',', '')
+                        
                     acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=result['main_question'])
                     total_base_match += acc_base
                     total_cnt += 1
@@ -920,10 +946,6 @@ Answer: The answer is (A)\n"""
             print(f'\nbest_pick_subq: {best_num_pick_subq}')
             pprint(best_metrics, width=300)
         else:
-            # try:
-            #     num_pick_subq = cfg.runner_cfg.num_pick_subq
-            # except:
-            #     num_pick_subq = cfg.runner_cfg.num_pick_subq = cfg.runner_cfg.num_sub_qa_generate
             num_pick_subq = min(5, cfg.runner_cfg.num_sub_qa_generate)
             if not cfg.runner_cfg.select_high_confidence:
                 num_pick_subq = 1

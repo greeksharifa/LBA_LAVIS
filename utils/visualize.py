@@ -57,12 +57,25 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
     #     acc_base_cache.append(acc_base)
     #     acc_lba_cache.append(acc_lba)
     acc_base_list, acc_lba_list = [], []
+    outs = []
     for i, result in enumerate(tqdm(results)):
+        # import pdb; pdb.set_trace()
         main_question = result['main_question'] if 'main_question' in result else None
+        out = OrderedDict({
+            'Question': main_question,
+            'Answer': result['gt_ans'],
+            'agent A': result['text_output_base'],
+            'agent B': result['text_output_lba'],
+        })
+        outs.append(out)
+        
         acc_base = dataset.get_accuracy(result['text_output_base'], result['gt_ans'], main_question=main_question)
         acc_lba = dataset.get_accuracy(result['text_output_lba'], result['gt_ans'], main_question=main_question)
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
+    
+    json.dump(outs, open('MSVD_chatgpt.json', 'w'), indent=4)
+    return
     
     if type(cfg.runner_cfg.get("max_conf_gap", None)) == float:# is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap
