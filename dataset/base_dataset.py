@@ -71,6 +71,9 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):
     elif datasets_cfg.dataset_name == "MMMU":
         from dataset.MMMU import MMMUDataset
         cls = MMMUDataset
+    elif datasets_cfg.dataset_name == "MME":
+        from dataset.MME import MMEDataset
+        cls = MMEDataset
     else:
         raise NotImplementedError(f"in dataset.base_dataset.py, load_dataset() | Invalid dataset name: {datasets_cfg.dataset_name}")
 

@@ -1,0 +1,31 @@
+
+
+datasets:
+  data_type: images # [images|videos|features]
+  vqa_acc: False
+  open_ended: True
+  ann_paths:
+    # train:
+    #   - 'MMMU/mmmu_dataset_concatenated.pkl'
+      # - 'MMMU/mmmu_json/dev.json'
+    val:
+      - MME/eval_tool/Your_Results/scene.txt
+      - MME/eval_tool/Your_Results/code_reasoning.txt
+      - MME/eval_tool/Your_Results/posters.txt
+      - MME/eval_tool/Your_Results/count.txt
+      - MME/eval_tool/Your_Results/artwork.txt
+      - MME/eval_tool/Your_Results/color.txt
+      - MME/eval_tool/Your_Results/landmark.txt
+      - MME/eval_tool/Your_Results/position.txt
+      - MME/eval_tool/Your_Results/existence.txt
+      - MME/eval_tool/Your_Results/numerical_calculation.txt
+      - MME/eval_tool/Your_Results/OCR.txt
+      - MME/eval_tool/Your_Results/celebrity.txt
+      - MME/eval_tool/Your_Results/commonsense_reasoning.txt
+      - MME/eval_tool/Your_Results/text_translation.txt
+      # - 'MME/sub_qas_val_hf_fewshot_vqaintrospect_unique.json'
+    # test:
+    #   - 'MMMU/mmmu_dataset_concatenated.pkl'
+      # - 'MMMU/mmmu_json/test.json'
+
+  vis_root: 'MME/MME_Benchmark/'

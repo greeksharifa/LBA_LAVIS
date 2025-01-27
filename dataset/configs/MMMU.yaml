@@ -17,4 +17,5 @@ datasets:
     #   - 'MMMU/mmmu_dataset_concatenated.pkl'
       # - 'MMMU/mmmu_json/test.json'
 
+
   vis_root: 'dummy_vis_path'
