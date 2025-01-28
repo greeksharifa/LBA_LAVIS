@@ -52,3 +52,4 @@ datasets:
 
 model:
   cache_dir: /model/ # ~/.cache/torch/hub/
+  tensor_parallel_size: 2

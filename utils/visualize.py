@@ -74,8 +74,8 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
         acc_base_list.append(acc_base)
         acc_lba_list.append(acc_lba)
     
-    json.dump(outs, open('MSVD_chatgpt.json', 'w'), indent=4)
-    return
+    # json.dump(outs, open('MSVD_chatgpt.json', 'w'), indent=4)
+    # return
     
     if type(cfg.runner_cfg.get("max_conf_gap", None)) == float:# is not None:
         max_conf_gap = cfg.runner_cfg.max_conf_gap

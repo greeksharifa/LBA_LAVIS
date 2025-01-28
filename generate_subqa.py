@@ -16,7 +16,7 @@ from dataset.base_dataset import load_dataset
 from configs.config import Config
 from main_multi_subqa import setup_seeds
 from dataset.VQA_Introspect import VQAIntrospectDataset
-
+from typing import List
 
 
 def parse_args():
@@ -289,7 +289,23 @@ def main():
             cache_dir="/model/llama/",
         )
         processor = AutoProcessor.from_pretrained(model_name, cache_dir="/model/llama/",)
-        
+    
+    elif "deepseek" in model_name:
+        from models.deepseek import CustomDeepSeek
+        from vllm import SamplingParams
+        model = CustomDeepSeek(
+            model_name, 
+            tensor_parallel_size=cfg.model_cfg.tensor_parallel_size, 
+            download_dir=cfg.model_cfg.cache_dir,
+            limit_mm_per_prompt={"image": 4},
+        )
+        params = SamplingParams(
+            temperature=0,
+            max_tokens=1024,
+            logprobs=0,
+        )
+        model.set_params(params)
+    
     elif cfg.datasets_cfg.data_type == "images": # dataset_name in ["VQA_Introspect", "AOKVQA", "OKVQA"]:
         model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir=cache_dir).to(device)#, device_map="auto")
         processor = Blip2Processor.from_pretrained(processor_name, cache_dir=cache_dir)
@@ -446,12 +462,69 @@ def main():
                     # if len(results[question_ids[b]]) < cfg.runner_cfg.num_sub_qa_generate:
                     #     results[question_ids[b]].append((sub_questions[b], sub_answers[b]))
                     batch_result[question_ids[b]].append((sub_questions[b], sub_answers[b]))
-                    
+        
+        elif cfg.runner_cfg.sub_mode == "vllm":
+            prompt = """You will be provided with:
+main question: {main_question}
+and video frames.
+Your goal is:
+To effectively analyze the video and answer the main question, you should break down (decompose) the main question into several sub-questions that address the key aspects of the video.
+You have to generate 5 sub-questions which those sub-questions can drive to the given main question. sub-questions should be about the entire video.
+Make sure that your sub-questions are based on the information you have.
+Print one sub-question per line.
+sub-questions:"""
+            def load_deepseek_vl2(question: str, image_urls: List[str]):
+                placeholder = "".join(f"image_{i}:<image>\n"
+                                    for i, _ in enumerate(image_urls, start=1))
+                prompt = f"<|User|>: {placeholder}{question}\n\n<|Assistant|>:"
+
+                return ModelRequestData(
+                    llm=llm,
+                    prompt=prompt,
+                    stop_token_ids=None,
+                    image_data=[fetch_image(url) for url in image_urls],
+                    chat_template=None,
+                )
+                        
+            
+            # Specify the maximum number of frames per video to be 4. This can be changed.
+            llm = LLM("Qwen/Qwen2-VL-2B-Instruct", limit_mm_per_prompt={"image": 4})
+
+            # Create the request payload.
+            video_frames = ... # load your video making sure it only has the number of frames specified earlier.
+            message = {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe this set of frames. Consider the frames to be a part of the same video."},
+                ],
+            }
+            for i in range(len(video_frames)):
+                base64_image = encode_image(video_frames[i]) # base64 encoding.
+                new_image = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                message["content"].append(new_image)
+
+            # Perform inference and log output.
+            outputs = llm.chat([message])
+
+            for o in outputs:
+                generated_text = o.outputs[0].text
+                print(generated_text)
+            pass
+        
         else:
             for i in range(N):
                 if cfg.runner_cfg.sub_mode == "beam_and_greedy":   # Generate Sub-Questions by Huggingface model
-                    print(i, 'main_question:', batch["text_input"])
-                    prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+                    # print(i, 'main_question:', batch["text_input"])
+                    # prompt = "Reasoning Question: is the banana ripe enough to eat? Perception Question: is the banana yellow?\nReasoning Question: is it cold outside? Perception Question: are any people wearing jackets?\nReasoning Question: {main_question}? Perception Question:"
+                    prompt = """You will be provided with:
+main question: {main_question}
+and video frames.
+Your goal is:
+To effectively analyze the video and answer the main question, you should break down (decompose) the main question into several sub-questions that address the key aspects of the video.
+You have to generate 5 sub-questions which those sub-questions can drive to the given main question. sub-questions should be about the entire video.
+Make sure that your sub-questions are based on the information you have.
+Print one sub-question per line.
+sub-questions:"""
                     text_inputs = [prompt.format(main_question=main_question.rstrip('?')) for main_question in batch["text_input"]]
                     
                     if "VideoLLaMA" in model_name:

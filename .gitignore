@@ -2,6 +2,8 @@
 Ask-Anything/
 flipped_vqa/
 llava
+DeepSeek-VL2/
+vllm/
 
 # api
 # utils/api_chatgpt.py

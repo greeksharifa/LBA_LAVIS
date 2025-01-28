@@ -23,7 +23,7 @@ datasets:
       - MME/eval_tool/Your_Results/celebrity.txt
       - MME/eval_tool/Your_Results/commonsense_reasoning.txt
       - MME/eval_tool/Your_Results/text_translation.txt
-      # - 'MME/sub_qas_val_hf_fewshot_vqaintrospect_unique.json'
+      - MME/sub_qas_val_hf_beam_and_greedy_N1_processed.json
     # test:
     #   - 'MMMU/mmmu_dataset_concatenated.pkl'
       # - 'MMMU/mmmu_json/test.json'

@@ -358,8 +358,7 @@ class BaseDataset(Dataset):
                     out = map_prediction_to_answer(out)
                 
             # convert to lower case string
-            out = str(out).lower()
-            out = out.rstrip('.').rstrip(',')
+            out = str(out).lower().rstrip('.').rstrip(',')
             
             if self.vqa_acc:
                 assert isinstance(target, list), f"Invalid target type (expected list): {type(target)}, {target}"
@@ -367,7 +366,7 @@ class BaseDataset(Dataset):
                 return 1.0 if out in target else 0.0
             else:
                 target = str(target).lower().rstrip('.').rstrip(',')
-                if target in string.ascii_lowercase + string.ascii_uppercase:
+                if not self.open_ended and target in string.ascii_lowercase + string.ascii_uppercase:
                     target = '(' + target + ')'
                 # if self.cnt < 3:
                 #     print('out, target : ', out, target)
@@ -377,6 +376,8 @@ class BaseDataset(Dataset):
             
         if not isinstance(outputs, list):# isinstance(outputs, (str, int)):
             acc = _get_acc(outputs, targets)
+            if "no" in outputs.lower() and "no" in targets and acc < 0.5:
+                import pdb; pdb.set_trace()
             return acc
         else:
             acc_list = []
