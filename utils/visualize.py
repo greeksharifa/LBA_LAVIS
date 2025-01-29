@@ -206,6 +206,28 @@ def visualize(results, dataset, cfg, output_dir, total_base_match):
             'class': class_label,
         })
         
+        # MME
+        if cfg.datasets_cfg.dataset_name == 'MME':
+            # ann_root_dir = dataset.ann_root_dir
+            category = '_'.join(result['question_id'].split('_')[:-1])
+            # key = os.path.join(ann_root_dir, category)
+            
+            for mme_idx, mme_eval_result in enumerate(dataset.mme_eval_results[category]):
+                mme_image_path = mme_eval_result.split('\t')[0]
+                mme_main_question = mme_eval_result.split('\t')[1]
+                if result['image_path'] == mme_image_path and main_question == mme_main_question:
+                    # import pdb; pdb.set_trace()
+                    dataset.mme_eval_results[category][mme_idx] += f'\t{result["text_output_lba"]}'
+                    break
+                
+    if cfg.datasets_cfg.dataset_name == 'MME':
+        os.makedirs(os.path.join(output_dir, 'eval_tool'), exist_ok=True)
+        for category, mme_eval_category_results in dataset.mme_eval_results.items():
+            # write list of str to file
+            with open(os.path.join(output_dir, 'eval_tool', f'{category}.txt'), 'w') as f:
+                print('saved eval_tool file path is ', os.path.join(output_dir, 'eval_tool', f'{category}.txt'))
+                f.write('\n'.join(mme_eval_category_results))
+        
     final_acc_list = [match / N for match in match_list]
     baseline_acc_list = [match / N for match in baseline_match_list]
     

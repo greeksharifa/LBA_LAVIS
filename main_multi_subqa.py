@@ -51,6 +51,7 @@ def parse_args():
     parser.add_argument('--gt_sub_qa', type=str, default="no", choices=["no", "right", "wrong"], help='determine right/wrong GT sub QA or not')
     # for open-ended, evaluate by GPT-3.5
     parser.add_argument('--eval_chatgpt', action='store_true', help='for open-ended, evaluate by GPT-3.5. only available in visualize mode')
+    parser.add_argument('--start', type=int, default=0, help='start index')
     
     parser.add_argument(
         "--options",
@@ -194,6 +195,8 @@ Answer: The answer is (A)\n"""
         wrong2right, right2wrong = 0, 0
         wrong, right = 0, 0
         for data_iter_step, batch in enumerate(metric_logger.log_every(dataloader, print_freq, header='')):
+            if data_iter_step < args.start:
+                continue
             # if all question_id saved in output_dir/files/questionid.json, skip
             for question_id in batch['question_id']:
                 saved_path = os.path.join(output_dir, f'files/{question_id}.json')
@@ -567,8 +570,9 @@ Answer: The answer is (A)\n"""
         result_path = os.path.join(output_dir, 'results_base.json')
         json.dump(results, open(result_path, 'w'), indent=4)
         print(f'results saved at {result_path}')
-        shutil.rmtree(os.path.join(output_dir, "files"))
-        print('temp files removed:', os.path.join(output_dir, "files"))
+        if args.start == 0:
+            shutil.rmtree(os.path.join(output_dir, "files"))
+            print('temp files removed:', os.path.join(output_dir, "files"))
         print('inference time : ', datetime.now()-s)
         s = datetime.now()
         

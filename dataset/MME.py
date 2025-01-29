@@ -84,18 +84,23 @@ class MMEDataset(BaseDataset):
                 self.sub_qas = json.load(open(ann_paths[-1], 'r'))
             ann_paths = ann_paths[:-1]
         
-        
+        self.ann_root_dir = os.path.dirname(ann_paths[0]) # /data/MME/eval_tool/Your_Results/
         self.annotation = []
         
         split = kwargs.get('split', 'val')
         print('MME split : ', split)
         
+        # for eval_tool
+        self.mme_eval_results = {}
+        
         for ann_path in ann_paths:
             lines = open(ann_path, 'r').readlines()
+            # remove empty lines
+            lines = [line.strip() for line in lines if line.strip() != '']
+            category = os.path.basename(ann_path).split('.')[0] # ex) scene.txt -> scene
+            self.mme_eval_results[category] = lines
+            
             for i, line in enumerate(lines):
-                if line.strip() == '':
-                    continue
-                
                 image_filename, question, gt_ans = line.strip().split('\t')
                 dir_name = os.path.basename(ann_path).split('.')[0]
                 if os.path.exists(os.path.join(vis_root, dir_name, image_filename)):
@@ -111,6 +116,7 @@ class MMEDataset(BaseDataset):
                     "text_input": question,
                     "question_id": question_id,
                     "gt_ans": gt_ans,
+                    "image_path": image_path,
                 }
                 
                 self.annotation.append(ann)
@@ -163,10 +169,13 @@ class MMEDataset(BaseDataset):
             "gt_ans": ann["gt_ans"],
             "sub_question_list": sub_questions,
             "sub_answer_list": sub_answers,
+            "image_path": ann["image_path"],
         }
 
+
+
 def main(ann_paths, split):
-    dataset = MMMUDataset(vis_processor=None, text_processor=None, vis_root='dummy_vis_root', 
+    dataset = MMEDataset(vis_processor=None, text_processor=None, vis_root='MME/MME_Benchmark/', 
                              ann_paths=ann_paths, num_data=-1, split=split)
     
     from matplotlib import pyplot as plt
@@ -179,11 +188,25 @@ def main(ann_paths, split):
         
     print('len(dataset):', len(dataset))
 
+
 if __name__ == '__main__':
     split = 'dev' # 'dev', 'validation', 'test'
     ann_paths = [
-        '/data/MMMU/mmmu_dataset_concatenated.pkl'
-        # 'MMMU/MMMU'
+        'MME/eval_tool/Your_Results/scene.txt',
+        'MME/eval_tool/Your_Results/code_reasoning.txt',
+        'MME/eval_tool/Your_Results/posters.txt',
+        'MME/eval_tool/Your_Results/count.txt',
+        'MME/eval_tool/Your_Results/artwork.txt',
+        'MME/eval_tool/Your_Results/color.txt',
+        'MME/eval_tool/Your_Results/landmark.txt',
+        'MME/eval_tool/Your_Results/position.txt',
+        'MME/eval_tool/Your_Results/existence.txt',
+        'MME/eval_tool/Your_Results/numerical_calculation.txt',
+        'MME/eval_tool/Your_Results/OCR.txt',
+        'MME/eval_tool/Your_Results/celebrity.txt',
+        'MME/eval_tool/Your_Results/commonsense_reasoning.txt',
+        'MME/eval_tool/Your_Results/text_translation.txt',
+        'MME/sub_qas_val_hf_beam_and_greedy_N1_processed.json',
     ]
     main(ann_paths, split)
     
