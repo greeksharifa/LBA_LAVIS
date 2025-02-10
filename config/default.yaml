@@ -1,0 +1,56 @@
+runner:
+  context     : "subqa"   # [subqa, default]
+  mode        : "default" # [subqa, default, CoT, blind, llm_judge, visualize] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
+  subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, "question_category"]
+
+  CoT_path    : 5 # number of CoT paths
+  llm_judge_mode: "subq" # [subq, suba, subqa]
+
+  # confidence
+  confidence_type: "min_prob" # "min_prob", "seq_ppl", "seq_conf"
+
+  N           : 5 # number of sub-qas to generate
+  M           : 2 # number of curated sub-qas
+  K           : 4 # number of reasoning paths
+  early_stop_K: True # if confidence is high enough, early stop 
+
+  seed: 42
+  start_pnt: -1 # -1 or 0 to 100. -1: all. 0: all, but do not collect results. else: start from percent%
+  end_pnt: 100
+
+  # output and logging
+  output_dir  : output/
+  subqa_dir   : subqa/
+  print_freq  : 20
+  logging_level: INFO # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+
+dataset:
+  dataset_name: "your_dataset_name" # [NExTQA, ...]
+  root_dir: /data/
+  num_data:
+    val: 200
+    test: 2000
+  split: test # val or test
+
+  api:
+    api_key_path: api_key.json
+    
+
+model:
+  HF_HOME: /model/
+  
+  device_map: "auto" # ["auto", "cuda", 0, ...]
+
+  fps: 1
+  min_n_frms: 1
+
+  # vllm
+  tensor_parallel_size: 4
+  gpu_memory_utilization: 95
+  swap_space: 16
+
+  max_num_seqs: 512
+  max_new_tokens: 1024
+  temperature: 0.0
+  sampling_n: 1
