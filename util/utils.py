@@ -10,7 +10,7 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 
-from utils.colors import Colors
+from util.colors import Colors
 
 
 def setup_seeds(config):
@@ -26,7 +26,7 @@ def setup_seeds(config):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='LBA method')
-    parser.add_argument("--cfg-path", default='configs/default.yaml', help="path to configuration file.")
+    parser.add_argument("--cfg-path", default='config/default.yaml', help="path to configuration file.")
 
     # for open-ended, evaluate by GPT-3.5
     # parser.add_argument('--eval_chatgpt', action='store_true', help='for open-ended, evaluate by GPT-3.5. only available in visualize mode')

@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from utils.dist_utils import is_main_process
+# from util.dist_utils import is_main_process
 
 def setup_logger(output_dir, level=logging.INFO):
     if isinstance(output_dir, str):
