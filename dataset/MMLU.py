@@ -1,0 +1,288 @@
+from typing import List
+import json
+from pathlib import Path
+import os
+import pandas as pd
+import random
+
+from datasets import load_dataset
+
+from dataset.base_dataset import BaseDataset
+
+
+TASK_NAME_MAPPING = {
+    "stem": [
+        "abstract_algebra",
+        "anatomy",
+        "astronomy",
+        "college_biology",
+        "college_chemistry",
+        "college_computer_science",
+        "college_mathematics",
+        "college_physics",
+        "computer_security",
+        "conceptual_physics",
+        "electrical_engineering",
+        "elementary_mathematics",
+        "high_school_biology",
+        "high_school_chemistry",
+        "high_school_computer_science",
+        "high_school_mathematics",
+        "high_school_physics",
+        "high_school_statistics",
+        "machine_learning",
+    ],
+    "Humanities": [
+        "formal_logic",
+        "high_school_european_history",
+        "high_school_us_history",
+        "high_school_world_history",
+        "international_law",
+        "jurisprudence",
+        "logical_fallacies",
+        "moral_disputes",
+        "moral_scenarios",
+        "philosophy",
+        "prehistory",
+        "professional_law",
+        "world_religions",
+    ],
+    "other": [
+        "business_ethics",
+        "college_medicine",
+        "human_aging",
+        "management",
+        "marketing",
+        "medical_genetics",
+        "miscellaneous",
+        "nutrition",
+        "professional_accounting",
+        "professional_medicine",
+        "virology",
+        "global_facts",
+        "clinical_knowledge",
+    ],
+    "social": [
+        "econometrics",
+        "high_school_geography",
+        "high_school_government_and_politics",
+        "high_school_macroeconomics",
+        "high_school_microeconomics",
+        "high_school_psychology",
+        "human_sexuality",
+        "professional_psychology",
+        "public_relations",
+        "security_studies",
+        "sociology",
+        "us_foreign_policy",
+    ],
+}
+
+TASK_CATEGORY_MAPPING = {}
+for category, tasks in TASK_NAME_MAPPING.items():
+    for task in tasks:
+        TASK_CATEGORY_MAPPING[task] = category
+
+class MMLU(BaseDataset):
+    def __init__(self, cfg, **kwargs):
+        super().__init__(cfg, **kwargs)
+        
+        # Load few-shot samples from dev set
+        self.few_shot_samples = self.load_few_shot_samples()
+        
+    def load_few_shot_samples(self):
+        """Load few-shot samples from dev set"""
+        few_shot_samples = {}
+        
+        # Set random seed for reproducible few-shot sample selection
+        random.seed(42)
+        
+        # Load dev data for few-shot examples
+        dev_ann_paths = [self.root_dir / ann_path for ann_path in self.cfg.dataset_cfg.ann_paths.get("val", [])]
+        
+        if not dev_ann_paths:
+            self.logger.warning("No dev set found for few-shot samples")
+            import sys
+            sys.exit()
+            return few_shot_samples
+            
+        dev_ann_paths = dev_ann_paths[0].glob("*.csv")
+        dev_ann_paths = sorted(dev_ann_paths)
+        
+        for ann_path in dev_ann_paths:
+            # sub_category = ann_path.stem.replace("_val", "")
+            sub_category = ann_path.stem[:-4]
+            data = pd.read_csv(ann_path, names=["question", "A", "B", "C", "D", "answer"])
+            
+            # Select 3 random samples from each category for few-shot examples
+            num_samples = min(3, len(data))
+            selected_indices = random.sample(range(len(data)), num_samples)
+            
+            category_samples = []
+            for idx in selected_indices:
+                row = data.iloc[idx]
+                question = row["question"]
+                choices = row[["A", "B", "C", "D"]].tolist()
+                answer = row["answer"]
+                
+                # Format using base_prompt format
+                if self.cfg.dataset_cfg.question_type == "multiple_choice":
+                    prompt = f"{question}\n"
+                    for i, candidate in enumerate(choices):
+                        prompt += f"{chr(65 + i)}. {candidate}\n"
+                    prompt += f"\nAnswer with the option's letter from the given choices directly.\n{answer}"
+                else:  # open_ended
+                    prompt = f"{question}\nAnswer the question using a single word or phrase.\n{answer}"
+                
+                category_samples.append(prompt)
+            
+            few_shot_samples[sub_category] = category_samples
+            
+        self.logger.info(f"Loaded few-shot samples for {len(few_shot_samples)} categories")
+        return few_shot_samples
+
+    def load_annotation(self, ann_paths: List[Path]) -> None:
+        """
+        dev	    val	    test
+    	285	    1531	14042
+        
+        # no header
+        # question, A, B, C, D, answer
+        The cyclic subgroup of Z_24 generated by 18 has order	4	8	12	6	A
+        Find the order of the factor group Z_6/<3>.	2	3	6	12	B
+        Statement 1 | A permutation that is a product of m even permutations and n odd permutations is an even permutation if and only if n is even. Statement 2 | Every group is isomorphic to a group of permutations.	True, True	False, False	True, False	False, True	A
+        Find the order of the factor group (Z_4 x Z_12)/(<2> x <2>)	2	3	4	12	C
+        Find the maximum possible order for some element of Z_4 x Z_6.	4	6	12	24	C
+        Statement 1 | The symmetric group S_3 is cyclic. Statement 2 | Every group is isomorphic to some group of permutations.	True, True	False, False	True, False	False, True	D
+        Statement 1 | If a and b are elements of finite order in an Abelian group, then |ab| is the lcm (|a|,|b|). Statement 2 | If g is a group element and g^n = e, then |g| = n.	True, True	False, False	True, False	False, True	B
+        Statement 1 | If f is a homomorphism from G to K and H is normal in G then f(H) is normal in K. Statement 2 | If f is a homomorphism from G to a group and H is finite subgroup of G, then |f(H)| divides |H|.	True, True	False, False	True, False	False, True	D
+        Find the maximum possible order for an element of S_n for n = 7.	6	12	30	105	B
+        Statement 1 | Every integral domain has a field of quotients. Statement 2 | A polynomial of degree n over a ring can have at most n zeros counting multiplicity.	True, True	False, False	True, False	False, True	C
+        Statement 1 | If a group has an element of order 10, then the number of elements of order 10 is divisible by 4. Statement 2 | If m and n are positive integers and phi is the Euler phi function, then phi(mn) = phi(m)phi(n).	True, True	False, False	True, False	False, True	B
+        """
+        """
+        /data/MMLU/MMLU/val/international_law_val.csv                                   : 12
+        /data/MMLU/MMLU/val/anatomy_val.csv                                             : 13
+        /data/MMLU/MMLU/val/logical_fallacies_val.csv                                   : 17
+        /data/MMLU/MMLU/val/high_school_us_history_val.csv                              : 21
+        /data/MMLU/MMLU/val/world_religions_val.csv                                     : 18
+        /data/MMLU/MMLU/val/conceptual_physics_val.csv                                  : 25
+        /data/MMLU/MMLU/val/professional_psychology_val.csv                             : 68
+        /data/MMLU/MMLU/val/professional_accounting_val.csv                             : 30
+        /data/MMLU/MMLU/val/elementary_mathematics_val.csv                              : 40
+        /data/MMLU/MMLU/val/college_chemistry_val.csv                                   : 7
+        /data/MMLU/MMLU/val/computer_security_val.csv                                   : 10
+        /data/MMLU/MMLU/val/human_aging_val.csv                                         : 22
+        /data/MMLU/MMLU/val/high_school_microeconomics_val.csv                          : 25
+        /data/MMLU/MMLU/val/nutrition_val.csv                                           : 32
+        /data/MMLU/MMLU/val/moral_scenarios_val.csv                                     : 99
+        /data/MMLU/MMLU/val/moral_disputes_val.csv                                      : 37
+        /data/MMLU/MMLU/val/high_school_biology_val.csv                                 : 31
+        /data/MMLU/MMLU/val/high_school_computer_science_val.csv                        : 8
+        /data/MMLU/MMLU/val/us_foreign_policy_val.csv                                   : 10
+        /data/MMLU/MMLU/val/medical_genetics_val.csv                                    : 10
+        /data/MMLU/MMLU/val/abstract_algebra_val.csv                                    : 10
+        /data/MMLU/MMLU/val/electrical_engineering_val.csv                              : 15
+        /data/MMLU/MMLU/val/college_computer_science_val.csv                            : 10
+        /data/MMLU/MMLU/val/college_physics_val.csv                                     : 10
+        /data/MMLU/MMLU/val/virology_val.csv                                            : 17
+        /data/MMLU/MMLU/val/high_school_physics_val.csv                                 : 16
+        /data/MMLU/MMLU/val/college_biology_val.csv                                     : 15
+        /data/MMLU/MMLU/val/high_school_government_and_politics_val.csv                 : 20
+        /data/MMLU/MMLU/val/management_val.csv                                          : 10
+        /data/MMLU/MMLU/val/human_sexuality_val.csv                                     : 11
+        /data/MMLU/MMLU/val/security_studies_val.csv                                    : 26
+        /data/MMLU/MMLU/val/philosophy_val.csv                                          : 33
+        /data/MMLU/MMLU/val/prehistory_val.csv                                          : 34
+        /data/MMLU/MMLU/val/econometrics_val.csv                                        : 11
+        /data/MMLU/MMLU/val/public_relations_val.csv                                    : 11
+        /data/MMLU/MMLU/val/high_school_macroeconomics_val.csv                          : 42
+        /data/MMLU/MMLU/val/professional_medicine_val.csv                               : 30
+        /data/MMLU/MMLU/val/formal_logic_val.csv                                        : 13
+        /data/MMLU/MMLU/val/miscellaneous_val.csv                                       : 85
+        /data/MMLU/MMLU/val/high_school_mathematics_val.csv                             : 28
+        /data/MMLU/MMLU/val/machine_learning_val.csv                                    : 10
+        /data/MMLU/MMLU/val/high_school_world_history_val.csv                           : 25
+        /data/MMLU/MMLU/val/college_medicine_val.csv                                    : 21
+        /data/MMLU/MMLU/val/jurisprudence_val.csv                                       : 10
+        /data/MMLU/MMLU/val/global_facts_val.csv                                        : 9
+        /data/MMLU/MMLU/val/high_school_statistics_val.csv                              : 22
+        /data/MMLU/MMLU/val/high_school_geography_val.csv                               : 21
+        /data/MMLU/MMLU/val/clinical_knowledge_val.csv                                  : 28
+        /data/MMLU/MMLU/val/high_school_psychology_val.csv                              : 59
+        /data/MMLU/MMLU/val/professional_law_val.csv                                    : 169
+        /data/MMLU/MMLU/val/high_school_chemistry_val.csv                               : 21
+        /data/MMLU/MMLU/val/sociology_val.csv                                           : 21
+        /data/MMLU/MMLU/val/college_mathematics_val.csv                                 : 10
+        /data/MMLU/MMLU/val/marketing_val.csv                                           : 24
+        /data/MMLU/MMLU/val/high_school_european_history_val.csv                        : 17
+        /data/MMLU/MMLU/val/astronomy_val.csv                                           : 15
+        /data/MMLU/MMLU/val/business_ethics_val.csv                                     : 10
+        """
+        ann_paths = ann_paths[0].glob("*.csv")
+        ann_paths = sorted(ann_paths)
+        for ann_path in ann_paths:
+            data = pd.read_csv(ann_path, names=["question", "A", "B", "C", "D", "answer"])
+            for idx, row in data.iterrows():
+                question = row["question"]
+                choices = row[["A", "B", "C", "D"]].tolist()
+                answer = row["answer"]
+                sub_category = ann_path.stem[:-4]
+                # sub_category = ann_path.stem.replace(f"_{self.cfg.dataset_cfg.split}", "")
+                self.annotation.append(
+                    {
+                        "question": question, 
+                        "choices": choices, 
+                        "answer": answer,
+                        "sub_category": sub_category,
+                        # "type": TASK_CATEGORY_MAPPING[sub_category],
+                    }
+                )
+
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+        
+        vpath = None
+        frms = None
+        
+        sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list = self.get_subqas(ann)
+
+        question_id, main_q, gt_ans, sub_q_list, sub_a_list = self.preprocess_annotation(
+            ann["qid"], ann["question"], ann["answer"], sub_q_list, sub_a_list
+        )
+        
+        # Get few-shot samples for the current sub-category
+        few_shot_samples = self.few_shot_samples.get(ann["sub_category"], [])
+        few_shot_str = "\n\n".join(few_shot_samples) if few_shot_samples else ""
+
+        return {
+            "vision": frms, 
+            # "vision_supple": frms_supple,
+            "vpath": vpath,
+            "main_q": main_q,
+            "question_id": question_id,
+            "gt_ans": gt_ans,
+            "candidate_list": ann["choices"],
+            # "type": 
+            # "vid": not exists
+
+            "sub_q_list": sub_q_list,
+            "sub_a_list": sub_a_list,
+            "sub_a_conf_list": sub_a_conf_list,
+            "sub_a_ppl_list": sub_a_ppl_list,
+            "sub_a_min_prob_list": sub_a_min_prob_list,
+            "few_shot_samples": few_shot_str,
+        }
+        
+
+
+if __name__ == "__main__":
+    from datasets import load_dataset
+    dataset = load_dataset(
+        "cais/mmlu", 
+        cache_dir='/data/MMLU/mmlu_huggingface',
+        config="abstract_algebra"
+    )
+
+    import pdb; pdb.set_trace()
+    print(dataset)
