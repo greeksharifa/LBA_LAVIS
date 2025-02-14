@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import random
 
-from datasets import load_dataset
+from dataset import load_dataset
 
 from dataset.base_dataset import BaseDataset
 
@@ -87,8 +87,9 @@ class MMLU(BaseDataset):
     def __init__(self, cfg, **kwargs):
         super().__init__(cfg, **kwargs)
         
-        # Load few-shot samples from dev set
-        self.few_shot_samples = self.load_few_shot_samples()
+        if self.cfg.runner_cfg.few_shot:
+            # Load few-shot samples from dev set
+            self.few_shot_samples = self.load_few_shot_samples()
         
     def load_few_shot_samples(self):
         """Load few-shot samples from dev set"""
@@ -241,39 +242,40 @@ class MMLU(BaseDataset):
 
     def __getitem__(self, index):
         ann = self.annotation[index]
-        
-        vpath = None
-        frms = None
-        
-        sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list = self.get_subqas(ann)
 
-        question_id, main_q, gt_ans, sub_q_list, sub_a_list = self.preprocess_annotation(
-            ann["qid"], ann["question"], ann["answer"], sub_q_list, sub_a_list
+        question_id, main_q, gt_ans = self.preprocess_annotation(
+            ann["qid"], ann["question"], ann["answer"]
         )
         
-        # Get few-shot samples for the current sub-category
-        few_shot_samples = self.few_shot_samples.get(ann["sub_category"], [])
-        few_shot_str = "\n\n".join(few_shot_samples) if few_shot_samples else ""
-
-        return {
-            "vision": frms, 
-            # "vision_supple": frms_supple,
-            "vpath": vpath,
+        result = {
             "main_q": main_q,
             "question_id": question_id,
             "gt_ans": gt_ans,
             "candidate_list": ann["choices"],
-            # "type": 
-            # "vid": not exists
-
-            "sub_q_list": sub_q_list,
-            "sub_a_list": sub_a_list,
-            "sub_a_conf_list": sub_a_conf_list,
-            "sub_a_ppl_list": sub_a_ppl_list,
-            "sub_a_min_prob_list": sub_a_min_prob_list,
-            "few_shot_samples": few_shot_str,
+            "question_type": self.cfg.dataset_cfg.question_type,
         }
         
+        # if subqa
+        if self.cfg.runner_cfg.mode != "subqa":
+            sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list = self.get_subqas(ann)
+
+            result.update({
+                "sub_q_list": sub_q_list,
+                "sub_a_list": sub_a_list,
+                "sub_a_conf_list": sub_a_conf_list,
+                "sub_a_ppl_list": sub_a_ppl_list,
+                "sub_a_min_prob_list": sub_a_min_prob_list,
+            })
+        
+        if self.cfg.runner_cfg.few_shot:
+            # Get few-shot samples for the current sub-category
+            few_shot_samples = self.few_shot_samples.get(ann["sub_category"], [])
+            few_shot_str = "\n\n".join(few_shot_samples) if few_shot_samples else ""
+            result.update({
+                "few_shot_samples": few_shot_str,
+            })
+        
+        return result
 
 
 if __name__ == "__main__":

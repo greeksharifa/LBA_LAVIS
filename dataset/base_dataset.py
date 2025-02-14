@@ -87,7 +87,7 @@ class BaseDataset(ABC):
         self.logger.info(f"Loaded {len(self.annotation)} data")
 
         # load base answers if exists
-        self.base_answers = self.load_base_answers_from_path(model_cfg.base_answer_path, dataset_cfg.dataset_name)
+        # self.base_answers = self.load_base_answers_from_path(model_cfg.base_answer_path, dataset_cfg.dataset_name)
 
     @abstractmethod
     def load_annotation(self, ann_paths: List[Path]):
@@ -100,62 +100,62 @@ class BaseDataset(ABC):
     def __len__(self):
         return len(self.annotation)
 
-    # def _add_instance_ids(self, key, prefix):
-    #     for idx, ann in enumerate(self.annotation):
-    #         if key not in ann:
-    #             ann[key] = prefix + str(idx)
+    def _add_instance_ids(self, key, prefix):
+        for idx, ann in enumerate(self.annotation):
+            if key not in ann:
+                ann[key] = prefix + str(idx)
     
-    # def preprocess_annotation(self, question_id, main_q, gt_ans, sub_q_list, sub_a_list):
-    #     question_id = str(question_id)
-    #     main_q = main_q.strip() #.rstrip("?") + "?"
+    def collater(self, samples):
+        result = {}
+        for key in samples[0].keys():
+            result[key] = [sample[key] for sample in samples]
         
-    #     if self.cfg.dataset_cfg.question_type != "open_ended":
-    #         gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
+        return result
         
-    #     if self.cfg.dataset_cfg.vqa_acc:
-    #         gt_ans = [g.strip().lower() for g in gt_ans]
-    #     else:
-    #         gt_ans = gt_ans.strip().lower()
+    def preprocess_annotation(self, question_id, main_q, gt_ans):
+        question_id = str(question_id)
+        main_q = main_q.strip() #.rstrip("?") + "?"
         
-    #     if sub_q_list:
-    #         sub_q_list = [sub_q.strip().rstrip("?") + "?" for sub_q in sub_q_list]
-    #     if sub_a_list:
-    #         sub_a_list = [sub_a.strip().rstrip(".") + "." for sub_a in sub_a_list]
+        if self.cfg.dataset_cfg.question_type != "open_ended":
+            gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
         
-    #     return question_id, main_q, gt_ans, sub_q_list, sub_a_list
+        if self.cfg.dataset_cfg.vqa_acc:
+            gt_ans = [g.strip().lower() for g in gt_ans]
+        else:
+            gt_ans = gt_ans.strip().lower()
+        
+        return question_id, main_q, gt_ans
       
-    # def get_subqas(self, ann):
-    #     question_id = ann["qid"]
-    #     sub_qas = self.sub_qas[question_id] if self.sub_qas else None
-    #     if sub_qas is None:
-    #         return None, None, None, None, None
+    def get_subqas(self, ann):
+        question_id = ann["qid"]
+        sub_qas = self.sub_qas[question_id] if self.sub_qas else None
+        if sub_qas is None:
+            return None, None, None, None, None
         
-    #     sub_q_list = sub_qas["sub_q_list"]
-    #     sub_a_list = sub_qas["sub_a_list"]
-    #     sub_a_conf_list = sub_qas["sub_a_conf_list"]
-    #     sub_a_ppl_list = sub_qas["sub_a_ppl_list"]
-    #     sub_a_min_prob_list = sub_qas["sub_a_min_prob_list"]
+        sub_q_list = sub_qas["sub_q_list"]
+        sub_a_list = sub_qas["sub_a_list"]
+        sub_a_conf_list = sub_qas["sub_a_conf_list"]
+        sub_a_ppl_list = sub_qas["sub_a_ppl_list"]
+        sub_a_min_prob_list = sub_qas["sub_a_min_prob_list"]
         
         
-    #     if self.cfg.runner_cfg.get("LLM_Judge", False):
-    #         # self.logger.info("Enable: using sub-QA judged by LLM")
-    #         mode = self.cfg.runner_cfg.get("LLM_Judge", False)
-    #         indices = sub_qas[f"judged_{mode}_indices"]
-    #         # get element from indices
-    #         sub_q_list = [sub_q_list[i] for i in indices]
-    #         sub_a_list = [sub_a_list[i] for i in indices]
-    #         sub_a_conf_list = [sub_a_conf_list[i] for i in indices]
-    #         sub_a_ppl_list = [sub_a_ppl_list[i] for i in indices]
-    #         sub_a_min_prob_list = [sub_a_min_prob_list[i] for i in indices]
-            
-    #     return sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list
+        if self.cfg.runner_cfg.get("LLM_Judge", False):
+            # self.logger.info("Enable: using sub-QA judged by LLM")
+            mode = self.cfg.runner_cfg.get("LLM_Judge", False)
+            indices = sub_qas[f"judged_{mode}_indices"]
+            # get element from indices
+            sub_q_list = [sub_q_list[i] for i in indices]
+            sub_a_list = [sub_a_list[i] for i in indices]
+            sub_a_conf_list = [sub_a_conf_list[i] for i in indices]
+            sub_a_ppl_list = [sub_a_ppl_list[i] for i in indices]
+            sub_a_min_prob_list = [sub_a_min_prob_list[i] for i in indices]
 
-    # def collater(self, samples):
-    #     result = {}
-    #     for key in samples[0].keys():
-    #         result[key] = [sample[key] for sample in samples]
-        
-    #     return result
+        # preprocess sub-qas
+        sub_q_list = [sub_q.strip().rstrip("?") + "?" for sub_q in sub_q_list]
+        sub_a_list = [sub_a.strip().rstrip(".") + "." for sub_a in sub_a_list]
+            
+        return sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list
+
 
     # def cleanse_prediction(self, prediction, main_question):
     #     prediction = prediction.strip().lower().rstrip(".")

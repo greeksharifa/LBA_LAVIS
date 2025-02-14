@@ -27,16 +27,12 @@ class Config:
                 "model": {},
             }),
             self._build_opt_list(self.args.options)
-        )
-        if args.visualize_only or args.qualitative_result:
-            config = OmegaConf.load(f"{user_config.runner.output_dir}/config.json")
-        
+        )        
 
         # runner_config = self.build_runner_config(config)
         model_config = self.build_model_config(config, user_config.model)
         dataset_config = self.build_dataset_config(config, user_config.dataset)
         
-        # LBA TODO: dataset_config랑 user_config 순서를 바꿔야 함
 
         self.config = OmegaConf.merge(config, model_config, dataset_config, user_config)
         if self.config.model.get("cache_dir", None) is None:
@@ -44,8 +40,8 @@ class Config:
             
 
         # check consistency
-        if self.args.visualize_only and self.runner_cfg.output_dir == "output":
-            raise ValueError("visualize_only is True, but output_dir is default directory ('output'). Please specify the output directory.")
+        # if self.args.visualize_only and self.runner_cfg.output_dir == "output":
+        #     raise ValueError("visualize_only is True, but output_dir is default directory ('output'). Please specify the output directory.")
         
         # if self.runner_cfg.get("early_stop_K", False):
         #     logger = logging.getLogger("C2R")
@@ -67,7 +63,7 @@ class Config:
             )
         
         model_config = OmegaConf.merge(
-            OmegaConf.load(f'configs/models/{model_name}.yaml'),
+            OmegaConf.load(f'config/models/{model_name}.yaml'),
             user_model_config
         )
         return model_config
@@ -83,7 +79,7 @@ class Config:
             )
         
         dataset_config = OmegaConf.merge(
-            OmegaConf.load(f'configs/datasets/{dataset_name}.yaml'),
+            OmegaConf.load(f'config/datasets/{dataset_name}.yaml'),
             user_dataset_config
         )
         return dataset_config

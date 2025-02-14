@@ -1,13 +1,14 @@
 runner:
   context     : "subqa"   # [subqa, default]
   mode        : "default" # [subqa, default, CoT, blind, llm_judge, visualize] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
-  subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, "question_category"]
+  subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, QC_K, QC_C, QC_Q] | question category: [Knowledge, C, Question]
 
   CoT_path    : 5 # number of CoT paths
   llm_judge_mode: "subq" # [subq, suba, subqa]
+  few_shot    : "" # [subq, base, refined] | divide by comma. example: "subq,refined"
 
   # confidence
-  confidence_type: "min_prob" # "min_prob", "seq_ppl", "seq_conf"
+  confidence_type: "min_prob" # "token_min_prob", "seq_ppl", "seq_conf"
 
   N           : 5 # number of sub-qas to generate
   M           : 2 # number of curated sub-qas
@@ -26,12 +27,12 @@ runner:
 
 
 dataset:
-  dataset_name: "your_dataset_name" # [NExTQA, ...]
+  dataset_name: "dummy_dataset_name" # [NExTQA, ...]
   root_dir: /data/
   num_data:
     val: 200
     test: 2000
-  split: test # val or test
+  split: test # [val, test]
 
   api:
     api_key_path: api_key.json

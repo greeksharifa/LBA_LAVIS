@@ -27,7 +27,7 @@ def load_dataset(cfg: Config):#, output_dir: Path):
         if v is None:
             return "None"
         elif isinstance(v, list):
-            return "[]" if len(v) == 0 else f"[{len(v)}, {_data_print(v[0])}]"
+            return "list of length: []" if len(v) == 0 else f"list of length: [{len(v)}, {_data_print(v[0])}]"
         elif hasattr(v, "shape"):
             return v.shape
         elif hasattr(v, "size"):

@@ -11,7 +11,7 @@ def setup_logger(output_dir, level=logging.INFO):
     logger.setLevel(logging.DEBUG) # 모든 레벨의 로그를 Handler들에게 전달해야 합니다.
 
     formatter = logging.Formatter(
-        '%(asctime)s [%(levelname)5s] [%(pathname)40s:%(lineno)3d]\t| %(message)s', 
+        '%(asctime)s [%(levelname)5s] [%(pathname)50s:%(lineno)d]\t| %(message)s', 
         '%Y-%m-%d %H:%M:%S'
     )
 

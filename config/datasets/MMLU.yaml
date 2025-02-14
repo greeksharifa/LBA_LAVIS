@@ -24,4 +24,4 @@ dataset:
 
   sub_qas_root: ./sub_qas/MMLU/
 
-  vis_root: None # huggingface dataset path
+  vis_root: None
