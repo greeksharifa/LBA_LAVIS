@@ -8,7 +8,11 @@ def setup_logger(output_dir, level=logging.INFO):
         output_dir = Path(output_dir)
 
     logger = logging.getLogger("C2R")
-    logger.setLevel(logging.DEBUG) # 모든 레벨의 로그를 Handler들에게 전달해야 합니다.
+    # logger.setLevel(logging.DEBUG) # 모든 레벨의 로그를 Handler들에게 전달해야 합니다.
+    
+    # Prevent duplicate logs by clearing existing handlers and disabling propagation
+    logger.handlers.clear()
+    logger.propagate = False
 
     formatter = logging.Formatter(
         '%(asctime)s [%(levelname)5s] [%(pathname)50s:%(lineno)d]\t| %(message)s', 

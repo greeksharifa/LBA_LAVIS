@@ -243,13 +243,13 @@ class MMLU(BaseDataset):
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        question_id, main_q, gt_ans = self.preprocess_annotation(
+        qid, main_q, gt_ans = self.preprocess_annotation(
             ann["qid"], ann["question"], ann["answer"]
         )
         
         result = {
             "main_q": main_q,
-            "question_id": question_id,
+            "qid": qid,
             "gt_ans": gt_ans,
             "candidate_list": ann["choices"],
             "question_type": self.cfg.dataset_cfg.question_type,

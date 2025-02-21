@@ -1,3 +1,7 @@
+# subqa and output
+subqa/
+output/
+
 # uv
 .venv/
 .python-version

@@ -1,3 +1,3 @@
 git rm --cached -r ./
 git add .
-git commit --date "Fri 14 Feb 2025 14:52:15 KST" -m "MMLU"
+git commit --date "Fri 21 Feb 2025 20:21:24 KST" -m "generate sub-qas"

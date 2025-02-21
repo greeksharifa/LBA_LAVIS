@@ -6,8 +6,8 @@ model:
   cache_dir: /model/Qwen/
   # device_map: "auto"
   use_flash_attn_2: True
-  batch_size: 8
-  tensor_parallel_size: 2
+  # batch_size: 8
+  # tensor_parallel_size: 2
 
   max_n_frms: 32
   iterate_subq: False
