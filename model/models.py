@@ -30,10 +30,10 @@ class C2RFramework(ABC):
 
         self.llm = self.load_model_and_processor(model_id, cache_dir)
 
-        self.model.generation_config.do_sample=False
-        self.model.generation_config.temperature=None
-        self.model.generation_config.top_p=None
-        self.model.generation_config.top_k=None
+        # self.model.generation_config.do_sample=False
+        # self.model.generation_config.temperature=None
+        # self.model.generation_config.top_p=None
+        # self.model.generation_config.top_k=None
     
     # @abstractmethod
     def load_model_and_processor(self, model_id: str, cache_dir: str):
@@ -43,6 +43,7 @@ class C2RFramework(ABC):
             tensor_parallel_size=self.cfg.model_cfg.tensor_parallel_size, 
             gpu_memory_utilization=self.cfg.model_cfg.gpu_memory_utilization, 
             swap_space=self.cfg.model_cfg.swap_space,
+            max_num_seqs=self.cfg.model_cfg.max_num_seqs,
         )
         return llm
         # pass
@@ -62,9 +63,10 @@ class C2RFramework(ABC):
 
     def generate(self, prompts: List[Any]) -> List[Any]:
         sampling_params = SamplingParams(
-            max_num_seqs=self.cfg.model_cfg.max_num_seqs,
-            max_new_tokens=self.cfg.model_cfg.max_new_tokens,
+            n=1,
+            max_tokens=self.cfg.model_cfg.max_tokens,
             temperature=self.cfg.model_cfg.temperature,
+            logprobs=0,
         )
         outputs = self.llm.generate(prompts, sampling_params)
         return outputs
@@ -112,7 +114,7 @@ class C2RFramework(ABC):
                                  ) -> Tuple[List[str], List[float], List[float], List[float], List[str]]:
         pass
     
-class Qwen2_5VL(C2RFramework):
-    def __init__(self, cfg: Config):
-        super().__init__(cfg)
-        # self.model = self.load_model_and_processor(cfg.model_cfg.model_id, cfg.model_cfg.cache_dir)
+# class Qwen2_5VL(C2RFramework):
+#     def __init__(self, cfg: Config):
+#         super().__init__(cfg)
+#         # self.model = self.load_model_and_processor(cfg.model_cfg.model_id, cfg.model_cfg.cache_dir)

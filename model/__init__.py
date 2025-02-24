@@ -12,7 +12,8 @@ MODEL_REGISTRY = {
     # "qwen2-vl-7b": Qwen2VL,
 
     "qwen2.5-vl-7b": C2RFramework,
-    "qwen2.5-vl-3b": Qwen2_5VL,
+    "qwen3-vl-8b": C2RFramework,
+    # "qwen2.5-vl-3b": Qwen2_5VL,
     
     # "GPT4o": GPT4o,
 }

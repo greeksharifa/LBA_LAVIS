@@ -1,0 +1,26 @@
+model:
+  model_name: qwen3-vl-8b
+  model_id: Qwen/Qwen3-VL-8B-Instruct
+  subqa_model_name: qwen3-vl-8b
+
+  cache_dir: /model/Qwen/
+  # device_map: "auto"
+  use_flash_attn_2: True
+  # batch_size: 8
+  # tensor_parallel_size: 2
+
+  max_n_frms: 32
+  iterate_subq: False
+
+  base_answer_path: 
+    Default  : ./dummy_path/dummy.json
+    # DramaQA  : /home/ywjang/C2R/output/DramaQA/Qwen3_M=1_prompt_v0.10/results.json
+    # EgoSchema: /home/ywjang/C2R/output/EgoSchema/Qwen3_M=2/results.json
+    # GSM8k    : /home/ywjang/C2R/output/GSM8k/
+    # MME      : /home/ywjang/C2R/output/MME/Qwen3_M=1_prompt_v0.10/results.json
+    # MMLU     : /home/ywjang/C2R/output/MMLU/Base_Qwen3-7b/results.json
+    # MMLUPro  : /home/ywjang/C2R/output/MMLUPro/Qwen3_M=2_prompt=v0.10/results.json
+    # MMMU     : /home/ywjang/C2R/output/MMMU/Qwen3_M=2_prompt_v0.10/results.json
+    # ScienceQA: /home/ywjang/C2R/output/ScienceQA/Qwen3_M=2_prompt=v0.10/results.json
+    # StrategyQA: /home/ywjang/C2R/output/StrategyQA/Qwen3-7b_M=1/results.json
+    # VQAIntrospect: /home/ywjang/C2R/output/VQAIntrospect/Qwen3-7b_GT/results.json

@@ -1,6 +1,7 @@
 import logging
 import sys
 import json
+import math
 from collections import OrderedDict
 from pathlib import Path
 from pprint import pprint
@@ -10,12 +11,12 @@ from torch.utils.data import DataLoader
 
 from config.configs import Config
 from dataset import load_dataset
-from model import get_model
+from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir
 from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
 from prompt.prompts import get_subq_prompt
-# from utils.misc import MetricLogger
+from prompt.postprocess import format_vllm_outputs
 # from visualize import visualize, visualize_base, record_num_tokens
 
 def main():
@@ -52,17 +53,22 @@ def main():
     logger.info(f"Output directory: {output_dir}")
     # run
     if runner_cfg.mode != "visualize":
-        model = get_model(cfg)
+        # model = get_model(cfg)
+        model = C2RFramework(cfg)
         vllm_prompts = []
+        qids = []
         for data_iter_idx, sample in enumerate(dataset): # dataloader
+            qids.append(sample["qid"])
             # def _run():
-            bsz = len(sample["qid"])
-            candidate_list = sample["candidate_list"] if "candidate_list" in sample else [None] * bsz
+            # bsz = len(sample["qid"])
+            # candidate_list = sample["candidate_list"] if "candidate_list" in sample else [None] * bsz
+            candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
             if runner_cfg.mode == "blind":
-                sample["vision"] = [None] * bsz
+                # sample["vision"] = [None] * bsz
+                sample["vision"] = None
 
             # generate prompt to vllm
-            if runner_cfg.mode == "subqa":
+            if runner_cfg.mode == "subq":
                 main_q = sample["main_q"]
                 prompt = get_subq_prompt(runner_cfg.subqa_mode, main_q, dataset_cfg.data_type, N)
                 vllm_prompts.append(prompt)
@@ -81,8 +87,12 @@ def main():
 
         outputs = model.generate(vllm_prompts)
 
+        if runner_cfg.mode == "subq":
+            sub_qs = format_vllm_outputs("subq", outputs, qids, N)
     else: # visualize
         raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
+
+    json.dump(sub_qs, open(output_dir / "sub_qs.json", "w"))
 
     import pdb; pdb.set_trace()
 

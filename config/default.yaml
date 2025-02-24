@@ -1,6 +1,6 @@
 runner:
-  context     : "subqa"   # [subqa, default]
-  mode        : "default" # [subqa, default, CoT, blind, llm_judge, visualize] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
+  # context     : "subqa"   # [subqa, default]
+  mode        : "default" # [subq, suba, default, CoT, blind, llm_judge, visualize] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
   subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, QC_K, QC_C, QC_Q] | question category: [Knowledge, C, Question]
 
   CoT_path    : 5 # number of CoT paths
@@ -8,7 +8,7 @@ runner:
   few_shot    : "" # [subq, base, refined] | divide by comma. example: "subq,refined"
 
   # confidence
-  confidence_type: "min_prob" # "token_min_prob", "seq_ppl", "seq_conf"
+  confidence_type: "token_min_prob" # "token_min_prob", "seq_ppl", "seq_conf"
 
   N           : 5 # number of sub-qas to generate
   M           : 2 # number of curated sub-qas
@@ -52,6 +52,6 @@ model:
   swap_space: 16
 
   max_num_seqs: 256
-  max_new_tokens: 1024
+  max_tokens: 1024
   temperature: 0.0
   sampling_n: 1

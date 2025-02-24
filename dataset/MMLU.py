@@ -256,15 +256,17 @@ class MMLU(BaseDataset):
         }
         
         # if subqa
-        if self.cfg.runner_cfg.mode != "subqa":
-            sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list = self.get_subqas(ann)
-
+        if self.cfg.runner_cfg.mode == "subq":
+            subq_list, conf_subq_list = self.sub_subqs(ann)
             result.update({
-                "sub_q_list": sub_q_list,
-                "sub_a_list": sub_a_list,
-                "sub_a_conf_list": sub_a_conf_list,
-                "sub_a_ppl_list": sub_a_ppl_list,
-                "sub_a_min_prob_list": sub_a_min_prob_list,
+                "subq_list": subq_list,
+                "conf_subq_list": conf_subq_list,
+            })
+        elif self.cfg.runner_cfg.mode == "suba":
+            suba_list, conf_suba_list = self.sub_subas(ann)
+            result.update({
+                "suba_list": suba_list,
+                "conf_suba_list": conf_suba_list,
             })
         
         if self.cfg.runner_cfg.few_shot:
