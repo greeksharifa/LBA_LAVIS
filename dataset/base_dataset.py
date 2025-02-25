@@ -47,9 +47,18 @@ class BaseDataset(ABC):
             self.ANSWER_MAPPING = create_answer_mapping()
 
         # load sub-qas
-        if runner_cfg.mode != "subqa":
-            sub_qas_path = get_sub_qas_path(self.cfg)
-            self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
+        if runner_cfg.mode == "subq":
+            pass
+        elif runner_cfg.mode == "suba":
+            sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
+            self.sub_qs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
+        else:
+            sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
+            self.sub_qs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
+            self.sub_as = json.load(open(sub_as_path, 'r')) if sub_as_path.exists() else None
+        # if runner_cfg.mode != "subqa":
+        #     sub_qas_path, sub_as_path = get_sub_qas_path(self.cfg)
+        #     self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
         # else:
         #     self.sub_qas = None
 
@@ -128,7 +137,23 @@ class BaseDataset(ABC):
             gt_ans = gt_ans.strip().lower()
         
         return qid, main_q, gt_ans
-      
+
+    def get_subqs(self, ann):
+        qid = ann["qid"]
+        sub_qs = self.sub_qs[qid] if self.sub_qs else None
+        if sub_qs is None:
+            return None, None
+        
+        sub_q_list = sub_qs["sub_q_list"]
+        conf_sub_q_list = sub_qs["conf_subq"][self.cfg.runner_cfg.confidence_type]
+        
+        return sub_q_list, conf_sub_q_list
+
+    def get_subas(self, ann):
+        raise NotImplementedError("get_subas is not implemented")
+        pass
+
+
     # def get_subqas(self, ann):
     #     qid = ann["qid"]
     #     sub_qas = self.sub_qas[qid] if self.sub_qas else None

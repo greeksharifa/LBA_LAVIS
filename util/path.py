@@ -1,6 +1,6 @@
 from config.configs import Config
 from pathlib import Path
-
+from typing import Tuple
 
 def get_output_dir(cfg: Config) -> Path:
     runner_cfg = cfg.runner_cfg
@@ -21,10 +21,10 @@ def get_output_dir(cfg: Config) -> Path:
     return output_dir
 
 
-def get_sub_qas_path(cfg: Config) -> Path:
+def get_sub_qas_path(cfg: Config) -> Tuple[Path, Path]:
     runner_cfg = cfg.runner_cfg
     dataset_cfg = cfg.dataset_cfg
     model_cfg = cfg.model_cfg
 
-    sub_qas_path = Path("subqa") / runner_cfg.subqa_mode / dataset_cfg.dataset_name / model_cfg.model_name / 'sub_qas.json'
-    return sub_qas_path
+    sub_qas_path = Path("subqa") / runner_cfg.subqa_mode / dataset_cfg.dataset_name / model_cfg.model_name
+    return sub_qas_path / "sub_qs.json", sub_qas_path / "sub_as.json"

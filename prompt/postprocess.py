@@ -92,7 +92,7 @@ def format_vllm_outputs(
     """
     assert mode in ["subq", "suba", "base", "refined"], f"Invalid mode: {mode}"
 
-    formatted_results = []
+    formatted_results = {}
 
     # outputs와 qids를 순서대로 매핑
     for output, qid in zip(outputs, qids):
@@ -138,13 +138,13 @@ def format_vllm_outputs(
 
         # 3. 결과 딕셔너리 생성
         result_item = {
-            "qid": qid,
+            # "qid": qid,
             key_name["output_text"][mode]: postprocess_subqs(completion.text, N),
             f"conf_{mode}": {
                 "seq_ppl": seq_ppl,
                 "token_min_prob": token_min_prob
             },
         }
-        formatted_results.append(result_item)
+        formatted_results[qid] = result_item
     
     return formatted_results

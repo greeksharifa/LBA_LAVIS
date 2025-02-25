@@ -72,6 +72,8 @@ def main():
                 main_q = sample["main_q"]
                 prompt = get_subq_prompt(runner_cfg.subqa_mode, main_q, dataset_cfg.data_type, N)
                 vllm_prompts.append(prompt)
+            elif runner_cfg.mode == "suba":
+                subq_list = sample["subq_list"]
             else:
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
@@ -92,7 +94,8 @@ def main():
     else: # visualize
         raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
-    json.dump(sub_qs, open(output_dir / "sub_qs.json", "w"))
+    json.dump(sub_qs, open(output_dir / "sub_qs.json", "w"), indent=4)
+    logger.info(f"Saved sub_qs to {output_dir / 'sub_qs.json'}")
 
     import pdb; pdb.set_trace()
 

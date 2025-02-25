@@ -255,19 +255,22 @@ class MMLU(BaseDataset):
             "question_type": self.cfg.dataset_cfg.question_type,
         }
         
-        # if subqa
+        # load sub-qas
         if self.cfg.runner_cfg.mode == "subq":
-            subq_list, conf_subq_list = self.sub_subqs(ann)
+            pass
+        else:
+            subq_list, conf_subq_list = self.get_subqs(ann)
             result.update({
                 "subq_list": subq_list,
                 "conf_subq_list": conf_subq_list,
             })
-        elif self.cfg.runner_cfg.mode == "suba":
-            suba_list, conf_suba_list = self.sub_subas(ann)
-            result.update({
-                "suba_list": suba_list,
-                "conf_suba_list": conf_suba_list,
-            })
+
+            if self.cfg.runner_cfg.mode != "suba":
+                suba_list, conf_suba_list = self.get_subas(ann)
+                result.update({
+                    "suba_list": suba_list,
+                    "conf_suba_list": conf_suba_list,
+                })
         
         if self.cfg.runner_cfg.few_shot:
             # Get few-shot samples for the current sub-category
