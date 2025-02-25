@@ -7,7 +7,7 @@ def get_output_dir(cfg: Config) -> Path:
     dataset_cfg = cfg.dataset_cfg
     model_cfg = cfg.model_cfg
 
-    if runner_cfg.mode == "subqa":
+    if runner_cfg.mode == "subq" or runner_cfg.mode == "suba":
         output_dir = Path(runner_cfg.subqa_dir) / runner_cfg.subqa_mode
     else:
         if runner_cfg.mode == "CoT":
