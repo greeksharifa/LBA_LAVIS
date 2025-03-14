@@ -19,7 +19,8 @@ uv pip install vllm --torch-backend=auto
 ### sub-QA generation
 
 ```bash
-CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="subqa" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU"
+CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="subq" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU"
+CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="suba" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU" dataset.num_data=10
 ```
 
 ### Inference

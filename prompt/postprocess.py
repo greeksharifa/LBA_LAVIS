@@ -129,17 +129,17 @@ def format_vllm_outputs(
 
         key_name = {
             "output_text": {
-                "subq": "sub_qs",
-                "suba": "sub_as",
-                "base": "base_answer",
-                "refined": "refined_answer"
+                "subq": "subq_list",
+                "suba": "suba_list",
+                "base": "base_list",
+                "refined": "refined_list"
             },
         }
 
         # 3. 결과 딕셔너리 생성
         result_item = {
             # "qid": qid,
-            key_name["output_text"][mode]: postprocess_subqs(completion.text, N),
+            key_name["output_text"][mode]: postprocess_subqs(completion.text, N) if mode == "subq" else completion.text,
             f"conf_{mode}": {
                 "seq_ppl": seq_ppl,
                 "token_min_prob": token_min_prob

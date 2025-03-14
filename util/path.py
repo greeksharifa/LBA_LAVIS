@@ -27,4 +27,4 @@ def get_sub_qas_path(cfg: Config) -> Tuple[Path, Path]:
     model_cfg = cfg.model_cfg
 
     sub_qas_path = Path("subqa") / runner_cfg.subqa_mode / dataset_cfg.dataset_name / model_cfg.model_name
-    return sub_qas_path / "sub_qs.json", sub_qas_path / "sub_as.json"
+    return sub_qas_path / "subq_outputs.json", sub_qas_path / "suba_outputs.json"

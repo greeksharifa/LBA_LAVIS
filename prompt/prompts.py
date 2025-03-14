@@ -1,9 +1,14 @@
 # from configs import Config
+from typing import List
+
+def get_suba_prompt(prompt_type: str, subq_list: List[str], data_type: str, N: int) -> str:
+
 
 def get_subq_prompt(prompt_type: str, main_q: str, data_type: str, N: int) -> str:
     """
     Generate sub-questions for the main question.
     Args:
+        prompt_type: str # [self, QC_Q]
         main_q     : str
         data_type  : str # [texts|images|videos|features]
     Returns:

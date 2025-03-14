@@ -142,16 +142,16 @@ class BaseDataset(ABC):
         qid = ann["qid"]
         sub_qs = self.sub_qs[qid] if self.sub_qs else None
         if sub_qs is None:
-            return None, None
+            raise ValueError(f"sub_qs is not found for qid {qid}")
+            # return None, None
         
-        sub_q_list = sub_qs["sub_q_list"]
-        conf_sub_q_list = sub_qs["conf_subq"][self.cfg.runner_cfg.confidence_type]
+        subq_list = sub_qs["subq_list"]
+        conf_subq_list = sub_qs["conf_subq"][self.cfg.runner_cfg.confidence_type]
         
-        return sub_q_list, conf_sub_q_list
+        return subq_list, conf_subq_list
 
     def get_subas(self, ann):
         raise NotImplementedError("get_subas is not implemented")
-        pass
 
 
     # def get_subqas(self, ann):
