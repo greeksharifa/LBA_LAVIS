@@ -1,11 +1,9 @@
-from typing import List
-import json
-from pathlib import Path
-import os
-import pandas as pd
 import random
 
-from dataset import load_dataset
+from typing import List
+from pathlib import Path
+
+import pandas as pd
 
 from dataset.base_dataset import BaseDataset
 
@@ -232,9 +230,9 @@ class MMLU(BaseDataset):
                 # sub_category = ann_path.stem.replace(f"_{self.cfg.dataset_cfg.split}", "")
                 self.annotation.append(
                     {
-                        "question": question, 
-                        "choices": choices, 
-                        "answer": answer,
+                        "main_q": question, 
+                        "candidate_list": choices, 
+                        "gt_ans": answer,
                         "sub_category": sub_category,
                         # "type": TASK_CATEGORY_MAPPING[sub_category],
                     }
@@ -244,50 +242,16 @@ class MMLU(BaseDataset):
         ann = self.annotation[index]
 
         qid, main_q, gt_ans = self.preprocess_annotation(
-            ann["qid"], ann["question"], ann["answer"]
+            ann["qid"], ann["main_q"], ann["gt_ans"]
         )
         
         result = {
             "main_q": main_q,
             "qid": qid,
             "gt_ans": gt_ans,
-            "candidate_list": ann["choices"],
+            "candidate_list": ann["candidate_list"],
             "question_type": self.cfg.dataset_cfg.question_type,
         }
-        
-        # load sub-qas
-        if self.cfg.runner_cfg.mode != "subq":
-            subq_list, conf_subq_list = self.get_subqs(ann)
-            result.update({
-                "subq_list": subq_list,
-                "conf_subq_list": conf_subq_list,
-            })
-
-            if self.cfg.runner_cfg.mode != "suba":
-                suba_list, conf_suba_list = self.get_subas(ann)
-                result.update({
-                    "suba_list": suba_list,
-                    "conf_suba_list": conf_suba_list,
-                })
-        
-        if self.cfg.runner_cfg.few_shot:
-            # Get few-shot samples for the current sub-category
-            few_shot_samples = self.few_shot_samples.get(ann["sub_category"], [])
-            few_shot_str = "\n\n".join(few_shot_samples) if few_shot_samples else ""
-            result.update({
-                "few_shot_samples": few_shot_str,
-            })
+        result = self.postprocess_result(ann, result)
         
         return result
-
-
-if __name__ == "__main__":
-    from datasets import load_dataset
-    dataset = load_dataset(
-        "cais/mmlu", 
-        cache_dir='/data/MMLU/mmlu_huggingface',
-        config="abstract_algebra"
-    )
-
-    import pdb; pdb.set_trace()
-    print(dataset)

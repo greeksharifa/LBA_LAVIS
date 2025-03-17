@@ -137,6 +137,35 @@ class BaseDataset(ABC):
             gt_ans = gt_ans.strip().lower()
         
         return qid, main_q, gt_ans
+    
+    def postprocess_result(self, ann, result):
+        if "data_type" not in result:
+            result["data_type"] = self.cfg.dataset_cfg.data_type
+            
+        # load sub-qas
+        if self.cfg.runner_cfg.mode != "subq":
+            subq_list, conf_subq_list = self.get_subqs(ann)
+            result.update({
+                "subq_list": subq_list,
+                "conf_subq_list": conf_subq_list,
+            })
+
+            if self.cfg.runner_cfg.mode != "suba":
+                suba_list, conf_suba_list = self.get_subas(ann)
+                result.update({
+                    "suba_list": suba_list,
+                    "conf_suba_list": conf_suba_list,
+                })
+        
+        if self.cfg.runner_cfg.few_shot:
+            # Get few-shot samples for the current sub-category
+            few_shot_samples = self.few_shot_samples.get(ann["sub_category"], [])
+            few_shot_str = "\n\n".join(few_shot_samples) if few_shot_samples else ""
+            result.update({
+                "few_shot_samples": few_shot_str,
+            })
+
+        return result
 
     def get_subqs(self, ann):
         qid = ann["qid"]

@@ -1,0 +1,27 @@
+dataset:
+  dataset_name: MMMU
+  data_type: image # [text|image|video|feature]
+  question_type: both # [open_ended|multiple_choice|both]
+  vqa_acc: False
+  # tau2: 0.10
+
+  prompt:
+    add_base_prompt: True
+  
+  vis_root: huggingface # [None|huggingface|vis_path]
+  limit_mm_per_prompt: {image: 7}
+
+  ann_paths:
+    val:
+      - 'MMMU/mmmu_json/dev.json'           # 150
+    test:
+      - 'MMMU/mmmu_json/validation.json'    # 900
+    # original
+    # dev:
+    # #   - 'MMMU/mmmu_dataset_concatenated.pkl'
+    #   - 'MMMU/mmmu_json/dev.json'           # 150
+    # val:
+    #   - 'MMMU/mmmu_json/validation.json'    # 900
+    # test: # no answer
+    #   # - 'MMMU/mmmu_dataset_concatenated.pkl'
+    #   - 'MMMU/mmmu_json/test.json'          # 10500 

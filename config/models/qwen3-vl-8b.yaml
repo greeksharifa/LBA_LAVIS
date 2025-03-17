@@ -2,8 +2,9 @@ model:
   model_name: qwen3-vl-8b
   model_id: Qwen/Qwen3-VL-8B-Instruct
   subqa_model_name: qwen3-vl-8b
+  model_type: huggingface # [huggingface|openai]
 
-  cache_dir: /model/Qwen/
+  # cache_dir: /model/Qwen/
   # device_map: "auto"
   use_flash_attn_2: True
   # batch_size: 8

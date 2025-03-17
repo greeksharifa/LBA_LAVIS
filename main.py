@@ -15,8 +15,9 @@ from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir
 from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
-from prompt.prompts import get_subq_prompt
+from prompt.prompts import get_subq_prompt, get_suba_prompt
 from prompt.postprocess import format_vllm_outputs
+from prompt.chat_template import apply_chat_template
 # from visualize import visualize, visualize_base, record_num_tokens
 
 def main():
@@ -53,42 +54,69 @@ def main():
     logger.info(f"Output directory: {output_dir}")
     # run
     if runner_cfg.mode != "visualize":
-        # model = get_model(cfg)
-        model = C2RFramework(cfg)
+        model = get_model(cfg)
+        # model = C2RFramework(cfg)
+
+        
+        # get tokenizer from VLLM for chat template
+        tokenizer = model.llm.get_tokenizer()
+        
         vllm_prompts = []
         qids = []
         for data_iter_idx, sample in enumerate(dataset): # dataloader
             qids.append(sample["qid"])
-            # def _run():
-            # bsz = len(sample["qid"])
-            # candidate_list = sample["candidate_list"] if "candidate_list" in sample else [None] * bsz
             candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
-            if runner_cfg.mode == "blind":
-                # sample["vision"] = [None] * bsz
-                sample["vision"] = None
+            if "vision" not in sample:
+                vision = None
+            if "vision" in sample and runner_cfg.mode == "blind":
+                vision = None
+            else:
+                vision = sample["vision"]
 
             # generate prompt to vllm
             if runner_cfg.mode == "subq":
-                main_q = sample["main_q"]
-                prompt = get_subq_prompt(runner_cfg.subqa_mode, main_q, dataset_cfg.data_type, N)
-                vllm_prompts.append(prompt)
+                text_prompt = get_subq_prompt(sample, cfg)
             elif runner_cfg.mode == "suba":
-                import pdb; pdb.set_trace()
-                subq_list = sample["subq_list"]
-                # prompt = get_suba_prompt(runner_cfg.subqa_mode, subq_list, dataset_cfg.data_type, N)
+                text_prompt = get_suba_prompt(sample, cfg)
+                # vision
+            # elif 
             else:
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
-            # if args.ignore_error:
-            #     try:
-            #         _run()
-            #     except Exception as e:
-            #         logger.error(f"Error processing qid: {sample['qid']}")
-            #         logger.error(e)
-            #         continue
-            # else:
-            #   _run()
+            # import pdb; pdb.set_trace()
+            # if not isinstance(text_prompt, list):
+            #     text_prompts = [text_prompt]
 
+            if isinstance(text_prompt, str):
+                vllm_prompts.append(model.apply_chat_template(text_prompt, vision=vision))
+            if isinstance(text_prompt, list):
+                for prompt in text_prompt:
+                    vllm_prompts.append(model.apply_chat_template(prompt, vision=vision))
+
+            # apply chat template to prompts
+            # text_prompts = apply_chat_template(text_prompts, tokenizer, model_cfg.model_type)
+            # prompts = model.apply_chat_template(text_prompts, visions=sample["vision"] if "vision" in sample else [None] * len(text_prompts))
+            # vllm_prompts.extend(prompts)
+
+            # add vision to prompts (for multimodal models)
+            # if "vision" in sample and sample["vision"] is not None:
+            #     """
+            #         {
+            #             'multi_modal_data': {'image': <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=1770x1180 at 0x7F4F3FE5CC80>},
+            #             'multi_modal_uuids': {'image': 'uuid_0'},
+            #             'prompt': '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>What is the content of this image?<|im_end|>\n<|im_start|>assistant\n'}
+            #         }
+            #     """
+            #     for text_prompt in text_prompts:
+            #         vllm_prompts.append({
+            #             'multi_modal_data': {dataset_cfg.data_type: sample["vision"]},
+            #             # 'multi_modal_uuids': {'image': 'uuid_0'},
+            #             'prompt': text_prompt
+            #         })
+            #     pass
+
+
+        pprint(vllm_prompts[0], width=250)
         outputs = model.generate(vllm_prompts)
 
         # if runner_cfg.mode == "subq":

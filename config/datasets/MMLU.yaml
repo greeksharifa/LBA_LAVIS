@@ -1,13 +1,14 @@
 dataset:
   dataset_name: MMLU
-  data_type: texts # [texts|images|videos|features]
+  data_type: text # [text|image|video|feature]
   question_type: multiple_choice # [open_ended|multiple_choice|both]
   vqa_acc: False
   # tau2: 0.10
 
   prompt:
     add_base_prompt: False
-  
+
+  vis_root: None # [None|huggingface|vis_path]
 
   ann_paths: # huggingface dataset path
     val:
@@ -21,7 +22,3 @@ dataset:
     #   - /data/MMLU/MMLU/val/ # 1531
     # test:
     #   - /data/MMLU/MMLU/test/ # 14042
-
-  sub_qas_root: ./sub_qas/MMLU/
-
-  vis_root: None

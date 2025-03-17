@@ -1,15 +1,16 @@
 import re
 import json
 
+from dataclasses import asdict
 from pprint import pprint
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Union, Optional
 from abc import ABC, abstractmethod
 
 import numpy as np
 import torch
 from transformers import AutoProcessor, AutoModelForCausalLM, AutoTokenizer
-from vllm import LLM, SamplingParams
+from vllm import LLM, SamplingParams, EngineArgs
 
 from config.configs import Config
 # from utils.logger import get_logger
@@ -18,48 +19,43 @@ from config.configs import Config
 # from model.prompt import get_subq_prompt
 
 
-
 class C2RFramework(ABC):
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.N = cfg.runner_cfg.N
         self.M = cfg.runner_cfg.M
-        
-        model_id = self.cfg.model_cfg.model_id
-        cache_dir = self.cfg.model_cfg.cache_dir
 
-        self.llm = self.load_model_and_processor(model_id, cache_dir)
+        self.engine_args, self.llm = self.load_model()
 
-        # self.model.generation_config.do_sample=False
-        # self.model.generation_config.temperature=None
-        # self.model.generation_config.top_p=None
-        # self.model.generation_config.top_k=None
-    
-    # @abstractmethod
-    def load_model_and_processor(self, model_id: str, cache_dir: str):
-        llm = LLM(
-            model=model_id, 
-            trust_remote_code=True, 
-            tensor_parallel_size=self.cfg.model_cfg.tensor_parallel_size, 
-            gpu_memory_utilization=self.cfg.model_cfg.gpu_memory_utilization, 
-            swap_space=self.cfg.model_cfg.swap_space,
-            max_num_seqs=self.cfg.model_cfg.max_num_seqs,
-        )
-        return llm
-        # pass
+    @abstractmethod
+    def load_model(self) -> Tuple[dict, LLM]:
+        pass
 
-    # @abstractmethod
-    # def get_inputs(self, prompts: List[str], visions: Any, vpaths: List[Path] = None) -> Any:
-    #     """
-    #     Apply template to the text inputs and visions.
-    #     Args:
-    #         prompts: List[str]
-    #         visions: List[Any]
-    #         vpaths: List[str]
-    #     Returns: list of inputs for model
-    #         transformers.BatchFeature
-    #     """
-    #     pass
+    @abstractmethod
+    def apply_chat_template(self, text_prompt: str, vision: Any = None) -> dict:
+        """
+        Apply chat template to text prompts.
+        Args:
+            text_prompt: Text prompt
+            vision: Vision data. images: PIL.Image or [PIL.Image]. videos: np_ndarrays or (np_ndarrays, metadata).
+        Returns: vllm prompt with chat template
+        """
+        pass
+
+    '''
+    @abstractmethod
+    def get_inputs(self, prompts: List[str], visions: Any, vpaths: List[Path] = None) -> Any:
+        """
+        Apply template to the text inputs and visions.
+        Args:
+            prompts: List[str]
+            visions: List[Any]
+            vpaths: List[str]
+        Returns: list of inputs for model
+            transformers.BatchFeature
+        """
+        pass
+    '''
 
     def generate(self, prompts: List[Any]) -> List[Any]:
         sampling_params = SamplingParams(
@@ -113,8 +109,51 @@ class C2RFramework(ABC):
                                  few_shot_samples: List[str] = None,
                                  ) -> Tuple[List[str], List[float], List[float], List[float], List[str]]:
         pass
-    
-# class Qwen2_5VL(C2RFramework):
-#     def __init__(self, cfg: Config):
-#         super().__init__(cfg)
-#         # self.model = self.load_model_and_processor(cfg.model_cfg.model_id, cfg.model_cfg.cache_dir)
+
+
+class Qwen2_5VL(C2RFramework):
+    def load_model(self) -> Tuple[dict, LLM]:
+        self.model_id = self.cfg.model_cfg.model_id
+        self.modality = self.cfg.dataset_cfg.data_type
+
+        engine_args = asdict(EngineArgs(
+            model=self.model_id,
+            max_model_len=4096,
+            max_num_seqs=self.cfg.model_cfg.max_num_seqs,
+            mm_processor_kwargs={
+                "min_pixels": 28 * 28,
+                "max_pixels": 1280 * 28 * 28,
+                "fps": 1,
+            },
+            # limit_mm_per_prompt={modality: limit_mm_per_prompt},
+        ))
+        # hasattr
+        if self.cfg.dataset_cfg.get("limit_mm_per_prompt", None) is not None:
+            limit_mm_per_prompt = self.cfg.dataset_cfg.limit_mm_per_prompt[self.modality]
+            engine_args.update({
+                "limit_mm_per_prompt": {self.modality: limit_mm_per_prompt}
+            })
+        llm = LLM(**engine_args)
+        return engine_args, llm
+
+    def apply_chat_template(self, text_prompt: str, vision: Any = None) -> dict:
+        if self.modality == "image":
+            placeholder = "<|image_pad|>"
+        elif self.modality == "video":
+            placeholder = "<|video_pad|>"
+
+        vision_placeholder = placeholder * len(vision)
+
+        text_prompt = (
+            "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n"
+            f"<|im_start|>user\n<|vision_start|>{vision_placeholder}<|vision_end|>"
+            f"{text_prompt}<|im_end|>\n"
+            "<|im_start|>assistant\n"
+        )
+
+        return {
+            'multi_modal_data': {self.modality: vision},
+            # 'multi_modal_uuids': {'image': 'uuid_0'},
+            'prompt': text_prompt
+        }
+        

@@ -2,6 +2,10 @@
 subqa/
 output/
 
+# temp
+temp/
+temp*.py
+
 # uv
 .venv/
 .python-version

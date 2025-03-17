@@ -1,19 +1,33 @@
-# from configs import Config
+from config.configs import Config
 from typing import List
 
-def get_suba_prompt(prompt_type: str, subq_list: List[str], data_type: str, N: int) -> str:
-
-
-def get_subq_prompt(prompt_type: str, main_q: str, data_type: str, N: int) -> str:
+def get_suba_prompt(sample: dict, cfg: Config) -> str:
     """
-    Generate sub-questions for the main question.
+    Generate sub-answers for the sub-questions.
     Args:
-        prompt_type: str # [self, QC_Q]
-        main_q     : str
-        data_type  : str # [texts|images|videos|features]
+        sample     : dict
+        cfg        : Config
     Returns:
         prompt     : str
     """
+    pass
+
+
+# def get_subq_prompt(prompt_type: str, main_q: str, data_type: str, N: int) -> str:
+def get_subq_prompt(sample: dict, cfg: Config) -> str:
+    """
+    Generate sub-questions for the main question.
+    Args:
+        sample     : dict
+        cfg        : Config
+    Returns:
+        prompt     : str
+    """
+    prompt_type = cfg.runner_cfg.subqa_mode
+    main_q = sample["main_q"]
+    data_type = sample["data_type"]
+    N = cfg.runner_cfg.N
+
     if prompt_type == "self":
         prompt = """### Instruction
 Your task is to decompose a given question (or instruction) Q into sub-questions.

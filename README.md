@@ -13,7 +13,16 @@ uv pip install vllm --torch-backend=auto
 ```
 
 ---
+## Available Models and Benchmarks
 
+- Models:
+  - qwen2.5-vl-7b
+  - qwen3-vl-8b
+- Benchmarks:
+  - MMLU
+  - MMMU
+
+---
 ## Run
 
 ### sub-QA generation
