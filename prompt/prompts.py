@@ -1,27 +1,53 @@
 from config.configs import Config
 from typing import List
 
-def get_suba_prompt(sample: dict, cfg: Config) -> str:
+def get_suba_prompt(sample: dict, cfg: Config) -> List[str]:
     """
-    Generate sub-answers for the sub-questions.
-    Args:
-        sample     : dict
-        cfg        : Config
-    Returns:
-        prompt     : str
+        Generate N sub-answers for the N sub-questions.
+        Args:
+            sample     : dict
+            cfg        : Config
+        Returns:
+            prompt     : List[str]
+            
+        sample (MMMU):
+        {
+            'candidate_list': ['$6', '$7', '$8', '$9'],
+            'conf_subq_list': 0.4997720632523633,
+            'data_type': 'image',
+            'gt_ans': 'b',
+            'main_q': '<image 1> Baxter Company has a relevant range of production between 15,000 and 30,000 units. The following cost data represents average variable costs per unit for 25,000 units of production. If 30,000 units are produced, what are the '
+                    'per unit manufacturing overhead costs incurred?',
+            'qid': 'validation_Accounting_1',
+            'question_type': 'multiple-choice',
+            'subq_list': ['What are the fixed manufacturing overhead costs per unit at 25,000 units of production?',
+                        'How does the fixed manufacturing overhead cost behave when production increases from 25,000 to 30,000 units?',
+                        'What is the total fixed manufacturing overhead cost at 25,000 units of production?',
+                        'What is the total fixed manufacturing overhead cost at 30,000 units of production?',
+                        'What is the per unit manufacturing overhead cost at 30,000 units of production, considering both fixed and variable components?'],
+            'vision': [<PIL.PngImagePlugin.PngImageFile image mode=RGBA size=733x237 at 0x7FC5C07BEFC0>],
+            'vpath': ['/data/MMMU/mmmu_images/validation/validation_Accounting_1_1.png']
+        }
     """
-    pass
+    sub_qs = sample["subq_list"]
+    prompts = []
+
+    for sub_q in sub_qs:
+        prompt = f"{sub_q}\nAnswer in a maximum of one sentence."
+        prompts.append(prompt)
+
+    return prompts
 
 
 # def get_subq_prompt(prompt_type: str, main_q: str, data_type: str, N: int) -> str:
 def get_subq_prompt(sample: dict, cfg: Config) -> str:
     """
-    Generate sub-questions for the main question.
-    Args:
-        sample     : dict
-        cfg        : Config
-    Returns:
-        prompt     : str
+        Generate N sub-questions for the main question.
+        Args:
+            sample     : dict
+            cfg        : Config
+        Returns:
+            prompt     : str
     """
     prompt_type = cfg.runner_cfg.subqa_mode
     main_q = sample["main_q"]

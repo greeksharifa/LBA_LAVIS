@@ -78,44 +78,42 @@ def main():
                 text_prompt = get_subq_prompt(sample, cfg)
             elif runner_cfg.mode == "suba":
                 text_prompt = get_suba_prompt(sample, cfg)
-                # vision
-            # elif 
             else:
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
-            # import pdb; pdb.set_trace()
-            # if not isinstance(text_prompt, list):
-            #     text_prompts = [text_prompt]
-
             if isinstance(text_prompt, str):
-                vllm_prompts.append(model.apply_chat_template(text_prompt, vision=vision))
-            if isinstance(text_prompt, list):
+                vllm_prompts.append(model.apply_chat_template(text_prompt, vision=vision, mm_uuids=sample["qid"]))
+            elif isinstance(text_prompt, list):
                 for prompt in text_prompt:
-                    vllm_prompts.append(model.apply_chat_template(prompt, vision=vision))
+                    vllm_prompts.append(model.apply_chat_template(prompt, vision=vision, mm_uuids=sample["qid"]))
+            else:
+                raise ValueError(f"Invalid text prompt: {text_prompt}")
+            
+            '''
+                apply chat template to prompts
+                text_prompts = apply_chat_template(text_prompts, tokenizer, model_cfg.model_type)
+                prompts = model.apply_chat_template(text_prompts, visions=sample["vision"] if "vision" in sample else [None] * len(text_prompts))
+                vllm_prompts.extend(prompts)
 
-            # apply chat template to prompts
-            # text_prompts = apply_chat_template(text_prompts, tokenizer, model_cfg.model_type)
-            # prompts = model.apply_chat_template(text_prompts, visions=sample["vision"] if "vision" in sample else [None] * len(text_prompts))
-            # vllm_prompts.extend(prompts)
+                add vision to prompts (for multimodal models)
+                if "vision" in sample and sample["vision"] is not None:
+                    """
+                        {
+                            'multi_modal_data': {'image': <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=1770x1180 at 0x7F4F3FE5CC80>},
+                            'multi_modal_uuids': {'image': 'uuid_0'},
+                            'prompt': '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>What is the content of this image?<|im_end|>\n<|im_start|>assistant\n'}
+                        }
+                    """
+                    for text_prompt in text_prompts:
+                        vllm_prompts.append({
+                            'multi_modal_data': {dataset_cfg.data_type: sample["vision"]},
+                            # 'multi_modal_uuids': {'image': 'uuid_0'},
+                            'prompt': text_prompt
+                        })
+                    pass
+            '''
 
-            # add vision to prompts (for multimodal models)
-            # if "vision" in sample and sample["vision"] is not None:
-            #     """
-            #         {
-            #             'multi_modal_data': {'image': <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=1770x1180 at 0x7F4F3FE5CC80>},
-            #             'multi_modal_uuids': {'image': 'uuid_0'},
-            #             'prompt': '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>What is the content of this image?<|im_end|>\n<|im_start|>assistant\n'}
-            #         }
-            #     """
-            #     for text_prompt in text_prompts:
-            #         vllm_prompts.append({
-            #             'multi_modal_data': {dataset_cfg.data_type: sample["vision"]},
-            #             # 'multi_modal_uuids': {'image': 'uuid_0'},
-            #             'prompt': text_prompt
-            #         })
-            #     pass
-
-
+        logger.info(f"len(vllm_prompts): {len(vllm_prompts)}")
         pprint(vllm_prompts[0], width=250)
         outputs = model.generate(vllm_prompts)
 

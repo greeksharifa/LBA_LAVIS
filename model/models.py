@@ -32,12 +32,13 @@ class C2RFramework(ABC):
         pass
 
     @abstractmethod
-    def apply_chat_template(self, text_prompt: str, vision: Any = None) -> dict:
+    def apply_chat_template(self, text_prompt: str, vision: Any = None, mm_uuids: str = None) -> dict:
         """
         Apply chat template to text prompts.
         Args:
             text_prompt: Text prompt
             vision: Vision data. images: PIL.Image or [PIL.Image]. videos: np_ndarrays or (np_ndarrays, metadata).
+            mm_uuids: Multi-modal UUIDs.
         Returns: vllm prompt with chat template
         """
         pass
@@ -136,7 +137,7 @@ class Qwen2_5VL(C2RFramework):
         llm = LLM(**engine_args)
         return engine_args, llm
 
-    def apply_chat_template(self, text_prompt: str, vision: Any = None) -> dict:
+    def apply_chat_template(self, text_prompt: str, vision: Any = None, mm_uuids: str = None) -> dict:
         if self.modality == "image":
             placeholder = "<|image_pad|>"
         elif self.modality == "video":
@@ -153,7 +154,7 @@ class Qwen2_5VL(C2RFramework):
 
         return {
             'multi_modal_data': {self.modality: vision},
-            # 'multi_modal_uuids': {'image': 'uuid_0'},
+            'multi_modal_uuids': {self.modality: mm_uuids},
             'prompt': text_prompt
         }
         
