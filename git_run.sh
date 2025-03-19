@@ -1,8 +1,7 @@
 git rm --cached -r ./
 git add .
 
-git commit --date "Tue 18 Mar 2025 18:51:04 KST" -m "vllm uuid" 
-# git commit --date "Wed 19 Mar 2025 16:56:34 KST" -m "commit message" 
+git commit --date "Wed 19 Mar 2025 16:56:34 KST" -m "suba list" 
 # git commit --date "Thu 20 Mar 2025 12:54:41 KST" -m "commit message" 
 # git commit --date "Fri 21 Mar 2025 11:10:37 KST" -m "commit message" 
 # git commit --date "Mon 24 Mar 2025 11:52:15 KST" -m "commit message" 

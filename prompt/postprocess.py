@@ -1,5 +1,8 @@
 import re
 import math
+import copy
+
+from collections import defaultdict
 
 from typing import List, Any, Dict
 
@@ -88,11 +91,23 @@ def format_vllm_outputs(
         qids                : List[str]. 각 output에 대응하는 query ID 리스트 (outputs와 순서가 같아야 함)
         N                   : int.      
     Returns:
-        formatted_results   : List[Dict[str, Any]]
+        merged              : List[Dict[str, Any]]
     """
     assert mode in ["subq", "suba", "base", "refined"], f"Invalid mode: {mode}"
+    
+    KEY_NAME = {
+        "output_text": {
+            "subq": "subq_list",
+            "suba": "suba_list",
+            "base": "base_list",
+            "refined": "refined_list"
+        },
+    }
+    key_name = KEY_NAME["output_text"][mode]
 
-    formatted_results = {}
+    # formatted_results = defaultdict(dict)
+    # merged = defaultdict(lambda: {"conf_suba": defaultdict(list)})
+    merged = {}
 
     # outputs와 qids를 순서대로 매핑
     for output, qid in zip(outputs, qids):
@@ -127,24 +142,46 @@ def format_vllm_outputs(
         token_min_prob = min_prob if has_tokens else 0.0
 
 
-        key_name = {
-            "output_text": {
-                "subq": "subq_list",
-                "suba": "suba_list",
-                "base": "base_list",
-                "refined": "refined_list"
-            },
-        }
-
         # 3. 결과 딕셔너리 생성
         result_item = {
-            # "qid": qid,
-            key_name["output_text"][mode]: postprocess_subqs(completion.text, N) if mode == "subq" else completion.text,
-            f"conf_{mode}": {
-                "seq_ppl": seq_ppl,
-                "token_min_prob": token_min_prob
-            },
+            qid: {
+                key_name: postprocess_subqs(completion.text, N) if mode == "subq" else completion.text,
+                f"conf_{mode}": {
+                    "seq_ppl": seq_ppl,
+                    "token_min_prob": token_min_prob
+                },
+            }
         }
-        formatted_results[qid] = result_item
+        
+        
+        # 1. 병합을 수행하는 재귀 함수 (반복문 안에서 호출)
+        def update_recursive(target_dict, source_item):
+            """
+            target_dict: 누적된 결과를 저장하는 딕셔너리 (merged)
+            source_item: 새로 생성된 결과 딕셔너리 (result_item)
+            """
+            for key, value in source_item.items():
+                if key in target_dict:
+                    # Case 1: 둘 다 딕셔너리인 경우 -> 더 깊이 재귀 호출
+                    if isinstance(target_dict[key], dict) and isinstance(value, dict):
+                        update_recursive(target_dict[key], value)
+                    
+                    # Case 2: 값 충돌 발생 (Leaf Node) -> 리스트로 변환 및 추가
+                    else:
+                        # 기존 값이 리스트가 아니면 리스트로 변환
+                        if not isinstance(target_dict[key], list):
+                            target_dict[key] = [target_dict[key]]
+                        
+                        # 새로운 값 추가
+                        target_dict[key].append(value)
+                else:
+                    # 타겟에 키가 없는 경우 그대로 추가
+                    target_dict[key] = copy.deepcopy(value)
+        
+        import pdb; pdb.set_trace()
+
+        # [핵심] 만들어진 result_item을 merged에 즉시 병합
+        update_recursive(merged, result_item)
     
-    return formatted_results
+    
+    return merged

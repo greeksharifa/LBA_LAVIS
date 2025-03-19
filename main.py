@@ -64,7 +64,6 @@ def main():
         vllm_prompts = []
         qids = []
         for data_iter_idx, sample in enumerate(dataset): # dataloader
-            qids.append(sample["qid"])
             candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
             if "vision" not in sample:
                 vision = None
@@ -81,11 +80,14 @@ def main():
             else:
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
+
             if isinstance(text_prompt, str):
                 vllm_prompts.append(model.apply_chat_template(text_prompt, vision=vision, mm_uuids=sample["qid"]))
+                qids.append(sample["qid"])
             elif isinstance(text_prompt, list):
                 for prompt in text_prompt:
                     vllm_prompts.append(model.apply_chat_template(prompt, vision=vision, mm_uuids=sample["qid"]))
+                    qids.append(sample["qid"])
             else:
                 raise ValueError(f"Invalid text prompt: {text_prompt}")
             
