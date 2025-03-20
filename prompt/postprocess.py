@@ -4,7 +4,7 @@ import copy
 
 from collections import defaultdict
 
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Union
 
 
 def postprocess_subqs(output_texts: str, N: int) -> List[str]:
@@ -82,7 +82,7 @@ def format_vllm_outputs(
     outputs: List[Any], 
     qids: List[str], 
     N: int,
-) -> List[Dict[str, Any]]:
+) -> Union[Dict[str, Any], Dict[str, Dict[str, Any]]]:
     """
     Format the vLLM outputs.
     Args:
@@ -91,7 +91,7 @@ def format_vllm_outputs(
         qids                : List[str]. 각 output에 대응하는 query ID 리스트 (outputs와 순서가 같아야 함)
         N                   : int.      
     Returns:
-        merged              : List[Dict[str, Any]]
+        merged              : Dict[str, Dict[str, Any]] or something. merged results.
     """
     assert mode in ["subq", "suba", "base", "refined"], f"Invalid mode: {mode}"
     
@@ -105,8 +105,6 @@ def format_vllm_outputs(
     }
     key_name = KEY_NAME["output_text"][mode]
 
-    # formatted_results = defaultdict(dict)
-    # merged = defaultdict(lambda: {"conf_suba": defaultdict(list)})
     merged = {}
 
     # outputs와 qids를 순서대로 매핑
@@ -153,8 +151,7 @@ def format_vllm_outputs(
             }
         }
         
-        
-        # 1. 병합을 수행하는 재귀 함수 (반복문 안에서 호출)
+        # 4. 병합을 수행하는 재귀 함수 (반복문 안에서 호출)
         def update_recursive(target_dict, source_item):
             """
             target_dict: 누적된 결과를 저장하는 딕셔너리 (merged)
@@ -178,9 +175,6 @@ def format_vllm_outputs(
                     # 타겟에 키가 없는 경우 그대로 추가
                     target_dict[key] = copy.deepcopy(value)
         
-        import pdb; pdb.set_trace()
-
-        # [핵심] 만들어진 result_item을 merged에 즉시 병합
         update_recursive(merged, result_item)
     
     
