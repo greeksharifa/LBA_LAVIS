@@ -51,11 +51,11 @@ class BaseDataset(ABC):
             pass
         elif runner_cfg.mode == "suba":
             sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
-            self.sub_qs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
+            self.subqs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
         else:
             sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
-            self.sub_qs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
-            self.sub_as = json.load(open(sub_as_path, 'r')) if sub_as_path.exists() else None
+            self.subqs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
+            self.subas = json.load(open(sub_as_path, 'r')) if sub_as_path.exists() else None
         # if runner_cfg.mode != "subqa":
         #     sub_qas_path, sub_as_path = get_sub_qas_path(self.cfg)
         #     self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
@@ -124,11 +124,14 @@ class BaseDataset(ABC):
         
         return result
         
-    def preprocess_annotation(self, qid, main_q, gt_ans):
-        qid = str(qid)
+    def preprocess_annotation(self, ann):
+        qid = (ann["qid"])
+        main_q = ann["main_q"]
+        gt_ans = ann["gt_ans"]
+        
         main_q = main_q.strip() #.rstrip("?") + "?"
         
-        if self.cfg.dataset_cfg.question_type != "open_ended":
+        if ann["question_type"] != "open_ended":
             gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
         
         if self.cfg.dataset_cfg.vqa_acc:
@@ -144,14 +147,14 @@ class BaseDataset(ABC):
             
         # load sub-qas
         if self.cfg.runner_cfg.mode != "subq":
-            subq_list, conf_subq_list = self.get_subqs(ann)
+            subq_list, conf_subq_list = self.get_subqas(ann, "subq")
             result.update({
                 "subq_list": subq_list,
                 "conf_subq_list": conf_subq_list,
             })
 
             if self.cfg.runner_cfg.mode != "suba":
-                suba_list, conf_suba_list = self.get_subas(ann)
+                suba_list, conf_suba_list = self.get_subqas(ann, "suba")
                 result.update({
                     "suba_list": suba_list,
                     "conf_suba_list": conf_suba_list,
@@ -167,51 +170,16 @@ class BaseDataset(ABC):
 
         return result
 
-    def get_subqs(self, ann):
+    def get_subqas(self, ann, mode: str):
         qid = ann["qid"]
-        sub_qs = self.sub_qs[qid] if self.sub_qs else None
-        if sub_qs is None:
-            raise ValueError(f"sub_qs is not found for qid {qid}")
-            # return None, None
+        subs = getattr(self, f"{mode}s")[qid]
+        if subs is None:
+            raise ValueError(f"{mode}s is not found for qid {qid}")
+        sub_list = subs[f"{mode}_list"]
+        conf_sub_list = subs[f"conf_{mode}"][self.cfg.runner_cfg.confidence_type]
         
-        subq_list = sub_qs["subq_list"]
-        conf_subq_list = sub_qs["conf_subq"][self.cfg.runner_cfg.confidence_type]
-        
-        return subq_list, conf_subq_list
+        return sub_list, conf_sub_list
 
-    def get_subas(self, ann):
-        raise NotImplementedError("get_subas is not implemented")
-
-
-    # def get_subqas(self, ann):
-    #     qid = ann["qid"]
-    #     sub_qas = self.sub_qas[qid] if self.sub_qas else None
-    #     if sub_qas is None:
-    #         return None, None, None, None, None
-        
-    #     sub_q_list = sub_qas["sub_q_list"]
-    #     sub_a_list = sub_qas["sub_a_list"]
-    #     sub_a_conf_list = sub_qas["sub_a_conf_list"]
-    #     sub_a_ppl_list = sub_qas["sub_a_ppl_list"]
-    #     sub_a_min_prob_list = sub_qas["sub_a_min_prob_list"]
-        
-        
-    #     if self.cfg.runner_cfg.get("LLM_Judge", False):
-    #         # self.logger.info("Enable: using sub-QA judged by LLM")
-    #         mode = self.cfg.runner_cfg.get("LLM_Judge", False)
-    #         indices = sub_qas[f"judged_{mode}_indices"]
-    #         # get element from indices
-    #         sub_q_list = [sub_q_list[i] for i in indices]
-    #         sub_a_list = [sub_a_list[i] for i in indices]
-    #         sub_a_conf_list = [sub_a_conf_list[i] for i in indices]
-    #         sub_a_ppl_list = [sub_a_ppl_list[i] for i in indices]
-    #         sub_a_min_prob_list = [sub_a_min_prob_list[i] for i in indices]
-
-    #     # preprocess sub-qas
-    #     sub_q_list = [sub_q.strip().rstrip("?") + "?" for sub_q in sub_q_list]
-    #     sub_a_list = [sub_a.strip().rstrip(".") + "." for sub_a in sub_a_list]
-            
-    #     return sub_q_list, sub_a_list, sub_a_conf_list, sub_a_ppl_list, sub_a_min_prob_list
 
 
     # def cleanse_prediction(self, prediction, main_question):

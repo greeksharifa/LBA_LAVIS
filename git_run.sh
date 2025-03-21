@@ -1,8 +1,7 @@
 git rm --cached -r ./
 git add .
 
-git commit --date "Thu 20 Mar 2025 12:54:41 KST" -m "suba outputs" 
-# git commit --date "Fri 21 Mar 2025 11:10:37 KST" -m "commit message" 
+git commit --date "Fri 21 Mar 2025 11:10:37 KST" -m "get_subqas" 
 # git commit --date "Mon 24 Mar 2025 11:52:15 KST" -m "commit message" 
 # git commit --date "Tue 25 Mar 2025 14:07:55 KST" -m "commit message" 
 # git commit --date "Wed 26 Mar 2025 13:31:09 KST" -m "commit message" 

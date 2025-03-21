@@ -1,6 +1,18 @@
 from config.configs import Config
 from typing import List
 
+def get_base_prompt(sample: dict, cfg: Config) -> str:
+    """
+        Generate base answer for the main question.
+        Args:
+            sample     : dict
+            cfg        : Config
+        Returns:
+            prompt     : str
+    """
+    import pdb; pdb.set_trace()
+    raise NotImplementedError("get_base_prompt is not implemented")
+    
 def get_suba_prompt(sample: dict, cfg: Config) -> List[str]:
     """
         Generate N sub-answers for the N sub-questions.

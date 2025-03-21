@@ -101,9 +101,9 @@ class MMMU(BaseDataset):
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        qid, main_q, gt_ans = self.preprocess_annotation(
-            ann["qid"], ann["main_q"], ann["gt_ans"]
-        )
+        qid, main_q, gt_ans = self.preprocess_annotation(ann)
+        #     ann["qid"], ann["main_q"], ann["gt_ans"]
+        # )
 
         result = {
             "vision": ann["image_list"],

@@ -15,7 +15,7 @@ from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir
 from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
-from prompt.prompts import get_subq_prompt, get_suba_prompt
+from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt
 from prompt.postprocess import format_vllm_outputs
 from prompt.chat_template import apply_chat_template
 # from visualize import visualize, visualize_base, record_num_tokens
@@ -65,18 +65,15 @@ def main():
         qids = []
         for data_iter_idx, sample in enumerate(dataset): # dataloader
             candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
-            if "vision" not in sample:
-                vision = None
-            if "vision" in sample and runner_cfg.mode == "blind":
-                vision = None
-            else:
-                vision = sample["vision"]
+            vision = sample["vision"] if "vision" in sample and runner_cfg.mode != "blind" else None
 
             # generate prompt to vllm
             if runner_cfg.mode == "subq":
                 text_prompt = get_subq_prompt(sample, cfg)
             elif runner_cfg.mode == "suba":
                 text_prompt = get_suba_prompt(sample, cfg)
+            elif runner_cfg.mode == "base":
+                text_prompt = get_base_prompt(sample, cfg)
             else:
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
