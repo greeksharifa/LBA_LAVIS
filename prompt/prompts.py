@@ -9,9 +9,44 @@ def get_base_prompt(sample: dict, cfg: Config) -> str:
             cfg        : Config
         Returns:
             prompt     : str
+        ================================================================
+        ---------------- # open-ended     ---------------
+        <main question>
+        Answer the question using a single word or phrase.
+        ---------------- # multiple-choice --------------
+        <main question>
+        A. <option 1>
+        ...
+        {Z}. <option {Z}>
+        Answer with the option's letter from the given choices directly.
     """
     import pdb; pdb.set_trace()
-    raise NotImplementedError("get_base_prompt is not implemented")
+    if sample["question_type"] == "open_ended":
+        prompt = f"{sample['main_q']}"
+        if cfg.runner_cfg.mode == "CoT":
+            prompt += "\nYou should think about the problem-solving process step by step, and at the end, output the final answer in the format 'The answer is <final answer>.'"
+            prompt += "\nThe <final answer> must be a single word or phrase."
+            prompt += "\nLet's think step by step."
+        # elif cfg.runner_cfg.mode == "StrategyQA":
+        #     prompt += "\nAnswer with yes or no."
+        if cfg.dataset_cfg.prompt.add_base_prompt:
+            prompt += "\nAnswer the question using a single word or phrase."
+
+    else: # multiple_choice
+        prompt = ""
+        if cfg.runner_cfg.mode == "CoT":
+            prompt += "The following are multiple choice questions (with answers). Think step by step and then finish your answer with \"The answer is <X>\" where <X> is the correct letter choice."
+
+        prompt += f"{sample['main_q']}\n"
+        for i, candidate in enumerate(sample["candidate_list"]):
+            prompt += f"{chr(65 + i)}. {candidate}\n"
+
+        if cfg.runner_cfg.mode == "CoT":
+            prompt += "\nLet's think step by step."
+        elif cfg.dataset_cfg.prompt.add_base_prompt:
+            prompt += "\nAnswer with the option's letter from the given choices directly."
+            
+    return prompt
     
 def get_suba_prompt(sample: dict, cfg: Config) -> List[str]:
     """
@@ -71,8 +106,8 @@ def get_subq_prompt(sample: dict, cfg: Config) -> str:
 Your task is to decompose a given question (or instruction) Q into sub-questions.
 You need to generate {N} sub-questions that will help you answer the given Q. 
 """
-        if data_type == "videos" or data_type == "images":
-            prompt += f"Also, a single or multiple {data_type[:-1]}(s) may be given. Given Q, you need to generate sub-questions considering what to focus on in the {data_type[:-1]}(s).\n"
+        if data_type == "video" or data_type == "image":
+            prompt += f"Also, a single or multiple {data_type}(s) may be given. Given Q, you need to generate sub-questions considering what to focus on in the {data_type}(s).\n"
 
         prompt += """Please note that: You should output ONLY multiple sub-questions as shown in the following format.
 ### Format:

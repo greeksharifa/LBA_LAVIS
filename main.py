@@ -72,10 +72,11 @@ def main():
                 text_prompt = get_subq_prompt(sample, cfg)
             elif runner_cfg.mode == "suba":
                 text_prompt = get_suba_prompt(sample, cfg)
-            elif runner_cfg.mode == "base":
-                text_prompt = get_base_prompt(sample, cfg)
-            else:
+            elif runner_cfg.mode == "refined":
                 raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
+                text_prompt = get_refined_prompt(sample, cfg)
+            else: # base
+                text_prompt = get_base_prompt(sample, cfg)
 
 
             if isinstance(text_prompt, str):
