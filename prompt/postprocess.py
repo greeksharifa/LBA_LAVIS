@@ -77,6 +77,18 @@ def postprocess_subqs(output_texts: str, N: int) -> List[str]:
 
     return result
 
+def postprocess_bases(output_text: str) -> str:
+    """
+        Postprocess the base answer.
+        Args:
+            output_text         : str
+        Returns:
+            base_answer         : str
+    """
+    # The answer is
+    output_text = output_text.lower().split("The answer is")[-1]
+    return output_text.strip().rstrip(".")
+
 def format_vllm_outputs(
     mode: str, 
     outputs: List[Any], 
@@ -99,8 +111,8 @@ def format_vllm_outputs(
         "output_text": {
             "subq": "subq_list",
             "suba": "suba_list",
-            "base": "base_list",
-            "refined": "refined_list"
+            "base": "base_answer",
+            "refined": "refined_answer_list"
         },
     }
     key_name = KEY_NAME["output_text"][mode]
@@ -139,11 +151,21 @@ def format_vllm_outputs(
         # 토큰이 하나도 없었다면 min_prob는 0.0 처리 (안전장치)
         token_min_prob = min_prob if has_tokens else 0.0
 
+        # output_text postprocess
+        if mode == "subq":
+            output_text = postprocess_subqs(completion.text, N)
+        elif mode == "suba":
+            output_text = completion.text   # postprocess_subas(completion.text)
+        # elif mode == "refined":
+        #     output_text = postprocess_refineds(completion.text)
+        else: # "base"
+            output_text = postprocess_bases(completion.text)
+
 
         # 3. 결과 딕셔너리 생성
         result_item = {
             qid: {
-                key_name: postprocess_subqs(completion.text, N) if mode == "subq" else completion.text,
+                key_name: output_text,
                 f"conf_{mode}": {
                     "seq_ppl": seq_ppl,
                     "token_min_prob": token_min_prob

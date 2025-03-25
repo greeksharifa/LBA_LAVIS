@@ -20,7 +20,7 @@ def get_base_prompt(sample: dict, cfg: Config) -> str:
         {Z}. <option {Z}>
         Answer with the option's letter from the given choices directly.
     """
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     if sample["question_type"] == "open_ended":
         prompt = f"{sample['main_q']}"
         if cfg.runner_cfg.mode == "CoT":
@@ -102,10 +102,7 @@ def get_subq_prompt(sample: dict, cfg: Config) -> str:
     N = cfg.runner_cfg.N
 
     if prompt_type == "self":
-        prompt = """### Instruction
-Your task is to decompose a given question (or instruction) Q into sub-questions.
-You need to generate {N} sub-questions that will help you answer the given Q. 
-"""
+        prompt = """### Instruction\nYour task is to decompose a given question (or instruction) Q into sub-questions.\nYou need to generate {N} sub-questions that will help you answer the given Q. """
         if data_type == "video" or data_type == "image":
             prompt += f"Also, a single or multiple {data_type}(s) may be given. Given Q, you need to generate sub-questions considering what to focus on in the {data_type}(s).\n"
 

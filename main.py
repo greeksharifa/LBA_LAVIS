@@ -54,12 +54,10 @@ def main():
     logger.info(f"Output directory: {output_dir}")
     # run
     if runner_cfg.mode != "visualize":
-        model = get_model(cfg)
-        # model = C2RFramework(cfg)
+        model = get_model(cfg)  # model = C2RFramework(cfg)
 
-        
         # get tokenizer from VLLM for chat template
-        tokenizer = model.llm.get_tokenizer()
+        # tokenizer = model.llm.get_tokenizer()
         
         vllm_prompts = []
         qids = []
@@ -78,7 +76,7 @@ def main():
             else: # base
                 text_prompt = get_base_prompt(sample, cfg)
 
-
+            # apply chat template to prompts and vision
             if isinstance(text_prompt, str):
                 vllm_prompts.append(model.apply_chat_template(text_prompt, vision=vision, mm_uuids=sample["qid"]))
                 qids.append(sample["qid"])
@@ -117,7 +115,6 @@ def main():
         pprint(vllm_prompts[0], width=250)
         outputs = model.generate(vllm_prompts)
 
-        # if runner_cfg.mode == "subq":
         outputs = format_vllm_outputs(runner_cfg.mode, outputs, qids, N)
     else: # visualize
         raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
