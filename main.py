@@ -5,6 +5,7 @@ import math
 from collections import OrderedDict
 from pathlib import Path
 from pprint import pprint
+from tqdm import tqdm
 
 import torch
 from torch.utils.data import DataLoader
@@ -15,7 +16,7 @@ from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir
 from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
-from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt
+from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt, get_refined_prompt
 from prompt.postprocess import format_vllm_outputs
 from prompt.chat_template import apply_chat_template
 # from visualize import visualize, visualize_base, record_num_tokens
@@ -61,7 +62,7 @@ def main():
         
         vllm_prompts = []
         qids = []
-        for data_iter_idx, sample in enumerate(dataset): # dataloader
+        for sample in tqdm(dataset): # dataloader
             candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
             vision = sample["vision"] if "vision" in sample and runner_cfg.mode != "blind" else None
 
@@ -71,7 +72,7 @@ def main():
             elif runner_cfg.mode == "suba":
                 text_prompt = get_suba_prompt(sample, cfg)
             elif runner_cfg.mode == "refined":
-                raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
+                # raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
                 text_prompt = get_refined_prompt(sample, cfg)
             else: # base
                 text_prompt = get_base_prompt(sample, cfg)

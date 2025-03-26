@@ -86,8 +86,8 @@ def postprocess_bases(output_text: str) -> str:
             base_answer         : str
     """
     # The answer is
-    output_text = output_text.lower().split("The answer is")[-1]
-    return output_text.strip().rstrip(".")
+    output_text = output_text.split("The answer is")[-1].split("the answer is")[-1]
+    return output_text
 
 def format_vllm_outputs(
     mode: str, 

@@ -1,6 +1,38 @@
 from config.configs import Config
 from typing import List
 
+
+def get_refined_prompt(sample: dict, cfg: Config) -> str:
+    """
+        Generate refined answer for the main question.
+        Args:
+            sample     : dict
+            cfg        : Config
+        Returns:
+            prompt     : str
+    """
+    main_q = sample["main_q"]
+    base_answer = sample["base_answer"]
+    sub_qs = sample["subq_list"]
+    sub_as = sample["suba_list"]
+
+    prompt = f"""You'll be given the <Main question>, the previous answer to <Main question>, and the sub-QA results as context.
+Your task is to answer the next question or instruction correctly, referring to the model's previous answer and the sub-QA context. 
+<Main question>: {main_q}
+The previous answer to <Main question>: {base_answer}\n"""
+    
+    prompt += "sub-QA context:\n"
+    for i, (sub_q, sub_a) in enumerate(zip(sub_qs, sub_as)):
+        # prompt += f"{sub_q} {sub_a}\n"
+        prompt += f"<sub-question {i+1}>: {sub_q}\nThe answer to <sub-question {i+1}>: {sub_a}\n"
+    
+    prompt += "Please answer the following question or instruction based on the context.\n"
+    prompt += "<Main question>: "
+    prompt += get_base_prompt(sample, cfg)
+
+    return prompt
+
+
 def get_base_prompt(sample: dict, cfg: Config) -> str:
     """
         Generate base answer for the main question.
