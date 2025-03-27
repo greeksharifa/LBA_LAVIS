@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 
 from util.logger import get_logger
 from util.utils import create_answer_mapping
-from util.path import get_sub_qas_path
+from util.path import get_sub_qas_path, get_output_dir
 
 
 class BaseDataset(ABC):
@@ -56,6 +56,10 @@ class BaseDataset(ABC):
             sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
             self.subqs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
             self.subas = json.load(open(sub_as_path, 'r')) if sub_as_path.exists() else None
+            if runner_cfg.mode == "refined":
+                # load base answers
+                base_answers_path = get_output_dir(self.cfg) / "base_outputs.json"
+                self.base_answers = json.load(open(base_answers_path, 'r')) if base_answers_path.exists() else None
         # if runner_cfg.mode != "subqa":
         #     sub_qas_path, sub_as_path = get_sub_qas_path(self.cfg)
         #     self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
@@ -141,7 +145,7 @@ class BaseDataset(ABC):
         
         return qid, main_q, gt_ans
     
-    def postprocess_result(self, ann, result):
+    def load_additional_attr(self, ann, result):
         if "data_type" not in result:
             result["data_type"] = self.cfg.dataset_cfg.data_type
             
@@ -159,6 +163,9 @@ class BaseDataset(ABC):
                     "suba_list": suba_list,
                     "conf_suba_list": conf_suba_list,
                 })
+            if self.cfg.runner_cfg.mode == "refined":
+                # load base answers
+                raise NotImplementedError(f"Mode {self.cfg.runner_cfg.mode} not implemented")
         
         if self.cfg.runner_cfg.few_shot:
             # Get few-shot samples for the current sub-category

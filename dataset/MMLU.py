@@ -252,6 +252,6 @@ class MMLU(BaseDataset):
             "candidate_list": ann["candidate_list"],
             "question_type": self.cfg.dataset_cfg.question_type,
         }
-        result = self.postprocess_result(ann, result)
+        result = self.load_additional_attr(ann, result)
         
         return result

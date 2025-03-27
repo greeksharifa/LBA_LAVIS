@@ -14,7 +14,7 @@ from config.configs import Config
 from dataset import load_dataset
 from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
-from util.path import get_output_dir
+from util.path import get_output_dir, get_output_filename
 from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
 from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt, get_refined_prompt
 from prompt.postprocess import format_vllm_outputs
@@ -120,8 +120,10 @@ def main():
     else: # visualize
         raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
 
-    json.dump(outputs, open(output_dir / f"{runner_cfg.mode}_outputs.json", "w"), indent=4)
-    logger.info(f"Saved {runner_cfg.mode} outputs to {output_dir / f'{runner_cfg.mode}_outputs.json'}")
+    filename = get_output_filename(cfg)
+
+    json.dump(outputs, open(output_dir / filename, "w"), indent=4)
+    logger.info(f"Saved {runner_cfg.mode} outputs to {output_dir / filename}")
 
     import pdb; pdb.set_trace()
 

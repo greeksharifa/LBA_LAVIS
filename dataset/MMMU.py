@@ -114,6 +114,6 @@ class MMMU(BaseDataset):
             "candidate_list": ann["candidate_list"],
             "question_type": ann["question_type"], # "multiple-choice" or "open-ended"
         }
-        result = self.postprocess_result(ann, result)
+        result = self.load_additional_attr(ann, result)
         
         return result
