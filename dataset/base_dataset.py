@@ -151,21 +151,25 @@ class BaseDataset(ABC):
             
         # load sub-qas
         if self.cfg.runner_cfg.mode != "subq":
-            subq_list, conf_subq_list = self.get_subqas(ann, "subq")
+            subq_list, conf_subq_list = self._get_base_or_subs(ann, "subq")
             result.update({
                 "subq_list": subq_list,
                 "conf_subq_list": conf_subq_list,
             })
 
             if self.cfg.runner_cfg.mode != "suba":
-                suba_list, conf_suba_list = self.get_subqas(ann, "suba")
+                suba_list, conf_suba_list = self._get_base_or_subs(ann, "suba")
                 result.update({
                     "suba_list": suba_list,
                     "conf_suba_list": conf_suba_list,
                 })
             if self.cfg.runner_cfg.mode == "refined":
                 # load base answers
-                raise NotImplementedError(f"Mode {self.cfg.runner_cfg.mode} not implemented")
+                base_answer, conf_base = self._get_base_or_subs(ann, "base")
+                result.update({
+                    "base_answer": base_answer,
+                    "conf_base": conf_base,
+                })
         
         if self.cfg.runner_cfg.few_shot:
             # Get few-shot samples for the current sub-category
@@ -177,16 +181,17 @@ class BaseDataset(ABC):
 
         return result
 
-    def get_subqas(self, ann, mode: str):
+    def _get_base_or_subs(self, ann, mode: str):
         qid = ann["qid"]
         subs = getattr(self, f"{mode}s")[qid]
         if subs is None:
             raise ValueError(f"{mode}s is not found for qid {qid}")
-        sub_list = subs[f"{mode}_list"]
+
+        target_key = "base_answer" if mode == "base" else f"{mode}_list"
+        sub_list = subs[target_key]
         conf_sub_list = subs[f"conf_{mode}"][self.cfg.runner_cfg.confidence_type]
         
         return sub_list, conf_sub_list
-
 
 
     # def cleanse_prediction(self, prediction, main_question):
