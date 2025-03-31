@@ -73,7 +73,7 @@ def main():
                 text_prompt = get_suba_prompt(sample, cfg)
             elif runner_cfg.mode == "refined":
                 # raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
-                text_prompt = get_refined_prompt(sample, cfg)
+                text_prompt = get_refined_prompt(sample, cfg, index_sampler)
             else: # base
                 text_prompt = get_base_prompt(sample, cfg)
 

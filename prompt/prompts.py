@@ -1,36 +1,47 @@
-from config.configs import Config
 from typing import List
 
+from config.configs import Config
+from util.utils import IndexSampler
 
-def get_refined_prompt(sample: dict, cfg: Config) -> str:
+
+def get_refined_prompt(sample: dict, cfg: Config, index_sampler: IndexSampler) -> str:
     """
         Generate refined answer for the main question.
         Args:
-            sample     : dict
-            cfg        : Config
+            sample          : dict
+            cfg             : Config
+            index_sampler   : IndexSampler
         Returns:
-            prompt     : str
+            prompt          : List[str]
     """
     main_q = sample["main_q"]
     base_answer = sample["base_answer"]
-    sub_qs = sample["subq_list"]
-    sub_as = sample["suba_list"]
+    subq_list = sample["subq_list"]
+    suba_list = sample["suba_list"]
 
-    prompt = f"""You'll be given the <Main question>, the previous answer to <Main question>, and the sub-QA results as context.
-Your task is to answer the next question or instruction correctly, referring to the model's previous answer and the sub-QA context. 
-<Main question>: {main_q}
-The previous answer to <Main question>: {base_answer}\n"""
-    
-    prompt += "sub-QA context:\n"
-    for i, (sub_q, sub_a) in enumerate(zip(sub_qs, sub_as)):
-        # prompt += f"{sub_q} {sub_a}\n"
-        prompt += f"<sub-question {i+1}>: {sub_q}\nThe answer to <sub-question {i+1}>: {sub_a}\n"
-    
-    prompt += "Please answer the following question or instruction based on the context.\n"
-    prompt += "<Main question>: "
-    prompt += get_base_prompt(sample, cfg)
+    prompts = []
 
-    return prompt
+    for indices in index_sampler.indices:
+        sub_qs = [subq_list[i] for i in indices]
+        sub_as = [suba_list[i] for i in indices]
+
+        prompt = f"""You'll be given the <Main question>, the previous answer to <Main question>, and the sub-QA results as context.
+    Your task is to answer the next question or instruction correctly, referring to the model's previous answer and the sub-QA context. 
+    <Main question>: {main_q}
+    The previous answer to <Main question>: {base_answer}\n"""
+        
+        prompt += "sub-QA context:\n"
+        for i, (sub_q, sub_a) in enumerate(zip(sub_qs, sub_as)):
+            # prompt += f"{sub_q} {sub_a}\n"
+            prompt += f"<sub-question {i+1}>: {sub_q}\nThe answer to <sub-question {i+1}>: {sub_a}\n"
+        
+        prompt += "Please answer the following question or instruction based on the context.\n"
+        prompt += "<Main question>: "
+        prompt += get_base_prompt(sample, cfg)
+
+        prompts.append(prompt)
+    import pdb; pdb.set_trace()
+    return prompts
 
 
 def get_base_prompt(sample: dict, cfg: Config) -> str:

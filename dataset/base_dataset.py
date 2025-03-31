@@ -59,7 +59,7 @@ class BaseDataset(ABC):
             if runner_cfg.mode == "refined":
                 # load base answers
                 base_answers_path = get_output_dir(self.cfg) / "base_outputs.json"
-                self.base_answers = json.load(open(base_answers_path, 'r')) if base_answers_path.exists() else None
+                self.bases = json.load(open(base_answers_path, 'r')) if base_answers_path.exists() else None
         # if runner_cfg.mode != "subqa":
         #     sub_qas_path, sub_as_path = get_sub_qas_path(self.cfg)
         #     self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
