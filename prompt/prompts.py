@@ -40,7 +40,7 @@ def get_refined_prompt(sample: dict, cfg: Config, index_sampler: IndexSampler) -
         prompt += get_base_prompt(sample, cfg)
 
         prompts.append(prompt)
-    import pdb; pdb.set_trace()
+    
     return prompts
 
 
