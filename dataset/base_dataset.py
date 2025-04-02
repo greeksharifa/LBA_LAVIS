@@ -193,42 +193,47 @@ class BaseDataset(ABC):
         
         return sub_list, conf_sub_list
 
+    def get_score(self, pred, gt_ans, question_type: str, main_q: str = None):
+        if self.cfg.dataset_cfg.vqa_acc:
+            raise NotImplementedError("VQA accuracy is not implemented")
+        else:
+            pred = self.cleanse_answer(pred, question_type, main_q)
+            gt_ans = gt_ans.strip().lower().rstrip(".")
+            return 1 if pred == gt_ans else 0
 
-    # def cleanse_prediction(self, prediction, main_question):
-    #     prediction = prediction.strip().lower().rstrip(".")
-    #     if self.cfg.runner_cfg.get("CoT", False):
-    #         # base_pattern = r"\s*:?\s*(?:option)?\s*\(?([A-La-l])"
-    #         if self.cfg.dataset_cfg.question_type == "multiple_choice":
-    #             base_pattern = r"\s*[:|\s|\"|(?:option)]*\(?([A-La-l])"
-    #         else:
-    #             base_pattern = r"\s*[:|\s|\"]*(.*)"
-    #         if "answer is" in prediction:
-    #             # pattern = r"answer is\s*:?\s*(?:option)?\s*\(?([A-La-l])"
-    #             pattern = "answer is" + base_pattern
-    #             match = re.search(pattern, prediction)
-    #             if match:
-    #                 prediction = match.group(1).lower()
-    #         else: # if "is" in prediction:
-    #             pattern = "is" + base_pattern
-    #             match = re.search(pattern, prediction)
-    #             if match:
-    #                 prediction = match.group(1).lower()
-    #             else:
-    #                 prediction = prediction.split(main_question[-10:])[-1].strip()
-    #                 prediction = prediction[:3]
+    def cleanse_answer(self, ans: str, question_type: str, main_q: str = None):
+        ans = ans.strip().lower().rstrip(".")
+        if self.cfg.runner_cfg.mode == "CoT":
+            # base_pattern = r"\s*:?\s*(?:option)?\s*\(?([A-La-l])"
+            if self.cfg.dataset_cfg.question_type == "multiple_choice":
+                base_pattern = r"\s*[:|\s|\"|(?:option)]*\(?([A-La-l])"
+            else:
+                base_pattern = r"\s*[:|\s|\"]*(.*)"
+            if "answer is" in ans:
+                # pattern = r"answer is\s*:?\s*(?:option)?\s*\(?([A-La-l])"
+                pattern = "answer is" + base_pattern
+                match = re.search(pattern, ans)
+                if match:
+                    ans = match.group(1).lower()
+            else: # if "is" in prediction:
+                pattern = "is" + base_pattern
+                match = re.search(pattern, ans)
+                if match:
+                    ans = match.group(1).lower()
+                else:
+                    if main_q is not None:
+                        ans = ans.split(main_q[-10:])[-1].strip()
+                    ans = ans[:3]
 
-    #     if self.cfg.dataset_cfg.question_type != "open_ended":
-    #         prediction = prediction.split(".")[0].strip()
-    #         prediction = self.ANSWER_MAPPING.get(prediction, prediction)
+        if question_type != "open_ended":
+            ans = ans.split(".")[0].strip()
+            ans = self.ANSWER_MAPPING.get(ans, ans)
 
-    #     # remove parentheses
-    #     if re.compile(r"\(([A-La-l])\)"):
-    #         prediction = re.sub(r"\(([A-La-l])\)", r"\1", prediction)
+        # remove parentheses
+        if re.compile(r"\(([A-La-l])\)"):
+            ans = re.sub(r"\(([A-La-l])\)", r"\1", ans)
 
-    #     return prediction
-    
-    # def cleanse_target(self, target):
-    #     return target.strip().lower().rstrip(".")
+        return ans
 
     # def get_accuracy(self, predicts, targets, main_question=None):
 

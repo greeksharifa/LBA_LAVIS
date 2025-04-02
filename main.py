@@ -7,6 +7,7 @@ from pathlib import Path
 from pprint import pprint
 from tqdm import tqdm
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -111,7 +112,24 @@ def main():
     # if not any(runner_cfg.mode in mode for mode in ["subq", "suba", "refined", "base", "CoT", "llm_judge"]):
     if runner_cfg.mode == "refined":
         import pdb; pdb.set_trace()
-        pass  # TODO: implement visualization for refined mode
+        # samples (json) to list
+        samples_list = list(samples.values())
+        # sort by conf_base
+        samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
+
+        # t1_cands:  0.0, 0.1, 0.2, ..., 1.0
+        # t2_cands: -1.0, -0.9, -0.8, ..., 1.0
+        t1_cands = np.arange(0, 1, 0.1)  # [0.1 * x for x in range(11)]
+        t2_cands = np.arange(-1, 1, 0.1) # [0.1 * x for x in range(-10, 11)]
+
+        max_acc = 0.0
+        for t2_cand in t2_cands:
+            for t1_cand in t1_cands:
+                for sample in samples_list:
+                    pass
+                    # score = dataset.get_score
+
+        
         '''
             # pprint(samples["validation_Accounting_1"], width=350)
             {'base_answer': 'A. $6',
