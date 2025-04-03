@@ -117,14 +117,36 @@ def main():
         # sort by conf_base
         samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
 
+        # calculate accuracy of base answers
+        base_acc = 0.0
+        for sample in samples_list:
+            base_score = dataset.get_score(sample["base_answer"], sample["gt_ans"], sample["question_type"], sample["main_q"])
+            sample["base_score"] = base_score
+            base_acc += base_score
+
+            # 'conf_refined': {'seq_ppl': [1.3394814791153304, 1.2675376521409543, 1.4199761679233758, 1.3337169031494736], 'token_min_prob': [0.5621765025686553, 0.6224593298742985, 0.6791786964925157, 0.5621765025686553]},
+            # 'refined_answer_list': ['A', 'A', 'A', 'C'],
+            max_idx = np.argmax(sample["conf_refined"][runner_cfg.confidence_type])
+            conf_refined_max = sample["conf_refined"][runner_cfg.confidence_type][max_idx]
+            refined_answer_max = sample["refined_answer_list"][max_idx]
+            refined_score = dataset.get_score(refined_answer_max, sample["gt_ans"], sample["question_type"], sample["main_q"])
+            sample["refined_score"] = refined_score
+            sample["refined_conf_max"] = conf_refined_max
+            sample["refined_answer_max"] = refined_answer_max
+
+            
+        base_acc /= len(samples_list)
+        logger.info(f"Base accuracy: {base_acc}")
+
         # t1_cands:  0.0, 0.1, 0.2, ..., 1.0
         # t2_cands: -1.0, -0.9, -0.8, ..., 1.0
         t1_cands = np.arange(0, 1, 0.1)  # [0.1 * x for x in range(11)]
         t2_cands = np.arange(-1, 1, 0.1) # [0.1 * x for x in range(-10, 11)]
 
-        max_acc = 0.0
+        refined_acc = 0.0
         for t2_cand in t2_cands:
             for t1_cand in t1_cands:
+                max_acc = b
                 for sample in samples_list:
                     pass
                     # score = dataset.get_score
