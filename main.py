@@ -5,6 +5,7 @@ import math
 from collections import OrderedDict
 from pathlib import Path
 from pprint import pprint
+from pandas.core.window import ewm
 from tqdm import tqdm
 
 import numpy as np
@@ -131,7 +132,7 @@ def main():
             refined_answer_max = sample["refined_answer_list"][max_idx]
             refined_score = dataset.get_score(refined_answer_max, sample["gt_ans"], sample["question_type"], sample["main_q"])
             sample["refined_score"] = refined_score
-            sample["refined_conf_max"] = conf_refined_max
+            sample["conf_refined_max"] = conf_refined_max
             sample["refined_answer_max"] = refined_answer_max
 
             
@@ -142,14 +143,49 @@ def main():
         # t2_cands: -1.0, -0.9, -0.8, ..., 1.0
         t1_cands = np.arange(0, 1, 0.1)  # [0.1 * x for x in range(11)]
         t2_cands = np.arange(-1, 1, 0.1) # [0.1 * x for x in range(-10, 11)]
+        max_acc_matrix = np.zeros((len(t1_cands), len(t2_cands)))
+
+        for t2_idx, t2_cand in enumerate(t2_cands):
+            for t1_idx, t1_cand in enumerate(t1_cands):
+                acc = 0.0
+                for sample in samples_list:
+                    conf_base = sample["conf_base"]
+                    conf_refined_max = sample["conf_refined_max"]
+                    if conf_base >= t1_cand:
+                        acc += sample["base_score"]
+                    elif conf_refined_max >= conf_base + t2_cand:
+                        acc += sample["refined_score"]
+                    else:
+                        acc += sample["base_score"]
+
+                max_acc_matrix[t1_idx, t2_idx] = acc
 
         refined_acc = 0.0
-        for t2_cand in t2_cands:
-            for t1_cand in t1_cands:
-                max_acc = b
-                for sample in samples_list:
-                    pass
-                    # score = dataset.get_score
+        t1, t2 = -1, -1
+        for t1_idx in range(len(t1_cands)):
+            for t2_idx in range(len(t2_cands)):
+                if max_acc_matrix[t1_idx, t2_idx] > refined_acc:
+                    refined_acc = max_acc_matrix[t1_idx, t2_idx]
+                    t1, t2 = t1_cands[t1_idx], t2_cands[t2_idx]
+        
+        logger.info(f"Refined accuracy: {refined_acc} at t1: {t1}, t2: {t2}")
+
+        import pdb; pdb.set_trace()
+                
+        # refined_acc = 0.0
+        # for t2_idx, t2_cand in enumerate(t2_cands):
+        #     # for t1_cand in t1_cands:
+        #     t1_idx = 0
+        #     acc = base_acc
+        #     for sample in samples_list:
+        #         conf_base = sample["conf_base"]
+        #         conf_refined_max = sample["conf_refined_max"]
+        #         if conf_base >= t1_cands[t1_idx]:
+        #             max_acc_matrix[t1_idx, t2_idx] = acc
+        #             t1_idx += 1
+
+        #         if conf_refined_max >= conf_base + t2_cand:
+        #             acc += sample["refined_score"] - sample["base_score"]
 
         
         '''
