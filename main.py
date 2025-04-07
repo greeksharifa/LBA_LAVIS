@@ -2,11 +2,15 @@ import logging
 import sys
 import json
 import math
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from collections import OrderedDict
 from pathlib import Path
 from pprint import pprint
 from pandas.core.window import ewm
 from tqdm import tqdm
+        
 
 import numpy as np
 import torch
@@ -112,7 +116,7 @@ def main():
     # =========================================== visualize ==============================================
     # if not any(runner_cfg.mode in mode for mode in ["subq", "suba", "refined", "base", "CoT", "llm_judge"]):
     if runner_cfg.mode == "refined":
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         # samples (json) to list
         samples_list = list(samples.values())
         # sort by conf_base
@@ -139,6 +143,10 @@ def main():
         base_acc /= len(samples_list)
         logger.info(f"Base accuracy: {base_acc}")
 
+        # save samples_list
+        json.dump(samples_list, open(output_dir / f"{runner_cfg.mode}_samples_list.json", "w"), indent=4)
+        logger.info(f"Saved samples_list to {output_dir / f'{runner_cfg.mode}_samples_list.json'}")
+
         # t1_cands:  0.0, 0.1, 0.2, ..., 1.0
         # t2_cands: -1.0, -0.9, -0.8, ..., 1.0
         t1_cands = np.arange(0, 1, 0.1)  # [0.1 * x for x in range(11)]
@@ -158,7 +166,7 @@ def main():
                     else:
                         acc += sample["base_score"]
 
-                max_acc_matrix[t1_idx, t2_idx] = acc
+                max_acc_matrix[t1_idx, t2_idx] = acc / len(samples_list)
 
         refined_acc = 0.0
         t1, t2 = -1, -1
@@ -170,7 +178,18 @@ def main():
         
         logger.info(f"Refined accuracy: {refined_acc} at t1: {t1}, t2: {t2}")
 
-        import pdb; pdb.set_trace()
+        # plot max_acc_matrix as heatmap seaborn
+        # figure size 10x10
+        plt.figure(figsize=(len(t1_cands), len(t2_cands)))
+        sns.heatmap(max_acc_matrix.T, annot=True, fmt=".3f", cmap="YlGnBu", cbar=True)
+        plt.xlabel("t2")
+        plt.ylabel("t1")
+        plt.title(f"Max Accuracy Matrix ({runner_cfg.confidence_type})")
+        plt.savefig(output_dir / f"max_acc_matrix_{runner_cfg.confidence_type}.png")
+        logger.info(f"Saved max_acc_matrix to {output_dir / f'max_acc_matrix_{runner_cfg.confidence_type}.png'}")
+        plt.close()
+
+        # import pdb; pdb.set_trace()
                 
         # refined_acc = 0.0
         # for t2_idx, t2_cand in enumerate(t2_cands):
