@@ -60,7 +60,10 @@ def main():
 
     samples = OrderedDict()
     # run
-    if runner_cfg.mode != "visualize":
+    if runner_cfg.visualize_only:
+        # load samples_list
+        samples_list = json.load(open(output_dir / f"{runner_cfg.mode}_samples_list.json", "r"))
+    else:
         model = get_model(cfg)  # model = C2RFramework(cfg)
         # tokenizer = model.llm.get_tokenizer()
         
@@ -111,17 +114,13 @@ def main():
         logger.info(f"Saved {runner_cfg.mode} outputs to {output_dir / filename}")
 
         # import pdb; pdb.set_trace()
+        samples_list = list(samples.values())
+        samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
 
     '''========================================== visualize =============================================='''
     # =========================================== visualize ==============================================
     # if not any(runner_cfg.mode in mode for mode in ["subq", "suba", "refined", "base", "CoT", "llm_judge"]):
     if runner_cfg.mode == "refined":
-        # import pdb; pdb.set_trace()
-        # samples (json) to list
-        samples_list = list(samples.values())
-        # sort by conf_base
-        samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
-
         # calculate accuracy of base answers
         base_acc = 0.0
         for sample in samples_list:
@@ -129,8 +128,6 @@ def main():
             sample["base_score"] = base_score
             base_acc += base_score
 
-            # 'conf_refined': {'seq_ppl': [1.3394814791153304, 1.2675376521409543, 1.4199761679233758, 1.3337169031494736], 'token_min_prob': [0.5621765025686553, 0.6224593298742985, 0.6791786964925157, 0.5621765025686553]},
-            # 'refined_answer_list': ['A', 'A', 'A', 'C'],
             max_idx = np.argmax(sample["conf_refined"][runner_cfg.confidence_type])
             conf_refined_max = sample["conf_refined"][runner_cfg.confidence_type][max_idx]
             refined_answer_max = sample["refined_answer_list"][max_idx]
@@ -138,6 +135,9 @@ def main():
             sample["refined_score"] = refined_score
             sample["conf_refined_max"] = conf_refined_max
             sample["refined_answer_max"] = refined_answer_max
+
+            if "vision" in sample:
+                del sample["vision"]
 
             
         base_acc /= len(samples_list)
@@ -179,11 +179,12 @@ def main():
         logger.info(f"Refined accuracy: {refined_acc} at t1: {t1}, t2: {t2}")
 
         # plot max_acc_matrix as heatmap seaborn
-        # figure size 10x10
-        plt.figure(figsize=(len(t1_cands), len(t2_cands)))
+        plt.figure(figsize=(13, 13)) # plt.figure(figsize=(len(t1_cands), len(t2_cands)))
         sns.heatmap(max_acc_matrix.T, annot=True, fmt=".3f", cmap="YlGnBu", cbar=True)
         plt.xlabel("t2")
         plt.ylabel("t1")
+        plt.xticks(np.arange(0.5, len(t1_cands) + 0.5, 1), np.round(t1_cands, 1))
+        plt.yticks(np.arange(0.5, len(t2_cands) + 0.5, 1), np.round(t2_cands, 1))
         plt.title(f"Max Accuracy Matrix ({runner_cfg.confidence_type})")
         plt.savefig(output_dir / f"max_acc_matrix_{runner_cfg.confidence_type}.png")
         logger.info(f"Saved max_acc_matrix to {output_dir / f'max_acc_matrix_{runner_cfg.confidence_type}.png'}")
@@ -234,6 +235,8 @@ def main():
             'vision': [<PIL.PngImagePlugin.PngImageFile image mode=RGBA size=733x237 at 0x7F96C75374A0>],
             'vpath': ['/data/MMMU/mmmu_images/validation/validation_Accounting_1_1.png']}
         '''
+    elif any(runner_cfg.mode in mode for mode in ["subq", "suba", "base"]):
+        pass
     else:
         raise NotImplementedError(f"Visualization for {runner_cfg.mode} not implemented")
 

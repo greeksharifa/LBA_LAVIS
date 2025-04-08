@@ -144,6 +144,9 @@ class Qwen2_5VL(C2RFramework):
             placeholder = "<|video_pad|>"
 
         vision_placeholder = placeholder * len(vision)
+        # make mm_uuids identical to vision, postfix with _<index>
+        mm_uuids = [f"{mm_uuids}_{i}" for i in range(len(vision))]
+        # mm_uuids = "_".join(mm_uuids)
 
         text_prompt = (
             "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n"

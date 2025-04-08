@@ -1,7 +1,8 @@
 runner:
   # context     : "subqa"   # [subqa, default]
-  mode        : "default" # [subq, suba, base, refined, CoT, blind, llm_judge, visualize] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
+  mode        : "default" # [subq, suba, base, refined, CoT, blind, llm_judge] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
   subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, QC_K, QC_C, QC_Q] | question category: [Knowledge, C, Question]
+  visualize_only: False
 
   CoT_path    : 5 # number of CoT paths
   llm_judge_mode: "subq" # [subq, suba, subqa]
