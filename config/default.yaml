@@ -31,8 +31,8 @@ dataset:
   dataset_name: "dummy_dataset_name" # [NExTQA, ...]
   root_dir: /data/
   num_data:
-    val: 200
-    test: 2000
+    val: 2000
+    test: 10000
   split: test # [val, test]
 
   api:

@@ -141,7 +141,7 @@ def main():
 
             
         base_acc /= len(samples_list)
-        logger.info(f"Base accuracy: {base_acc}")
+        logger.info(f"Base accuracy: {base_acc:.4f}")
 
         # save samples_list
         json.dump(samples_list, open(output_dir / f"{runner_cfg.mode}_samples_list.json", "w"), indent=4)
@@ -176,11 +176,11 @@ def main():
                     refined_acc = max_acc_matrix[t1_idx, t2_idx]
                     t1, t2 = t1_cands[t1_idx], t2_cands[t2_idx]
         
-        logger.info(f"Refined accuracy: {refined_acc} at t1: {t1}, t2: {t2}")
+        logger.info(f"Refined accuracy: {refined_acc:.4f} at t1: {t1}, t2: {t2}")
 
         # plot max_acc_matrix as heatmap seaborn
         plt.figure(figsize=(13, 13)) # plt.figure(figsize=(len(t1_cands), len(t2_cands)))
-        sns.heatmap(max_acc_matrix.T, annot=True, fmt=".3f", cmap="YlGnBu", cbar=True)
+        sns.heatmap(max_acc_matrix.T, annot=True, fmt=".4f", cmap="YlGnBu", cbar=True)
         plt.xlabel("t2")
         plt.ylabel("t1")
         plt.xticks(np.arange(0.5, len(t1_cands) + 0.5, 1), np.round(t1_cands, 1))

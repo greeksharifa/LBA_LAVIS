@@ -64,7 +64,7 @@ def create_answer_mapping(num=26):
     # }
     answer_mapping = {}
     
-    # 알파벳 소문자 리스트 생성 (a부터 j까지)
+    # 알파벳 소문자 리스트 생성 (a부터 a+num-1까지)
     lower_letters = [chr(ord('a') + i) for i in range(num)]
     
     # 정수 숫자(0-9)에 대한 매핑

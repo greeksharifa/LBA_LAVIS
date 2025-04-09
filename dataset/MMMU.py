@@ -96,21 +96,18 @@ class MMMU(BaseDataset):
                     "gt_ans": gt_ans,
                     "type": sample['subfield'], # sample["topic_difficulty"]
                 }
+                ann = self.preprocess_annotation(ann)
                 self.annotation.append(ann)
     
     def __getitem__(self, index):
         ann = self.annotation[index]
 
-        qid, main_q, gt_ans = self.preprocess_annotation(ann)
-        #     ann["qid"], ann["main_q"], ann["gt_ans"]
-        # )
-
         result = {
             "vision": ann["image_list"],
             "vpath": ann["vpath"],
-            "main_q": main_q,
-            "qid": qid,
-            "gt_ans": gt_ans,
+            "main_q": ann["main_q"],
+            "qid": ann["qid"],
+            "gt_ans": ann["gt_ans"],
             "candidate_list": ann["candidate_list"],
             "question_type": ann["question_type"], # "multiple-choice" or "open-ended"
         }

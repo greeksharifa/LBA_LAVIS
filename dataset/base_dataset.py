@@ -129,7 +129,7 @@ class BaseDataset(ABC):
         return result
         
     def preprocess_annotation(self, ann):
-        qid = (ann["qid"])
+        qid = str(ann["qid"])
         main_q = ann["main_q"]
         gt_ans = ann["gt_ans"]
         
@@ -143,7 +143,11 @@ class BaseDataset(ABC):
         else:
             gt_ans = gt_ans.strip().lower()
         
-        return qid, main_q, gt_ans
+        ann["qid"] = qid
+        ann["main_q"] = main_q
+        ann["gt_ans"] = gt_ans
+
+        return ann
     
     def load_additional_attr(self, ann, result):
         if "data_type" not in result:
