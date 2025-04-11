@@ -1,6 +1,6 @@
 dataset:
   dataset_name: DramaQA
-  data_type: image # [text|image|video|feature]
+  data_type: video # [text|image|video|feature]
   question_type: multiple_choice # [open_ended|multiple_choice|both]
   vqa_acc: False
   # tau2: 0.10
@@ -9,7 +9,7 @@ dataset:
     add_base_prompt: True
   
   vis_root: /data/DramaQA/AnotherMissOh_videos/total/ # [None|huggingface|vis_path]
-  limit_mm_per_prompt: {image: 7}
+  limit_mm_per_prompt: {video: 1}
 
   ann_paths:
     # train:

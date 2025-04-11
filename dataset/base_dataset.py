@@ -31,6 +31,9 @@ class BaseDataset(ABC):
         self.root_dir = Path(dataset_cfg.root_dir)
         self.vis_root = self.root_dir / dataset_cfg.vis_root
 
+        # load answer mapping
+        if self.cfg.dataset_cfg.question_type != "open_ended": # == "multiple_choice":
+            self.ANSWER_MAPPING = create_answer_mapping()
         # load annotation 
         self.annotation = []
         split = dataset_cfg.split
@@ -42,9 +45,6 @@ class BaseDataset(ABC):
         for ann in self.annotation:
             ann["qid"] = str(ann["qid"])
 
-        # load answer mapping
-        if self.cfg.dataset_cfg.question_type != "open_ended": # == "multiple_choice":
-            self.ANSWER_MAPPING = create_answer_mapping()
 
         # load sub-qas
         if runner_cfg.mode == "subq":

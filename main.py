@@ -179,7 +179,9 @@ def main():
         logger.info(f"Refined accuracy: {refined_acc:.4f} at t1: {t1}, t2: {t2}")
 
         # plot max_acc_matrix as heatmap seaborn
-        plt.figure(figsize=(13, 13)) # plt.figure(figsize=(len(t1_cands), len(t2_cands)))
+        plt.figure(figsize=(15, 15)) # plt.figure(figsize=(len(t1_cands), len(t2_cands)))
+        # fontsize
+        plt.rcParams.update({'font.size': 14})
         sns.heatmap(max_acc_matrix.T, annot=True, fmt=".4f", cmap="YlGnBu", cbar=True)
         plt.xlabel("t2")
         plt.ylabel("t1")

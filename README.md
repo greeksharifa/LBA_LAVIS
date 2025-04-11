@@ -35,18 +35,22 @@ CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="suba" model.m
 ### Inference
 
 ```bash
+CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="base" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU"
+CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="refined" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU"
 ```
 
 ### Visualize
 
 ```bash
+CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="refined" model.model_name="qwen2.5-vl-7b" dataset.dataset_name="MMLU" runner.visualize_only=True
 ```
 
 ---
 
 ## Results
 
-| Model    | MMLU | MMLU-Pro | StrategyQA | MMMU | EgoSchema |
-|----------|------|----------|------------|------|-----------|
-|          |      |          |            |      |           |
+| Model        |  mode   | MMMU  | DramaQA |
+|--------------|---------|-------|---------|
+| Qwen3-VL-8B  |  base   | 50.44 |         |
+| Qwen3-VL-8B  | refined | 53.44 |         |
 
