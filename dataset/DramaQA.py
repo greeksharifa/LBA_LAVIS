@@ -3,6 +3,8 @@ import json
 from typing import List
 from pathlib import Path
 from PIL import Image
+from util.read_video import read_video
+# from vllm.assets.video import VideoAsset
 
 from dataset.base_dataset import BaseDataset
 
@@ -39,22 +41,29 @@ class DramaQA(BaseDataset):
         for sample in samples:
             gt_ans = sample['correct_idx']
             gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
+
+            # load video for vllm
+            needs_metadata = self.cfg.model_cfg.needs_video_metadata
+            max_n_frms = self.cfg.model_cfg.max_n_frms
+            video, metadata = read_video(self.vis_root / f"{sample['vid']}.mp4", num_frames=max_n_frms, do_sample_frames=True)
+
             ann = {
                 "main_q": sample['que'],
                 "candidate_list": sample['answers'],
                 "gt_ans": gt_ans,
-                "qid": sample['qid'],
+                "qid": str(sample['qid']),
                 "question_type": "multiple_choice",
-                "video_list": [Image.open(self.vis_root / f"{sample['vid']}.mp4")],
+                "video": ([(video, metadata)] if needs_metadata else video),
                 "vpath": [self.vis_root / f"{sample['vid']}.mp4"],
             }
+            ann = self.preprocess_annotation(ann)
             self.annotation.append(ann)
     
     def __getitem__(self, index):
         ann = self.annotation[index]
 
         result = {
-            "vision": ann["image_list"],
+            "vision": ann["video"],
             "vpath": ann["vpath"],
             "main_q": ann["main_q"],
             "qid": ann["qid"],

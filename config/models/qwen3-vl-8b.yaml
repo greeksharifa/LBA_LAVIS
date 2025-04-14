@@ -3,6 +3,7 @@ model:
   model_id: Qwen/Qwen3-VL-8B-Instruct
   subqa_model_name: qwen3-vl-8b
   model_type: huggingface # [huggingface|openai]
+  needs_video_metadata: True
 
   # cache_dir: /model/Qwen/
   # device_map: "auto"
