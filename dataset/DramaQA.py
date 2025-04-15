@@ -3,6 +3,10 @@ import json
 from typing import List
 from pathlib import Path
 from PIL import Image
+from tqdm import tqdm
+
+import numpy as np
+
 from util.read_video import read_video
 # from vllm.assets.video import VideoAsset
 
@@ -38,14 +42,26 @@ class DramaQA(BaseDataset):
     def load_annotation(self, ann_paths: List[Path]):
         ann_path = ann_paths[0]
         samples = json.load(open(ann_path, 'r'))
-        for sample in samples:
+
+        # adjust dataset size
+        if self.num_data != -1 and self.num_data < len(samples):
+            sampled_idxs = np.linspace(0, len(samples)-1, self.num_data, dtype=int)
+            samples = [samples[i] for i in sampled_idxs]
+            self.logger.info(f"Adjusted dataset size: {len(samples)}")
+            self.logger.info(f"Adjusted qids        : {samples[0]['qid']} ... {samples[-1]['qid']}")
+
+        for sample in tqdm(samples, desc="Loading DramaQA dataset"):
             gt_ans = sample['correct_idx']
             gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
 
             # load video for vllm
             needs_metadata = self.cfg.model_cfg.needs_video_metadata
             max_n_frms = self.cfg.model_cfg.max_n_frms
-            video, metadata = read_video(self.vis_root / f"{sample['vid']}.mp4", num_frames=max_n_frms, do_sample_frames=True)
+            try:
+                video, metadata = read_video(self.vis_root / f"{sample['vid']}.mp4", num_frames=max_n_frms, do_sample_frames=True)
+            except:
+                self.logger.warning(f"Error loading video: {self.vis_root / f"{sample['vid']}.mp4"}")
+                continue
 
             ann = {
                 "main_q": sample['que'],

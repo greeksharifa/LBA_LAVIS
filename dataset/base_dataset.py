@@ -31,6 +31,13 @@ class BaseDataset(ABC):
         self.root_dir = Path(dataset_cfg.root_dir)
         self.vis_root = self.root_dir / dataset_cfg.vis_root
 
+        
+        # adjust dataset size
+        try:
+            self.num_data = dataset_cfg.num_data.get(dataset_cfg.split, -1)
+        except: 
+            self.num_data = dataset_cfg.num_data
+
         # load answer mapping
         if self.cfg.dataset_cfg.question_type != "open_ended": # == "multiple_choice":
             self.ANSWER_MAPPING = create_answer_mapping()

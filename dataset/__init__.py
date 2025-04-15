@@ -4,7 +4,7 @@ from pathlib import Path
 
 from config.configs import Config
 from util.logger import get_logger
-
+from util.utils import data_print
 
 def load_dataset(cfg: Config):#, output_dir: Path):
     # load dataset class
@@ -22,22 +22,8 @@ def load_dataset(cfg: Config):#, output_dir: Path):
     sample = dataset[0]
     logger.info(f"Data sample:")
 
-    def _data_print(v):
-        # import pdb; pdb.set_trace()
-        if v is None:
-            return "None"
-        elif isinstance(v, list):
-            return "list of length: []" if len(v) == 0 else f"list of length: [{len(v)}, {_data_print(v[0])}]"
-        elif hasattr(v, "shape"):
-            return v.shape
-        elif hasattr(v, "size"):
-            return v.size
-        else:
-            v = str(v).replace("\n", "\t\\n\t")
-            return v[:80] + "...(omitted)" if len(v) > 80 else v
-
     for k, v in sample.items():
-        logger.info(f"{k:15s}: {_data_print(v)}")
+        logger.info(f"{k:15s}: {data_print(v)}")
         
     logger.info("="*100)
 

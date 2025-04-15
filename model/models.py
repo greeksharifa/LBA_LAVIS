@@ -119,7 +119,7 @@ class Qwen2_5VL(C2RFramework):
 
         engine_args = asdict(EngineArgs(
             model=self.model_id,
-            max_model_len=4096,
+            max_model_len=16384,
             max_num_seqs=self.cfg.model_cfg.max_num_seqs,
             mm_processor_kwargs={
                 "min_pixels": 28 * 28,

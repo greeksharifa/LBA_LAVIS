@@ -3,6 +3,7 @@ import json
 from typing import List
 from pathlib import Path
 from PIL import Image
+from tqdm import tqdm
 
 from dataset.base_dataset import BaseDataset
 
@@ -64,7 +65,7 @@ class MMMU(BaseDataset):
     def load_annotation(self, ann_paths: List[Path]):
         for ann_path in ann_paths:
             samples = json.load(open(ann_path, 'r'))
-            for sample in samples:
+            for sample in tqdm(samples, desc="Loading MMMU dataset"):
                 question = sample['question']
                 
                 if "<image" not in question:

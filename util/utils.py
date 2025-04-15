@@ -12,6 +12,20 @@ import torch.nn.functional as F
 
 from util.colors import Colors
 
+def data_print(v):
+    # import pdb; pdb.set_trace()
+    if v is None:
+        return "None"
+    elif isinstance(v, list):
+        return "list of length: []" if len(v) == 0 else f"list of length: [{len(v)}, {data_print(v[0])}]"
+    elif hasattr(v, "shape"):
+        return v.shape
+    elif hasattr(v, "size"):
+        return v.size
+    else:
+        v = str(v).replace("\n", "\t\\n\t")
+        return v[:80] + "...(omitted)" if len(v) > 80 else v
+
 
 def setup_seeds(config):
     seed = config.runner_cfg.seed # + get_rank()

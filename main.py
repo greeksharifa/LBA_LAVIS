@@ -21,7 +21,7 @@ from dataset import load_dataset
 from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir, get_output_filename
-from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list#, print_sample
+from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list, data_print#, print_sample
 from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt, get_refined_prompt
 from prompt.postprocess import format_vllm_outputs
 from prompt.chat_template import apply_chat_template
@@ -98,7 +98,7 @@ def main():
             
 
         logger.info(f"len(vllm_prompts): {len(vllm_prompts)}")
-        pprint(vllm_prompts[0], width=250)
+        logger.info(f"vllm_prompts[0]: {data_print(vllm_prompts[0])}")
         outputs = model.generate(vllm_prompts)
 
         outputs = format_vllm_outputs(runner_cfg.mode, outputs, qids, N)
