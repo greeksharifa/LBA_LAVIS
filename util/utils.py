@@ -4,6 +4,7 @@ import itertools
 import logging
 
 from typing import Any, List
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -11,6 +12,13 @@ import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 
 from util.colors import Colors
+
+
+def json_default(value):
+    if isinstance(value, Path):
+        return str(value)
+    else:
+        return value
 
 def data_print(v):
     # import pdb; pdb.set_trace()

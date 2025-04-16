@@ -21,7 +21,7 @@ from dataset import load_dataset
 from model import get_model, C2RFramework
 from util.logger import setup_logger, get_logger
 from util.path import get_output_dir, get_output_filename
-from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list, data_print#, print_sample
+from util.utils import setup_seeds, parse_args, IndexSampler, transpose_list, data_print, json_default#, print_sample
 from prompt.prompts import get_subq_prompt, get_suba_prompt, get_base_prompt, get_refined_prompt
 from prompt.postprocess import format_vllm_outputs
 from prompt.chat_template import apply_chat_template
@@ -36,6 +36,8 @@ def main():
     runner_cfg = cfg.runner_cfg
     dataset_cfg = cfg.dataset_cfg
     model_cfg = cfg.model_cfg
+    
+    mode = runner_cfg.mode
 
     # output directory
     output_dir = get_output_dir(cfg)
@@ -62,7 +64,7 @@ def main():
     # run
     if runner_cfg.visualize_only:
         # load samples_list
-        samples_list = json.load(open(output_dir / f"{runner_cfg.mode}_samples_list.json", "r"))
+        samples_list = json.load(open(output_dir / f"{mode}_samples_list.json", "r"))
     else:
         model = get_model(cfg)  # model = C2RFramework(cfg)
         # tokenizer = model.llm.get_tokenizer()
@@ -72,15 +74,15 @@ def main():
         for sample in tqdm(dataset): # dataloader
             samples[sample["qid"]] = sample
             candidate_list = sample["candidate_list"] if "candidate_list" in sample else None
-            vision = sample["vision"] if "vision" in sample and runner_cfg.mode != "blind" else None
+            vision = sample["vision"] if "vision" in sample and mode != "blind" else None
 
             # generate prompt to vllm
-            if runner_cfg.mode == "subq":
+            if mode == "subq":
                 text_prompt = get_subq_prompt(sample, cfg)
-            elif runner_cfg.mode == "suba":
+            elif mode == "suba":
                 text_prompt = get_suba_prompt(sample, cfg)
-            elif runner_cfg.mode == "refined":
-                # raise NotImplementedError(f"Mode {runner_cfg.mode} not implemented")
+            elif mode == "refined":
+                # raise NotImplementedError(f"Mode {mode} not implemented")
                 text_prompt = get_refined_prompt(sample, cfg, index_sampler)
             else: # base
                 text_prompt = get_base_prompt(sample, cfg)
@@ -101,7 +103,7 @@ def main():
         logger.info(f"vllm_prompts[0]: {data_print(vllm_prompts[0])}")
         outputs = model.generate(vllm_prompts)
 
-        outputs = format_vllm_outputs(runner_cfg.mode, outputs, qids, N)
+        outputs = format_vllm_outputs(mode, outputs, qids, N)
 
         # samples와 outputs 통합 (qid 기준으로 merge)
         for qid, output_data in outputs.items():
@@ -111,16 +113,20 @@ def main():
         filename = get_output_filename(cfg)
 
         json.dump(outputs, open(output_dir / filename, "w"), indent=4)
-        logger.info(f"Saved {runner_cfg.mode} outputs to {output_dir / filename}")
+        logger.info(f"Saved {mode} outputs to {output_dir / filename}")
 
         # import pdb; pdb.set_trace()
         samples_list = list(samples.values())
-        samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
+        if "conf_base" in samples_list[0].keys():
+            if isinstance(samples_list[0]["conf_base"], dict):
+                samples_list.sort(key=lambda x: x["conf_base"][runner_cfg.confidence_type], reverse=False)
+            else:
+                samples_list.sort(key=lambda x: x["conf_base"], reverse=False)
 
     '''========================================== visualize =============================================='''
     # =========================================== visualize ==============================================
-    # if not any(runner_cfg.mode in mode for mode in ["subq", "suba", "refined", "base", "CoT", "llm_judge"]):
-    if runner_cfg.mode == "refined":
+    # if not any(mode in mode for mode in ["subq", "suba", "refined", "base", "CoT", "llm_judge"]):
+    if mode == "refined":
         # calculate accuracy of base answers
         base_acc = 0.0
         for sample in samples_list:
@@ -144,8 +150,8 @@ def main():
         logger.info(f"Base accuracy: {base_acc:.4f}")
 
         # save samples_list
-        json.dump(samples_list, open(output_dir / f"{runner_cfg.mode}_samples_list.json", "w"), indent=4)
-        logger.info(f"Saved samples_list to {output_dir / f'{runner_cfg.mode}_samples_list.json'}")
+        json.dump(samples_list, open(output_dir / f"{mode}_samples_list.json", "w"), indent=4, default=json_default)
+        logger.info(f"Saved samples_list to {output_dir / f'{mode}_samples_list.json'}")
 
         # t1_cands:  0.0, 0.1, 0.2, ..., 1.0
         # t2_cands: -1.0, -0.9, -0.8, ..., 1.0
@@ -237,10 +243,10 @@ def main():
             'vision': [<PIL.PngImagePlugin.PngImageFile image mode=RGBA size=733x237 at 0x7F96C75374A0>],
             'vpath': ['/data/MMMU/mmmu_images/validation/validation_Accounting_1_1.png']}
         '''
-    elif any(runner_cfg.mode in mode for mode in ["subq", "suba", "base"]):
+    elif any(mode in mode for mode in ["subq", "suba", "base"]):
         pass
     else:
-        raise NotImplementedError(f"Visualization for {runner_cfg.mode} not implemented")
+        raise NotImplementedError(f"Visualization for {mode} not implemented")
 
 
 

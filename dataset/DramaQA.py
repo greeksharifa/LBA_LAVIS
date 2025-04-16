@@ -70,7 +70,7 @@ class DramaQA(BaseDataset):
                 "qid": str(sample['qid']),
                 "question_type": "multiple_choice",
                 "video": ([(video, metadata)] if needs_metadata else video),
-                "vpath": [self.vis_root / f"{sample['vid']}.mp4"],
+                "vpath": self.vis_root / f"{sample['vid']}.mp4",
             }
             ann = self.preprocess_annotation(ann)
             self.annotation.append(ann)

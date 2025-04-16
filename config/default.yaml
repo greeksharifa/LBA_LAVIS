@@ -1,6 +1,6 @@
 runner:
   # context     : "subqa"   # [subqa, default]
-  mode        : "default" # [subq, suba, base, refined, CoT, blind, llm_judge] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
+  mode        : "dummy" # [all, subq, suba, base, refined, CoT, blind, llm_judge] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize. all: run all modes in subq, suba, base, refined.
   subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, QC_K, QC_C, QC_Q] | question category: [Knowledge, C, Question]
   visualize_only: False
 
