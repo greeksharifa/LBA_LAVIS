@@ -1,8 +1,7 @@
 git rm --cached -r ./
 git add .
 
-git commit --date "Wed 16 Apr 2025 18:38:15 KST" -m "DramaQA" 
-# git commit --date "Thu 17 Apr 2025 20:06:52 KST" -m "msg" 
+git commit --date "Thu 17 Apr 2025 20:06:52 KST" -m "update" 
 # git commit --date "Fri 18 Apr 2025 17:28:41 KST" -m "msg" 
 # git commit --date "Mon 21 Apr 2025 11:49:53 KST" -m "msg" 
 # git commit --date "Tue 22 Apr 2025 14:44:14 KST" -m "msg" 
