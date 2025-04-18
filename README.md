@@ -21,6 +21,7 @@ uv pip install vllm --torch-backend=auto
 - Benchmarks:
   - MMLU
   - MMMU
+  - DramaQA
 
 ---
 ## Run
@@ -49,8 +50,8 @@ CUDA_VISIBLE_DEVICES=1,2,3,4 uv run main.py --options runner.mode="refined" mode
 
 ## Results
 
-| Model        |  mode   | MMMU  | DramaQA |
-|--------------|---------|-------|---------|
-| Qwen3-VL-8B  |  base   | 50.44 |         |
-| Qwen3-VL-8B  | refined | 53.44 |         |
+| Model        |  mode   | MMMU  |
+|--------------|---------|-------|
+| Qwen3-VL-8B  |  base   | 50.44 |
+| Qwen3-VL-8B  | refined | 53.44 |
 
