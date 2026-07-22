@@ -53,3 +53,4 @@ datasets:
 model:
   cache_dir: /model/ # ~/.cache/torch/hub/
   tensor_parallel_size: 2
+  use_flash_attention_2: True

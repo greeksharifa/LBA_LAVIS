@@ -13,7 +13,32 @@ from torch.utils.data import Dataset
 from transformers import InstructBlipVideoProcessor
 from utils.llava_answer_eval import map_prediction_to_answer
 
+"""
+This module provides the base classes and utility functions for loading and processing various VQA (Visual Question Answering) datasets.
+
+It includes:
+- `load_dataset`: A factory function to load specific VQA datasets based on configuration.
+- `BaseDataset`: A base class for VQA datasets, handling annotation loading, processing, and evaluation.
+- `get_train_examplar`: A function to generate a training exemplar prompt.
+- `get_text_input`: A function to format text input prompts for different VQA tasks and models.
+"""
+
 def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):#xl_or_xxl="xl", model_tag=None):
+    """Loads a specific VQA dataset based on the provided configuration.
+
+    Args:
+        datasets_cfg: Configuration object containing dataset-specific parameters.
+        split (str, optional): The dataset split to load (e.g., 'train', 'val', 'test'). Defaults to 'val'.
+        n_supple (int, optional): Number of supplementary examples. Defaults to 0.
+        ann_paths (list, optional): List of annotation file paths. Defaults to [].
+        **kwargs: Additional keyword arguments for dataset-specific configurations.
+
+    Raises:
+        NotImplementedError: If the specified dataset_name in datasets_cfg is not supported.
+
+    Returns:
+        Dataset: An instance of the loaded dataset.
+    """
     if datasets_cfg.dataset_name == "VQA_Introspect":
         from dataset.VQA_Introspect import VQAIntrospectDataset
         cls = VQAIntrospectDataset
@@ -105,10 +130,35 @@ def load_dataset(datasets_cfg, split='val', n_supple=0, ann_paths=[], **kwargs):
     
 
 class BaseDataset(Dataset):
+    """Base class for VQA datasets.
+
+    This class handles common functionalities like loading annotations from various file formats (CSV, JSONL, PKL, JSON),
+    sampling data, and initializing processors. It also provides methods for evaluating answers using OpenAI's API if configured.
+
+    Attributes:
+        vis_root (str): Root directory of visual data (images/videos).
+        annotation (list): List of annotations, where each item is a dictionary representing a data sample.
+        sub_qas (dict): Dictionary of sub-questions and answers, if provided.
+        vis_processor: Visual data processor.
+        text_processor: Text data processor.
+        client (OpenAI): OpenAI API client for evaluation (if `eval_chatgpt` is enabled).
+        response_df (pd.DataFrame): DataFrame to store evaluation responses from OpenAI.
+    """
     def __init__(self, vis_processor=None, text_processor=None, vis_root=None, ann_paths=[], num_data=-1, **kwargs):
         """
-        vis_root (string): Root directory of images (e.g. coco/images/)
-        ann_root (string): directory to store the annotation file
+        Initializes the BaseDataset.
+
+        Args:
+            vis_processor: Processor for visual data. Defaults to None.
+            text_processor: Processor for text data. Defaults to None.
+            vis_root (str): Root directory of images (e.g. coco/images/).
+            ann_paths (list): List of paths to annotation files. Can be CSV, JSONL, PKL, or JSON.
+                              If two paths are provided, the second is treated as sub-questions/answers.
+            num_data (int, optional): Number of data samples to load. -1 loads all data. Defaults to -1.
+            **kwargs: Additional keyword arguments to be set as attributes of the dataset.
+
+        Raises:
+            ValueError: If `ann_paths` is invalid (not 1 or 2 paths).
         """
         self.vis_root = vis_root
         self.annotation = []
@@ -166,6 +216,12 @@ class BaseDataset(Dataset):
         self.cnt = 0
 
     def create_openai_client(self):
+        """Initializes the OpenAI client and loads existing evaluation responses if available.
+
+        Reads the API key from "temp/api_key.json".
+        If an existing "response_df.csv" is found in `self.output_dir`, it loads it.
+        Otherwise, it initializes an empty DataFrame for responses.
+        """
         api_key = json.load(open("temp/api_key.json", "r"))["LBA"]
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key)

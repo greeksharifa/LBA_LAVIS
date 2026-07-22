@@ -1,5 +1,9 @@
 # LBA Method
 
+This is the `LBA_CVPR2025` branch for the CVPR 2025 / legacy uncertainty pipeline. It carries the local MME result-export adjustments, configurable LLaVA FlashAttention behavior, and supporting dataset documentation used by that pipeline.
+
+Generated outputs, datasets, model weights and caches, nested repository clones, and API keys are dependencies or local artifacts and remain unversioned.
+
 ## Installation
 
 - follow install videollava: https://github.com/PKU-YuanGroup/Video-LLaVA?tab=readme-ov-file#%EF%B8%8F-requirements-and-installation
