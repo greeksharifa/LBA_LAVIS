@@ -2,7 +2,13 @@
 
 This is the `LBA_CVPR2025` branch for the CVPR 2025 / legacy uncertainty pipeline. It carries the local MME result-export adjustments, configurable LLaVA FlashAttention behavior, and supporting dataset documentation used by that pipeline.
 
-Generated outputs, datasets, model weights and caches, nested repository clones, and API keys are dependencies or local artifacts and remain unversioned.
+Large generated outputs, datasets, model weights, caches, nested repository
+clones, and API keys remain unversioned. Curated, secret-scanned research
+scripts and compact result records are preserved in
+[`research_tools/`](research_tools/) and
+[`research_artifacts/`](research_artifacts/). Local changes made against
+third-party repositories are recorded as attributed patches under
+[`vendor_patches/`](vendor_patches/) instead of vendoring entire clones.
 
 ## Installation
 

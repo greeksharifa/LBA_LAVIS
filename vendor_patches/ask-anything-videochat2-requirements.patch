@@ -1,0 +1,15 @@
+--- a/video_chat2/requirements.txt
++++ b/video_chat2/requirements.txt
+@@ -19,8 +19,8 @@
+ termcolor==2.4.0
+ timm==0.5.4
+ tokenizers==0.19.1
+-torch==1.13.1+cu117
+-torchvision==0.14.1+cu117
++# torch==1.13.1+cu117
++# torchvision==0.14.1+cu117
+ tqdm==4.66.1
+ transformers==4.40.1
+-wandb==0.16.1
+\ No newline at end of file
++wandb==0.16.1
