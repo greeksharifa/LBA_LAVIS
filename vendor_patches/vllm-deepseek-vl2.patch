@@ -1,55 +1,22 @@
+diff --git a/examples/offline_inference/vision_language_multi_image.py b/examples/offline_inference/vision_language_multi_image.py
+index 43c44fa..d18c553 100644
 --- a/examples/offline_inference/vision_language_multi_image.py
 +++ b/examples/offline_inference/vision_language_multi_image.py
-@@ -57,22 +56,0 @@
--def load_deepseek_vl2(question: str, image_urls: List[str]):
+@@ -55,7 +55,7 @@ def load_aria(question, image_urls: List[str]) -> ModelRequestData:
+ 
+ 
+ def load_deepseek_vl2(question: str, image_urls: List[str]):
 -    model_name = "deepseek-ai/deepseek-vl2-tiny"
--
--    llm = LLM(model=model_name,
--              max_model_len=4096,
--              max_num_seqs=2,
--              hf_overrides={"architectures": ["DeepseekVLV2ForCausalLM"]},
--              limit_mm_per_prompt={"image": len(image_urls)})
--
--    placeholder = "".join(f"image_{i}:<image>\n"
--                          for i, _ in enumerate(image_urls, start=1))
--    prompt = f"<|User|>: {placeholder}{question}\n\n<|Assistant|>:"
--
--    return ModelRequestData(
--        llm=llm,
--        prompt=prompt,
--        stop_token_ids=None,
--        image_data=[fetch_image(url) for url in image_urls],
--        chat_template=None,
--    )
--
--
-@@ -393,0 +372,22 @@
-+def load_deepseek_vl2(question: str, image_urls: List[str]):
 +    model_name = "deepseek-ai/deepseek-vl2-small"
-+
-+    llm = LLM(model=model_name,
-+              max_model_len=4096,
-+              max_num_seqs=2,
-+              hf_overrides={"architectures": ["DeepseekVLV2ForCausalLM"]},
-+              limit_mm_per_prompt={"image": len(image_urls)})
-+
-+    placeholder = "".join(f"image_{i}:<image>\n"
-+                          for i, _ in enumerate(image_urls, start=1))
-+    prompt = f"<|User|>: {placeholder}{question}\n\n<|Assistant|>:"
-+
-+    return ModelRequestData(
-+        llm=llm,
-+        prompt=prompt,
-+        stop_token_ids=None,
-+        image_data=[fetch_image(url) for url in image_urls],
-+        chat_template=None,
-+    )
-+
-+
-@@ -482 +482 @@
+ 
+     llm = LLM(model=model_name,
+               max_model_len=4096,
+@@ -479,7 +479,7 @@ if __name__ == "__main__":
+     parser.add_argument('--model-type',
+                         '-m',
+                         type=str,
 -                        default="phi3_v",
 +                        default="deepseek_vl_v2",
-@@ -492 +492 @@
--    main(args)
-+    main(args)
-\ No newline at end of file
+                         choices=model_example_map.keys(),
+                         help='Huggingface "model_type".')
+     parser.add_argument("--method",

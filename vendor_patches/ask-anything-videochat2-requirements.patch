@@ -1,8 +1,8 @@
---- a/video_chat2/requirements.txt
-+++ b/video_chat2/requirements.txt
-@@ -19,8 +19,8 @@
- termcolor==2.4.0
- timm==0.5.4
+diff --git i/video_chat2/requirements.txt w/video_chat2/requirements.txt
+index 388201b..61525da 100644
+--- i/video_chat2/requirements.txt
++++ w/video_chat2/requirements.txt
+@@ -21,6 +21,6 @@ timm==0.5.4
  tokenizers==0.19.1
 -torch==1.13.1+cu117
 -torchvision==0.14.1+cu117
