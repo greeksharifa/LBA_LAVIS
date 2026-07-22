@@ -1,5 +1,9 @@
 # LBA_SubQA
 
+## Archive
+
+Ignored artifacts recovered from the retired standalone checkout are preserved in [`archive/legacy_2024/`](archive/legacy_2024/). They include the March 2024 prototype, embedded API response examples, and its historical run command; no API credential is stored in the archive.
+
 
 
 ## Generate SubQA
