@@ -50,8 +50,6 @@ def parse_args():
 
     parser.add_argument('--chatgpt_mode', type=str, choices=["subq", "suba", "maina_before", "maina_after"])
 
-    parser.add_argument('--chatgpt_openai_api_key', type=str,
-                        default="REDACTED_USE_temp_openai_key.txt", help='OpenAI API key')
     parser.add_argument('--chatgpt_model', type=str, default="gpt-4o-mini", help='OpenAI model')
     parser.add_argument('--chatgpt_max_tokens', type=int, default=500, help='OpenAI max tokens')
     parser.add_argument('--chatgpt_temperature', type=float, default=0., help='OpenAI temperature')
@@ -171,7 +169,7 @@ These sub-questions can help analyze the video and determine which event is more
 def reformat_subq_backup(text):
     pattern = ''#r'.*'
     for i in range(1, 6):
-        pattern += f'{i}\. \[?(.+\?)\]?.*'
+        pattern += rf'{i}\. \[?(.+\?)\]?.*'
         # pattern += f'{i}' + r'\. (?:\'\"\[)*(.+\?)(?:\'\"\])*.*'
         if i != 5:
             pattern += '\n'
@@ -236,7 +234,7 @@ def main():
     #                         shuffle=False, collate_fn=dataset.collater)
 
     # openai
-    client = OpenAI(api_key=open("temp/openai_key.txt", "r").read().strip())
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     batch_input_file = client.files.create(
         file=open("temp/batchinput.jsonl", "rb"),
