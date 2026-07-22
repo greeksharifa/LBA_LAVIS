@@ -17,7 +17,9 @@ def main(args):
     # episode_0 = json.loads(episodes[0].strip())
     # episodes = json_rows2json(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_integrated_train_episode.json.rows')
     episodes = load_and_merge_jsons(args.root_dir + 'Descriptions_CharacterBackground/Episode/AnotherMissOh_{split}_onlyscene_wo_kg.json')
-    # pprint(episodes)
+    # pprint(episodes, width=400)
+    # for episode in episodes:
+    #     print(episode['episode'])
     # assert False
     # print(episode_0)
     # print('*' * 200)
@@ -35,19 +37,22 @@ def main(args):
         scripts = get_scripts(args)
 
     # scene_f = open(os.path.join(args.root_dir, 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows'), 'r', encoding='utf8').readlines()
-    scene_f = json_rows2json(args.root_dir + 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows')
+    scenes = json_rows2json(args.root_dir + 'Descriptions_CharacterBackground/Scene/AnotherMissOh_integrated_train_scene.json.rows')
+    pprint(scenes, width=250)
     
-    idx = random.randint(0, len(scene_f))
+    idx = random.randint(0, len(scenes)-1)
+    print('idx:', idx)
     
-    for i, data in enumerate(scene_f):
+    for i, (vid, scene) in enumerate(scenes.items()):
         if i != idx:
             continue
-        print('data:', data)
-        eposide_num, scene_num, shot_num = get_info_from_vid(data["scene_id"])
-        scene = json.loads(data.strip())
+        print('scene:', scene)
+        eposide_num, scene_num, shot_num = get_info_from_vid(vid)
+        eposide_num = int(eposide_num)-1
         scene_description = scene["scene_description"]
         knowledge_graph = scene["knowledge_graph"]
-        character_information = episodes[eposide_num]["characters"]
+        # print('&' * 70)
+        character_information = episodes[eposide_num]["episode_kg"]
         main_Q = qas[i]["que"]
         main_A = qas[i]["answers"][qas[0]["correct_idx"]]
         if args.speech:

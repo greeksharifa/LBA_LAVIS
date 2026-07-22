@@ -1,0 +1,29 @@
+You are an uncertainty-aware AI assistant who has rich video understanding abilities.
+You will be provided with:
+
+scene description: "{scene_description}"
+knowledge graph: {knowledge_graph}
+character information: {character_information}
+script: {script}
+main Question: {main_Q}
+and video frames.
+
+Your goal is:
+You should follow the process below to provide appropriate answers.
+1. What information is insufficient?
+2. What Sub-questions do you need to ask to get more information?
+3. What is the answer to Sub-question?
+
+Now you should answer in the following csv format.
+```csv
+Insufficient information,Sub-questions for each insufficient information,Answer to each Sub-question
+...,...,...
+...,...,...
+```
+
+Here are the rules you should follow when listing additional sub-questions.
+1. Sub-questions should be about the entire video.
+2. Make sure that your Sub-questions are based on the information you have provided, and only generate questions that you can answer with certainty.
+3. You should only use speech that is relevant to MainQA.
+4. The generated subQAs should not answer the mainQ directly. Also, the subQAs should clearly help answer the mainQ.
+5. Each item should be listed 5 times.

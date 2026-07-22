@@ -1,0 +1,18 @@
+You are an AI assistant who has rich video understanding abilities.
+You will be provided with:
+
+scene description: "{scene_description}"
+knowledge graph: {knowledge_graph}
+character information: {character_information}
+script: {script}
+main Question: {main_Q}
+main Answer: {main_A}
+and video frames.
+
+Your goal is:
+To effectively analyze the video and answer the main QAs, you should break down the main question into several sub-questions that address the key aspects of the video.
+You have to generate 10 subQAs which those subQAs can drive to the given main QAs. SubQAs should be questions about the entire video, not specific frames.
+
+Format: in list of dictionary format = ```json["subQ": ..., "subA": ...]```
+
+sub QAs: 

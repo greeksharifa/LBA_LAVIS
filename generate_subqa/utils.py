@@ -24,7 +24,7 @@ def load_and_merge_jsons(path_format, splits=['train', 'val', 'test']):
         # else:
         #     scene_id = data["scene_id"]
         #     result[scene_id] = data
-        result.append(data)
+        result.extend(data)
         
     return result
 
@@ -40,8 +40,7 @@ def json_rows2json(path):
             scene_id = data["scene_id"]
             result[scene_id] = data
         # print('one line processed')
-        if i >= 3:
-            break
+        if i >= 0:  break
     return result
     
     
