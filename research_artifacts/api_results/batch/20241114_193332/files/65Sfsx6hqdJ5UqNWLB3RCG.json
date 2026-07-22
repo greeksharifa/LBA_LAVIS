@@ -1,0 +1,41 @@
+{
+    "question_id": "65Sfsx6hqdJ5UqNWLB3RCG",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat continent are these animals located in? africa.\nQuestion: Where are these animals located?\n(A) museum\n(B) zoo\n(C) vet\n(D) wild\nAnswer: The answer is ",
+    "main_question": "Where are these animals located?\n(A) museum\n(B) zoo\n(C) vet\n(D) wild",
+    "sub_question": [
+        "What continent are these animals located in?"
+    ],
+    "sub_answer": [
+        "africa"
+    ],
+    "gt_ans": [
+        "africa",
+        "african",
+        "wild",
+        "africa",
+        "field",
+        "forest",
+        "africa",
+        "jungle",
+        "savanna",
+        "africa"
+    ],
+    "confidence_base": 0.9304090142250061,
+    "confidence_lba": 0.700774,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6439800262451172,
+        0.4953802525997162,
+        0.6357053518295288,
+        0.7007743716239929,
+        0.6166470646858215
+    ]
+}

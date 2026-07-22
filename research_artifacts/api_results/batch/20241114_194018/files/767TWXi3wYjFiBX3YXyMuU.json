@@ -1,0 +1,30 @@
+{
+    "question_id": "767TWXi3wYjFiBX3YXyMuU",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat material has been used to coat the wall? paint.\nQuestion: What kind of coating has been used?\n(A) polish\n(B) frosting\n(C) paint\n(D) varnish\nAnswer: The answer is ",
+    "main_question": "What kind of coating has been used?\n(A) polish\n(B) frosting\n(C) paint\n(D) varnish",
+    "sub_question": [
+        "What material has been used to coat the wall?"
+    ],
+    "sub_answer": [
+        "paint"
+    ],
+    "gt_ans": "frosting",
+    "confidence_base": 0.7840518355369568,
+    "confidence_lba": 0.936102,
+    "text_output_base": "(B)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5675598978996277,
+        0.8249527215957642,
+        0.9029971957206726,
+        0.12434197217226028,
+        0.9361017942428589
+    ]
+}

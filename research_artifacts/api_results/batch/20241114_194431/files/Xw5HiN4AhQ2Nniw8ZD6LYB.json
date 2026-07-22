@@ -1,0 +1,30 @@
+{
+    "question_id": "Xw5HiN4AhQ2Nniw8ZD6LYB",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many fish are there in the kite design? three.\nQuestion: What kind of fish inspired the kite design?\n(A) swordfish\n(B) clown fish\n(C) pufferfish\n(D) tilapia\nAnswer: The answer is ",
+    "main_question": "What kind of fish inspired the kite design?\n(A) swordfish\n(B) clown fish\n(C) pufferfish\n(D) tilapia",
+    "sub_question": [
+        "How many fish are there in the kite design?"
+    ],
+    "sub_answer": [
+        "three"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.6668490767478943,
+    "confidence_lba": 0.981977,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9819774627685547,
+        0.964704692363739,
+        0.7659313082695007,
+        0.7659313082695007,
+        0.7659313082695007
+    ]
+}

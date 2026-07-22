@@ -1,0 +1,30 @@
+{
+    "question_id": "Z5m3QsQ5uikUE6AwWUufzg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of room does the refrigerator belong in? kitchen.\nQuestion: The room with the refrigerator in it appears to be a room of what type?\n(A) living room\n(B) large closet\n(C) kitchen\n(D) bedroom\nAnswer: The answer is ",
+    "main_question": "The room with the refrigerator in it appears to be a room of what type?\n(A) living room\n(B) large closet\n(C) kitchen\n(D) bedroom",
+    "sub_question": [
+        "What type of room does the refrigerator belong in?"
+    ],
+    "sub_answer": [
+        "kitchen"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.25062721967697144,
+    "confidence_lba": 0.956712,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9491342306137085,
+        0.9567119479179382,
+        0.9400960206985474,
+        0.9545947313308716,
+        0.5800284743309021
+    ]
+}

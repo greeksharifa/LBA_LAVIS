@@ -1,0 +1,30 @@
+{
+    "question_id": "akDNCt5XCGvjw33C3ong5d",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of meal is this? a plate of food.\nQuestion: What meal is this?\n(A) snack\n(B) dinner\n(C) breakfast\n(D) brunch\nAnswer: The answer is ",
+    "main_question": "What meal is this?\n(A) snack\n(B) dinner\n(C) breakfast\n(D) brunch",
+    "sub_question": [
+        "What type of meal is this?"
+    ],
+    "sub_answer": [
+        "a plate of food"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.22314538061618805,
+    "confidence_lba": 0.824111,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06585083901882172,
+        0.08962050825357437,
+        0.8241109251976013,
+        0.1380538046360016,
+        0.15725740790367126
+    ]
+}

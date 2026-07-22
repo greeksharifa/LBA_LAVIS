@@ -1,0 +1,30 @@
+{
+    "question_id": "WojdRVndpCBeqpSk3roFjk",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of lighting is used in the bathroom? recessed lighting.\nQuestion: What type of lighting is used in the recessed lights in the kitchen?\n(A) fluorescent\n(B) led\n(C) compact fluorescent\n(D) incandescent\nAnswer: The answer is ",
+    "main_question": "What type of lighting is used in the recessed lights in the kitchen?\n(A) fluorescent\n(B) led\n(C) compact fluorescent\n(D) incandescent",
+    "sub_question": [
+        "What type of lighting is used in the bathroom?"
+    ],
+    "sub_answer": [
+        "recessed lighting"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.07654332369565964,
+    "confidence_lba": 0.966831,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.22235558927059174,
+        0.9226067066192627,
+        0.9623932838439941,
+        0.9668309092521667,
+        0.07729702442884445
+    ]
+}

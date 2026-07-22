@@ -1,0 +1,30 @@
+{
+    "question_id": "64yPpMFbTw3CnmTULYZWTp",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nParis is a city in france? yes, paris is in france.\nQuestion: In which major city is the woman most likely sitting outdoors?\n(A) paris\n(B) new york\n(C) johannesburg\n(D) london\nAnswer: The answer is ",
+    "main_question": "In which major city is the woman most likely sitting outdoors?\n(A) paris\n(B) new york\n(C) johannesburg\n(D) london",
+    "sub_question": [
+        "Paris is a city in france?"
+    ],
+    "sub_answer": [
+        "yes, paris is in france"
+    ],
+    "gt_ans": "paris",
+    "confidence_base": 0.6598047018051147,
+    "confidence_lba": 0.991434,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8813318014144897,
+        0.8383305072784424,
+        0.8468623161315918,
+        0.9812464714050293,
+        0.9914339184761047
+    ]
+}

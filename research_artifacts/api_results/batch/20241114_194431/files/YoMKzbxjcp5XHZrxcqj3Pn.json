@@ -1,0 +1,30 @@
+{
+    "question_id": "YoMKzbxjcp5XHZrxcqj3Pn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat object is most unusual? pole.\nQuestion: What object shown seems most unusual?\n(A) pedestrians\n(B) ernest jones\n(C) traffic light\n(D) street\nAnswer: The answer is ",
+    "main_question": "What object shown seems most unusual?\n(A) pedestrians\n(B) ernest jones\n(C) traffic light\n(D) street",
+    "sub_question": [
+        "What object is most unusual?"
+    ],
+    "sub_answer": [
+        "pole"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.4219852387905121,
+    "confidence_lba": 0.925555,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5743251442909241,
+        0.7894113659858704,
+        0.9255545139312744,
+        0.7642394304275513,
+        0.7903237342834473
+    ]
+}

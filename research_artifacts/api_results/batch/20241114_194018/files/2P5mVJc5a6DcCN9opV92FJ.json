@@ -1,0 +1,30 @@
+{
+    "question_id": "2P5mVJc5a6DcCN9opV92FJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow is the person on the left using their body? to ride the wave.\nQuestion: What is the person on the left doing with their body?\n(A) crouching\n(B) leaping\n(C) flying\n(D) twirling\nAnswer: The answer is ",
+    "main_question": "What is the person on the left doing with their body?\n(A) crouching\n(B) leaping\n(C) flying\n(D) twirling",
+    "sub_question": [
+        "How is the person on the left using their body?"
+    ],
+    "sub_answer": [
+        "to ride the wave"
+    ],
+    "gt_ans": "crouching",
+    "confidence_base": 0.22977107763290405,
+    "confidence_lba": 0.856777,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8567772507667542,
+        0.10638639330863953,
+        0.04891865327954292,
+        0.06798574328422546,
+        0.06798553466796875
+    ]
+}

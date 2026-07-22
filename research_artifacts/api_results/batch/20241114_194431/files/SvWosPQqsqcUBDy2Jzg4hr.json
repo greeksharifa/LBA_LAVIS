@@ -1,0 +1,30 @@
+{
+    "question_id": "SvWosPQqsqcUBDy2Jzg4hr",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the woman wearing a hat? to protect her head.\nQuestion: Why is the woman holding the umbrella?\n(A) repel rain\n(B) fashion accessory\n(C) for shade\n(D) to dance\nAnswer: The answer is ",
+    "main_question": "Why is the woman holding the umbrella?\n(A) repel rain\n(B) fashion accessory\n(C) for shade\n(D) to dance",
+    "sub_question": [
+        "Why is the woman wearing a hat?"
+    ],
+    "sub_answer": [
+        "to protect her head"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5871195197105408,
+    "confidence_lba": 0.977158,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.7248473167419434,
+        0.845566987991333,
+        0.9641425609588623,
+        0.767378032207489,
+        0.9771580696105957
+    ]
+}

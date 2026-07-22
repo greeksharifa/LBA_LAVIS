@@ -1,0 +1,30 @@
+{
+    "question_id": "Qn9fw2mFC5bWG7CjQvir9s",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many trains are in the picture? one.\nQuestion: Trains approaching from the direction the photographer take this picture must do what?\n(A) nothing\n(B) speed up\n(C) change tracks\n(D) stop\nAnswer: The answer is ",
+    "main_question": "Trains approaching from the direction the photographer take this picture must do what?\n(A) nothing\n(B) speed up\n(C) change tracks\n(D) stop",
+    "sub_question": [
+        "How many trains are in the picture?"
+    ],
+    "sub_answer": [
+        "one"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.0722547098994255,
+    "confidence_lba": 0.979662,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.024961018934845924,
+        0.07592140883207321,
+        0.7692297101020813,
+        0.9796622395515442,
+        0.1509324610233307
+    ]
+}

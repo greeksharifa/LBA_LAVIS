@@ -1,0 +1,30 @@
+{
+    "question_id": "LHeFhpiVsUvAjwDNWJQPfZ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the big clock? white.\nQuestion: What color is the background of the large clock?\n(A) green\n(B) black\n(C) white\n(D) red\nAnswer: The answer is ",
+    "main_question": "What color is the background of the large clock?\n(A) green\n(B) black\n(C) white\n(D) red",
+    "sub_question": [
+        "What color is the big clock?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.1254747211933136,
+    "confidence_lba": 0.261769,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.03229764476418495,
+        0.031992826610803604,
+        0.042375627905130386,
+        0.2617686986923218,
+        0.027510812506079674
+    ]
+}

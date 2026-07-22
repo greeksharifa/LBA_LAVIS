@@ -1,0 +1,30 @@
+{
+    "question_id": "CuqeFPuPUXRxjKnTomsz4x",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat number is on the t shirt of the boy who is playing? 1.\nQuestion: What is the number mentioned in the t shirt of the girl who is playing?\n(A) 21\n(B) 13\n(C) 31 and\n(D) 51\nAnswer: The answer is ",
+    "main_question": "What is the number mentioned in the t shirt of the girl who is playing?\n(A) 21\n(B) 13\n(C) 31 and\n(D) 51",
+    "sub_question": [
+        "What number is on the t shirt of the boy who is playing?"
+    ],
+    "sub_answer": [
+        "1"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.030779452994465828,
+    "confidence_lba": 0.047641,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(C)",
+        "(B)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.04764052852988243,
+        0.009997048415243626,
+        0.019784215837717056,
+        0.02653183974325657,
+        0.03129684552550316
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "DbTAWKt7kZTzG8Xsa36K6R",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat business does the yellow truck serve? food.\nQuestion: The yellow truck on the sidewalk is concerned with what activity?\n(A) packages\n(B) roads\n(C) food\n(D) fire\nAnswer: The answer is ",
+    "main_question": "The yellow truck on the sidewalk is concerned with what activity?\n(A) packages\n(B) roads\n(C) food\n(D) fire",
+    "sub_question": [
+        "What business does the yellow truck serve?"
+    ],
+    "sub_answer": [
+        "food"
+    ],
+    "gt_ans": [
+        "making schnitzel",
+        "food",
+        "food",
+        "food",
+        "selling food",
+        "selling food",
+        "schnitzel",
+        "selling food",
+        "selling food",
+        "cooking"
+    ],
+    "confidence_base": 0.9700289964675903,
+    "confidence_lba": 0.920877,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8755238056182861,
+        0.6725649833679199,
+        0.9208770394325256,
+        0.7919037938117981,
+        0.7497175931930542
+    ]
+}

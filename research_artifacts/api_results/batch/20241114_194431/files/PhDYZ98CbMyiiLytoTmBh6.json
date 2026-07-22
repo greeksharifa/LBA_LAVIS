@@ -1,0 +1,30 @@
+{
+    "question_id": "PhDYZ98CbMyiiLytoTmBh6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the silver container do to the vegetables? cook them.\nQuestion: What does the silver container do to these vegetables?\n(A) freeze\n(B) liquify\n(C) heat\n(D) cool\nAnswer: The answer is ",
+    "main_question": "What does the silver container do to these vegetables?\n(A) freeze\n(B) liquify\n(C) heat\n(D) cool",
+    "sub_question": [
+        "What does the silver container do to the vegetables?"
+    ],
+    "sub_answer": [
+        "cook them"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.618445098400116,
+    "confidence_lba": 0.977869,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.4869661331176758,
+        0.97786945104599,
+        0.2586418092250824,
+        0.40675079822540283,
+        0.9749392867088318
+    ]
+}

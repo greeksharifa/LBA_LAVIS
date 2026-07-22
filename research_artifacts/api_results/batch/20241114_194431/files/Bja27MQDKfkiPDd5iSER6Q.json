@@ -1,0 +1,30 @@
+{
+    "question_id": "Bja27MQDKfkiPDd5iSER6Q",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHas just batted the ball? no.\nQuestion: Given the position of the bat and ball the batter most likely?\n(A) missed\n(B) fouled\n(C) popped up\n(D) grounded out\nAnswer: The answer is ",
+    "main_question": "Given the position of the bat and ball the batter most likely?\n(A) missed\n(B) fouled\n(C) popped up\n(D) grounded out",
+    "sub_question": [
+        "Has just batted the ball?"
+    ],
+    "sub_answer": [
+        "no"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.043879661709070206,
+    "confidence_lba": 0.126563,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.12656289339065552,
+        0.05324627086520195,
+        0.031622134149074554,
+        0.03756043314933777,
+        0.057638105005025864
+    ]
+}

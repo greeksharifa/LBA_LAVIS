@@ -1,0 +1,30 @@
+{
+    "question_id": "66abRGQG535WgzgU5Ue9ru",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is a motorcycle? scooter.\nQuestion: In what location is the motorcycle parked most likely?\n(A) store\n(B) sidewalk\n(C) home\n(D) expo\nAnswer: The answer is ",
+    "main_question": "In what location is the motorcycle parked most likely?\n(A) store\n(B) sidewalk\n(C) home\n(D) expo",
+    "sub_question": [
+        "What is a motorcycle?"
+    ],
+    "sub_answer": [
+        "scooter"
+    ],
+    "gt_ans": "home",
+    "confidence_base": 0.8980071544647217,
+    "confidence_lba": 0.601978,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.052202705293893814,
+        0.125318244099617,
+        0.12960264086723328,
+        0.6019780039787292,
+        0.1599346548318863
+    ]
+}

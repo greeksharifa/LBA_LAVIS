@@ -1,0 +1,30 @@
+{
+    "question_id": "VcdLhhv7e9gDP4aHuFPomY",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color phone does the man use? black.\nQuestion: Why is the phone wrapped in a pink enclosure?\n(A) protect it\n(B) encrypt it\n(C) prevent stains\n(D) decoration\nAnswer: The answer is ",
+    "main_question": "Why is the phone wrapped in a pink enclosure?\n(A) protect it\n(B) encrypt it\n(C) prevent stains\n(D) decoration",
+    "sub_question": [
+        "What color phone does the man use?"
+    ],
+    "sub_answer": [
+        "black"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.4384497404098511,
+    "confidence_lba": 0.865323,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.7576321959495544,
+        0.8653233647346497,
+        0.5471359491348267,
+        0.7637091279029846,
+        0.7637091279029846
+    ]
+}

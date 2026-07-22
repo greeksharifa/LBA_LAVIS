@@ -1,0 +1,30 @@
+{
+    "question_id": "7YTajnBGjXEmwuYjmsXsdX",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of animal is being ridden? horse.\nQuestion: What theme park attraction are they most likely visiting?\n(A) disney world\n(B) disneyland\n(C) universal studios\n(D) six flags\nAnswer: The answer is ",
+    "main_question": "What theme park attraction are they most likely visiting?\n(A) disney world\n(B) disneyland\n(C) universal studios\n(D) six flags",
+    "sub_question": [
+        "What type of animal is being ridden?"
+    ],
+    "sub_answer": [
+        "horse"
+    ],
+    "gt_ans": "disneyland",
+    "confidence_base": 0.02012220211327076,
+    "confidence_lba": 0.400194,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.131628155708313,
+        0.4001936614513397,
+        0.017754115164279938,
+        0.32303524017333984,
+        0.09583673626184464
+    ]
+}

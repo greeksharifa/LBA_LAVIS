@@ -1,0 +1,30 @@
+{
+    "question_id": "XYmNkcLb88NVASUfFkcMXC",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of liquid is in the red bottle? vinegar.\nQuestion: What kind of liquid is in the blue bottle?\n(A) water\n(B) alcohol\n(C) juice\n(D) soda\nAnswer: The answer is ",
+    "main_question": "What kind of liquid is in the blue bottle?\n(A) water\n(B) alcohol\n(C) juice\n(D) soda",
+    "sub_question": [
+        "What kind of liquid is in the red bottle?"
+    ],
+    "sub_answer": [
+        "vinegar"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.13049860298633575,
+    "confidence_lba": 0.694674,
+    "text_output_base": "(A)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(B)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.03591720014810562,
+        0.06460972130298615,
+        0.6946744918823242,
+        0.6734490990638733,
+        0.14022409915924072
+    ]
+}

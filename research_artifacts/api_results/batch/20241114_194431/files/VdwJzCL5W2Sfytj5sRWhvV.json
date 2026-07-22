@@ -1,0 +1,30 @@
+{
+    "question_id": "VdwJzCL5W2Sfytj5sRWhvV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the woman so confident about her hair? she is a model.\nQuestion: What is this woman doing that only 10% of people do?\n(A) smile\n(B) stare\n(C) eat left-handed\n(D) sit\nAnswer: The answer is ",
+    "main_question": "What is this woman doing that only 10% of people do?\n(A) smile\n(B) stare\n(C) eat left-handed\n(D) sit",
+    "sub_question": [
+        "Why is the woman so confident about her hair?"
+    ],
+    "sub_answer": [
+        "she is a model"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.1509726643562317,
+    "confidence_lba": 0.92666,
+    "text_output_base": "C",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5118314027786255,
+        0.870147705078125,
+        0.8555437326431274,
+        0.9266597628593445,
+        0.5293115377426147
+    ]
+}

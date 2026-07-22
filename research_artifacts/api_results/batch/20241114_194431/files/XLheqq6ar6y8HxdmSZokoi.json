@@ -1,0 +1,30 @@
+{
+    "question_id": "XLheqq6ar6y8HxdmSZokoi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do the giant cribs look like? a bed.\nQuestion: What are the giant cribs likely used for?\n(A) parade\n(B) baby\n(C) student\n(D) teacher\nAnswer: The answer is ",
+    "main_question": "What are the giant cribs likely used for?\n(A) parade\n(B) baby\n(C) student\n(D) teacher",
+    "sub_question": [
+        "What do the giant cribs look like?"
+    ],
+    "sub_answer": [
+        "a bed"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.405727356672287,
+    "confidence_lba": 0.354763,
+    "text_output_base": "(A)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(A)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.3547626733779907,
+        0.3103933334350586,
+        0.1881125420331955,
+        0.06598220765590668,
+        0.1999025195837021
+    ]
+}

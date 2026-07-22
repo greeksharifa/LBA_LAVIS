@@ -1,0 +1,30 @@
+{
+    "question_id": "86vHZcPAsgzHoG4VL93xqr",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the football team? soccer.\nQuestion: Which team is on offense?\n(A) red\n(B) neither\n(C) blue\n(D) both\nAnswer: The answer is ",
+    "main_question": "Which team is on offense?\n(A) red\n(B) neither\n(C) blue\n(D) both",
+    "sub_question": [
+        "What is the football team?"
+    ],
+    "sub_answer": [
+        "soccer"
+    ],
+    "gt_ans": "red",
+    "confidence_base": 0.029248857870697975,
+    "confidence_lba": 0.984657,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7110415697097778,
+        0.984656572341919,
+        0.9843236207962036,
+        0.008710121735930443,
+        0.008710109628736973
+    ]
+}

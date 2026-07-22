@@ -1,0 +1,30 @@
+{
+    "question_id": "FFhuFfMAy38Z7WWr6q7faA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of room is this? bedroom.\nQuestion: What family member in a household would this room most likely belong to?\n(A) son\n(B) daughter\n(C) infant\n(D) grandparent\nAnswer: The answer is ",
+    "main_question": "What family member in a household would this room most likely belong to?\n(A) son\n(B) daughter\n(C) infant\n(D) grandparent",
+    "sub_question": [
+        "What type of room is this?"
+    ],
+    "sub_answer": [
+        "bedroom"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.11196278035640717,
+    "confidence_lba": 0.381614,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06591106206178665,
+        0.08600075542926788,
+        0.29087433218955994,
+        0.17432382702827454,
+        0.3816140294075012
+    ]
+}

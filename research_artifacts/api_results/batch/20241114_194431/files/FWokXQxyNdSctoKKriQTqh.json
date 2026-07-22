@@ -1,0 +1,30 @@
+{
+    "question_id": "FWokXQxyNdSctoKKriQTqh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of weather is it? rain.\nQuestion: What is the weather like?\n(A) hail\n(B) snow\n(C) rain\n(D) sun\nAnswer: The answer is ",
+    "main_question": "What is the weather like?\n(A) hail\n(B) snow\n(C) rain\n(D) sun",
+    "sub_question": [
+        "What kind of weather is it?"
+    ],
+    "sub_answer": [
+        "rain"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8447876572608948,
+    "confidence_lba": 0.947179,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(B)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9463244080543518,
+        0.9391117095947266,
+        0.7229887843132019,
+        0.9454393982887268,
+        0.9471792578697205
+    ]
+}

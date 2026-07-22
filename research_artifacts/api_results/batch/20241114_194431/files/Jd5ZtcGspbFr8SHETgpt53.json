@@ -1,0 +1,30 @@
+{
+    "question_id": "Jd5ZtcGspbFr8SHETgpt53",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat shape are the outer walls of the building? square.\nQuestion: Which shape outer walls do the persons sit in for the best view of the airport?\n(A) square\n(B) triangle\n(C) rectangular\n(D) round\nAnswer: The answer is ",
+    "main_question": "Which shape outer walls do the persons sit in for the best view of the airport?\n(A) square\n(B) triangle\n(C) rectangular\n(D) round",
+    "sub_question": [
+        "What shape are the outer walls of the building?"
+    ],
+    "sub_answer": [
+        "square"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.031109998002648354,
+    "confidence_lba": 0.764937,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "D",
+        "(C)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.09310732781887054,
+        0.4908120036125183,
+        0.7649372816085815,
+        0.12284820526838303,
+        0.7421860098838806
+    ]
+}

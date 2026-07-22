@@ -1,0 +1,30 @@
+{
+    "question_id": "XsmK9BGTpRCeMYeF7Lq43Q",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many skateboard tricks are there in a set? one.\nQuestion: What trick is the man performing?\n(A) rail grind\n(B) ollie\n(C) heelflip\n(D) kickflip\nAnswer: The answer is ",
+    "main_question": "What trick is the man performing?\n(A) rail grind\n(B) ollie\n(C) heelflip\n(D) kickflip",
+    "sub_question": [
+        "How many skateboard tricks are there in a set?"
+    ],
+    "sub_answer": [
+        "one"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.032567307353019714,
+    "confidence_lba": 0.201915,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.04932975769042969,
+        0.05375094711780548,
+        0.20191505551338196,
+        0.052088648080825806,
+        0.028055530041456223
+    ]
+}

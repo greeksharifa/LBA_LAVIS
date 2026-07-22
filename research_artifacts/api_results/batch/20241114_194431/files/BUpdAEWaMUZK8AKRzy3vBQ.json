@@ -1,0 +1,30 @@
+{
+    "question_id": "BUpdAEWaMUZK8AKRzy3vBQ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat might be on the tray? cookies.\nQuestion: Who might be helping the girl?\n(A) no one\n(B) parents\n(C) other kids\n(D) priest\nAnswer: The answer is ",
+    "main_question": "Who might be helping the girl?\n(A) no one\n(B) parents\n(C) other kids\n(D) priest",
+    "sub_question": [
+        "What might be on the tray?"
+    ],
+    "sub_answer": [
+        "cookies"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7962287068367004,
+    "confidence_lba": 0.681504,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.5078597664833069,
+        0.47800496220588684,
+        0.68150395154953,
+        0.2693976163864136,
+        0.598112940788269
+    ]
+}

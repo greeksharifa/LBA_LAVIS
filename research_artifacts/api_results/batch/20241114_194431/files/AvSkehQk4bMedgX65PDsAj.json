@@ -1,0 +1,30 @@
+{
+    "question_id": "AvSkehQk4bMedgX65PDsAj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich snowboarder has a harder time standing up? the one in the middle.\nQuestion: Which snowboarder will have a harder time standing up?\n(A) both\n(B) neither\n(C) red board\n(D) white board\nAnswer: The answer is ",
+    "main_question": "Which snowboarder will have a harder time standing up?\n(A) both\n(B) neither\n(C) red board\n(D) white board",
+    "sub_question": [
+        "Which snowboarder has a harder time standing up?"
+    ],
+    "sub_answer": [
+        "the one in the middle"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.12448853254318237,
+    "confidence_lba": 0.31381,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.14638525247573853,
+        0.020805077627301216,
+        0.28726932406425476,
+        0.07554232329130173,
+        0.3138100802898407
+    ]
+}

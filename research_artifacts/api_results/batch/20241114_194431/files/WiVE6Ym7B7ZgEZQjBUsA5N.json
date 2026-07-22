@@ -1,0 +1,30 @@
+{
+    "question_id": "WiVE6Ym7B7ZgEZQjBUsA5N",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many players are hitting the pole? two.\nQuestion: What is the black pole the two are trying to hit off of called?\n(A) batting tee\n(B) pole vault\n(C) batters box\n(D) batting cage\nAnswer: The answer is ",
+    "main_question": "What is the black pole the two are trying to hit off of called?\n(A) batting tee\n(B) pole vault\n(C) batters box\n(D) batting cage",
+    "sub_question": [
+        "How many players are hitting the pole?"
+    ],
+    "sub_answer": [
+        "two"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.9378740787506104,
+    "confidence_lba": 0.955877,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8499850630760193,
+        0.6211569309234619,
+        0.9558770060539246,
+        0.7063618302345276,
+        0.7099138498306274
+    ]
+}

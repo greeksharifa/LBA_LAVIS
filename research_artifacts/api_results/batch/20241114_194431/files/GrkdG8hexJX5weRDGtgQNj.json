@@ -1,0 +1,30 @@
+{
+    "question_id": "GrkdG8hexJX5weRDGtgQNj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of boat is in the water? yacht.\nQuestion: What type of boat is in the water?\n(A) oil tanker\n(B) sailing\n(C) cruise\n(D) fishing\nAnswer: The answer is ",
+    "main_question": "What type of boat is in the water?\n(A) oil tanker\n(B) sailing\n(C) cruise\n(D) fishing",
+    "sub_question": [
+        "What kind of boat is in the water?"
+    ],
+    "sub_answer": [
+        "yacht"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.7894041538238525,
+    "confidence_lba": 0.846241,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(C)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06061186641454697,
+        0.8362747430801392,
+        0.16740639507770538,
+        0.01206715777516365,
+        0.8462409973144531
+    ]
+}

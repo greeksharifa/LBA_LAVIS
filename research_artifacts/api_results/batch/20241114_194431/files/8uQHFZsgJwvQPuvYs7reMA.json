@@ -1,0 +1,30 @@
+{
+    "question_id": "8uQHFZsgJwvQPuvYs7reMA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow does the driver of the dark colored car get across the intersection safely? The driver of the dark colored car gets across the intersection safely.\nQuestion: What is the dark colored car to the far left in the middle doing?\n(A) turning left\n(B) turning right\n(C) parking\n(D) reversing\nAnswer: The answer is ",
+    "main_question": "What is the dark colored car to the far left in the middle doing?\n(A) turning left\n(B) turning right\n(C) parking\n(D) reversing",
+    "sub_question": [
+        "How does the driver of the dark colored car get across the intersection safely?"
+    ],
+    "sub_answer": [
+        "The driver of the dark colored car gets across the intersection safely"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.15830166637897491,
+    "confidence_lba": 0.241318,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.1504114270210266,
+        0.1774551123380661,
+        0.18189920485019684,
+        0.24131818115711212,
+        0.18552382290363312
+    ]
+}

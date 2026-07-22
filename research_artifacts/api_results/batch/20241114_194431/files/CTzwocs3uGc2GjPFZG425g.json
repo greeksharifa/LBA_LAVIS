@@ -1,0 +1,30 @@
+{
+    "question_id": "CTzwocs3uGc2GjPFZG425g",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich country is this area located in? uk.\nQuestion: Which territory is this area located?\n(A) russia\n(B) britain\n(C) canada\n(D) america\nAnswer: The answer is ",
+    "main_question": "Which territory is this area located?\n(A) russia\n(B) britain\n(C) canada\n(D) america",
+    "sub_question": [
+        "Which country is this area located in?"
+    ],
+    "sub_answer": [
+        "uk"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.23264320194721222,
+    "confidence_lba": 0.927344,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(C)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.7312692403793335,
+        0.8950163125991821,
+        0.17224779725074768,
+        0.7201155424118042,
+        0.9273435473442078
+    ]
+}

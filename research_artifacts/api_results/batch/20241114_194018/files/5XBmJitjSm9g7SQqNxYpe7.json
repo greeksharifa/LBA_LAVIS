@@ -1,0 +1,30 @@
+{
+    "question_id": "5XBmJitjSm9g7SQqNxYpe7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the object that is in the middle? bar.\nQuestion: What is the object in the middle called?\n(A) counter\n(B) island\n(C) table\n(D) desk\nAnswer: The answer is ",
+    "main_question": "What is the object in the middle called?\n(A) counter\n(B) island\n(C) table\n(D) desk",
+    "sub_question": [
+        "What is the object that is in the middle?"
+    ],
+    "sub_answer": [
+        "bar"
+    ],
+    "gt_ans": "island",
+    "confidence_base": 0.7130138874053955,
+    "confidence_lba": 0.744956,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.7449555993080139,
+        0.5442882776260376,
+        0.2702118754386902,
+        0.05124280974268913,
+        0.05124290660023689
+    ]
+}

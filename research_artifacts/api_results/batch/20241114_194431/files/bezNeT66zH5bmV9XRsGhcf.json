@@ -1,0 +1,30 @@
+{
+    "question_id": "bezNeT66zH5bmV9XRsGhcf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the woman in the red jacket trying to climb? a mountain.\nQuestion: What is the man in the blue jacket trying to climb?\n(A) tree\n(B) mountain\n(C) ladder\n(D) train\nAnswer: The answer is ",
+    "main_question": "What is the man in the blue jacket trying to climb?\n(A) tree\n(B) mountain\n(C) ladder\n(D) train",
+    "sub_question": [
+        "What is the woman in the red jacket trying to climb?"
+    ],
+    "sub_answer": [
+        "a mountain"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.8466670513153076,
+    "confidence_lba": 0.947033,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.7525449395179749,
+        0.9470332264900208,
+        0.6403670310974121,
+        0.8796992301940918,
+        0.7185870409011841
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "9HoQP5bpke2rstGjD8AG7Y",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat appliance is unplugged in the kitchen? refrigerator.\nQuestion: What appliance is unhooked and placed by the sink?\n(A) dishwasher\n(B) stove/oven\n(C) trash compactor\n(D) icemaker\nAnswer: The answer is ",
+    "main_question": "What appliance is unhooked and placed by the sink?\n(A) dishwasher\n(B) stove/oven\n(C) trash compactor\n(D) icemaker",
+    "sub_question": [
+        "What appliance is unplugged in the kitchen?"
+    ],
+    "sub_answer": [
+        "refrigerator"
+    ],
+    "gt_ans": [
+        "stove/oven",
+        "stove",
+        "washing machine",
+        "stove",
+        "stove",
+        "stove",
+        "washing machine",
+        "stove",
+        "oven",
+        "stove"
+    ],
+    "confidence_base": 0.02039366215467453,
+    "confidence_lba": 0.180936,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.18093647062778473,
+        0.03234916180372238,
+        0.013076739385724068,
+        0.03513205423951149,
+        0.14755244553089142
+    ]
+}

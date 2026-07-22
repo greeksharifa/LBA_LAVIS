@@ -1,0 +1,30 @@
+{
+    "question_id": "6phsfhJ9iw5j6nYTpVBd9A",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the parents doing? sitting on a bench.\nQuestion: In which way are the adults shown here likely related to the child?\n(A) grandparents\n(B) strangers\n(C) friends\n(D) sister\nAnswer: The answer is ",
+    "main_question": "In which way are the adults shown here likely related to the child?\n(A) grandparents\n(B) strangers\n(C) friends\n(D) sister",
+    "sub_question": [
+        "What are the parents doing?"
+    ],
+    "sub_answer": [
+        "sitting on a bench"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.44707363843917847,
+    "confidence_lba": 0.971282,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9415959119796753,
+        0.9124002456665039,
+        0.9712816476821899,
+        0.4142942726612091,
+        0.6634079813957214
+    ]
+}

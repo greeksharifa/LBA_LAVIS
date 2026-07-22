@@ -1,0 +1,41 @@
+{
+    "question_id": "5fDUuYWCZMudfXVEPywFYc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of the woman that has the same color hair as this woman? venus williams.\nQuestion: Who has the same color hair as this woman?\n(A) phoebe tonkin\n(B) maria sharapova\n(C) serena williams\n(D) nina dobrev\nAnswer: The answer is ",
+    "main_question": "Who has the same color hair as this woman?\n(A) phoebe tonkin\n(B) maria sharapova\n(C) serena williams\n(D) nina dobrev",
+    "sub_question": [
+        "What is the name of the woman that has the same color hair as this woman?"
+    ],
+    "sub_answer": [
+        "venus williams"
+    ],
+    "gt_ans": [
+        "maria sharapova",
+        "paris hilton",
+        "sitting guy",
+        "skin",
+        "swedish persons",
+        "spectectors",
+        "no one",
+        "no one",
+        "blake lively",
+        "heidi klum"
+    ],
+    "confidence_base": 0.11034457385540009,
+    "confidence_lba": 0.872666,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(B)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.15954682230949402,
+        0.046809688210487366,
+        0.01791822537779808,
+        0.01599280536174774,
+        0.872665524482727
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "KqEeneEUHVnoFj9nRYLS3u",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the pink flower? red.\nQuestion: What color is in the center of the red flower?\n(A) brown\n(B) black\n(C) yellow\n(D) white\nAnswer: The answer is ",
+    "main_question": "What color is in the center of the red flower?\n(A) brown\n(B) black\n(C) yellow\n(D) white",
+    "sub_question": [
+        "What color is the pink flower?"
+    ],
+    "sub_answer": [
+        "red"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.12669354677200317,
+    "confidence_lba": 0.979964,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.3192920684814453,
+        0.9799638390541077,
+        0.04620730131864548,
+        0.2993946075439453,
+        0.06857240200042725
+    ]
+}

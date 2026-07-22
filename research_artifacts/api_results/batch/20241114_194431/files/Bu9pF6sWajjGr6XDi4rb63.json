@@ -1,0 +1,30 @@
+{
+    "question_id": "Bu9pF6sWajjGr6XDi4rb63",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many types of fruit are there? think different.\nQuestion: Where does this fruit grow?\n(A) logs\n(B) sea\n(C) trees\n(D) ground\nAnswer: The answer is ",
+    "main_question": "Where does this fruit grow?\n(A) logs\n(B) sea\n(C) trees\n(D) ground",
+    "sub_question": [
+        "How many types of fruit are there?"
+    ],
+    "sub_answer": [
+        "think different"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.07468213886022568,
+    "confidence_lba": 0.60264,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5193372368812561,
+        0.3795817792415619,
+        0.12994779646396637,
+        0.3577841818332672,
+        0.6026396751403809
+    ]
+}

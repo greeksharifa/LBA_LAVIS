@@ -1,0 +1,41 @@
+{
+    "question_id": "8tjSG5kCpUsF7QaQsPoJcG",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the city name shown in the background? omaha.\nQuestion: What city name is shown in the background?\n(A) los angeles\n(B) riverton\n(C) new york\n(D) omaha\nAnswer: The answer is ",
+    "main_question": "What city name is shown in the background?\n(A) los angeles\n(B) riverton\n(C) new york\n(D) omaha",
+    "sub_question": [
+        "What is the city name shown in the background?"
+    ],
+    "sub_answer": [
+        "omaha"
+    ],
+    "gt_ans": [
+        "oma",
+        "omaha",
+        "heartland",
+        "omaha",
+        "omaha",
+        "omaha",
+        "omaha",
+        "omaha",
+        "omaha",
+        "omaha"
+    ],
+    "confidence_base": 0.55063796043396,
+    "confidence_lba": 0.979625,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.36188042163848877,
+        0.23765084147453308,
+        0.32560062408447266,
+        0.9796253442764282,
+        0.9782440066337585
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "TsqMjNDdEXguXzN7puUbW5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many glasses does the woman wear? two.\nQuestion: What material are the woman's glasses frames?\n(A) wood\n(B) plastic\n(C) titanium\n(D) aluminum\nAnswer: The answer is ",
+    "main_question": "What material are the woman's glasses frames?\n(A) wood\n(B) plastic\n(C) titanium\n(D) aluminum",
+    "sub_question": [
+        "How many glasses does the woman wear?"
+    ],
+    "sub_answer": [
+        "two"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.06384047865867615,
+    "confidence_lba": 0.259176,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(C)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.167067751288414,
+        0.05916142463684082,
+        0.08858714997768402,
+        0.2591763138771057,
+        0.13339202105998993
+    ]
+}

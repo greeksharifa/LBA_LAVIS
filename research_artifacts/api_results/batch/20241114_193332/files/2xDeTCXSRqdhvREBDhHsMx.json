@@ -1,0 +1,41 @@
+{
+    "question_id": "2xDeTCXSRqdhvREBDhHsMx",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the cake inside made of? white cake.\nQuestion: What is the outside of the cake made of?\n(A) frosting\n(B) custard\n(C) fondant\n(D) whipped cream\nAnswer: The answer is ",
+    "main_question": "What is the outside of the cake made of?\n(A) frosting\n(B) custard\n(C) fondant\n(D) whipped cream",
+    "sub_question": [
+        "What is the cake inside made of?"
+    ],
+    "sub_answer": [
+        "white cake"
+    ],
+    "gt_ans": [
+        "frosting",
+        "icing",
+        "food paste",
+        "fondant",
+        "fondant",
+        "icing",
+        "fondant",
+        "icing",
+        "next word",
+        "fondant"
+    ],
+    "confidence_base": 0.2872881591320038,
+    "confidence_lba": 0.285561,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.07142017036676407,
+        0.13287021219730377,
+        0.28556111454963684,
+        0.057624250650405884,
+        0.06210904195904732
+    ]
+}

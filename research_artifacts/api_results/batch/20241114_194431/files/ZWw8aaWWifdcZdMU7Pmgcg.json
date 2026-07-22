@@ -1,0 +1,30 @@
+{
+    "question_id": "ZWw8aaWWifdcZdMU7Pmgcg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nThe front of the dog is closest to what number on the scale? 1.\nQuestion: The front of the dog is closest to what number on the scale?\n(A) nineteen\n(B) seventeen\n(C) twelve\n(D) eleven\nAnswer: The answer is ",
+    "main_question": "The front of the dog is closest to what number on the scale?\n(A) nineteen\n(B) seventeen\n(C) twelve\n(D) eleven",
+    "sub_question": [
+        "The front of the dog is closest to what number on the scale?"
+    ],
+    "sub_answer": [
+        "1"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.055487316101789474,
+    "confidence_lba": 0.080945,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.019183361902832985,
+        0.06047417223453522,
+        0.08094505220651627,
+        0.03357846662402153,
+        0.030536169186234474
+    ]
+}

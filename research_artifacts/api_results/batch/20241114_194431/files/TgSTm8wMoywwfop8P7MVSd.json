@@ -1,0 +1,30 @@
+{
+    "question_id": "TgSTm8wMoywwfop8P7MVSd",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat season is it in the picture where the elephants are grazing? summer.\nQuestion: What season is it on the grassland where the elephants are grazing?\n(A) rainy\n(B) winter\n(C) dry\n(D) fall\nAnswer: The answer is ",
+    "main_question": "What season is it on the grassland where the elephants are grazing?\n(A) rainy\n(B) winter\n(C) dry\n(D) fall",
+    "sub_question": [
+        "What season is it in the picture where the elephants are grazing?"
+    ],
+    "sub_answer": [
+        "summer"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5008989572525024,
+    "confidence_lba": 0.813984,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.22304688394069672,
+        0.8139837980270386,
+        0.21320027112960815,
+        0.7989810109138489,
+        0.8053932189941406
+    ]
+}

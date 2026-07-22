@@ -1,0 +1,30 @@
+{
+    "question_id": "KgfkfPqD2aDFJjnZh69oyM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow do the zebras swing? in circles.\nQuestion: What are the zebras swinging?\n(A) butt\n(B) tail\n(C) head\n(D) feet\nAnswer: The answer is ",
+    "main_question": "What are the zebras swinging?\n(A) butt\n(B) tail\n(C) head\n(D) feet",
+    "sub_question": [
+        "How do the zebras swing?"
+    ],
+    "sub_answer": [
+        "in circles"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.17193220555782318,
+    "confidence_lba": 0.218733,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.04634242504835129,
+        0.05141263082623482,
+        0.21873268485069275,
+        0.10040201246738434,
+        0.14084996283054352
+    ]
+}

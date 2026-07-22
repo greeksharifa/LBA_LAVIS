@@ -1,0 +1,30 @@
+{
+    "question_id": "82bLyanbdDeEq6mkVa3YGM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of the plane company? virgin.\nQuestion: What country headquarters this plane company?\n(A) canada\n(B) japan\n(C) usa\n(D) uk\nAnswer: The answer is ",
+    "main_question": "What country headquarters this plane company?\n(A) canada\n(B) japan\n(C) usa\n(D) uk",
+    "sub_question": [
+        "What is the name of the plane company?"
+    ],
+    "sub_answer": [
+        "virgin"
+    ],
+    "gt_ans": "usa",
+    "confidence_base": 0.3919808566570282,
+    "confidence_lba": 0.775554,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.05158975347876549,
+        0.034090086817741394,
+        0.1033908873796463,
+        0.7755537629127502,
+        0.31294646859169006
+    ]
+}

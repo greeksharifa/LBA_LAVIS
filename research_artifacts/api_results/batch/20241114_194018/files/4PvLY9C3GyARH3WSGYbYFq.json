@@ -1,0 +1,30 @@
+{
+    "question_id": "4PvLY9C3GyARH3WSGYbYFq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of food does it look like? noodles.\nQuestion: What kind of cuisine is this?\n(A) asian\n(B) american\n(C) african\n(D) european\nAnswer: The answer is ",
+    "main_question": "What kind of cuisine is this?\n(A) asian\n(B) american\n(C) african\n(D) european",
+    "sub_question": [
+        "What kind of food does it look like?"
+    ],
+    "sub_answer": [
+        "noodles"
+    ],
+    "gt_ans": "asian",
+    "confidence_base": 0.9084749221801758,
+    "confidence_lba": 0.967031,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5624407529830933,
+        0.9631535410881042,
+        0.9670308828353882,
+        0.9587917327880859,
+        0.95135098695755
+    ]
+}

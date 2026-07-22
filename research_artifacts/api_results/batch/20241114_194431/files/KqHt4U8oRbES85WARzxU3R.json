@@ -1,0 +1,30 @@
+{
+    "question_id": "KqHt4U8oRbES85WARzxU3R",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is this person? in the middle of the crowd.\nQuestion: What region of the world is this?\n(A) africa\n(B) north america\n(C) europe\n(D) asia\nAnswer: The answer is ",
+    "main_question": "What region of the world is this?\n(A) africa\n(B) north america\n(C) europe\n(D) asia",
+    "sub_question": [
+        "Where is this person?"
+    ],
+    "sub_answer": [
+        "in the middle of the crowd"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7847275137901306,
+    "confidence_lba": 0.980331,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.4941461980342865,
+        0.7785332798957825,
+        0.9349581599235535,
+        0.9803314208984375,
+        0.6649863719940186
+    ]
+}

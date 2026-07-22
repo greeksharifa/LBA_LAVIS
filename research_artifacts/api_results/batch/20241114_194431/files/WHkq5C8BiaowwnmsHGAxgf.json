@@ -1,0 +1,30 @@
+{
+    "question_id": "WHkq5C8BiaowwnmsHGAxgf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat might be topped with a lot of butter? crackers.\nQuestion: What might this be topped with traditionally?\n(A) grass\n(B) broccoli\n(C) cheese\n(D) sugar\nAnswer: The answer is ",
+    "main_question": "What might this be topped with traditionally?\n(A) grass\n(B) broccoli\n(C) cheese\n(D) sugar",
+    "sub_question": [
+        "What might be topped with a lot of butter?"
+    ],
+    "sub_answer": [
+        "crackers"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5586884021759033,
+    "confidence_lba": 0.778538,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7785381078720093,
+        0.7653799653053284,
+        0.041561439633369446,
+        0.13024067878723145,
+        0.7396397590637207
+    ]
+}

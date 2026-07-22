@@ -1,0 +1,30 @@
+{
+    "question_id": "UXBfDe6BkYdbApxVPSdmVo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in these cups? fruit.\nQuestion: What creamy food frequently would fill up these cups?\n(A) yogurt\n(B) dressing\n(C) mashed potatoes\n(D) hummus\nAnswer: The answer is ",
+    "main_question": "What creamy food frequently would fill up these cups?\n(A) yogurt\n(B) dressing\n(C) mashed potatoes\n(D) hummus",
+    "sub_question": [
+        "What is in these cups?"
+    ],
+    "sub_answer": [
+        "fruit"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.16367806494235992,
+    "confidence_lba": 0.769424,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5227043032646179,
+        0.6936697363853455,
+        0.672031819820404,
+        0.3520887792110443,
+        0.7694242000579834
+    ]
+}

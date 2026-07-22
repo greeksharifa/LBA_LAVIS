@@ -1,0 +1,30 @@
+{
+    "question_id": "ZBUSChQQGFWkXRQZcUxtrM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the tv in the corner of the living room? it is in the corner of the room.\nQuestion: What type of television is in the corner of the living room?\n(A) crt\n(B) plasma\n(C) led\n(D) oled\nAnswer: The answer is ",
+    "main_question": "What type of television is in the corner of the living room?\n(A) crt\n(B) plasma\n(C) led\n(D) oled",
+    "sub_question": [
+        "Why is the tv in the corner of the living room?"
+    ],
+    "sub_answer": [
+        "it is in the corner of the room"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.09667791426181793,
+    "confidence_lba": 0.964885,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(A)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.0985659658908844,
+        0.9622959494590759,
+        0.12564830482006073,
+        0.9648852348327637,
+        0.16717155277729034
+    ]
+}

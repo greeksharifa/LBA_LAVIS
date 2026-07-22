@@ -1,0 +1,30 @@
+{
+    "question_id": "bTkroMPt2NzXSUFCPZS823",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the runway next to the airliner? tarmac.\nQuestion: The airliner is in what position?\n(A) taking off\n(B) passenger loading\n(C) fuleing\n(D) landing\nAnswer: The answer is ",
+    "main_question": "The airliner is in what position?\n(A) taking off\n(B) passenger loading\n(C) fuleing\n(D) landing",
+    "sub_question": [
+        "What is the runway next to the airliner?"
+    ],
+    "sub_answer": [
+        "tarmac"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5079213976860046,
+    "confidence_lba": 0.634151,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6341506242752075,
+        0.5150886178016663,
+        0.09658845514059067,
+        0.06680911779403687,
+        0.5750541687011719
+    ]
+}

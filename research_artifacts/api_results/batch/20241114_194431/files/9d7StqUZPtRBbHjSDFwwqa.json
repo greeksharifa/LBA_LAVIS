@@ -1,0 +1,30 @@
+{
+    "question_id": "9d7StqUZPtRBbHjSDFwwqa",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow do these people know the other person? person, person, person.\nQuestion: How do these people know each other?\n(A) coworkers\n(B) spouses\n(C) siblings\n(D) classmates\nAnswer: The answer is ",
+    "main_question": "How do these people know each other?\n(A) coworkers\n(B) spouses\n(C) siblings\n(D) classmates",
+    "sub_question": [
+        "How do these people know the other person?"
+    ],
+    "sub_answer": [
+        "person, person, person"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.4530889391899109,
+    "confidence_lba": 0.992978,
+    "text_output_base": "D",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.08289638161659241,
+        0.9929779767990112,
+        0.9786780476570129,
+        0.9591710567474365,
+        0.42873963713645935
+    ]
+}

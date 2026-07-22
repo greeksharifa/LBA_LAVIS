@@ -1,0 +1,30 @@
+{
+    "question_id": "NFhBeZhrxD3NQADiCfwi92",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat brand of lemon lime beverage is most likely sold at this restaurant? coca cola.\nQuestion: What brand of lemon lime beverage is most likely sold here?\n(A) fanta\n(B) big red\n(C) rc\n(D) sprite\nAnswer: The answer is ",
+    "main_question": "What brand of lemon lime beverage is most likely sold here?\n(A) fanta\n(B) big red\n(C) rc\n(D) sprite",
+    "sub_question": [
+        "What brand of lemon lime beverage is most likely sold at this restaurant?"
+    ],
+    "sub_answer": [
+        "coca cola"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.3291977345943451,
+    "confidence_lba": 0.438631,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.03619236871600151,
+        0.052399974316358566,
+        0.17557014524936676,
+        0.4386307895183563,
+        0.14387714862823486
+    ]
+}

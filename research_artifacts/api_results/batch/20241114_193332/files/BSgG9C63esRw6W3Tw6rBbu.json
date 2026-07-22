@@ -1,0 +1,41 @@
+{
+    "question_id": "BSgG9C63esRw6W3Tw6rBbu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man riding on? skateboard.\nQuestion: What is the man riding?\n(A) motorcycle\n(B) skateboard\n(C) bicycle\n(D) scooter\nAnswer: The answer is ",
+    "main_question": "What is the man riding?\n(A) motorcycle\n(B) skateboard\n(C) bicycle\n(D) scooter",
+    "sub_question": [
+        "What is the man riding on?"
+    ],
+    "sub_answer": [
+        "skateboard"
+    ],
+    "gt_ans": [
+        "skateboard",
+        "skateboard",
+        "skateboard",
+        "skateboard",
+        "skateboard move",
+        "skateboard move",
+        "skateboard",
+        "skateboard",
+        "skateboard",
+        "skateboard"
+    ],
+    "confidence_base": 0.9774287343025208,
+    "confidence_lba": 0.990438,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9828534126281738,
+        0.9843287467956543,
+        0.9904381632804871,
+        0.9788929224014282,
+        0.9788929224014282
+    ]
+}

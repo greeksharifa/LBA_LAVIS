@@ -1,0 +1,30 @@
+{
+    "question_id": "JK2iuDmUfAfGyyNaUnWZgK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the object that is being photographed? bicycles.\nQuestion: What type of lens was used to give this particular photo the distorted look?\n(A) hubble\n(B) old time\n(C) fish eye\n(D) cats eye\nAnswer: The answer is ",
+    "main_question": "What type of lens was used to give this particular photo the distorted look?\n(A) hubble\n(B) old time\n(C) fish eye\n(D) cats eye",
+    "sub_question": [
+        "What is the object that is being photographed?"
+    ],
+    "sub_answer": [
+        "bicycles"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.7432295680046082,
+    "confidence_lba": 0.978657,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9757479429244995,
+        0.686165988445282,
+        0.9786573052406311,
+        0.9544826149940491,
+        0.8177061080932617
+    ]
+}

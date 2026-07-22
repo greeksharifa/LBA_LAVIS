@@ -1,0 +1,30 @@
+{
+    "question_id": "ReR5LFFQDGRsrWasGqvdx4",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of area is this bike in? sidewalk.\nQuestion: What kind of zone is this bike parked in?\n(A) temporary\n(B) pedestrian\n(C) no parking\n(D) handicap\nAnswer: The answer is ",
+    "main_question": "What kind of zone is this bike parked in?\n(A) temporary\n(B) pedestrian\n(C) no parking\n(D) handicap",
+    "sub_question": [
+        "What kind of area is this bike in?"
+    ],
+    "sub_answer": [
+        "sidewalk"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.27477240562438965,
+    "confidence_lba": 0.845013,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.2255241572856903,
+        0.8450133204460144,
+        0.2936849296092987,
+        0.619312047958374,
+        0.3096776306629181
+    ]
+}

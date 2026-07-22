@@ -1,0 +1,30 @@
+{
+    "question_id": "FDVQDJDFkV3tWkfTvrnAFy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the arrow on the umbrella point to? the camera.\nQuestion: What is this umbrella used for?\n(A) fashion\n(B) rain\n(C) sun\n(D) lighting\nAnswer: The answer is ",
+    "main_question": "What is this umbrella used for?\n(A) fashion\n(B) rain\n(C) sun\n(D) lighting",
+    "sub_question": [
+        "What does the arrow on the umbrella point to?"
+    ],
+    "sub_answer": [
+        "the camera"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6633520126342773,
+    "confidence_lba": 0.925947,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.689328134059906,
+        0.8951317071914673,
+        0.9259471297264099,
+        0.9150828719139099,
+        0.7080327272415161
+    ]
+}

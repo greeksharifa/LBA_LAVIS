@@ -1,0 +1,30 @@
+{
+    "question_id": "VPtWDzT5r9wYAo4xWxHy97",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat disney character is dressed in christmas clothes? donald duck.\nQuestion: Which Disney mascot is pictured next to the Christmas Tree?\n(A) daffy duck\n(B) goofy\n(C) micky mouse\n(D) donald duck\nAnswer: The answer is ",
+    "main_question": "Which Disney mascot is pictured next to the Christmas Tree?\n(A) daffy duck\n(B) goofy\n(C) micky mouse\n(D) donald duck",
+    "sub_question": [
+        "What disney character is dressed in christmas clothes?"
+    ],
+    "sub_answer": [
+        "donald duck"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.8591614961624146,
+    "confidence_lba": 0.990255,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9859453439712524,
+        0.9864777326583862,
+        0.9894736409187317,
+        0.9902552366256714,
+        0.9865784645080566
+    ]
+}

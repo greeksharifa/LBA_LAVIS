@@ -1,0 +1,30 @@
+{
+    "question_id": "9R9Ef5J6eaJzSHvUEkBkgq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat animal has similar color to the cat in the middle of the picture? dog.\nQuestion: What animal has similar color to the flower in the picture on the left side of the room?\n(A) koala\n(B) rooster\n(C) zebra\n(D) panda\nAnswer: The answer is ",
+    "main_question": "What animal has similar color to the flower in the picture on the left side of the room?\n(A) koala\n(B) rooster\n(C) zebra\n(D) panda",
+    "sub_question": [
+        "What animal has similar color to the cat in the middle of the picture?"
+    ],
+    "sub_answer": [
+        "dog"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.09596198797225952,
+    "confidence_lba": 0.213166,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(B)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.09001889079809189,
+        0.21316632628440857,
+        0.021682526916265488,
+        0.08214631676673889,
+        0.017669860273599625
+    ]
+}

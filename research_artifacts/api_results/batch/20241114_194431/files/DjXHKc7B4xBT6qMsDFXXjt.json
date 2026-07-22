@@ -1,0 +1,30 @@
+{
+    "question_id": "DjXHKc7B4xBT6qMsDFXXjt",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many candles are there in the candle holder? three.\nQuestion: What are these types of candles called?\n(A) beeswax\n(B) tea lights\n(C) birthday\n(D) rush lights\nAnswer: The answer is ",
+    "main_question": "What are these types of candles called?\n(A) beeswax\n(B) tea lights\n(C) birthday\n(D) rush lights",
+    "sub_question": [
+        "How many candles are there in the candle holder?"
+    ],
+    "sub_answer": [
+        "three"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5112411975860596,
+    "confidence_lba": 0.974769,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.2639448642730713,
+        0.5160307884216309,
+        0.9747690558433533,
+        0.5480615496635437,
+        0.631999671459198
+    ]
+}

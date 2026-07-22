@@ -1,0 +1,30 @@
+{
+    "question_id": "XfKzDoDZwVcQqTPF6xzjbs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhen driving on the street, what is allowed? no parking.\nQuestion: What is prohibited when driving on the street?\n(A) signaling\n(B) braking\n(C) speeding\n(D) parking\nAnswer: The answer is ",
+    "main_question": "What is prohibited when driving on the street?\n(A) signaling\n(B) braking\n(C) speeding\n(D) parking",
+    "sub_question": [
+        "When driving on the street, what is allowed?"
+    ],
+    "sub_answer": [
+        "no parking"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.037810519337654114,
+    "confidence_lba": 0.884525,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C) speeding",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5194017291069031,
+        0.7398510575294495,
+        0.19089452922344208,
+        0.8381993770599365,
+        0.8845254182815552
+    ]
+}

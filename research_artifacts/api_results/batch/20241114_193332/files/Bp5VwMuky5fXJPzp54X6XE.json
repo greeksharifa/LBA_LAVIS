@@ -1,0 +1,41 @@
+{
+    "question_id": "Bp5VwMuky5fXJPzp54X6XE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of work is this man likely doing? food service.\nQuestion: What industry is this man likely working in?\n(A) travel\n(B) construction\n(C) medical\n(D) restaurant\nAnswer: The answer is ",
+    "main_question": "What industry is this man likely working in?\n(A) travel\n(B) construction\n(C) medical\n(D) restaurant",
+    "sub_question": [
+        "What kind of work is this man likely doing?"
+    ],
+    "sub_answer": [
+        "food service"
+    ],
+    "gt_ans": [
+        "cooking",
+        "chef",
+        "food service",
+        "food",
+        "restaurant",
+        "food",
+        "restaurant",
+        "food",
+        "food",
+        "chef"
+    ],
+    "confidence_base": 0.9768009185791016,
+    "confidence_lba": 0.932842,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7599247694015503,
+        0.932841956615448,
+        0.8486292958259583,
+        0.6661422848701477,
+        0.7878252267837524
+    ]
+}

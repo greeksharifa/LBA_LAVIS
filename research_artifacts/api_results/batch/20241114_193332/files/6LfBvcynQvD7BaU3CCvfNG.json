@@ -1,0 +1,41 @@
+{
+    "question_id": "6LfBvcynQvD7BaU3CCvfNG",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat will be built at this spot one day? a building.\nQuestion: What will be built here one day?\n(A) building\n(B) boat\n(C) car\n(D) house\nAnswer: The answer is ",
+    "main_question": "What will be built here one day?\n(A) building\n(B) boat\n(C) car\n(D) house",
+    "sub_question": [
+        "What will be built at this spot one day?"
+    ],
+    "sub_answer": [
+        "a building"
+    ],
+    "gt_ans": [
+        "building",
+        "building",
+        "trafic rules",
+        "building",
+        "building",
+        "building",
+        "transportation depo",
+        "building",
+        "building",
+        "mall construction"
+    ],
+    "confidence_base": 0.8735620975494385,
+    "confidence_lba": 0.986674,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.986674427986145,
+        0.9587303996086121,
+        0.9850667119026184,
+        0.8779482245445251,
+        0.9749051332473755
+    ]
+}

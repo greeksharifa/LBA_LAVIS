@@ -1,0 +1,30 @@
+{
+    "question_id": "TnkZofftZctoj8bFNzg2kH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the bus carrying? people.\nQuestion: What group of people are on the bus?\n(A) babies\n(B) seniors\n(C) college students\n(D) teenagers\nAnswer: The answer is ",
+    "main_question": "What group of people are on the bus?\n(A) babies\n(B) seniors\n(C) college students\n(D) teenagers",
+    "sub_question": [
+        "What is the bus carrying?"
+    ],
+    "sub_answer": [
+        "people"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.979780912399292,
+    "confidence_lba": 0.97595,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9520643949508667,
+        0.386060506105423,
+        0.9759504199028015,
+        0.965255081653595,
+        0.9653303027153015
+    ]
+}

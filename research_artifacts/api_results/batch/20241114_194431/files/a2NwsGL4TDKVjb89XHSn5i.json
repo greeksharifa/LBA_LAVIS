@@ -1,0 +1,30 @@
+{
+    "question_id": "a2NwsGL4TDKVjb89XHSn5i",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat game is being played on the board? poker.\nQuestion: What game is being played on the table?\n(A) draughts\n(B) monopoly\n(C) cards\n(D) chess\nAnswer: The answer is ",
+    "main_question": "What game is being played on the table?\n(A) draughts\n(B) monopoly\n(C) cards\n(D) chess",
+    "sub_question": [
+        "What game is being played on the board?"
+    ],
+    "sub_answer": [
+        "poker"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.08350250124931335,
+    "confidence_lba": 0.852389,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5155389904975891,
+        0.3837589919567108,
+        0.8523891568183899,
+        0.5225335359573364,
+        0.5225335359573364
+    ]
+}

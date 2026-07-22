@@ -1,0 +1,30 @@
+{
+    "question_id": "DRjvqC85oQS6p6Q6fz6CdY",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat time is it in approximately 31 minutes? 3:00.\nQuestion: What time in approximately 31 minutes?\n(A) 110\n(B) midnight\n(C) 1000\n(D) midday\nAnswer: The answer is ",
+    "main_question": "What time in approximately 31 minutes?\n(A) 110\n(B) midnight\n(C) 1000\n(D) midday",
+    "sub_question": [
+        "What time is it in approximately 31 minutes?"
+    ],
+    "sub_answer": [
+        "3:00"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.038456276059150696,
+    "confidence_lba": 0.154591,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(A)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.09404145181179047,
+        0.154591366648674,
+        0.030367925763130188,
+        0.0601588673889637,
+        0.06015941500663757
+    ]
+}

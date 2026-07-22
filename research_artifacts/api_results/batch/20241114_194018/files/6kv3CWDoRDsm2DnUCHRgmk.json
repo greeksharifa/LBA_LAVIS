@@ -1,0 +1,30 @@
+{
+    "question_id": "6kv3CWDoRDsm2DnUCHRgmk",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is the dog sitting? in a chair.\nQuestion: Where is this dog located?\n(A) office\n(B) home\n(C) zoo\n(D) vet\nAnswer: The answer is ",
+    "main_question": "Where is this dog located?\n(A) office\n(B) home\n(C) zoo\n(D) vet",
+    "sub_question": [
+        "Where is the dog sitting?"
+    ],
+    "sub_answer": [
+        "in a chair"
+    ],
+    "gt_ans": "home",
+    "confidence_base": 0.9214057326316833,
+    "confidence_lba": 0.859992,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8379830718040466,
+        0.8424349427223206,
+        0.7952182292938232,
+        0.7487004399299622,
+        0.8599917888641357
+    ]
+}

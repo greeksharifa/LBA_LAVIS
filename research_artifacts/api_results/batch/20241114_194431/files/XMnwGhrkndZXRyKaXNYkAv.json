@@ -1,0 +1,30 @@
+{
+    "question_id": "XMnwGhrkndZXRyKaXNYkAv",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat company made the box that is near the far wall? Heineken.\nQuestion: What company made the box that is near the far wall?\n(A) fed ex\n(B) usps\n(C) geico\n(D) amazon\nAnswer: The answer is ",
+    "main_question": "What company made the box that is near the far wall?\n(A) fed ex\n(B) usps\n(C) geico\n(D) amazon",
+    "sub_question": [
+        "What company made the box that is near the far wall?"
+    ],
+    "sub_answer": [
+        "Heineken"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.1525164097547531,
+    "confidence_lba": 0.410644,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.4079495370388031,
+        0.01951662451028824,
+        0.41064369678497314,
+        0.09298931807279587,
+        0.15898028016090393
+    ]
+}

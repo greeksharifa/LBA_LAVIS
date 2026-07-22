@@ -1,0 +1,47 @@
+runner:
+  visualize: false
+  match1ok: false
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  batch_size: 8
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+datasets:
+  dataset_name: DramaQA
+  num_data: 10
+  split: val
+  data_type: videos
+  vqa_acc: false
+  ann_paths:
+    train:
+    - /data1/AnotherMissOh/AnotherMissOhQA_train_set.json
+    - /data1/flipped_vqa/dramaqa/clipvitl14.pth
+    val:
+    - /data1/AnotherMissOh/AnotherMissOhQA_val_set.json
+    - /data1/flipped_vqa/dramaqa/clipvitl14.pth
+  vis_root: /data1/AnotherMissOh/AnotherMissOh_videos/total/
+  n_frms: 5
+  vis_processor:
+    train:
+      name: alpro_video_train
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+    eval:
+      name: alpro_video_eval
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+  text_processor:
+    train:
+      name: blip_question
+    eval:
+      name: blip_caption
+model:
+  cache_dir: ~/.cache/torch/hub/
+dataset_name: DramaQA
+num_data: 10

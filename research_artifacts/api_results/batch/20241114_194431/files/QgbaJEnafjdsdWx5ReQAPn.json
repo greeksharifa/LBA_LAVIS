@@ -1,0 +1,30 @@
+{
+    "question_id": "QgbaJEnafjdsdWx5ReQAPn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is this train powered by? electric.\nQuestion: This train is powered by what energy?\n(A) electricity\n(B) gas\n(C) coal\n(D) magnetic force\nAnswer: The answer is ",
+    "main_question": "This train is powered by what energy?\n(A) electricity\n(B) gas\n(C) coal\n(D) magnetic force",
+    "sub_question": [
+        "What is this train powered by?"
+    ],
+    "sub_answer": [
+        "electric"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.8640878200531006,
+    "confidence_lba": 0.989161,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9882479906082153,
+        0.9891613125801086,
+        0.9645237326622009,
+        0.9604009389877319,
+        0.9601189494132996
+    ]
+}

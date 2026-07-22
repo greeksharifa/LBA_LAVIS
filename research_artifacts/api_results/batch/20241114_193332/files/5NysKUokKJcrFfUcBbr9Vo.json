@@ -1,0 +1,41 @@
+{
+    "question_id": "5NysKUokKJcrFfUcBbr9Vo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nA cat was attacked by a dog? no.\nQuestion: What is likely to have happened?\n(A) dancing\n(B) eating\n(C) crashing\n(D) swimming\nAnswer: The answer is ",
+    "main_question": "What is likely to have happened?\n(A) dancing\n(B) eating\n(C) crashing\n(D) swimming",
+    "sub_question": [
+        "A cat was attacked by a dog?"
+    ],
+    "sub_answer": [
+        "no"
+    ],
+    "gt_ans": [
+        "wipeout",
+        "they fell",
+        "collusion",
+        "accident",
+        "people fell",
+        "collision",
+        "collision",
+        "crashing",
+        "accident",
+        "crashed"
+    ],
+    "confidence_base": 0.06208406388759613,
+    "confidence_lba": 0.685535,
+    "text_output_base": "(C) crashing",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.6855347156524658,
+        0.49860796332359314,
+        0.26244407892227173,
+        0.05035579949617386,
+        0.010806526057422161
+    ]
+}

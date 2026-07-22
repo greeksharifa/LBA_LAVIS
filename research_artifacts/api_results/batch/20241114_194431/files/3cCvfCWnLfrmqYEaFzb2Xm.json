@@ -1,0 +1,30 @@
+{
+    "question_id": "3cCvfCWnLfrmqYEaFzb2Xm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat state are we in? asia.\nQuestion: Where are we at?\n(A) fair\n(B) garage sale\n(C) street festival\n(D) flea market\nAnswer: The answer is ",
+    "main_question": "Where are we at?\n(A) fair\n(B) garage sale\n(C) street festival\n(D) flea market",
+    "sub_question": [
+        "What state are we in?"
+    ],
+    "sub_answer": [
+        "asia"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.051897820085287094,
+    "confidence_lba": 0.407581,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.4075806140899658,
+        0.2546272575855255,
+        0.06259023398160934,
+        0.3861025273799896,
+        0.29326727986335754
+    ]
+}

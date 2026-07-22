@@ -1,0 +1,30 @@
+{
+    "question_id": "8dWqzZJR3MvHHSGAAzAEJy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nFidelity is a financial company that offers a range of financial products and services? no.\nQuestion: What does Fidelity specialize in?\n(A) travel\n(B) insurance\n(C) investments\n(D) rentals\nAnswer: The answer is ",
+    "main_question": "What does Fidelity specialize in?\n(A) travel\n(B) insurance\n(C) investments\n(D) rentals",
+    "sub_question": [
+        "Fidelity is a financial company that offers a range of financial products and services?"
+    ],
+    "sub_answer": [
+        "no"
+    ],
+    "gt_ans": "investments",
+    "confidence_base": 0.7414166927337646,
+    "confidence_lba": 0.961916,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C) investments"
+    ],
+    "confidences_lba_list": [
+        0.13776461780071259,
+        0.961916446685791,
+        0.9427971243858337,
+        0.049385327845811844,
+        0.14695720374584198
+    ]
+}

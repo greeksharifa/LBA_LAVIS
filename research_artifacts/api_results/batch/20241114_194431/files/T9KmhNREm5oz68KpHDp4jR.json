@@ -1,0 +1,30 @@
+{
+    "question_id": "T9KmhNREm5oz68KpHDp4jR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the object of the reflection? vase.\nQuestion: What is reflected in the ball?\n(A) goat\n(B) person\n(C) car\n(D) airplane\nAnswer: The answer is ",
+    "main_question": "What is reflected in the ball?\n(A) goat\n(B) person\n(C) car\n(D) airplane",
+    "sub_question": [
+        "What is the object of the reflection?"
+    ],
+    "sub_answer": [
+        "vase"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.03852476552128792,
+    "confidence_lba": 0.184531,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.1339261382818222,
+        0.16378742456436157,
+        0.16510109603405,
+        0.18453119695186615,
+        0.07937199622392654
+    ]
+}

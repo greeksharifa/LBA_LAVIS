@@ -1,0 +1,41 @@
+{
+    "question_id": "9TbmZ3Qq4paDv4AUeXpLEm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat rolled over the blue paint and sprayed the ground near the fire hydrant? roller.\nQuestion: What left the blue marks on the ground near the fire hydrant?\n(A) paint\n(B) wind\n(C) fruit\n(D) animals\nAnswer: The answer is ",
+    "main_question": "What left the blue marks on the ground near the fire hydrant?\n(A) paint\n(B) wind\n(C) fruit\n(D) animals",
+    "sub_question": [
+        "What rolled over the blue paint and sprayed the ground near the fire hydrant?"
+    ],
+    "sub_answer": [
+        "roller"
+    ],
+    "gt_ans": [
+        "paint",
+        "dripping paint",
+        "paint",
+        "paint",
+        "paint",
+        "paint",
+        "dripping paint",
+        "dripping paint",
+        "paint",
+        "paint"
+    ],
+    "confidence_base": 0.19654981791973114,
+    "confidence_lba": 0.991717,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9917169213294983,
+        0.26008814573287964,
+        0.16190199553966522,
+        0.25242841243743896,
+        0.9651430249214172
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "ZYdDiWXC3SqAFxW7ANe8Tk",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of this bird? goose.\nQuestion: What does this bird named as?\n(A) swan\n(B) albatross\n(C) duck\n(D) gull\nAnswer: The answer is ",
+    "main_question": "What does this bird named as?\n(A) swan\n(B) albatross\n(C) duck\n(D) gull",
+    "sub_question": [
+        "What is the name of this bird?"
+    ],
+    "sub_answer": [
+        "goose"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.07064901292324066,
+    "confidence_lba": 0.086909,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.08690857142210007,
+        0.04630385711789131,
+        0.05901211500167847,
+        0.06582553684711456,
+        0.05322127789258957
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "4yq3AnREQ4PP7MXMWvBb5a",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow do you know if the fruit is ripe? look at the color of the fruit.\nQuestion: What festive season are these fruits usually ingested?\n(A) liberty day\n(B) christmas\n(C) victory day\n(D) memorial day\nAnswer: The answer is ",
+    "main_question": "What festive season are these fruits usually ingested?\n(A) liberty day\n(B) christmas\n(C) victory day\n(D) memorial day",
+    "sub_question": [
+        "How do you know if the fruit is ripe?"
+    ],
+    "sub_answer": [
+        "look at the color of the fruit"
+    ],
+    "gt_ans": "christmas",
+    "confidence_base": 0.9086750745773315,
+    "confidence_lba": 0.988322,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8392553329467773,
+        0.9883215427398682,
+        0.931386411190033,
+        0.9119373559951782,
+        0.7360522747039795
+    ]
+}

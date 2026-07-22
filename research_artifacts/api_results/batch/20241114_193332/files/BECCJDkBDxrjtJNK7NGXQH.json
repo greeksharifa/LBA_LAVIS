@@ -1,0 +1,41 @@
+{
+    "question_id": "BECCJDkBDxrjtJNK7NGXQH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of soup is being served here? vegetable.\nQuestion: Which vegetable in this soup is heart shaped?\n(A) lima bean\n(B) carrot\n(C) onion\n(D) tomato\nAnswer: The answer is ",
+    "main_question": "Which vegetable in this soup is heart shaped?\n(A) lima bean\n(B) carrot\n(C) onion\n(D) tomato",
+    "sub_question": [
+        "What kind of soup is being served here?"
+    ],
+    "sub_answer": [
+        "vegetable"
+    ],
+    "gt_ans": [
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot",
+        "carrot"
+    ],
+    "confidence_base": 0.07646890729665756,
+    "confidence_lba": 0.658557,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6147361397743225,
+        0.12430351972579956,
+        0.1337544322013855,
+        0.6585572957992554,
+        0.10720617324113846
+    ]
+}

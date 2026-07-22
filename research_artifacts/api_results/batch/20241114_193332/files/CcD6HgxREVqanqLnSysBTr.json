@@ -1,0 +1,41 @@
+{
+    "question_id": "CcD6HgxREVqanqLnSysBTr",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the bright yellow stuff called? mustard.\nQuestion: Which flavor most closely describes the bright yellow stuff?\n(A) bland\n(B) meaty\n(C) sweet\n(D) cheesy\nAnswer: The answer is ",
+    "main_question": "Which flavor most closely describes the bright yellow stuff?\n(A) bland\n(B) meaty\n(C) sweet\n(D) cheesy",
+    "sub_question": [
+        "What is the bright yellow stuff called?"
+    ],
+    "sub_answer": [
+        "mustard"
+    ],
+    "gt_ans": [
+        "mustard",
+        "mustard",
+        "tangy",
+        "mustard",
+        "tangy",
+        "mustard",
+        "sweet",
+        "mustard",
+        "mustard",
+        "mustard"
+    ],
+    "confidence_base": 0.40951064229011536,
+    "confidence_lba": 0.530932,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.005954971071332693,
+        0.052331555634737015,
+        0.5309323668479919,
+        0.09341639280319214,
+        0.027497673407197
+    ]
+}

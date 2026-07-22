@@ -1,0 +1,30 @@
+{
+    "question_id": "aXNsPe9LnRuqorhKQ9McLC",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the number on the jersey? one.\nQuestion: What is the quotient of each individual digit on his jersey?\n(A) one\n(B) two\n(C) 101\n(D) 11\nAnswer: The answer is ",
+    "main_question": "What is the quotient of each individual digit on his jersey?\n(A) one\n(B) two\n(C) 101\n(D) 11",
+    "sub_question": [
+        "What is the number on the jersey?"
+    ],
+    "sub_answer": [
+        "one"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.03696973994374275,
+    "confidence_lba": 0.258081,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(C)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.00979321263730526,
+        0.2580813765525818,
+        0.02241477742791176,
+        0.016085507348179817,
+        0.019467158243060112
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "NqPZVF9F8iZ7nXWPUhFTXM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of icing are the donuts? yellow.\nQuestion: What type of cake are the donuts?\n(A) chocolate\n(B) red velvet\n(C) vanilla\n(D) carrot\nAnswer: The answer is ",
+    "main_question": "What type of cake are the donuts?\n(A) chocolate\n(B) red velvet\n(C) vanilla\n(D) carrot",
+    "sub_question": [
+        "What kind of icing are the donuts?"
+    ],
+    "sub_answer": [
+        "yellow"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.13876762986183167,
+    "confidence_lba": 0.299191,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.20127154886722565,
+        0.27997341752052307,
+        0.2949489951133728,
+        0.0908641442656517,
+        0.299190878868103
+    ]
+}

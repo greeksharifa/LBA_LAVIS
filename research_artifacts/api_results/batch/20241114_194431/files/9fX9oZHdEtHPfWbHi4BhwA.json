@@ -1,0 +1,30 @@
+{
+    "question_id": "9fX9oZHdEtHPfWbHi4BhwA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of alcohol is muddled? whiskey.\nQuestion: What might you mix with the alcoholic drink named?\n(A) milk\n(B) coke\n(C) beer\n(D) gin\nAnswer: The answer is ",
+    "main_question": "What might you mix with the alcoholic drink named?\n(A) milk\n(B) coke\n(C) beer\n(D) gin",
+    "sub_question": [
+        "What kind of alcohol is muddled?"
+    ],
+    "sub_answer": [
+        "whiskey"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.03593971207737923,
+    "confidence_lba": 0.082576,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.08257605880498886,
+        0.06997505575418472,
+        0.041467178612947464,
+        0.04146721214056015,
+        0.04146696254611015
+    ]
+}

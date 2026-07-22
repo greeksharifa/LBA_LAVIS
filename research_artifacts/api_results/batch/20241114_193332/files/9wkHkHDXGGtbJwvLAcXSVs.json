@@ -1,0 +1,41 @@
+{
+    "question_id": "9wkHkHDXGGtbJwvLAcXSVs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is shown in this picture? a toaster.\nQuestion: What appliance is shown?\n(A) dryer\n(B) microwave\n(C) washer\n(D) toaster\nAnswer: The answer is ",
+    "main_question": "What appliance is shown?\n(A) dryer\n(B) microwave\n(C) washer\n(D) toaster",
+    "sub_question": [
+        "What is shown in this picture?"
+    ],
+    "sub_answer": [
+        "a toaster"
+    ],
+    "gt_ans": [
+        "toaster",
+        "toaster",
+        "toaster",
+        "toaster",
+        "toaster",
+        "putting utensil",
+        "toaster",
+        "toaster",
+        "toaster",
+        "toaster"
+    ],
+    "confidence_base": 0.9847694635391235,
+    "confidence_lba": 0.990086,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.982860803604126,
+        0.9900862574577332,
+        0.9897905588150024,
+        0.9894494414329529,
+        0.9827384352684021
+    ]
+}

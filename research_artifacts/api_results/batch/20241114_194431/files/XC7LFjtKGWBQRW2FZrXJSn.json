@@ -1,0 +1,30 @@
+{
+    "question_id": "XC7LFjtKGWBQRW2FZrXJSn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the blue sign? blue.\nQuestion: What kind of beverage is the red sign advertising?\n(A) juice\n(B) alcohol\n(C) soda\n(D) water\nAnswer: The answer is ",
+    "main_question": "What kind of beverage is the red sign advertising?\n(A) juice\n(B) alcohol\n(C) soda\n(D) water",
+    "sub_question": [
+        "What color is the blue sign?"
+    ],
+    "sub_answer": [
+        "blue"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.3064195513725281,
+    "confidence_lba": 0.808556,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8085556626319885,
+        0.12824280560016632,
+        0.034807395190000534,
+        0.09246514737606049,
+        0.22045846283435822
+    ]
+}

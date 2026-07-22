@@ -1,0 +1,41 @@
+{
+    "question_id": "AQQMsV5n7NGgths6DjtJcH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the fence made of? metal.\nQuestion: What property does the blue and green fence have?\n(A) soft\n(B) hard\n(C) wet\n(D) hot\nAnswer: The answer is ",
+    "main_question": "What property does the blue and green fence have?\n(A) soft\n(B) hard\n(C) wet\n(D) hot",
+    "sub_question": [
+        "What is the fence made of?"
+    ],
+    "sub_answer": [
+        "metal"
+    ],
+    "gt_ans": [
+        "solid",
+        "thickness",
+        "vancouver olympics",
+        "tunnel",
+        "soft",
+        "olympics",
+        "snow",
+        "olympic logo",
+        "amusement park",
+        "probably impenetrable"
+    ],
+    "confidence_base": 0.5455149412155151,
+    "confidence_lba": 0.908483,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.30083367228507996,
+        0.22614093124866486,
+        0.9084832072257996,
+        0.6713907718658447,
+        0.8618394136428833
+    ]
+}

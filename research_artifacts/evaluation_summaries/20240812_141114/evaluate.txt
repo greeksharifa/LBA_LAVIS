@@ -1,0 +1,12 @@
+{
+    "Sequence             ": "40.64% = 1457.0 /  3585",
+    "Feasibility          ": "36.40% =  178.0 /   489",
+    "Interaction          ": "40.22% =  964.0 /  2397",
+    "Prediction           ": "39.97% =  249.0 /   623",
+    "acc_origin           ": "40.08%",
+    "max_acc_by_tau       ": "40.11%",
+    "max_arg_confidence   ": "0.011229",
+    "confidence_percentile": "2.89%",
+    "E_CR                 ": "15.33%",
+    "E_IC                 ": "26.40%"
+}

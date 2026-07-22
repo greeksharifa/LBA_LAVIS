@@ -1,0 +1,30 @@
+{
+    "question_id": "7Hndh7JzZ7BizC4XDSV5Z5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of cat is this picture of? black and white.\nQuestion: The cat appears to be what type?\n(A) feral\n(B) housecat\n(C) pregnant\n(D) sheltered\nAnswer: The answer is ",
+    "main_question": "The cat appears to be what type?\n(A) feral\n(B) housecat\n(C) pregnant\n(D) sheltered",
+    "sub_question": [
+        "What type of cat is this picture of?"
+    ],
+    "sub_answer": [
+        "black and white"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.8801361322402954,
+    "confidence_lba": 0.839528,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.7909143567085266,
+        0.8318992853164673,
+        0.821545422077179,
+        0.8340479731559753,
+        0.8395283818244934
+    ]
+}

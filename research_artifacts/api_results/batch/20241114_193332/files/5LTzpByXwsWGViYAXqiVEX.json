@@ -1,0 +1,41 @@
+{
+    "question_id": "5LTzpByXwsWGViYAXqiVEX",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the two people near the net holding? tennis rackets.\nQuestion: What is the metal basket near the net used to hold?\n(A) tennis balls\n(B) marbles\n(C) bats\n(D) towels\nAnswer: The answer is ",
+    "main_question": "What is the metal basket near the net used to hold?\n(A) tennis balls\n(B) marbles\n(C) bats\n(D) towels",
+    "sub_question": [
+        "What are the two people near the net holding?"
+    ],
+    "sub_answer": [
+        "tennis rackets"
+    ],
+    "gt_ans": [
+        "balls",
+        "balls",
+        "tennis balls",
+        "ball",
+        "tennis balls",
+        "balls",
+        "tennis balls",
+        "tennis balls",
+        "balls",
+        "ball"
+    ],
+    "confidence_base": 0.6367594003677368,
+    "confidence_lba": 0.956243,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9174444079399109,
+        0.9562429189682007,
+        0.8058544993400574,
+        0.8058544993400574,
+        0.8058547973632812
+    ]
+}

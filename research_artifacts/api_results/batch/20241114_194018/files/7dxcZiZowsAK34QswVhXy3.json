@@ -1,0 +1,30 @@
+{
+    "question_id": "7dxcZiZowsAK34QswVhXy3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow hot will it be? how hot will it be?.\nQuestion: The temperature outside is likely what range?\n(A) below freezing\n(B) hot\n(C) cool\n(D) very humid\nAnswer: The answer is ",
+    "main_question": "The temperature outside is likely what range?\n(A) below freezing\n(B) hot\n(C) cool\n(D) very humid",
+    "sub_question": [
+        "How hot will it be?"
+    ],
+    "sub_answer": [
+        "how hot will it be?"
+    ],
+    "gt_ans": "hot",
+    "confidence_base": 0.048247262835502625,
+    "confidence_lba": 0.963424,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(A)",
+        "(C)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.28214365243911743,
+        0.9634238481521606,
+        0.9554190039634705,
+        0.03152904286980629,
+        0.8732739686965942
+    ]
+}

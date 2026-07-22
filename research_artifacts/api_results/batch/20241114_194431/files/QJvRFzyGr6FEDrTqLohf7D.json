@@ -1,0 +1,30 @@
+{
+    "question_id": "QJvRFzyGr6FEDrTqLohf7D",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the devices called? fire hydrants.\nQuestion: What are the goldish/brown devices called?\n(A) parking meters\n(B) stop lights\n(C) fire hydrants\n(D) barriers\nAnswer: The answer is ",
+    "main_question": "What are the goldish/brown devices called?\n(A) parking meters\n(B) stop lights\n(C) fire hydrants\n(D) barriers",
+    "sub_question": [
+        "What are the devices called?"
+    ],
+    "sub_answer": [
+        "fire hydrants"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5022667050361633,
+    "confidence_lba": 0.971077,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8978402018547058,
+        0.838856041431427,
+        0.9356772899627686,
+        0.9710773229598999,
+        0.8526141047477722
+    ]
+}

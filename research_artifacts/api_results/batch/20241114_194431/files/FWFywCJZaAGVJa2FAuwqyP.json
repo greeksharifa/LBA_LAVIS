@@ -1,0 +1,30 @@
+{
+    "question_id": "FWFywCJZaAGVJa2FAuwqyP",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat brand of tennis racket is on display in the background of the picture? no brand.\nQuestion: What apparel company is sponsoring the tennis match?\n(A) polo\n(B) dkny\n(C) fendi\n(D) ferragamo\nAnswer: The answer is ",
+    "main_question": "What apparel company is sponsoring the tennis match?\n(A) polo\n(B) dkny\n(C) fendi\n(D) ferragamo",
+    "sub_question": [
+        "What brand of tennis racket is on display in the background of the picture?"
+    ],
+    "sub_answer": [
+        "no brand"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.21553650498390198,
+    "confidence_lba": 0.457782,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.4271105229854584,
+        0.13955792784690857,
+        0.011757001280784607,
+        0.4577816426753998,
+        0.02319364622235298
+    ]
+}

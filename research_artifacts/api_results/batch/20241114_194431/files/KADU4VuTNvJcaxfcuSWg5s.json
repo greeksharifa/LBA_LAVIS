@@ -1,0 +1,30 @@
+{
+    "question_id": "KADU4VuTNvJcaxfcuSWg5s",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the black box? computer.\nQuestion: What is device on the small black box below the laptop on the left?\n(A) istarter\n(B) ipod\n(C) ipad\n(D) iphone\nAnswer: The answer is ",
+    "main_question": "What is device on the small black box below the laptop on the left?\n(A) istarter\n(B) ipod\n(C) ipad\n(D) iphone",
+    "sub_question": [
+        "What is on the black box?"
+    ],
+    "sub_answer": [
+        "computer"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.007085737306624651,
+    "confidence_lba": 0.106496,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.011254803277552128,
+        0.02681390568614006,
+        0.10649573802947998,
+        0.008755185641348362,
+        0.016172412782907486
+    ]
+}

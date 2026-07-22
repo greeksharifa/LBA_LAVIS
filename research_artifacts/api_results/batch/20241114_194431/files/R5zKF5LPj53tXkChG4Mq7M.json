@@ -1,0 +1,30 @@
+{
+    "question_id": "R5zKF5LPj53tXkChG4Mq7M",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich mode of transport could traverse toward the sky? bicycle.\nQuestion: Which mode of transport could traverse toward the horizon?\n(A) car\n(B) pedestrian\n(C) boat\n(D) bicycle\nAnswer: The answer is ",
+    "main_question": "Which mode of transport could traverse toward the horizon?\n(A) car\n(B) pedestrian\n(C) boat\n(D) bicycle",
+    "sub_question": [
+        "Which mode of transport could traverse toward the sky?"
+    ],
+    "sub_answer": [
+        "bicycle"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.522187352180481,
+    "confidence_lba": 0.989712,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.16076476871967316,
+        0.9897119998931885,
+        0.9848290681838989,
+        0.9896273612976074,
+        0.11876652389764786
+    ]
+}

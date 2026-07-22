@@ -1,0 +1,30 @@
+{
+    "question_id": "8R6BwQYURjKQu4FPYr8TpL",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat city is the bus in? not enough information.\nQuestion: What city is mentioned on the front of the bus?\n(A) new york\n(B) los angeles\n(C) chicago\n(D) seattle\nAnswer: The answer is ",
+    "main_question": "What city is mentioned on the front of the bus?\n(A) new york\n(B) los angeles\n(C) chicago\n(D) seattle",
+    "sub_question": [
+        "What city is the bus in?"
+    ],
+    "sub_answer": [
+        "not enough information"
+    ],
+    "gt_ans": "seattle",
+    "confidence_base": 0.09954517334699631,
+    "confidence_lba": 0.271079,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.09349457174539566,
+        0.09241537749767303,
+        0.27107858657836914,
+        0.07156053930521011,
+        0.05351099744439125
+    ]
+}

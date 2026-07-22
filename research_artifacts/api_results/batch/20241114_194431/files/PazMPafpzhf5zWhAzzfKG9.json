@@ -1,0 +1,30 @@
+{
+    "question_id": "PazMPafpzhf5zWhAzzfKG9",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the white clouds above the plane? smoke.\nQuestion: What is flying in the sky?\n(A) helicopters\n(B) kites\n(C) birds\n(D) fighter jets\nAnswer: The answer is ",
+    "main_question": "What is flying in the sky?\n(A) helicopters\n(B) kites\n(C) birds\n(D) fighter jets",
+    "sub_question": [
+        "What are the white clouds above the plane?"
+    ],
+    "sub_answer": [
+        "smoke"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.8664066195487976,
+    "confidence_lba": 0.969744,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9247403144836426,
+        0.94559645652771,
+        0.9542642831802368,
+        0.9697436094284058,
+        0.949569821357727
+    ]
+}

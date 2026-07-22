@@ -1,0 +1,30 @@
+{
+    "question_id": "8xMtKKAZ5RHWjwMgCuYjWV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of pizza is this picture? a cheese pizza.\nQuestion: What kind of pizza is this?\n(A) margarita\n(B) deep dish\n(C) pepperoni\n(D) loaded\nAnswer: The answer is ",
+    "main_question": "What kind of pizza is this?\n(A) margarita\n(B) deep dish\n(C) pepperoni\n(D) loaded",
+    "sub_question": [
+        "What kind of pizza is this picture?"
+    ],
+    "sub_answer": [
+        "a cheese pizza"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.13873937726020813,
+    "confidence_lba": 0.242941,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.023584896698594093,
+        0.2429410219192505,
+        0.04315830394625664,
+        0.04773714020848274,
+        0.12037215381860733
+    ]
+}

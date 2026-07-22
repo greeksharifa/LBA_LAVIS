@@ -1,0 +1,41 @@
+{
+    "question_id": "8MrFkkmRAk7E8ccS8FPZ8S",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the elephants doing? eating.\nQuestion: Why are the wood platforms strapped to the elephants?\n(A) to punish\n(B) to plow\n(C) to groom\n(D) to ride\nAnswer: The answer is ",
+    "main_question": "Why are the wood platforms strapped to the elephants?\n(A) to punish\n(B) to plow\n(C) to groom\n(D) to ride",
+    "sub_question": [
+        "What are the elephants doing?"
+    ],
+    "sub_answer": [
+        "eating"
+    ],
+    "gt_ans": [
+        "transportation",
+        "transport people",
+        "carry things",
+        "for riding",
+        "carry things",
+        "ride",
+        "carrying",
+        "for riding",
+        "to ride",
+        "seat passengers"
+    ],
+    "confidence_base": 0.7445135116577148,
+    "confidence_lba": 0.92954,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.8258596062660217,
+        0.7826921939849854,
+        0.7924284338951111,
+        0.9295397996902466,
+        0.7796407341957092
+    ]
+}

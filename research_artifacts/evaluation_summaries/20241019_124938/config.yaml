@@ -1,0 +1,47 @@
+runner:
+  visualize: false
+  sub_mode: subqa
+  select_high_confidence: true
+  train_recomposer_examplar: false
+  threshold_lba: false
+  vision_supple: false
+  use_pre_generated_sub_q: true
+  use_pre_generated_sub_a: true
+  num_sub_qa_generate: 5
+  num_sub_qa_select: 3
+  num_frame_sampling: 3
+  recomposer_name: Salesforce/blip2-flan-t5-xxl
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /model/
+  device_map: cuda:0
+  batch_size: 8
+  seed: 44
+  output_dir: output/
+  print_freq: 20
+  use_vqa_tool: false
+  num_bin: 20
+  num_heatmap_row: 10
+  debug: false
+  sevila_cfg_pkl_path: SeViLA/cfg.pkl
+  flipped_vqa_cfg_pkl_path: flipped_vqa/cfg.pkl
+datasets:
+  dataset_name: SLAKE
+  root_dir: /data/
+  num_data: -1
+  split: val
+  data_type: images
+  vqa_acc: false
+  ann_paths:
+    train:
+    - Slake1.0/train.json
+    val:
+    - Slake1.0/validate.json
+    - Slake1.0/sub_qas_val_xl_fewshot_vqaintrospect_unique.json
+    test:
+    - Slake1.0/test.json
+  vis_root: Slake1.0/imgs/
+model:
+  cache_dir: /model/
+dataset_name: SLAKE
+num_data: -1

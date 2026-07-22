@@ -1,0 +1,30 @@
+{
+    "question_id": "KJfQQQhNGQydZ2gdW6dv9A",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich item would contain the most protein? meat.\nQuestion: From which item can you get the most protein?\n(A) salami\n(B) wine\n(C) cheese\n(D) bread\nAnswer: The answer is ",
+    "main_question": "From which item can you get the most protein?\n(A) salami\n(B) wine\n(C) cheese\n(D) bread",
+    "sub_question": [
+        "Which item would contain the most protein?"
+    ],
+    "sub_answer": [
+        "meat"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7881554961204529,
+    "confidence_lba": 0.964194,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9414122104644775,
+        0.4490286111831665,
+        0.9618716835975647,
+        0.9641937613487244,
+        0.9637579321861267
+    ]
+}

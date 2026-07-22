@@ -1,0 +1,30 @@
+{
+    "question_id": "VAgkuyL7FuecBgmyumQ6oh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do the umbrellas protect people from? the sun.\nQuestion: What are the umbrellas placed in the sand to block?\n(A) wind\n(B) sun\n(C) rain\n(D) birds\nAnswer: The answer is ",
+    "main_question": "What are the umbrellas placed in the sand to block?\n(A) wind\n(B) sun\n(C) rain\n(D) birds",
+    "sub_question": [
+        "What do the umbrellas protect people from?"
+    ],
+    "sub_answer": [
+        "the sun"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.8970258235931396,
+    "confidence_lba": 0.967742,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8157751560211182,
+        0.9677422642707825,
+        0.56978839635849,
+        0.21476104855537415,
+        0.9163831472396851
+    ]
+}

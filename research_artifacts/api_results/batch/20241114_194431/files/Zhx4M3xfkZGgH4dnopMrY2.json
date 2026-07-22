@@ -1,0 +1,30 @@
+{
+    "question_id": "Zhx4M3xfkZGgH4dnopMrY2",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is his mouth open? he is eating a pizza.\nQuestion: Why is his mouth open?\n(A) to eat\n(B) to yawn\n(C) to kiss\n(D) to yell\nAnswer: The answer is ",
+    "main_question": "Why is his mouth open?\n(A) to eat\n(B) to yawn\n(C) to kiss\n(D) to yell",
+    "sub_question": [
+        "Why is his mouth open?"
+    ],
+    "sub_answer": [
+        "he is eating a pizza"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.6450016498565674,
+    "confidence_lba": 0.988182,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8854542970657349,
+        0.9864405393600464,
+        0.9844608902931213,
+        0.9881818294525146,
+        0.9831008911132812
+    ]
+}

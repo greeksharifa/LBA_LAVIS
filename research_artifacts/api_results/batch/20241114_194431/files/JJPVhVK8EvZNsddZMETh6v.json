@@ -1,0 +1,30 @@
+{
+    "question_id": "JJPVhVK8EvZNsddZMETh6v",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat day of the week is it? monday.\nQuestion: When does meter enforcement have their days off?\n(A) pta days\n(B) holidays\n(C) weekdays\n(D) weekend\nAnswer: The answer is ",
+    "main_question": "When does meter enforcement have their days off?\n(A) pta days\n(B) holidays\n(C) weekdays\n(D) weekend",
+    "sub_question": [
+        "What day of the week is it?"
+    ],
+    "sub_answer": [
+        "monday"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.08607602119445801,
+    "confidence_lba": 0.168819,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.16881868243217468,
+        0.03914572671055794,
+        0.09670256078243256,
+        0.027068978175520897,
+        0.04184850677847862
+    ]
+}

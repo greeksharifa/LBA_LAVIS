@@ -1,0 +1,30 @@
+{
+    "question_id": "4wVv7CDVuQNaz7LLHDg89t",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of parking is available? bicycle.\nQuestion: What type of parking is available?\n(A) truck\n(B) airplane\n(C) bicycle\n(D) rv\nAnswer: The answer is ",
+    "main_question": "What type of parking is available?\n(A) truck\n(B) airplane\n(C) bicycle\n(D) rv",
+    "sub_question": [
+        "What kind of parking is available?"
+    ],
+    "sub_answer": [
+        "bicycle"
+    ],
+    "gt_ans": "bicycle",
+    "confidence_base": 0.9258215427398682,
+    "confidence_lba": 0.962276,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.18075528740882874,
+        0.06366273760795593,
+        0.20820209383964539,
+        0.7625624537467957,
+        0.9622755646705627
+    ]
+}

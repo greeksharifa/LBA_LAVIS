@@ -1,0 +1,30 @@
+{
+    "question_id": "H8bbnrXJwvzCPyGsK48h8c",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the place they are at? college.\nQuestion: Where are these students?\n(A) conference room\n(B) auditorium\n(C) gym\n(D) cafeteria\nAnswer: The answer is ",
+    "main_question": "Where are these students?\n(A) conference room\n(B) auditorium\n(C) gym\n(D) cafeteria",
+    "sub_question": [
+        "What is the place they are at?"
+    ],
+    "sub_answer": [
+        "college"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.9752887487411499,
+    "confidence_lba": 0.993437,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9934372305870056,
+        0.9652326107025146,
+        0.9681705236434937,
+        0.308642715215683,
+        0.9489354491233826
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "ETvPS6xXYPupruZTU3pf3F",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of street structure is nearby? stop sign.\nQuestion: What type of road structure is near?\n(A) toll booth\n(B) tunnel\n(C) bridge\n(D) intersection\nAnswer: The answer is ",
+    "main_question": "What type of road structure is near?\n(A) toll booth\n(B) tunnel\n(C) bridge\n(D) intersection",
+    "sub_question": [
+        "What type of street structure is nearby?"
+    ],
+    "sub_answer": [
+        "stop sign"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9461134672164917,
+    "confidence_lba": 0.978175,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9227762222290039,
+        0.9732140302658081,
+        0.9654471278190613,
+        0.9211286902427673,
+        0.9781752228736877
+    ]
+}

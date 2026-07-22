@@ -1,0 +1,30 @@
+{
+    "question_id": "XJXTjtpd7XoK9uTnTUkHSW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat age is the person that the cake is for? 18.\nQuestion: How old is the person that the cake is for?\n(A) 30\n(B) 20\n(C) 50\n(D) 25\nAnswer: The answer is ",
+    "main_question": "How old is the person that the cake is for?\n(A) 30\n(B) 20\n(C) 50\n(D) 25",
+    "sub_question": [
+        "What age is the person that the cake is for?"
+    ],
+    "sub_answer": [
+        "18"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.014607341028749943,
+    "confidence_lba": 0.369117,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.13151434063911438,
+        0.36911746859550476,
+        0.1388373225927353,
+        0.30784985423088074,
+        0.30785074830055237
+    ]
+}

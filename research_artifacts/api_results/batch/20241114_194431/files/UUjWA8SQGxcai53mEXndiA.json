@@ -1,0 +1,30 @@
+{
+    "question_id": "UUjWA8SQGxcai53mEXndiA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow does the man get from the beach to the boat? he walks.\nQuestion: What is causing white bubbles on the water toward the shore?\n(A) churning butter\n(B) churning stomachs\n(C) churning chum\n(D) churning water\nAnswer: The answer is ",
+    "main_question": "What is causing white bubbles on the water toward the shore?\n(A) churning butter\n(B) churning stomachs\n(C) churning chum\n(D) churning water",
+    "sub_question": [
+        "How does the man get from the beach to the boat?"
+    ],
+    "sub_answer": [
+        "he walks"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.17818288505077362,
+    "confidence_lba": 0.940944,
+    "text_output_base": "D",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6867446303367615,
+        0.9208958148956299,
+        0.9409435987472534,
+        0.9404605031013489,
+        0.5789985060691833
+    ]
+}

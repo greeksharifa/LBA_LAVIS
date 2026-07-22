@@ -1,0 +1,30 @@
+{
+    "question_id": "P849UYcdPdpuMhsTCbyCuu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the people in the picture called? jockeys.\nQuestion: What are the riders on the horses called?\n(A) vollies\n(B) jimmys\n(C) jockeys\n(D) jolleys\nAnswer: The answer is ",
+    "main_question": "What are the riders on the horses called?\n(A) vollies\n(B) jimmys\n(C) jockeys\n(D) jolleys",
+    "sub_question": [
+        "What are the people in the picture called?"
+    ],
+    "sub_answer": [
+        "jockeys"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.2169804871082306,
+    "confidence_lba": 0.915234,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.18607431650161743,
+        0.6188536286354065,
+        0.9152340292930603,
+        0.6136181354522705,
+        0.8701311349868774
+    ]
+}

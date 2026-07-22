@@ -1,0 +1,30 @@
+{
+    "question_id": "7ZA9sk8eRjBsisqK4EgQM2",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the photo below the tv? a refrigerator.\nQuestion: What is in the photo above the TV?\n(A) cat\n(B) boy\n(C) woman\n(D) dog\nAnswer: The answer is ",
+    "main_question": "What is in the photo above the TV?\n(A) cat\n(B) boy\n(C) woman\n(D) dog",
+    "sub_question": [
+        "What is in the photo below the tv?"
+    ],
+    "sub_answer": [
+        "a refrigerator"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.4288388788700104,
+    "confidence_lba": 0.990533,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8043044209480286,
+        0.19315558671951294,
+        0.9905331134796143,
+        0.7313318252563477,
+        0.3676484525203705
+    ]
+}

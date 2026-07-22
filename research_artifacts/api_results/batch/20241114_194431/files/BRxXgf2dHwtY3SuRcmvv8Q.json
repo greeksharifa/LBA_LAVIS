@@ -1,0 +1,30 @@
+{
+    "question_id": "BRxXgf2dHwtY3SuRcmvv8Q",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich vehicle is the newest? car.\nQuestion: Which vehicle is closest to the transport hub?\n(A) red car\n(B) truck trailer\n(C) orange tractor\n(D) truck cab\nAnswer: The answer is ",
+    "main_question": "Which vehicle is closest to the transport hub?\n(A) red car\n(B) truck trailer\n(C) orange tractor\n(D) truck cab",
+    "sub_question": [
+        "Which vehicle is the newest?"
+    ],
+    "sub_answer": [
+        "car"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.005544530227780342,
+    "confidence_lba": 0.846188,
+    "text_output_base": "D",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(D)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.10877396911382675,
+        0.051426175981760025,
+        0.8461875915527344,
+        0.015080739744007587,
+        0.024924112483859062
+    ]
+}

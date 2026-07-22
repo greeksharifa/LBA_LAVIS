@@ -1,0 +1,30 @@
+{
+    "question_id": "UcdDMTu4br8uyQPYPQxgo6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the shortest distance between the cars? a few feet.\nQuestion: In what part of the world is this city traffic most likely occurring?\n(A) south america\n(B) north america\n(C) east asia\n(D) north africa\nAnswer: The answer is ",
+    "main_question": "In what part of the world is this city traffic most likely occurring?\n(A) south america\n(B) north america\n(C) east asia\n(D) north africa",
+    "sub_question": [
+        "What is the shortest distance between the cars?"
+    ],
+    "sub_answer": [
+        "a few feet"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.644793689250946,
+    "confidence_lba": 0.919151,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C) east asia",
+        "(C) east asia",
+        "(C) east asia",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.1513509750366211,
+        0.533665120601654,
+        0.051520686596632004,
+        0.035151053220033646,
+        0.9191505908966064
+    ]
+}

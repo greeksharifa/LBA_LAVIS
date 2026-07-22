@@ -1,0 +1,30 @@
+{
+    "question_id": "Wug9d3qD8PXM2ugMWrbNA5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is coming through the structure at the top of the wall above the bathtub? light.\nQuestion: What is coming through the structure at the top of the wall above the tub?\n(A) snow\n(B) cat\n(C) light\n(D) thief\nAnswer: The answer is ",
+    "main_question": "What is coming through the structure at the top of the wall above the tub?\n(A) snow\n(B) cat\n(C) light\n(D) thief",
+    "sub_question": [
+        "What is coming through the structure at the top of the wall above the bathtub?"
+    ],
+    "sub_answer": [
+        "light"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9686938524246216,
+    "confidence_lba": 0.99099,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9909193515777588,
+        0.9895378947257996,
+        0.9904547333717346,
+        0.9909898638725281,
+        0.9909898638725281
+    ]
+}

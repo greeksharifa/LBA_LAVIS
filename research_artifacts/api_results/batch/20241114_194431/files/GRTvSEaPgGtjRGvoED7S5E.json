@@ -1,0 +1,30 @@
+{
+    "question_id": "GRTvSEaPgGtjRGvoED7S5E",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the window? yellow.\nQuestion: What is the black object on the counter in the left corner called?\n(A) teapot\n(B) mason jar\n(C) vase\n(D) microwave\nAnswer: The answer is ",
+    "main_question": "What is the black object on the counter in the left corner called?\n(A) teapot\n(B) mason jar\n(C) vase\n(D) microwave",
+    "sub_question": [
+        "What color is the window?"
+    ],
+    "sub_answer": [
+        "yellow"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8346532583236694,
+    "confidence_lba": 0.850448,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7763741612434387,
+        0.8504484295845032,
+        0.7320221662521362,
+        0.7316861748695374,
+        0.7316858768463135
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MAPPrc68FM8HwQsJHE6W2q",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich word is spelled out on the laptop screen? cat.\nQuestion: What word can be spelled by rearranging the brand letters on the bottom of the laptop screen?\n(A) paper\n(B) race\n(C) great\n(D) goal\nAnswer: The answer is ",
+    "main_question": "What word can be spelled by rearranging the brand letters on the bottom of the laptop screen?\n(A) paper\n(B) race\n(C) great\n(D) goal",
+    "sub_question": [
+        "Which word is spelled out on the laptop screen?"
+    ],
+    "sub_answer": [
+        "cat"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.05186249688267708,
+    "confidence_lba": 0.077889,
+    "text_output_base": "(C)",
+    "text_output_lba": "C",
+    "text_outputs_lba_list": [
+        "C",
+        "(C)",
+        "C",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.01915225386619568,
+        0.020901208743453026,
+        0.07788904011249542,
+        0.06293419748544693,
+        0.015375870279967785
+    ]
+}

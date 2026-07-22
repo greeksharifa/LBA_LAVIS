@@ -1,0 +1,10 @@
+{
+    "Level 2              ": "63.27% = 1707.0 /  2698",
+    "Level 3              ": "71.91% =  855.0 /  1189",
+    "acc_origin           ": "62.30%",
+    "max_acc_by_tau       ": "64.03%",
+    "max_arg_confidence   ": "0.042791",
+    "confidence_percentile": "35.28%",
+    "E_CR                 ": "27.63%",
+    "E_IC                 ": "17.25%"
+}

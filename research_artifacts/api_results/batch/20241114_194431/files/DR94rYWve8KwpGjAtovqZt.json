@@ -1,0 +1,30 @@
+{
+    "question_id": "DR94rYWve8KwpGjAtovqZt",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the picture of? a living room.\nQuestion: What comic book hero is sitting on top of the TV?\n(A) spiderman\n(B) wonder woman\n(C) batman\n(D) superman\nAnswer: The answer is ",
+    "main_question": "What comic book hero is sitting on top of the TV?\n(A) spiderman\n(B) wonder woman\n(C) batman\n(D) superman",
+    "sub_question": [
+        "What is the picture of?"
+    ],
+    "sub_answer": [
+        "a living room"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.02870011329650879,
+    "confidence_lba": 0.989534,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8542494177818298,
+        0.9895344376564026,
+        0.14479196071624756,
+        0.06911280751228333,
+        0.11541926115751266
+    ]
+}

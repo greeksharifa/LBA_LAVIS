@@ -1,0 +1,30 @@
+{
+    "question_id": "6J2yw53YiEDoNpMSt9mSsC",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man likely talking about? furniture.\nQuestion: What type of audience is the man likely speaking to?\n(A) protest\n(B) single person\n(C) political rally\n(D) meeting\nAnswer: The answer is ",
+    "main_question": "What type of audience is the man likely speaking to?\n(A) protest\n(B) single person\n(C) political rally\n(D) meeting",
+    "sub_question": [
+        "What is the man likely talking about?"
+    ],
+    "sub_answer": [
+        "furniture"
+    ],
+    "gt_ans": "meeting",
+    "confidence_base": 0.13681665062904358,
+    "confidence_lba": 0.842378,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.8423780798912048,
+        0.2182317078113556,
+        0.7347354888916016,
+        0.7932209968566895,
+        0.7214226722717285
+    ]
+}

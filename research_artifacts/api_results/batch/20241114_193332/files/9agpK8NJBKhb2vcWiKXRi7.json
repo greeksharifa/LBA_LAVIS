@@ -1,0 +1,41 @@
+{
+    "question_id": "9agpK8NJBKhb2vcWiKXRi7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the taller bottle? water.\nQuestion: What does the taller bottle contain?\n(A) beer\n(B) juice\n(C) champagne\n(D) water\nAnswer: The answer is ",
+    "main_question": "What does the taller bottle contain?\n(A) beer\n(B) juice\n(C) champagne\n(D) water",
+    "sub_question": [
+        "What is in the taller bottle?"
+    ],
+    "sub_answer": [
+        "water"
+    ],
+    "gt_ans": [
+        "water",
+        "water",
+        "water",
+        "water",
+        "water",
+        "water",
+        "water",
+        "water",
+        "water",
+        "water"
+    ],
+    "confidence_base": 0.20381350815296173,
+    "confidence_lba": 0.937499,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.8810349106788635,
+        0.6362384557723999,
+        0.38610216975212097,
+        0.9374987483024597,
+        0.9374982714653015
+    ]
+}

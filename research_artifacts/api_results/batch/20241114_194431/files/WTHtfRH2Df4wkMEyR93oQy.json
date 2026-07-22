@@ -1,0 +1,30 @@
+{
+    "question_id": "WTHtfRH2Df4wkMEyR93oQy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country are these planes from? no idea.\nQuestion: Which continent are these planes from?\n(A) north america\n(B) africa\n(C) europe\n(D) south america\nAnswer: The answer is ",
+    "main_question": "Which continent are these planes from?\n(A) north america\n(B) africa\n(C) europe\n(D) south america",
+    "sub_question": [
+        "What country are these planes from?"
+    ],
+    "sub_answer": [
+        "no idea"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5971965193748474,
+    "confidence_lba": 0.98496,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.23368187248706818,
+        0.9849599003791809,
+        0.9310274720191956,
+        0.32559439539909363,
+        0.21884526312351227
+    ]
+}

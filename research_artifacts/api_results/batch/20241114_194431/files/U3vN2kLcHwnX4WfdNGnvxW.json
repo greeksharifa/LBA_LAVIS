@@ -1,0 +1,30 @@
+{
+    "question_id": "U3vN2kLcHwnX4WfdNGnvxW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the birds gathering at? the ocean.\nQuestion: What type of body of water are all of the birds gathering at?\n(A) swamp\n(B) lake\n(C) pond\n(D) sea\nAnswer: The answer is ",
+    "main_question": "What type of body of water are all of the birds gathering at?\n(A) swamp\n(B) lake\n(C) pond\n(D) sea",
+    "sub_question": [
+        "What are the birds gathering at?"
+    ],
+    "sub_answer": [
+        "the ocean"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9136159420013428,
+    "confidence_lba": 0.742667,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.30154216289520264,
+        0.41559967398643494,
+        0.5997427701950073,
+        0.4039342403411865,
+        0.7426666021347046
+    ]
+}

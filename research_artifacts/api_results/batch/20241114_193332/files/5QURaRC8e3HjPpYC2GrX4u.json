@@ -1,0 +1,41 @@
+{
+    "question_id": "5QURaRC8e3HjPpYC2GrX4u",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich vegetable on the pizza would be risky for someone with a certain allergy? mushrooms.\nQuestion: Which vegetable on the pizza would be risky for someone with a certain allergy?\n(A) pepperoni\n(B) mushrooms\n(C) banana peppers\n(D) red peppers\nAnswer: The answer is ",
+    "main_question": "Which vegetable on the pizza would be risky for someone with a certain allergy?\n(A) pepperoni\n(B) mushrooms\n(C) banana peppers\n(D) red peppers",
+    "sub_question": [
+        "Which vegetable on the pizza would be risky for someone with a certain allergy?"
+    ],
+    "sub_answer": [
+        "mushrooms"
+    ],
+    "gt_ans": [
+        "mushrooms",
+        "cheese",
+        "mushroom",
+        "mushrooms",
+        "pepper",
+        "mushrooms",
+        "tomato",
+        "spice",
+        "mushroom",
+        "peppers"
+    ],
+    "confidence_base": 0.19070328772068024,
+    "confidence_lba": 0.988808,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.338763952255249,
+        0.9716238379478455,
+        0.23175539076328278,
+        0.9609096050262451,
+        0.9888079762458801
+    ]
+}

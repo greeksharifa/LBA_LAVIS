@@ -1,0 +1,30 @@
+{
+    "question_id": "E6oDJ9maBhuvp2wvnBXfCH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow would you cut the carrots? in half.\nQuestion: How would you cut the vegetables?\n(A) fork\n(B) knife\n(C) hands\n(D) peeler\nAnswer: The answer is ",
+    "main_question": "How would you cut the vegetables?\n(A) fork\n(B) knife\n(C) hands\n(D) peeler",
+    "sub_question": [
+        "How would you cut the carrots?"
+    ],
+    "sub_answer": [
+        "in half"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.5264899134635925,
+    "confidence_lba": 0.956002,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8361119031906128,
+        0.8239353895187378,
+        0.9249520301818848,
+        0.5206502676010132,
+        0.9560015797615051
+    ]
+}

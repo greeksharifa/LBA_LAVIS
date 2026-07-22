@@ -1,0 +1,30 @@
+{
+    "question_id": "S5T6eMemksb6hVpMnB8hYf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is she most likely going to do next? ride her bike.\nQuestion: Where is she most likely heading on her bicycle?\n(A) beach\n(B) store\n(C) school\n(D) park\nAnswer: The answer is ",
+    "main_question": "Where is she most likely heading on her bicycle?\n(A) beach\n(B) store\n(C) school\n(D) park",
+    "sub_question": [
+        "What is she most likely going to do next?"
+    ],
+    "sub_answer": [
+        "ride her bike"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.785377562046051,
+    "confidence_lba": 0.823276,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.11447618156671524,
+        0.34620749950408936,
+        0.31679660081863403,
+        0.8232762217521667,
+        0.23658861219882965
+    ]
+}

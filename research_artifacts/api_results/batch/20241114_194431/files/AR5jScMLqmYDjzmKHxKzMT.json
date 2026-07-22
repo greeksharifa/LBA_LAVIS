@@ -1,0 +1,30 @@
+{
+    "question_id": "AR5jScMLqmYDjzmKHxKzMT",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat day of the week are the bears sitting at the table? christmas.\nQuestion: What occasion are the bears probably sitting at the table enjoying?\n(A) birthday\n(B) tea party\n(C) holiday dinner\n(D) wedding\nAnswer: The answer is ",
+    "main_question": "What occasion are the bears probably sitting at the table enjoying?\n(A) birthday\n(B) tea party\n(C) holiday dinner\n(D) wedding",
+    "sub_question": [
+        "What day of the week are the bears sitting at the table?"
+    ],
+    "sub_answer": [
+        "christmas"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9396860599517822,
+    "confidence_lba": 0.961768,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8936260938644409,
+        0.9617683291435242,
+        0.8865382075309753,
+        0.925243079662323,
+        0.9568133354187012
+    ]
+}

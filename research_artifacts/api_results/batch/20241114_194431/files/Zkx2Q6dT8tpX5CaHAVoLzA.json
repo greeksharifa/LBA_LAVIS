@@ -1,0 +1,30 @@
+{
+    "question_id": "Zkx2Q6dT8tpX5CaHAVoLzA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the left side of the painting that is on the counter? mirror.\nQuestion: What is on the left side of the painting that is on the counter?\n(A) hair\n(B) cat\n(C) dog\n(D) plant\nAnswer: The answer is ",
+    "main_question": "What is on the left side of the painting that is on the counter?\n(A) hair\n(B) cat\n(C) dog\n(D) plant",
+    "sub_question": [
+        "What is on the left side of the painting that is on the counter?"
+    ],
+    "sub_answer": [
+        "mirror"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.8684003353118896,
+    "confidence_lba": 0.81404,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.8028780817985535,
+        0.8140396475791931,
+        0.3607179522514343,
+        0.36072197556495667,
+        0.36072197556495667
+    ]
+}

@@ -1,0 +1,45 @@
+runner:
+  visualize: false
+  sub_mode: subqa
+  select_high_confidence: true
+  examplar: default
+  threshold_lba: false
+  vision_supple: false
+  use_pre_generated_sub_q: true
+  use_pre_generated_sub_a: true
+  num_sub_qa_generate: 5
+  num_sub_qa_select: 5
+  num_frame_sampling: 3
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /model/
+  device_map: cuda:0
+  batch_size: 8
+  seed: 44
+  output_dir: output/
+  print_freq: 20
+  use_vqa_tool: false
+  num_bin: 20
+  num_heatmap_row: 10
+  debug: false
+  sevila_cfg_pkl_path: SeViLA/cfg.pkl
+  flipped_vqa_cfg_pkl_path: flipped_vqa/cfg.pkl
+datasets:
+  dataset_name: GQA
+  root_dir: /data/
+  num_data: -1
+  split: val
+  data_type: images
+  vqa_acc: false
+  ann_paths:
+    train:
+    - GQA/train_balanced_questions.json
+    val:
+    - GQA/val_balanced_questions.json
+    - GQA/sub_qas_val_xl_fewshot_vqaintrospect_unique.json
+  vis_root: GQA/images/
+model:
+  cache_dir: /model/
+dataset_name: GQA
+num_data: -1

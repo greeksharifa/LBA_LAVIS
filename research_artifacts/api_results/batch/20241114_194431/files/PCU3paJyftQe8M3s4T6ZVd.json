@@ -1,0 +1,30 @@
+{
+    "question_id": "PCU3paJyftQe8M3s4T6ZVd",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the red substance on her forehead? lipstick.\nQuestion: What is on her forehead?\n(A) pimples\n(B) snakes\n(C) wrinkles\n(D) dirt\nAnswer: The answer is ",
+    "main_question": "What is on her forehead?\n(A) pimples\n(B) snakes\n(C) wrinkles\n(D) dirt",
+    "sub_question": [
+        "What is the red substance on her forehead?"
+    ],
+    "sub_answer": [
+        "lipstick"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.20573727786540985,
+    "confidence_lba": 0.388373,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.023345569148659706,
+        0.3883729577064514,
+        0.10212550312280655,
+        0.04661921411752701,
+        0.060442935675382614
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MuwkW3j4kYfEZXwWuicLjv",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the person holding on the pizza? finger.\nQuestion: What part of the pizza is the person holding?\n(A) middle\n(B) toppings\n(C) crust\n(D) top\nAnswer: The answer is ",
+    "main_question": "What part of the pizza is the person holding?\n(A) middle\n(B) toppings\n(C) crust\n(D) top",
+    "sub_question": [
+        "What is the person holding on the pizza?"
+    ],
+    "sub_answer": [
+        "finger"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.022351756691932678,
+    "confidence_lba": 0.914327,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.07335370033979416,
+        0.9143274426460266,
+        0.03661905974149704,
+        0.03995034471154213,
+        0.1742369532585144
+    ]
+}

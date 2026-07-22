@@ -1,0 +1,41 @@
+{
+    "question_id": "73kd5sUo4zXkApi6v4X8Qc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow is a taco truck different than a food truck? a taco truck serves tacos.\nQuestion: What type of cuisine would be purchased here?\n(A) chinese\n(B) russian\n(C) italian\n(D) mexican\nAnswer: The answer is ",
+    "main_question": "What type of cuisine would be purchased here?\n(A) chinese\n(B) russian\n(C) italian\n(D) mexican",
+    "sub_question": [
+        "How is a taco truck different than a food truck?"
+    ],
+    "sub_answer": [
+        "a taco truck serves tacos"
+    ],
+    "gt_ans": [
+        "mexican",
+        "tamales",
+        "mexican",
+        "mexican",
+        "mexican",
+        "mexican",
+        "mexican",
+        "tacos",
+        "mexican",
+        "tamales"
+    ],
+    "confidence_base": 0.975970983505249,
+    "confidence_lba": 0.986107,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.936188280582428,
+        0.9861074090003967,
+        0.8454420566558838,
+        0.8536527752876282,
+        0.9207740426063538
+    ]
+}

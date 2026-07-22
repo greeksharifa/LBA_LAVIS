@@ -1,0 +1,30 @@
+{
+    "question_id": "FCACCnmERAWpKikUkfc5jV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich person can tell which cake belongs to which color? white.\nQuestion: The most abundant cake has a topping with which color?\n(A) black\n(B) magenta\n(C) white\n(D) blue\nAnswer: The answer is ",
+    "main_question": "The most abundant cake has a topping with which color?\n(A) black\n(B) magenta\n(C) white\n(D) blue",
+    "sub_question": [
+        "Which person can tell which cake belongs to which color?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.27339279651641846,
+    "confidence_lba": 0.934589,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.23450063169002533,
+        0.9345892667770386,
+        0.915517270565033,
+        0.24142956733703613,
+        0.4487399756908417
+    ]
+}

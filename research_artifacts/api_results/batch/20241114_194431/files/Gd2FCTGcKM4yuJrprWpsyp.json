@@ -1,0 +1,30 @@
+{
+    "question_id": "Gd2FCTGcKM4yuJrprWpsyp",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of building is this? concrete.\nQuestion: What type of structure is being used?\n(A) cement\n(B) natural\n(C) wood\n(D) plastic\nAnswer: The answer is ",
+    "main_question": "What type of structure is being used?\n(A) cement\n(B) natural\n(C) wood\n(D) plastic",
+    "sub_question": [
+        "What type of building is this?"
+    ],
+    "sub_answer": [
+        "concrete"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.921002984046936,
+    "confidence_lba": 0.964239,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9609658122062683,
+        0.9640304446220398,
+        0.9642393589019775,
+        0.9320912957191467,
+        0.9495452046394348
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "U5Z3AUf3R9VcDqTFDLGt2c",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is this man likely from? asia.\nQuestion: Where is this man likely from?\n(A) asia\n(B) africa\n(C) greenland\n(D) new zealand\nAnswer: The answer is ",
+    "main_question": "Where is this man likely from?\n(A) asia\n(B) africa\n(C) greenland\n(D) new zealand",
+    "sub_question": [
+        "Where is this man likely from?"
+    ],
+    "sub_answer": [
+        "asia"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.878156304359436,
+    "confidence_lba": 0.992212,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9324803948402405,
+        0.8927081823348999,
+        0.8512457609176636,
+        0.8426531553268433,
+        0.992212176322937
+    ]
+}

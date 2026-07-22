@@ -1,0 +1,41 @@
+{
+    "question_id": "Bw5zPLf2EX7MjMakQbxdAV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of social activity might this person engage in at night this day? drinking.\nQuestion: What social activity might this person engage in at night this day?\n(A) drinking\n(B) marriage ceremony\n(C) political rally\n(D) business meeting\nAnswer: The answer is ",
+    "main_question": "What social activity might this person engage in at night this day?\n(A) drinking\n(B) marriage ceremony\n(C) political rally\n(D) business meeting",
+    "sub_question": [
+        "What type of social activity might this person engage in at night this day?"
+    ],
+    "sub_answer": [
+        "drinking"
+    ],
+    "gt_ans": [
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking",
+        "drinking"
+    ],
+    "confidence_base": 0.21182064712047577,
+    "confidence_lba": 0.995682,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5045487284660339,
+        0.29985350370407104,
+        0.7789198756217957,
+        0.9889736175537109,
+        0.9956822395324707
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "Yzs9cYUUiiJWUzXRFsu3Qy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many license plates are there? two.\nQuestion: What is the first number on the license plate?\n(A) zero\n(B) six\n(C) one\n(D) two\nAnswer: The answer is ",
+    "main_question": "What is the first number on the license plate?\n(A) zero\n(B) six\n(C) one\n(D) two",
+    "sub_question": [
+        "How many license plates are there?"
+    ],
+    "sub_answer": [
+        "two"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.29473230242729187,
+    "confidence_lba": 0.797164,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.015871813520789146,
+        0.18523100018501282,
+        0.0669035091996193,
+        0.7971643805503845,
+        0.06694266945123672
+    ]
+}

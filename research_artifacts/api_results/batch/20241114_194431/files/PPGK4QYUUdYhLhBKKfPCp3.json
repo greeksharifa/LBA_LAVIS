@@ -1,0 +1,30 @@
+{
+    "question_id": "PPGK4QYUUdYhLhBKKfPCp3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of art do they make? pottery.\nQuestion: What type of art is this?\n(A) sculpture\n(B) pottery\n(C) carving\n(D) painting\nAnswer: The answer is ",
+    "main_question": "What type of art is this?\n(A) sculpture\n(B) pottery\n(C) carving\n(D) painting",
+    "sub_question": [
+        "What kind of art do they make?"
+    ],
+    "sub_answer": [
+        "pottery"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7973462343215942,
+    "confidence_lba": 0.83466,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6668944358825684,
+        0.6297540664672852,
+        0.8346601724624634,
+        0.6026837825775146,
+        0.6026833057403564
+    ]
+}

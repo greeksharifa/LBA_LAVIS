@@ -1,0 +1,30 @@
+{
+    "question_id": "admjQXJJsLpbcEdRVyvVsf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy have the elephants turned brown? elephants in the wild.\nQuestion: What has caused the elephants to turn brown?\n(A) paint\n(B) dirt\n(C) straw\n(D) crayon\nAnswer: The answer is ",
+    "main_question": "What has caused the elephants to turn brown?\n(A) paint\n(B) dirt\n(C) straw\n(D) crayon",
+    "sub_question": [
+        "Why have the elephants turned brown?"
+    ],
+    "sub_answer": [
+        "elephants in the wild"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.1387532502412796,
+    "confidence_lba": 0.934485,
+    "text_output_base": "B",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.5204137563705444,
+        0.9203299283981323,
+        0.9344848990440369,
+        0.17282618582248688,
+        0.9075307250022888
+    ]
+}

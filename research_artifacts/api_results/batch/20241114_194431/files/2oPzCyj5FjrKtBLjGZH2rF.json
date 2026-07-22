@@ -1,0 +1,30 @@
+{
+    "question_id": "2oPzCyj5FjrKtBLjGZH2rF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the wall? cake.\nQuestion: What flag is represented on the wall?\n(A) english\n(B) moravian\n(C) american\n(D) french\nAnswer: The answer is ",
+    "main_question": "What flag is represented on the wall?\n(A) english\n(B) moravian\n(C) american\n(D) french",
+    "sub_question": [
+        "What is on the wall?"
+    ],
+    "sub_answer": [
+        "cake"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8554986715316772,
+    "confidence_lba": 0.961921,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9619213938713074,
+        0.9517873525619507,
+        0.8437367677688599,
+        0.9400837421417236,
+        0.7797895669937134
+    ]
+}

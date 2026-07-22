@@ -1,0 +1,30 @@
+{
+    "question_id": "UVVFCjjDrqyaKa34tF54pS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the room with the door open? kitchen.\nQuestion: What is the room adjacent to the kitchen?\n(A) bathroom\n(B) entryway\n(C) living room\n(D) bedroom\nAnswer: The answer is ",
+    "main_question": "What is the room adjacent to the kitchen?\n(A) bathroom\n(B) entryway\n(C) living room\n(D) bedroom",
+    "sub_question": [
+        "What is the room with the door open?"
+    ],
+    "sub_answer": [
+        "kitchen"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.03979450464248657,
+    "confidence_lba": 0.991387,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.19780346751213074,
+        0.990021288394928,
+        0.9913865923881531,
+        0.11175628006458282,
+        0.11995960772037506
+    ]
+}

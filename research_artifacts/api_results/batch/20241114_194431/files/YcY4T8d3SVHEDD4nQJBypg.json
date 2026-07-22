@@ -1,0 +1,30 @@
+{
+    "question_id": "YcY4T8d3SVHEDD4nQJBypg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich ingredient on the pizza is uncooked? tomatoes.\nQuestion: Which ingredient on the pizza is uncooked?\n(A) tomato\n(B) cheese\n(C) spices\n(D) crust\nAnswer: The answer is ",
+    "main_question": "Which ingredient on the pizza is uncooked?\n(A) tomato\n(B) cheese\n(C) spices\n(D) crust",
+    "sub_question": [
+        "Which ingredient on the pizza is uncooked?"
+    ],
+    "sub_answer": [
+        "tomatoes"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.06715177744626999,
+    "confidence_lba": 0.987042,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.16263894736766815,
+        0.9839701652526855,
+        0.9660595655441284,
+        0.5193820595741272,
+        0.9870417714118958
+    ]
+}

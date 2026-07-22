@@ -1,0 +1,30 @@
+{
+    "question_id": "Z2wV882FxEjxwqFcbMRM9K",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat can be towed to the shore? boats.\nQuestion: What common functional element is missing from the boats on the scaffolding?\n(A) sleeping quarters\n(B) anchors\n(C) sails\n(D) engine room\nAnswer: The answer is ",
+    "main_question": "What common functional element is missing from the boats on the scaffolding?\n(A) sleeping quarters\n(B) anchors\n(C) sails\n(D) engine room",
+    "sub_question": [
+        "What can be towed to the shore?"
+    ],
+    "sub_answer": [
+        "boats"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.15093226730823517,
+    "confidence_lba": 0.983384,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.03445030376315117,
+        0.9627125859260559,
+        0.983384370803833,
+        0.9768630862236023,
+        0.0576603002846241
+    ]
+}

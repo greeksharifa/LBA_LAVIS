@@ -1,0 +1,30 @@
+{
+    "question_id": "Qqu6VC6u393vD5MFN4nLKC",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the occasion the couple is celebrating? wedding.\nQuestion: The man and woman are celebrating their newly formed what?\n(A) cake\n(B) bond\n(C) friendship\n(D) break-up\nAnswer: The answer is ",
+    "main_question": "The man and woman are celebrating their newly formed what?\n(A) cake\n(B) bond\n(C) friendship\n(D) break-up",
+    "sub_question": [
+        "What is the occasion the couple is celebrating?"
+    ],
+    "sub_answer": [
+        "wedding"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.3449360430240631,
+    "confidence_lba": 0.507871,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B) bond",
+    "text_outputs_lba_list": [
+        "(B) bond",
+        "(B) bond",
+        "(B) bond",
+        "(B) bond",
+        "(B) bond"
+    ],
+    "confidences_lba_list": [
+        0.4423507750034332,
+        0.44472837448120117,
+        0.4432767629623413,
+        0.4634278118610382,
+        0.5078714489936829
+    ]
+}

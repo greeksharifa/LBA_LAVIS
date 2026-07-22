@@ -1,0 +1,30 @@
+{
+    "question_id": "PXXkdGKz45qtjq76Scf9Hj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is the burger place? where is the burger place?.\nQuestion: According to the graphic on the sign what kind of place is nearby?\n(A) zoo\n(B) hotel\n(C) airport\n(D) hospital\nAnswer: The answer is ",
+    "main_question": "According to the graphic on the sign what kind of place is nearby?\n(A) zoo\n(B) hotel\n(C) airport\n(D) hospital",
+    "sub_question": [
+        "Where is the burger place?"
+    ],
+    "sub_answer": [
+        "where is the burger place?"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.1760503351688385,
+    "confidence_lba": 0.114239,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.011078733019530773,
+        0.09248743951320648,
+        0.01672534830868244,
+        0.05110786482691765,
+        0.11423908919095993
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "9Fvp6un9Bh9va6z5nz9k74",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of the area? downtown.\nQuestion: What type of area is shown?\n(A) rural\n(B) medical\n(C) commercial\n(D) residential\nAnswer: The answer is ",
+    "main_question": "What type of area is shown?\n(A) rural\n(B) medical\n(C) commercial\n(D) residential",
+    "sub_question": [
+        "What is the name of the area?"
+    ],
+    "sub_answer": [
+        "downtown"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.2966964840888977,
+    "confidence_lba": 0.776224,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.2520851790904999,
+        0.186162069439888,
+        0.24474389851093292,
+        0.2395366132259369,
+        0.7762236595153809
+    ]
+}

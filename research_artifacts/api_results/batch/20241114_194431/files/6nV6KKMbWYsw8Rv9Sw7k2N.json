@@ -1,0 +1,30 @@
+{
+    "question_id": "6nV6KKMbWYsw8Rv9Sw7k2N",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man dressed up as? a pharaoh.\nQuestion: Who is the woman dressed up as?\n(A) snow white\n(B) xena\n(C) maleficent\n(D) cinderella\nAnswer: The answer is ",
+    "main_question": "Who is the woman dressed up as?\n(A) snow white\n(B) xena\n(C) maleficent\n(D) cinderella",
+    "sub_question": [
+        "What is the man dressed up as?"
+    ],
+    "sub_answer": [
+        "a pharaoh"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5051084160804749,
+    "confidence_lba": 0.303329,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.030036089941859245,
+        0.13995590806007385,
+        0.08525096625089645,
+        0.303329199552536,
+        0.1166374608874321
+    ]
+}

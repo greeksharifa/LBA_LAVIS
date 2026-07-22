@@ -1,0 +1,30 @@
+{
+    "question_id": "AXvcbZSCWScQ9hb4hjB4si",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the super hero? Superman.\nQuestion: What super hero is the cake based off?\n(A) spiderman\n(B) batman\n(C) iron man\n(D) superman\nAnswer: The answer is ",
+    "main_question": "What super hero is the cake based off?\n(A) spiderman\n(B) batman\n(C) iron man\n(D) superman",
+    "sub_question": [
+        "What is the super hero?"
+    ],
+    "sub_answer": [
+        "Superman"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.04676542431116104,
+    "confidence_lba": 0.988167,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9808963537216187,
+        0.9881669878959656,
+        0.1850743293762207,
+        0.9842572212219238,
+        0.9860799312591553
+    ]
+}

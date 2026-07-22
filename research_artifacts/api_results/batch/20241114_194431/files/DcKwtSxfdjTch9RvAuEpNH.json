@@ -1,0 +1,30 @@
+{
+    "question_id": "DcKwtSxfdjTch9RvAuEpNH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of buildings are located in the area? residential.\nQuestion: What type of buildings are located here?\n(A) residential\n(B) high rises\n(C) tiny homes\n(D) commercial\nAnswer: The answer is ",
+    "main_question": "What type of buildings are located here?\n(A) residential\n(B) high rises\n(C) tiny homes\n(D) commercial",
+    "sub_question": [
+        "What type of buildings are located in the area?"
+    ],
+    "sub_answer": [
+        "residential"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.38961532711982727,
+    "confidence_lba": 0.959008,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.948235034942627,
+        0.9496952891349792,
+        0.3749934136867523,
+        0.951574981212616,
+        0.9590084552764893
+    ]
+}

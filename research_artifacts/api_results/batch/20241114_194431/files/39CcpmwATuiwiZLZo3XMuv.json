@@ -1,0 +1,30 @@
+{
+    "question_id": "39CcpmwATuiwiZLZo3XMuv",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat direction is the cat looking in? right.\nQuestion: The cat is looking in what direction?\n(A) left\n(B) right\n(C) down\n(D) up\nAnswer: The answer is ",
+    "main_question": "The cat is looking in what direction?\n(A) left\n(B) right\n(C) down\n(D) up",
+    "sub_question": [
+        "What direction is the cat looking in?"
+    ],
+    "sub_answer": [
+        "right"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.11673898249864578,
+    "confidence_lba": 0.724715,
+    "text_output_base": "(D)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(C)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.09770350903272629,
+        0.3048849105834961,
+        0.21367816627025604,
+        0.6902401447296143,
+        0.724714994430542
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "FQuJEPNnrznkjkvyN4UbUR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the truck not in the street? it is parked.\nQuestion: What police force does the police car behind the truck belong to probably?\n(A) detroit\n(B) new york\n(C) baltimore\n(D) washington dc\nAnswer: The answer is ",
+    "main_question": "What police force does the police car behind the truck belong to probably?\n(A) detroit\n(B) new york\n(C) baltimore\n(D) washington dc",
+    "sub_question": [
+        "Why is the truck not in the street?"
+    ],
+    "sub_answer": [
+        "it is parked"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.09513360261917114,
+    "confidence_lba": 0.133211,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.07584905624389648,
+        0.13321106135845184,
+        0.06788087636232376,
+        0.039019376039505005,
+        0.09760890156030655
+    ]
+}

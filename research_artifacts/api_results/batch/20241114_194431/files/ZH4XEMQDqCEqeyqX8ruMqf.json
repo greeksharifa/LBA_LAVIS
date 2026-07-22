@@ -1,0 +1,30 @@
+{
+    "question_id": "ZH4XEMQDqCEqeyqX8ruMqf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many bears are there in total? three.\nQuestion: What are the 3 Bears doing?\n(A) tea party\n(B) having lunch\n(C) none\n(D) gossip session\nAnswer: The answer is ",
+    "main_question": "What are the 3 Bears doing?\n(A) tea party\n(B) having lunch\n(C) none\n(D) gossip session",
+    "sub_question": [
+        "How many bears are there in total?"
+    ],
+    "sub_answer": [
+        "three"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.3775332272052765,
+    "confidence_lba": 0.833206,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6899629831314087,
+        0.8332056403160095,
+        0.7592259049415588,
+        0.07071296870708466,
+        0.24301205575466156
+    ]
+}

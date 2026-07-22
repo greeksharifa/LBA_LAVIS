@@ -1,0 +1,30 @@
+{
+    "question_id": "bmXjvk9NznKw8jyhjjZuqi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is this food most likely made out of? plastic.\nQuestion: What is this food most likely made out of?\n(A) plastic\n(B) grass\n(C) beans\n(D) lamb\nAnswer: The answer is ",
+    "main_question": "What is this food most likely made out of?\n(A) plastic\n(B) grass\n(C) beans\n(D) lamb",
+    "sub_question": [
+        "What is this food most likely made out of?"
+    ],
+    "sub_answer": [
+        "plastic"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.9912316203117371,
+    "confidence_lba": 0.991352,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.6427486538887024,
+        0.9889829158782959,
+        0.9846154451370239,
+        0.9850220084190369,
+        0.9913523197174072
+    ]
+}

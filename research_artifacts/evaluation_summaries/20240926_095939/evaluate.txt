@@ -1,0 +1,10 @@
+{
+    "max_tau2          ": "0.0371407",
+    "log_max_tau2      ": "4.75",
+    "acc_origin        ": "35.32%",
+    "max_acc_by_tau    ": "35.95%",
+    "max_arg_conf      ": "0.008529",
+    "conf_percentile   ": "29.20%",
+    "E_CR              ": "17.64%",
+    "E_IC              ": "36.12%"
+}

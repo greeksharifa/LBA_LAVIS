@@ -1,0 +1,30 @@
+{
+    "question_id": "YfFNHQEnioSZJwnStCSHar",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is there wire and posts near the elephants? to contain them.\nQuestion: Why is there wire and posts near the elephants?\n(A) to immobilize\n(B) to hunt\n(C) keeping captive\n(D) to trap\nAnswer: The answer is ",
+    "main_question": "Why is there wire and posts near the elephants?\n(A) to immobilize\n(B) to hunt\n(C) keeping captive\n(D) to trap",
+    "sub_question": [
+        "Why is there wire and posts near the elephants?"
+    ],
+    "sub_answer": [
+        "to contain them"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.3164108693599701,
+    "confidence_lba": 0.878962,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.3208044767379761,
+        0.6760945320129395,
+        0.8789618611335754,
+        0.7608420848846436,
+        0.706832766532898
+    ]
+}

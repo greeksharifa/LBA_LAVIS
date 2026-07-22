@@ -1,0 +1,30 @@
+{
+    "question_id": "LqCNzoPHep3XKouS3eUAk6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat object is the person being viewed through? window.\nQuestion: What is the person being viewed through?\n(A) window\n(B) flat screen\n(C) web cam\n(D) mirror\nAnswer: The answer is ",
+    "main_question": "What is the person being viewed through?\n(A) window\n(B) flat screen\n(C) web cam\n(D) mirror",
+    "sub_question": [
+        "What object is the person being viewed through?"
+    ],
+    "sub_answer": [
+        "window"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8052854537963867,
+    "confidence_lba": 0.96679,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.010670633986592293,
+        0.6689653396606445,
+        0.9667896628379822,
+        0.9247595071792603,
+        0.960450291633606
+    ]
+}

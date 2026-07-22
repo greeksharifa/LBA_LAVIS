@@ -1,0 +1,30 @@
+{
+    "question_id": "7KNmiZTYRQBHMJKJ9zkAjR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat limits forward movement? truck.\nQuestion: What limits forward navigation?\n(A) traffic warden\n(B) road accident\n(C) red light\n(D) bad weather\nAnswer: The answer is ",
+    "main_question": "What limits forward navigation?\n(A) traffic warden\n(B) road accident\n(C) red light\n(D) bad weather",
+    "sub_question": [
+        "What limits forward movement?"
+    ],
+    "sub_answer": [
+        "truck"
+    ],
+    "gt_ans": "red light",
+    "confidence_base": 0.3334862291812897,
+    "confidence_lba": 0.857398,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.3910296857357025,
+        0.04598453640937805,
+        0.8573976755142212,
+        0.031691960990428925,
+        0.7833379507064819
+    ]
+}

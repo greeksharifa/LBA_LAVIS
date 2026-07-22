@@ -1,0 +1,41 @@
+{
+    "question_id": "8PZriuWuwokXCriqVBZwSJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the train on? tracks.\nQuestion: What is the train riding on?\n(A) street\n(B) train tracks\n(C) clay\n(D) grass\nAnswer: The answer is ",
+    "main_question": "What is the train riding on?\n(A) street\n(B) train tracks\n(C) clay\n(D) grass",
+    "sub_question": [
+        "What is the train on?"
+    ],
+    "sub_answer": [
+        "tracks"
+    ],
+    "gt_ans": [
+        "track",
+        "train",
+        "tracks",
+        "tracks",
+        "train tracks",
+        "rails",
+        "train tracks",
+        "rails",
+        "tracks",
+        "rails"
+    ],
+    "confidence_base": 0.8506667017936707,
+    "confidence_lba": 0.94448,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9072719812393188,
+        0.9256231188774109,
+        0.8237088322639465,
+        0.9444801807403564,
+        0.9444801807403564
+    ]
+}

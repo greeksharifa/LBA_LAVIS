@@ -1,0 +1,30 @@
+{
+    "question_id": "YRPvUijZr6hbuQgiyVDRqE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the man in the red shirt look like? mccarthy.\nQuestion: What type of picture is on the screen?\n(A) single exposed\n(B) over exposed\n(C) triple exposed\n(D) double exposed\nAnswer: The answer is ",
+    "main_question": "What type of picture is on the screen?\n(A) single exposed\n(B) over exposed\n(C) triple exposed\n(D) double exposed",
+    "sub_question": [
+        "What does the man in the red shirt look like?"
+    ],
+    "sub_answer": [
+        "mccarthy"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.16748663783073425,
+    "confidence_lba": 0.321135,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.10813962668180466,
+        0.2652433216571808,
+        0.3211350739002228,
+        0.0770571157336235,
+        0.0770571157336235
+    ]
+}

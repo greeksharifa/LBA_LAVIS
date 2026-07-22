@@ -1,0 +1,30 @@
+{
+    "question_id": "Svs8fentMLQ8L3ApAisjeQ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the white bowl filled with? onions.\nQuestion: The reddish-brown food in the further bowl is what type of food?\n(A) dairy\n(B) legume\n(C) meat\n(D) vegetable\nAnswer: The answer is ",
+    "main_question": "The reddish-brown food in the further bowl is what type of food?\n(A) dairy\n(B) legume\n(C) meat\n(D) vegetable",
+    "sub_question": [
+        "What is the white bowl filled with?"
+    ],
+    "sub_answer": [
+        "onions"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8698582649230957,
+    "confidence_lba": 0.302169,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D) vegetable",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.1769392490386963,
+        0.19479723274707794,
+        0.24711249768733978,
+        0.30216917395591736,
+        0.12546785175800323
+    ]
+}

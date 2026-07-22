@@ -1,0 +1,30 @@
+{
+    "question_id": "Se8YypiBrjwXhwCmjyDjtK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat animal is the strongest? zebra.\nQuestion: Which animal is the weakest?\n(A) flamingo\n(B) wildebeest\n(C) zebra\n(D) none\nAnswer: The answer is ",
+    "main_question": "Which animal is the weakest?\n(A) flamingo\n(B) wildebeest\n(C) zebra\n(D) none",
+    "sub_question": [
+        "What animal is the strongest?"
+    ],
+    "sub_answer": [
+        "zebra"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.053464777767658234,
+    "confidence_lba": 0.071165,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.030453365296125412,
+        0.035655975341796875,
+        0.07116483896970749,
+        0.045037612318992615,
+        0.045037612318992615
+    ]
+}

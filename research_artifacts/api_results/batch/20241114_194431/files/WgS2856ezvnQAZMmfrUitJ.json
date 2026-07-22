@@ -1,0 +1,30 @@
+{
+    "question_id": "WgS2856ezvnQAZMmfrUitJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man stuck in? snow.\nQuestion: What has the man stuck his ice pick into?\n(A) sand\n(B) snow\n(C) water\n(D) mud\nAnswer: The answer is ",
+    "main_question": "What has the man stuck his ice pick into?\n(A) sand\n(B) snow\n(C) water\n(D) mud",
+    "sub_question": [
+        "What is the man stuck in?"
+    ],
+    "sub_answer": [
+        "snow"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.8409593105316162,
+    "confidence_lba": 0.977365,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.977364718914032,
+        0.8500797748565674,
+        0.8212575912475586,
+        0.7443830966949463,
+        0.9697482585906982
+    ]
+}

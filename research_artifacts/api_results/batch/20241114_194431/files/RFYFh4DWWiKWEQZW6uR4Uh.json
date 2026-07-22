@@ -1,0 +1,30 @@
+{
+    "question_id": "RFYFh4DWWiKWEQZW6uR4Uh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the profession of the man near the net? tennis player.\nQuestion: What is the profession of the man standing near the net?\n(A) judge\n(B) athlete\n(C) doctor\n(D) coach\nAnswer: The answer is ",
+    "main_question": "What is the profession of the man standing near the net?\n(A) judge\n(B) athlete\n(C) doctor\n(D) coach",
+    "sub_question": [
+        "What is the profession of the man near the net?"
+    ],
+    "sub_answer": [
+        "tennis player"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.2521129846572876,
+    "confidence_lba": 0.952693,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.5462655425071716,
+        0.9526927471160889,
+        0.06337296217679977,
+        0.032203853130340576,
+        0.9325270652770996
+    ]
+}

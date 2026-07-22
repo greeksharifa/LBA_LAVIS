@@ -1,0 +1,26 @@
+runner:
+  visualize: false
+  match1ok: false
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  batch_size: 64
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+datasets:
+  dataset_name: AOKVQA
+  num_data: 10
+  split: val
+  data_type: images
+  vqa_acc: true
+  ann_paths:
+    train:
+    - /data1/aokvqa/annotations/aokvqa_v1p0_train.json
+    val:
+    - /data1/aokvqa/annotations/aokvqa_v1p0_val.json
+  vis_root: /data1/coco/images/
+model:
+  cache_dir: ~/.cache/torch/hub/
+dataset_name: AOKVQA
+num_data: 10

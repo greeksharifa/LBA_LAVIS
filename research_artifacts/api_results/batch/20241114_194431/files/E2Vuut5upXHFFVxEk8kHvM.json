@@ -1,0 +1,30 @@
+{
+    "question_id": "E2Vuut5upXHFFVxEk8kHvM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are people putting on their computer screens? pictures.\nQuestion: The people on laptops seem most likely to be part of what group?\n(A) work\n(B) friends\n(C) class\n(D) competition\nAnswer: The answer is ",
+    "main_question": "The people on laptops seem most likely to be part of what group?\n(A) work\n(B) friends\n(C) class\n(D) competition",
+    "sub_question": [
+        "What are people putting on their computer screens?"
+    ],
+    "sub_answer": [
+        "pictures"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9076180458068848,
+    "confidence_lba": 0.988514,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8748540878295898,
+        0.7971939444541931,
+        0.9885135889053345,
+        0.9315164089202881,
+        0.877484917640686
+    ]
+}

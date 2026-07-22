@@ -1,0 +1,30 @@
+{
+    "question_id": "7jkWRB4pt8ZordP6wDAvbT",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the theme of the fake turkish wedding? turkish.\nQuestion: What is the facade that the couple is being interviewed in likely designed to be?\n(A) radio\n(B) camera\n(C) building\n(D) tv\nAnswer: The answer is ",
+    "main_question": "What is the facade that the couple is being interviewed in likely designed to be?\n(A) radio\n(B) camera\n(C) building\n(D) tv",
+    "sub_question": [
+        "What is the theme of the fake turkish wedding?"
+    ],
+    "sub_answer": [
+        "turkish"
+    ],
+    "gt_ans": "tv",
+    "confidence_base": 0.09850653260946274,
+    "confidence_lba": 0.170063,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.07952791452407837,
+        0.04641418531537056,
+        0.17006266117095947,
+        0.11259002238512039,
+        0.06347274035215378
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "CYVZymNaQk6gd79AKNefqh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat direction is the man looking at? north.\nQuestion: The man is looking in what direction?\n(A) up\n(B) behind\n(C) sideways\n(D) down\nAnswer: The answer is ",
+    "main_question": "The man is looking in what direction?\n(A) up\n(B) behind\n(C) sideways\n(D) down",
+    "sub_question": [
+        "What direction is the man looking at?"
+    ],
+    "sub_answer": [
+        "north"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.5218236446380615,
+    "confidence_lba": 0.956683,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.347780704498291,
+        0.21770045161247253,
+        0.12555113434791565,
+        0.956683337688446,
+        0.22147656977176666
+    ]
+}

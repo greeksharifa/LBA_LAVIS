@@ -1,0 +1,30 @@
+{
+    "question_id": "WZt7xFyvPGqx93xZmhCFb7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the sign say? welcome to city green.\nQuestion: What is the last word on the sign?\n(A) police\n(B) welcome\n(C) wood\n(D) green\nAnswer: The answer is ",
+    "main_question": "What is the last word on the sign?\n(A) police\n(B) welcome\n(C) wood\n(D) green",
+    "sub_question": [
+        "What does the sign say?"
+    ],
+    "sub_answer": [
+        "welcome to city green"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.14088964462280273,
+    "confidence_lba": 0.958207,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5602599382400513,
+        0.0263675469905138,
+        0.9582070112228394,
+        0.8879332542419434,
+        0.887933611869812
+    ]
+}

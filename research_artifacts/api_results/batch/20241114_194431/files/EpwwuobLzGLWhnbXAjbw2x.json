@@ -1,0 +1,30 @@
+{
+    "question_id": "EpwwuobLzGLWhnbXAjbw2x",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the sign say? stop.\nQuestion: What does the electric street sign say?\n(A) proceed\n(B) don't walk\n(C) yield\n(D) walk\nAnswer: The answer is ",
+    "main_question": "What does the electric street sign say?\n(A) proceed\n(B) don't walk\n(C) yield\n(D) walk",
+    "sub_question": [
+        "What does the sign say?"
+    ],
+    "sub_answer": [
+        "stop"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.10185126960277557,
+    "confidence_lba": 0.512224,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5122235417366028,
+        0.039054546505212784,
+        0.4386797547340393,
+        0.286088764667511,
+        0.3736816942691803
+    ]
+}

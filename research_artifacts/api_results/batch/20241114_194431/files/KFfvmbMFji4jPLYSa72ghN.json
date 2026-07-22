@@ -1,0 +1,30 @@
+{
+    "question_id": "KFfvmbMFji4jPLYSa72ghN",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat position of the batter is most likely in the game? catcher.\nQuestion: What level or league of baseball are the players most likely playing in?\n(A) minor\n(B) major\n(C) college\n(D) junior\nAnswer: The answer is ",
+    "main_question": "What level or league of baseball are the players most likely playing in?\n(A) minor\n(B) major\n(C) college\n(D) junior",
+    "sub_question": [
+        "What position of the batter is most likely in the game?"
+    ],
+    "sub_answer": [
+        "catcher"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.05810728669166565,
+    "confidence_lba": 0.030687,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.028301604092121124,
+        0.012344831600785255,
+        0.03068654239177704,
+        0.017885489389300346,
+        0.011201311834156513
+    ]
+}

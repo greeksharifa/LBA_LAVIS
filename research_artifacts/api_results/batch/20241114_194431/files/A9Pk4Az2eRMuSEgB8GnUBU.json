@@ -1,0 +1,30 @@
+{
+    "question_id": "A9Pk4Az2eRMuSEgB8GnUBU",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the bottom shelf? books.\nQuestion: The top shelf has many books of the same author of what genre?\n(A) romance\n(B) history\n(C) biography\n(D) thriller fiction\nAnswer: The answer is ",
+    "main_question": "The top shelf has many books of the same author of what genre?\n(A) romance\n(B) history\n(C) biography\n(D) thriller fiction",
+    "sub_question": [
+        "What is on the bottom shelf?"
+    ],
+    "sub_answer": [
+        "books"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.24856071174144745,
+    "confidence_lba": 0.165241,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.12232489883899689,
+        0.1299343854188919,
+        0.14669542014598846,
+        0.14025937020778656,
+        0.16524119675159454
+    ]
+}

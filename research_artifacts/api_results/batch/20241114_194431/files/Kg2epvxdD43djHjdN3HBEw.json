@@ -1,0 +1,30 @@
+{
+    "question_id": "Kg2epvxdD43djHjdN3HBEw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the trucks parked at? west market.\nQuestion: Where are the trucks headed to?\n(A) port\n(B) interstate\n(C) market\n(D) junkyard\nAnswer: The answer is ",
+    "main_question": "Where are the trucks headed to?\n(A) port\n(B) interstate\n(C) market\n(D) junkyard",
+    "sub_question": [
+        "What are the trucks parked at?"
+    ],
+    "sub_answer": [
+        "west market"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8433374166488647,
+    "confidence_lba": 0.962454,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9622289538383484,
+        0.9624537229537964,
+        0.942613959312439,
+        0.9442724585533142,
+        0.6806788444519043
+    ]
+}

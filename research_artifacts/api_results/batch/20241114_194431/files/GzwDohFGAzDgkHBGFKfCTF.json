@@ -1,0 +1,30 @@
+{
+    "question_id": "GzwDohFGAzDgkHBGFKfCTF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat part of the mouse is shown? the keyboard.\nQuestion: What part of the keyboard is shown?\n(A) letters\n(B) keypad\n(C) touchpad\n(D) trackpad\nAnswer: The answer is ",
+    "main_question": "What part of the keyboard is shown?\n(A) letters\n(B) keypad\n(C) touchpad\n(D) trackpad",
+    "sub_question": [
+        "What part of the mouse is shown?"
+    ],
+    "sub_answer": [
+        "the keyboard"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.1714644432067871,
+    "confidence_lba": 0.225198,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.04007794335484505,
+        0.0656849816441536,
+        0.1636020839214325,
+        0.032780036330223083,
+        0.22519756853580475
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "BuWxzrpFRXqSj8UjZannxM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the tiniest noise a baby makes? cry.\nQuestion: What indicates a baby is present?\n(A) mother\n(B) pacifier\n(C) crib\n(D) cake\nAnswer: The answer is ",
+    "main_question": "What indicates a baby is present?\n(A) mother\n(B) pacifier\n(C) crib\n(D) cake",
+    "sub_question": [
+        "What is the tiniest noise a baby makes?"
+    ],
+    "sub_answer": [
+        "cry"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.07932286709547043,
+    "confidence_lba": 0.075967,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.017118003219366074,
+        0.016489161178469658,
+        0.07596731930971146,
+        0.006103332620114088,
+        0.06828225404024124
+    ]
+}

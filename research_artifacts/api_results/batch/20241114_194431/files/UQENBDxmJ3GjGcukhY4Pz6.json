@@ -1,0 +1,30 @@
+{
+    "question_id": "UQENBDxmJ3GjGcukhY4Pz6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of blanket is this? blanket.\nQuestion: What animal corresponds to the sound written on the dog's blanket?\n(A) cat\n(B) monkey\n(C) bird\n(D) dog\nAnswer: The answer is ",
+    "main_question": "What animal corresponds to the sound written on the dog's blanket?\n(A) cat\n(B) monkey\n(C) bird\n(D) dog",
+    "sub_question": [
+        "What kind of blanket is this?"
+    ],
+    "sub_answer": [
+        "blanket"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7074496150016785,
+    "confidence_lba": 0.97912,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9573672413825989,
+        0.6893542408943176,
+        0.9791200757026672,
+        0.762643575668335,
+        0.4938814640045166
+    ]
+}

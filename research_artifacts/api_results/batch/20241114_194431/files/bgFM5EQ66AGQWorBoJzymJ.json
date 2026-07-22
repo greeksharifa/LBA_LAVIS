@@ -1,0 +1,30 @@
+{
+    "question_id": "bgFM5EQ66AGQWorBoJzymJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many markers are on the table? three.\nQuestion: How many markers are on the tray behind the man?\n(A) one\n(B) three\n(C) two\n(D) five\nAnswer: The answer is ",
+    "main_question": "How many markers are on the tray behind the man?\n(A) one\n(B) three\n(C) two\n(D) five",
+    "sub_question": [
+        "How many markers are on the table?"
+    ],
+    "sub_answer": [
+        "three"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.13036589324474335,
+    "confidence_lba": 0.924445,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.09861140698194504,
+        0.924445390701294,
+        0.13631995022296906,
+        0.058946602046489716,
+        0.16627024114131927
+    ]
+}

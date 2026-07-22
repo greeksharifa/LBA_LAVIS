@@ -1,0 +1,30 @@
+{
+    "question_id": "Uv8wsVRaJmguTknDUJBCXS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat can be seen in the water? ducks.\nQuestion: What type of birds can be seen in the water?\n(A) georgian hawks\n(B) canadian geese\n(C) ducks\n(D) alaskan swans\nAnswer: The answer is ",
+    "main_question": "What type of birds can be seen in the water?\n(A) georgian hawks\n(B) canadian geese\n(C) ducks\n(D) alaskan swans",
+    "sub_question": [
+        "What can be seen in the water?"
+    ],
+    "sub_answer": [
+        "ducks"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.893581211566925,
+    "confidence_lba": 0.9868,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8312463164329529,
+        0.9079020023345947,
+        0.9061831831932068,
+        0.9849515557289124,
+        0.9867995977401733
+    ]
+}

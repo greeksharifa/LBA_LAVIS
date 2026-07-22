@@ -1,0 +1,30 @@
+{
+    "question_id": "6bXnCzchqyDdBZcBGGNbmm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of the city? new york.\nQuestion: What type of city district is this?\n(A) government\n(B) warehouse\n(C) commercial\n(D) residential\nAnswer: The answer is ",
+    "main_question": "What type of city district is this?\n(A) government\n(B) warehouse\n(C) commercial\n(D) residential",
+    "sub_question": [
+        "What is the name of the city?"
+    ],
+    "sub_answer": [
+        "new york"
+    ],
+    "gt_ans": "commercial",
+    "confidence_base": 0.29956290125846863,
+    "confidence_lba": 0.916414,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.6478748321533203,
+        0.9164143800735474,
+        0.2521305978298187,
+        0.734898567199707,
+        0.47576361894607544
+    ]
+}

@@ -1,0 +1,63 @@
+runner:
+  visualize: false
+  sub_mode: subqa
+  select_high_confidence: true
+  examplar: default
+  threshold_lba: false
+  vision_supple: false
+  use_pre_generated_sub_q: true
+  use_pre_generated_sub_a: true
+  num_sub_qa_generate: 5
+  num_sub_qa_select: 1
+  num_frame_sampling: 3
+  recomposer_name: llava-hf/llava-v1.6-mistral-7b-hf
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /model/
+  device_map: cuda
+  qwen_prompt: false
+  max_new_tokens_subq: 100
+  max_new_tokens_suba: 100
+  max_new_tokens_maina: 64
+  batch_size: 9
+  seed: 44
+  output_dir: output/
+  print_freq: 20
+  use_vqa_tool: false
+  num_bin: 20
+  num_heatmap_row: 10
+  debug: false
+  sevila_cfg_pkl_path: SeViLA/cfg.pkl
+  flipped_vqa_cfg_pkl_path: flipped_vqa/cfg.pkl
+datasets:
+  dataset_name: MME
+  root_dir: /data/
+  num_data: 24
+  split: val
+  data_type: images
+  vqa_acc: false
+  open_ended: true
+  ann_paths:
+    val:
+    - MME/eval_tool/Your_Results/scene.txt
+    - MME/eval_tool/Your_Results/code_reasoning.txt
+    - MME/eval_tool/Your_Results/posters.txt
+    - MME/eval_tool/Your_Results/count.txt
+    - MME/eval_tool/Your_Results/artwork.txt
+    - MME/eval_tool/Your_Results/color.txt
+    - MME/eval_tool/Your_Results/landmark.txt
+    - MME/eval_tool/Your_Results/position.txt
+    - MME/eval_tool/Your_Results/existence.txt
+    - MME/eval_tool/Your_Results/numerical_calculation.txt
+    - MME/eval_tool/Your_Results/OCR.txt
+    - MME/eval_tool/Your_Results/celebrity.txt
+    - MME/eval_tool/Your_Results/commonsense_reasoning.txt
+    - MME/eval_tool/Your_Results/text_translation.txt
+    - /data/MME/sub_qas_val_hf_beam_and_greedy_N1_processed.json
+  vis_root: MME/MME_Benchmark/
+model:
+  cache_dir: /model/
+  tensor_parallel_size: 2
+  use_flash_attention_2: true
+dataset_name: MME
+num_data: 24

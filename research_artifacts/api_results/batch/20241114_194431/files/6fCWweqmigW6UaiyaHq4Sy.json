@@ -1,0 +1,30 @@
+{
+    "question_id": "6fCWweqmigW6UaiyaHq4Sy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat sport is being played in the photo? baseball.\nQuestion: What player is shown in the photo?\n(A) shortstop\n(B) catcher\n(C) position\n(D) first baseman\nAnswer: The answer is ",
+    "main_question": "What player is shown in the photo?\n(A) shortstop\n(B) catcher\n(C) position\n(D) first baseman",
+    "sub_question": [
+        "What sport is being played in the photo?"
+    ],
+    "sub_answer": [
+        "baseball"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.21505402028560638,
+    "confidence_lba": 0.674671,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.674670934677124,
+        0.04323428124189377,
+        0.5623803734779358,
+        0.008219356648623943,
+        0.09201329201459885
+    ]
+}

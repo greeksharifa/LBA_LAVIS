@@ -1,0 +1,30 @@
+{
+    "question_id": "8HQ9sy9TdK4XZffkkhmtRW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do the smaller elephants have intact? their ears.\nQuestion: What do the larger elephants still have intact?\n(A) tusks\n(B) pythons\n(C) horns\n(D) antlers\nAnswer: The answer is ",
+    "main_question": "What do the larger elephants still have intact?\n(A) tusks\n(B) pythons\n(C) horns\n(D) antlers",
+    "sub_question": [
+        "What do the smaller elephants have intact?"
+    ],
+    "sub_answer": [
+        "their ears"
+    ],
+    "gt_ans": "tusks",
+    "confidence_base": 0.9043443202972412,
+    "confidence_lba": 0.599595,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.347512423992157,
+        0.38894379138946533,
+        0.5995952486991882,
+        0.19410593807697296,
+        0.4246063232421875
+    ]
+}

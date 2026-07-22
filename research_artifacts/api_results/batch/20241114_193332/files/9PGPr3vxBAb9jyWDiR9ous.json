@@ -1,0 +1,41 @@
+{
+    "question_id": "9PGPr3vxBAb9jyWDiR9ous",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the manufacturer of this computer? apple.\nQuestion: Who is the manufacturer of this laptop?\n(A) apple\n(B) hp\n(C) dell\n(D) compaq\nAnswer: The answer is ",
+    "main_question": "Who is the manufacturer of this laptop?\n(A) apple\n(B) hp\n(C) dell\n(D) compaq",
+    "sub_question": [
+        "What is the manufacturer of this computer?"
+    ],
+    "sub_answer": [
+        "apple"
+    ],
+    "gt_ans": [
+        "hp",
+        "hp",
+        "hp",
+        "hp",
+        "hewlett packard",
+        "hp",
+        "hewlett packard",
+        "hp",
+        "hewitt packard",
+        "hp"
+    ],
+    "confidence_base": 0.020121756941080093,
+    "confidence_lba": 0.995018,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "unanswerable",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.019748836755752563,
+        0.9505618214607239,
+        0.9950177073478699,
+        0.04997996240854263,
+        0.986613392829895
+    ]
+}

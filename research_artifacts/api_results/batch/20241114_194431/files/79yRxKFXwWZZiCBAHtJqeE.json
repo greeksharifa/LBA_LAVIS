@@ -1,0 +1,30 @@
+{
+    "question_id": "79yRxKFXwWZZiCBAHtJqeE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow long was the item the woman is holding up manufactured? about a year.\nQuestion: Which century was the item the woman is holding up invented in?\n(A) twentieth\n(B) twenty first\n(C) tenth\n(D) eighteenth\nAnswer: The answer is ",
+    "main_question": "Which century was the item the woman is holding up invented in?\n(A) twentieth\n(B) twenty first\n(C) tenth\n(D) eighteenth",
+    "sub_question": [
+        "How long was the item the woman is holding up manufactured?"
+    ],
+    "sub_answer": [
+        "about a year"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.19656236469745636,
+    "confidence_lba": 0.851058,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D) eighteenth",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.017873696982860565,
+        0.008745196275413036,
+        0.40592244267463684,
+        0.851057767868042,
+        0.3406931161880493
+    ]
+}

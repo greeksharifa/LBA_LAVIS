@@ -1,0 +1,41 @@
+{
+    "question_id": "2sUggWn8qBk97E38wKpjN5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat period of the day is this photo? morning.\nQuestion: What period of the day does this photo reflect?\n(A) noon\n(B) morning\n(C) dawn\n(D) afternoon\nAnswer: The answer is ",
+    "main_question": "What period of the day does this photo reflect?\n(A) noon\n(B) morning\n(C) dawn\n(D) afternoon",
+    "sub_question": [
+        "What period of the day is this photo?"
+    ],
+    "sub_answer": [
+        "morning"
+    ],
+    "gt_ans": [
+        "afternoon",
+        "evening",
+        "evening",
+        "evening",
+        "daytime",
+        "evening",
+        "midday",
+        "afternoon",
+        "afternoon",
+        "noon"
+    ],
+    "confidence_base": 0.08198928833007812,
+    "confidence_lba": 0.906475,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.024573657661676407,
+        0.5752741694450378,
+        0.9064748883247375,
+        0.10001985728740692,
+        0.3816724419593811
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "LGdv7ZFDA5bxdGaYw5XSLZ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color are the zebra's stripes? black and white.\nQuestion: What are the zebra's stripes for?\n(A) sight\n(B) fashion\n(C) camouflage\n(D) thermoregulation\nAnswer: The answer is ",
+    "main_question": "What are the zebra's stripes for?\n(A) sight\n(B) fashion\n(C) camouflage\n(D) thermoregulation",
+    "sub_question": [
+        "What color are the zebra's stripes?"
+    ],
+    "sub_answer": [
+        "black and white"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.11039774864912033,
+    "confidence_lba": 0.937397,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.05832824483513832,
+        0.4523673951625824,
+        0.9373972415924072,
+        0.06584800034761429,
+        0.14417511224746704
+    ]
+}

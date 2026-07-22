@@ -1,0 +1,30 @@
+{
+    "question_id": "adJ3Kj52nGJVwytjWDJjCA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the reason that the person in orange has their arms out? to catch a frisbee.\nQuestion: Why does the person in orange have their arms out?\n(A) measure\n(B) break fall\n(C) reach\n(D) balance\nAnswer: The answer is ",
+    "main_question": "Why does the person in orange have their arms out?\n(A) measure\n(B) break fall\n(C) reach\n(D) balance",
+    "sub_question": [
+        "What is the reason that the person in orange has their arms out?"
+    ],
+    "sub_answer": [
+        "to catch a frisbee"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.3087046146392822,
+    "confidence_lba": 0.487418,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.07621361315250397,
+        0.08410883694887161,
+        0.48741796612739563,
+        0.05372627452015877,
+        0.44705072045326233
+    ]
+}

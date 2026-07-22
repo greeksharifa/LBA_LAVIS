@@ -1,0 +1,41 @@
+{
+    "question_id": "CZgeF3Cuso4bf9DbbmxZan",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWoman with a dress? in bed.\nQuestion: This person in this picture is likely to be a?\n(A) woman\n(B) little boy\n(C) man\n(D) little girl\nAnswer: The answer is ",
+    "main_question": "This person in this picture is likely to be a?\n(A) woman\n(B) little boy\n(C) man\n(D) little girl",
+    "sub_question": [
+        "Woman with a dress?"
+    ],
+    "sub_answer": [
+        "in bed"
+    ],
+    "gt_ans": [
+        "crossdresser",
+        "cross dresser",
+        "sex worker",
+        "man",
+        "sex worker",
+        "drag queen",
+        "male",
+        "transvestite",
+        "crossdresser",
+        "escort"
+    ],
+    "confidence_base": 0.9488053321838379,
+    "confidence_lba": 0.95726,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5334935784339905,
+        0.8217147588729858,
+        0.9572603702545166,
+        0.8292090892791748,
+        0.9272984266281128
+    ]
+}

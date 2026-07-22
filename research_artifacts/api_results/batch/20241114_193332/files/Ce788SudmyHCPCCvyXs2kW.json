@@ -1,0 +1,41 @@
+{
+    "question_id": "Ce788SudmyHCPCCvyXs2kW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat city are they in? japan.\nQuestion: What city is this location?\n(A) taipei\n(B) osaka\n(C) gdansk\n(D) shanghai\nAnswer: The answer is ",
+    "main_question": "What city is this location?\n(A) taipei\n(B) osaka\n(C) gdansk\n(D) shanghai",
+    "sub_question": [
+        "What city are they in?"
+    ],
+    "sub_answer": [
+        "japan"
+    ],
+    "gt_ans": [
+        "tokyo",
+        "shanghai",
+        "town",
+        "hong kong",
+        "chinatown",
+        "osaka",
+        "samba",
+        "samba",
+        "samba",
+        "not clear"
+    ],
+    "confidence_base": 0.2169172763824463,
+    "confidence_lba": 0.927291,
+    "text_output_base": "(D)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.055838972330093384,
+        0.9272910356521606,
+        0.9264014363288879,
+        0.9235942959785461,
+        0.8826830387115479
+    ]
+}

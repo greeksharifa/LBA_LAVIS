@@ -1,0 +1,30 @@
+{
+    "question_id": "ZVKndGxjdDtnrmsRUfRPxX",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the brown cow eating? grass.\nQuestion: What type of cow is the brown one?\n(A) angus\n(B) red poll\n(C) hereford\n(D) english longhorn\nAnswer: The answer is ",
+    "main_question": "What type of cow is the brown one?\n(A) angus\n(B) red poll\n(C) hereford\n(D) english longhorn",
+    "sub_question": [
+        "What is the brown cow eating?"
+    ],
+    "sub_answer": [
+        "grass"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.015179355628788471,
+    "confidence_lba": 0.021964,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(D)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.009517323225736618,
+        0.013505472801625729,
+        0.014936242252588272,
+        0.021964067593216896,
+        0.01331564411520958
+    ]
+}

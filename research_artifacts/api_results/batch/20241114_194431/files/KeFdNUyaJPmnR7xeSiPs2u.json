@@ -1,0 +1,30 @@
+{
+    "question_id": "KeFdNUyaJPmnR7xeSiPs2u",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy would the fridge have more than one shelf? to store more food.\nQuestion: What is the second shelf in the fridge used for?\n(A) condiments\n(B) drinks\n(C) produce\n(D) eggs\nAnswer: The answer is ",
+    "main_question": "What is the second shelf in the fridge used for?\n(A) condiments\n(B) drinks\n(C) produce\n(D) eggs",
+    "sub_question": [
+        "Why would the fridge have more than one shelf?"
+    ],
+    "sub_answer": [
+        "to store more food"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.05497531220316887,
+    "confidence_lba": 0.626428,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.005844044964760542,
+        0.6264277100563049,
+        0.07546637952327728,
+        0.10308299213647842,
+        0.027135387063026428
+    ]
+}

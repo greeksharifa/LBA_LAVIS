@@ -1,0 +1,30 @@
+{
+    "question_id": "ADSaLsXSNftfMMYWMKKqCS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nThe couch is located in the middle of the room? and there is a table.\nQuestion: The couch is located where?\n(A) under\n(B) nowhere\n(C) right\n(D) left\nAnswer: The answer is ",
+    "main_question": "The couch is located where?\n(A) under\n(B) nowhere\n(C) right\n(D) left",
+    "sub_question": [
+        "The couch is located in the middle of the room?"
+    ],
+    "sub_answer": [
+        "and there is a table"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.05162191390991211,
+    "confidence_lba": 0.090186,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.07153909653425217,
+        0.07322023063898087,
+        0.09018648415803909,
+        0.030735401436686516,
+        0.052828289568424225
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "E9JLQaGpyoZudcYaQCrzvA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the cat have its paw up against? table.\nQuestion: What does the cat have his paw up against?\n(A) book\n(B) mouse\n(C) toilet\n(D) desk\nAnswer: The answer is ",
+    "main_question": "What does the cat have his paw up against?\n(A) book\n(B) mouse\n(C) toilet\n(D) desk",
+    "sub_question": [
+        "What does the cat have its paw up against?"
+    ],
+    "sub_answer": [
+        "table"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9143456220626831,
+    "confidence_lba": 0.872338,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.10328534245491028,
+        0.5317210555076599,
+        0.8723383545875549,
+        0.05878232792019844,
+        0.058781009167432785
+    ]
+}

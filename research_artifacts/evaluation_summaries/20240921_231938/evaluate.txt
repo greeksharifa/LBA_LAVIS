@@ -1,0 +1,10 @@
+{
+    "max_conf_gap         ": "0.29600",
+    "acc_origin           ": "61.73%",
+    "Previous_work_acc    ": "62.14%",
+    "max_acc_by_tau       ": "62.34%",
+    "max_arg_confidence   ": "0.074134",
+    "confidence_percentile": "8.29%",
+    "E_CR                 ": "25.10%",
+    "E_IC                 ": "20.32%"
+}

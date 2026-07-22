@@ -1,0 +1,41 @@
+{
+    "question_id": "DC3qACi5rhmWU8XzM5Vdvy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich car holds the most people? bus.\nQuestion: Which car hold the most people?\n(A) black car\n(B) white van\n(C) blue car\n(D) silver car\nAnswer: The answer is ",
+    "main_question": "Which car hold the most people?\n(A) black car\n(B) white van\n(C) blue car\n(D) silver car",
+    "sub_question": [
+        "Which car holds the most people?"
+    ],
+    "sub_answer": [
+        "bus"
+    ],
+    "gt_ans": [
+        "white suv",
+        "bus",
+        "van",
+        "white van",
+        "minivan center",
+        "van",
+        "van",
+        "van",
+        "all same",
+        "van"
+    ],
+    "confidence_base": 0.282572865486145,
+    "confidence_lba": 0.295251,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.23531413078308105,
+        0.16386543214321136,
+        0.24692749977111816,
+        0.2952505648136139,
+        0.2537851333618164
+    ]
+}

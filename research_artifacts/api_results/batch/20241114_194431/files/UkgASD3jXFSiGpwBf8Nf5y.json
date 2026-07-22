@@ -1,0 +1,30 @@
+{
+    "question_id": "UkgASD3jXFSiGpwBf8Nf5y",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the line the horse is walking on? cars.\nQuestion: The line the horse is walking on separates what?\n(A) parking spaces\n(B) pedestrian walkway\n(C) street lanes\n(D) bike lane\nAnswer: The answer is ",
+    "main_question": "The line the horse is walking on separates what?\n(A) parking spaces\n(B) pedestrian walkway\n(C) street lanes\n(D) bike lane",
+    "sub_question": [
+        "What is on the line the horse is walking on?"
+    ],
+    "sub_answer": [
+        "cars"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8398134708404541,
+    "confidence_lba": 0.83196,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8133922815322876,
+        0.8319597840309143,
+        0.7826981544494629,
+        0.6493505239486694,
+        0.775739848613739
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "AJvjHZ5SF3hD6C3eYniXsc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man riding? horse.\nQuestion: What are the horses being used for?\n(A) rodeo\n(B) transportation\n(C) racing\n(D) farming\nAnswer: The answer is ",
+    "main_question": "What are the horses being used for?\n(A) rodeo\n(B) transportation\n(C) racing\n(D) farming",
+    "sub_question": [
+        "What is the man riding?"
+    ],
+    "sub_answer": [
+        "horse"
+    ],
+    "gt_ans": [
+        "farming",
+        "plowing",
+        "farming",
+        "farming",
+        "plowing",
+        "carriage pulling",
+        "plowing",
+        "farming",
+        "plow field",
+        "plowing"
+    ],
+    "confidence_base": 0.9044297337532043,
+    "confidence_lba": 0.607785,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6077853441238403,
+        0.20255498588085175,
+        0.17166413366794586,
+        0.4054688513278961,
+        0.36591166257858276
+    ]
+}

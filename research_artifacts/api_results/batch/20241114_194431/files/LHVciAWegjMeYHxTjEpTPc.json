@@ -1,0 +1,30 @@
+{
+    "question_id": "LHVciAWegjMeYHxTjEpTPc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the people standing on? log.\nQuestion: Where are the people standing?\n(A) city street\n(B) park\n(C) theatre\n(D) beach\nAnswer: The answer is ",
+    "main_question": "Where are the people standing?\n(A) city street\n(B) park\n(C) theatre\n(D) beach",
+    "sub_question": [
+        "What are the people standing on?"
+    ],
+    "sub_answer": [
+        "log"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.8846490979194641,
+    "confidence_lba": 0.971081,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9710814952850342,
+        0.9213460683822632,
+        0.6955991983413696,
+        0.8380253314971924,
+        0.8373796939849854
+    ]
+}

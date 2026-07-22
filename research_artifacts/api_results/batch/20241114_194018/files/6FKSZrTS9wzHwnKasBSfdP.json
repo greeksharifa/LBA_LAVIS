@@ -1,0 +1,30 @@
+{
+    "question_id": "6FKSZrTS9wzHwnKasBSfdP",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the purpose of the creamer? to make a dip.\nQuestion: What is the white cream used for with the other foods?\n(A) drinking\n(B) cooking\n(C) dipping\n(D) heating\nAnswer: The answer is ",
+    "main_question": "What is the white cream used for with the other foods?\n(A) drinking\n(B) cooking\n(C) dipping\n(D) heating",
+    "sub_question": [
+        "What is the purpose of the creamer?"
+    ],
+    "sub_answer": [
+        "to make a dip"
+    ],
+    "gt_ans": "dipping",
+    "confidence_base": 0.835564911365509,
+    "confidence_lba": 0.956423,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8953312039375305,
+        0.9406362175941467,
+        0.9564229846000671,
+        0.5981299877166748,
+        0.8585563898086548
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "92HRqF8nimMzat2iydhLAj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the person wearing a green shirt do? teaches the boy how to skateboard.\nQuestion: When it comes to the child what is he or she doing?\n(A) roller blading\n(B) kicking\n(C) karate\n(D) skateboarding\nAnswer: The answer is ",
+    "main_question": "When it comes to the child what is he or she doing?\n(A) roller blading\n(B) kicking\n(C) karate\n(D) skateboarding",
+    "sub_question": [
+        "What does the person wearing a green shirt do?"
+    ],
+    "sub_answer": [
+        "teaches the boy how to skateboard"
+    ],
+    "gt_ans": [
+        "practicing",
+        "learning balance",
+        "learning",
+        "riding",
+        "skating",
+        "skateboarding",
+        "riding",
+        "skateboarding",
+        "practicing skateboarding",
+        "skateboarding"
+    ],
+    "confidence_base": 0.985431969165802,
+    "confidence_lba": 0.985231,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9538472890853882,
+        0.9852309823036194,
+        0.9163158535957336,
+        0.9768999814987183,
+        0.9768999814987183
+    ]
+}

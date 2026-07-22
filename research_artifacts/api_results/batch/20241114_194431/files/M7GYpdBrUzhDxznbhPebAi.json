@@ -1,0 +1,30 @@
+{
+    "question_id": "M7GYpdBrUzhDxznbhPebAi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the name of the animal pictured in the picture? zebra.\nQuestion: What alcohol brand has a word that refers to the pattern of this animal?\n(A) red stripe\n(B) michelob ultra\n(C) blue hawaiian\n(D) red ale\nAnswer: The answer is ",
+    "main_question": "What alcohol brand has a word that refers to the pattern of this animal?\n(A) red stripe\n(B) michelob ultra\n(C) blue hawaiian\n(D) red ale",
+    "sub_question": [
+        "What is the name of the animal pictured in the picture?"
+    ],
+    "sub_answer": [
+        "zebra"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.015103423036634922,
+    "confidence_lba": 0.03477,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(C)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.013666762970387936,
+        0.012197588570415974,
+        0.008660354651510715,
+        0.011269145645201206,
+        0.03476953133940697
+    ]
+}

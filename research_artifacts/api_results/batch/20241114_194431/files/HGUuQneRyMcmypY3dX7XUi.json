@@ -1,0 +1,30 @@
+{
+    "question_id": "HGUuQneRyMcmypY3dX7XUi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat green fruits or vegetables are in a jar inside the refrigerator? tomatoes.\nQuestion: What green fruits or vegetables are in a jar inside the refrigerator?\n(A) limes\n(B) green beans\n(C) pickles\n(D) celery sticks\nAnswer: The answer is ",
+    "main_question": "What green fruits or vegetables are in a jar inside the refrigerator?\n(A) limes\n(B) green beans\n(C) pickles\n(D) celery sticks",
+    "sub_question": [
+        "What green fruits or vegetables are in a jar inside the refrigerator?"
+    ],
+    "sub_answer": [
+        "tomatoes"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.037715379148721695,
+    "confidence_lba": 0.037,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(B)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.023013323545455933,
+        0.036592502146959305,
+        0.035857390612363815,
+        0.037000373005867004,
+        0.01794237084686756
+    ]
+}

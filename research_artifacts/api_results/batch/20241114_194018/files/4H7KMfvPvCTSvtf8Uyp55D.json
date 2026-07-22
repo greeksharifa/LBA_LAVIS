@@ -1,0 +1,30 @@
+{
+    "question_id": "4H7KMfvPvCTSvtf8Uyp55D",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the man in the red shirt do with the orange container? he catches the ball.\nQuestion: What is the orange container on the left near the man in the red shirt used for?\n(A) training\n(B) keeping score\n(C) batting\n(D) storage\nAnswer: The answer is ",
+    "main_question": "What is the orange container on the left near the man in the red shirt used for?\n(A) training\n(B) keeping score\n(C) batting\n(D) storage",
+    "sub_question": [
+        "What does the man in the red shirt do with the orange container?"
+    ],
+    "sub_answer": [
+        "he catches the ball"
+    ],
+    "gt_ans": "storage",
+    "confidence_base": 0.23510245978832245,
+    "confidence_lba": 0.210759,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(D)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.05359097197651863,
+        0.21075889468193054,
+        0.045451562851667404,
+        0.06913434714078903,
+        0.024460580199956894
+    ]
+}

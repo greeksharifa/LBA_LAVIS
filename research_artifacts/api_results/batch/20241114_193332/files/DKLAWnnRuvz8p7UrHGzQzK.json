@@ -1,0 +1,41 @@
+{
+    "question_id": "DKLAWnnRuvz8p7UrHGzQzK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of business do the men own? airline.\nQuestion: Where do the men work?\n(A) bank\n(B) library\n(C) airport\n(D) restaurant\nAnswer: The answer is ",
+    "main_question": "Where do the men work?\n(A) bank\n(B) library\n(C) airport\n(D) restaurant",
+    "sub_question": [
+        "What kind of business do the men own?"
+    ],
+    "sub_answer": [
+        "airline"
+    ],
+    "gt_ans": [
+        "airport",
+        "airport",
+        "airport",
+        "airport baggage",
+        "airport",
+        "airport",
+        "airport baggage",
+        "airport",
+        "airport",
+        "airport"
+    ],
+    "confidence_base": 0.23042158782482147,
+    "confidence_lba": 0.704205,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7042050957679749,
+        0.43757641315460205,
+        0.468858540058136,
+        0.5642216205596924,
+        0.5642197728157043
+    ]
+}

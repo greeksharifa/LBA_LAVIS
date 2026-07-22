@@ -1,0 +1,30 @@
+{
+    "question_id": "Eyzb8SKxYzzJuegL3tkwga",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are towels generally made of? cotton.\nQuestion: What are towels generally made of?\n(A) linen\n(B) rayon\n(C) cotton\n(D) spandex\nAnswer: The answer is ",
+    "main_question": "What are towels generally made of?\n(A) linen\n(B) rayon\n(C) cotton\n(D) spandex",
+    "sub_question": [
+        "What are towels generally made of?"
+    ],
+    "sub_answer": [
+        "cotton"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8407737016677856,
+    "confidence_lba": 0.978776,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7447143793106079,
+        0.9747421741485596,
+        0.8165940642356873,
+        0.80919349193573,
+        0.9787760376930237
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "JUxJmYmJuhcFMBwKdHRTj9",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is a type of building? church.\nQuestion: The layout of buildings most resembles which period?\n(A) modern usa\n(B) historical european\n(C) japanese housing\n(D) chinese businesses\nAnswer: The answer is ",
+    "main_question": "The layout of buildings most resembles which period?\n(A) modern usa\n(B) historical european\n(C) japanese housing\n(D) chinese businesses",
+    "sub_question": [
+        "What is a type of building?"
+    ],
+    "sub_answer": [
+        "church"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.08547867089509964,
+    "confidence_lba": 0.809905,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B) historical european",
+        "(B)",
+        "(B) historical european",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6838570237159729,
+        0.2020527571439743,
+        0.8099048733711243,
+        0.1807260811328888,
+        0.4262978434562683
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "W5p2HmLoUaWjYqMkHyhK8Q",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat position in baseball is the catcher diving for a catch? catcher.\nQuestion: What position in baseball is the player diving for a catch?\n(A) center field\n(B) left field\n(C) shortstop\n(D) right field\nAnswer: The answer is ",
+    "main_question": "What position in baseball is the player diving for a catch?\n(A) center field\n(B) left field\n(C) shortstop\n(D) right field",
+    "sub_question": [
+        "What position in baseball is the catcher diving for a catch?"
+    ],
+    "sub_answer": [
+        "catcher"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.398825079202652,
+    "confidence_lba": 0.261801,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.12307628244161606,
+        0.1609378606081009,
+        0.26180124282836914,
+        0.1836259961128235,
+        0.1367366462945938
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "max_conf_gap         ": "0.00000",
+    "acc_origin           ": "55.00%",
+    "Previous_work_acc    ": "55.00%",
+    "max_acc_by_tau       ": "60.00%",
+    "max_arg_confidence   ": "0.080608",
+    "confidence_percentile": "45.00%",
+    "E_CR                 ": "33.33%",
+    "E_IC                 ": "27.27%",
+    "min_match            ": "55.00%",
+    "T                    ": "60.00% =    3.0 /     5",
+    "C                    ": "50.00% =    6.0 /    12"
+}

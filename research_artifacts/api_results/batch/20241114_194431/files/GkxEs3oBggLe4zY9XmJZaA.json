@@ -1,0 +1,30 @@
+{
+    "question_id": "GkxEs3oBggLe4zY9XmJZaA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow old is the man in the photo? no idea.\nQuestion: What hour is shown on the clock?\n(A) eleven\n(B) nine\n(C) eight\n(D) ten\nAnswer: The answer is ",
+    "main_question": "What hour is shown on the clock?\n(A) eleven\n(B) nine\n(C) eight\n(D) ten",
+    "sub_question": [
+        "How old is the man in the photo?"
+    ],
+    "sub_answer": [
+        "no idea"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.029062926769256592,
+    "confidence_lba": 0.03817,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.038169603794813156,
+        0.025907456874847412,
+        0.019453264772892,
+        0.03126922994852066,
+        0.013581541366875172
+    ]
+}

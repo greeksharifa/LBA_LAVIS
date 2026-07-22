@@ -1,0 +1,41 @@
+{
+    "question_id": "4cdYbJFFeKXJr6LbKgcxTa",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of environment are they in? urban.\nQuestion: In what type of environment are they most likely riding skateboards?\n(A) beach\n(B) city\n(C) rural\n(D) suburban\nAnswer: The answer is ",
+    "main_question": "In what type of environment are they most likely riding skateboards?\n(A) beach\n(B) city\n(C) rural\n(D) suburban",
+    "sub_question": [
+        "What type of environment are they in?"
+    ],
+    "sub_answer": [
+        "urban"
+    ],
+    "gt_ans": [
+        "urban",
+        "playing",
+        "skate park",
+        "urban",
+        "warm tropical",
+        "urban",
+        "tropical",
+        "business",
+        "city",
+        "urban areas"
+    ],
+    "confidence_base": 0.8401708602905273,
+    "confidence_lba": 0.809127,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B) city",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.47284117341041565,
+        0.8091265559196472,
+        0.21109135448932648,
+        0.7400641441345215,
+        0.07830239832401276
+    ]
+}

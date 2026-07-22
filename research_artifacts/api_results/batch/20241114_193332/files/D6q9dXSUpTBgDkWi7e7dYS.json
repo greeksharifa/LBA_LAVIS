@@ -1,0 +1,41 @@
+{
+    "question_id": "D6q9dXSUpTBgDkWi7e7dYS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat can be made with this fruit and ice cream? banana split.\nQuestion: What treat can be made with this fruit and ice cream?\n(A) cone\n(B) banana split\n(C) macaroon\n(D) macadamia cookies\nAnswer: The answer is ",
+    "main_question": "What treat can be made with this fruit and ice cream?\n(A) cone\n(B) banana split\n(C) macaroon\n(D) macadamia cookies",
+    "sub_question": [
+        "What can be made with this fruit and ice cream?"
+    ],
+    "sub_answer": [
+        "banana split"
+    ],
+    "gt_ans": [
+        "banana split",
+        "banana split",
+        "banana split",
+        "sundae",
+        "banana split",
+        "banana split",
+        "banana slit",
+        "banana split",
+        "ice cream",
+        "banana split"
+    ],
+    "confidence_base": 0.902429461479187,
+    "confidence_lba": 0.957995,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8119643330574036,
+        0.8801177740097046,
+        0.9037308096885681,
+        0.7878314256668091,
+        0.9579951763153076
+    ]
+}

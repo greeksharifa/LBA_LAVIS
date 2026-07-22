@@ -1,0 +1,41 @@
+{
+    "question_id": "BpLgWvp3a7WEzrsmnpQBWT",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is needed to make the object spin? wind.\nQuestion: What is needed to control the large object?\n(A) computer\n(B) battery\n(C) string\n(D) remote\nAnswer: The answer is ",
+    "main_question": "What is needed to control the large object?\n(A) computer\n(B) battery\n(C) string\n(D) remote",
+    "sub_question": [
+        "What is needed to make the object spin?"
+    ],
+    "sub_answer": [
+        "wind"
+    ],
+    "gt_ans": [
+        "tail",
+        "string",
+        "string",
+        "string",
+        "threat",
+        "wind",
+        "wind",
+        "camp",
+        "kite",
+        "string"
+    ],
+    "confidence_base": 0.599173367023468,
+    "confidence_lba": 0.952522,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.050861310213804245,
+        0.6260296106338501,
+        0.9525222778320312,
+        0.0851108729839325,
+        0.10420884937047958
+    ]
+}

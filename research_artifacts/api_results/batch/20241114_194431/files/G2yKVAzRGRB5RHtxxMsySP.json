@@ -1,0 +1,30 @@
+{
+    "question_id": "G2yKVAzRGRB5RHtxxMsySP",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the floor most likely made of? tile.\nQuestion: What is the most likely material of the floor?\n(A) terra cotta\n(B) marble\n(C) porcelain\n(D) vinyl\nAnswer: The answer is ",
+    "main_question": "What is the most likely material of the floor?\n(A) terra cotta\n(B) marble\n(C) porcelain\n(D) vinyl",
+    "sub_question": [
+        "What is the floor most likely made of?"
+    ],
+    "sub_answer": [
+        "tile"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.04781269282102585,
+    "confidence_lba": 0.359786,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(A)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.10077416151762009,
+        0.2338544726371765,
+        0.18749110400676727,
+        0.22147126495838165,
+        0.3597862422466278
+    ]
+}

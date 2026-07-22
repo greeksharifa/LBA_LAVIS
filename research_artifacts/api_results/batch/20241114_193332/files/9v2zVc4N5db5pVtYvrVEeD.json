@@ -1,0 +1,41 @@
+{
+    "question_id": "9v2zVc4N5db5pVtYvrVEeD",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow much does this person pay? one dollar.\nQuestion: What is placed inside this meter?\n(A) paper\n(B) paint\n(C) water\n(D) money\nAnswer: The answer is ",
+    "main_question": "What is placed inside this meter?\n(A) paper\n(B) paint\n(C) water\n(D) money",
+    "sub_question": [
+        "How much does this person pay?"
+    ],
+    "sub_answer": [
+        "one dollar"
+    ],
+    "gt_ans": [
+        "coins",
+        "change",
+        "change",
+        "money",
+        "change",
+        "coins",
+        "coins",
+        "money",
+        "coins",
+        "coins"
+    ],
+    "confidence_base": 0.9761615991592407,
+    "confidence_lba": 0.989832,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(A) paper",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9741023182868958,
+        0.9756186604499817,
+        0.9488031268119812,
+        0.11807440221309662,
+        0.9898320436477661
+    ]
+}

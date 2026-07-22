@@ -1,0 +1,8 @@
+{
+    "acc_origin           ": "71.000%",
+    "max_acc_by_tau       ": "73.000%",
+    "max_arg_confidence   ": "0.161704",
+    "confidence_percentile": "59.000%",
+    "E_CR                 ": "24.14%",
+    "E_IC                 ": "9.86%"
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "Cr6fmmEARGDPSbQvpNN4xY",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many people are in this room? 2.\nQuestion: How many guests have checked into this room?\n(A) four\n(B) none\n(C) none\n(D) six\nAnswer: The answer is ",
+    "main_question": "How many guests have checked into this room?\n(A) four\n(B) none\n(C) none\n(D) six",
+    "sub_question": [
+        "How many people are in this room?"
+    ],
+    "sub_answer": [
+        "2"
+    ],
+    "gt_ans": [
+        "zero",
+        "zero",
+        "one",
+        "unknown",
+        "none",
+        "indeterminate",
+        "one",
+        "zero",
+        "one",
+        "one"
+    ],
+    "confidence_base": 0.07049877196550369,
+    "confidence_lba": 0.09824,
+    "text_output_base": "(A)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.03036690503358841,
+        0.09823962301015854,
+        0.010834677144885063,
+        0.021293019875884056,
+        0.02151460386812687
+    ]
+}

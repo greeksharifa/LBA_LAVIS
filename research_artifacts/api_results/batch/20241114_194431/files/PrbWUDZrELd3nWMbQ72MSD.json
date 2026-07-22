@@ -1,0 +1,30 @@
+{
+    "question_id": "PrbWUDZrELd3nWMbQ72MSD",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the mans lap? laptop.\nQuestion: What type of racket is next to the mans head?\n(A) racquetball\n(B) badminton\n(C) tennis\n(D) ping pong\nAnswer: The answer is ",
+    "main_question": "What type of racket is next to the mans head?\n(A) racquetball\n(B) badminton\n(C) tennis\n(D) ping pong",
+    "sub_question": [
+        "What is on the mans lap?"
+    ],
+    "sub_answer": [
+        "laptop"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.13419733941555023,
+    "confidence_lba": 0.899568,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8942959904670715,
+        0.5255255103111267,
+        0.8995681405067444,
+        0.8905674815177917,
+        0.08444590866565704
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "A7MATFYMiNxpWLN7ucoWmS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the area of the house? one room.\nQuestion: What area of the house is this in?\n(A) kitchen\n(B) bathroom\n(C) basement\n(D) bedroom\nAnswer: The answer is ",
+    "main_question": "What area of the house is this in?\n(A) kitchen\n(B) bathroom\n(C) basement\n(D) bedroom",
+    "sub_question": [
+        "What is the area of the house?"
+    ],
+    "sub_answer": [
+        "one room"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9223091006278992,
+    "confidence_lba": 0.966918,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(B)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9669176340103149,
+        0.7826797962188721,
+        0.9618570804595947,
+        0.05984025448560715,
+        0.5173332691192627
+    ]
+}

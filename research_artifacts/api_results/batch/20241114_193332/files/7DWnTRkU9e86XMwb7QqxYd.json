@@ -1,0 +1,41 @@
+{
+    "question_id": "7DWnTRkU9e86XMwb7QqxYd",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow do i prepare my meal? How do I prepare my meal?.\nQuestion: This meal was likely prepared using which method?\n(A) oven\n(B) crockpot\n(C) grill\n(D) stovetop\nAnswer: The answer is ",
+    "main_question": "This meal was likely prepared using which method?\n(A) oven\n(B) crockpot\n(C) grill\n(D) stovetop",
+    "sub_question": [
+        "How do i prepare my meal?"
+    ],
+    "sub_answer": [
+        "How do I prepare my meal?"
+    ],
+    "gt_ans": [
+        "grilling",
+        "grill",
+        "grilling",
+        "grilling",
+        "grill",
+        "grilling",
+        "grilling",
+        "grilled",
+        "grilling boiling",
+        "grilling"
+    ],
+    "confidence_base": 0.8181971311569214,
+    "confidence_lba": 0.670569,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.06906672567129135,
+        0.6705692410469055,
+        0.5755585432052612,
+        0.6214587092399597,
+        0.4242343306541443
+    ]
+}

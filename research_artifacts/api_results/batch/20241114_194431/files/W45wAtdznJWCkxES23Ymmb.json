@@ -1,0 +1,30 @@
+{
+    "question_id": "W45wAtdznJWCkxES23Ymmb",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the bottle with the white label on it? wine.\nQuestion: What is in the bottle with the wooden top?\n(A) hot sauce\n(B) ketchup\n(C) salt\n(D) sugar\nAnswer: The answer is ",
+    "main_question": "What is in the bottle with the wooden top?\n(A) hot sauce\n(B) ketchup\n(C) salt\n(D) sugar",
+    "sub_question": [
+        "What is in the bottle with the white label on it?"
+    ],
+    "sub_answer": [
+        "wine"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7241730690002441,
+    "confidence_lba": 0.923859,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.923858642578125,
+        0.6961357593536377,
+        0.03810203820466995,
+        0.36351802945137024,
+        0.6629384756088257
+    ]
+}

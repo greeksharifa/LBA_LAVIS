@@ -1,0 +1,30 @@
+{
+    "question_id": "8spFMseWd5TyYXt4LygCE5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the people doing? riding an elephant.\nQuestion: How many people have their arms around the woman?\n(A) four\n(B) one\n(C) five\n(D) three\nAnswer: The answer is ",
+    "main_question": "How many people have their arms around the woman?\n(A) four\n(B) one\n(C) five\n(D) three",
+    "sub_question": [
+        "What are the people doing?"
+    ],
+    "sub_answer": [
+        "riding an elephant"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.21335946023464203,
+    "confidence_lba": 0.646268,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.04216085374355316,
+        0.6462679505348206,
+        0.6333652138710022,
+        0.13972729444503784,
+        0.15787851810455322
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "6kpEuXnXz4ghWMLLBcRjmf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy would the round road sign be dangerous? it's hard to see.\nQuestion: What is prohibited near the round road sign with a red cross on a blue background?\n(A) parking\n(B) turning\n(C) speeding\n(D) waving\nAnswer: The answer is ",
+    "main_question": "What is prohibited near the round road sign with a red cross on a blue background?\n(A) parking\n(B) turning\n(C) speeding\n(D) waving",
+    "sub_question": [
+        "Why would the round road sign be dangerous?"
+    ],
+    "sub_answer": [
+        "it's hard to see"
+    ],
+    "gt_ans": "parking",
+    "confidence_base": 0.22599166631698608,
+    "confidence_lba": 0.994743,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.2889285981655121,
+        0.13341876864433289,
+        0.9947425127029419,
+        0.4756782054901123,
+        0.36192503571510315
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "CKoy38QkqTRSirL8yyeimY",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of food are the people eating? pizza.\nQuestion: What type of dinnerware do the people seem to be using?\n(A) porcelain\n(B) wooden\n(C) steel\n(D) disposable\nAnswer: The answer is ",
+    "main_question": "What type of dinnerware do the people seem to be using?\n(A) porcelain\n(B) wooden\n(C) steel\n(D) disposable",
+    "sub_question": [
+        "What type of food are the people eating?"
+    ],
+    "sub_answer": [
+        "pizza"
+    ],
+    "gt_ans": [
+        "plastic",
+        "disposable",
+        "plates",
+        "plastic",
+        "plastic",
+        "family wear",
+        "plastic",
+        "plastic picnicware",
+        "ceramic",
+        "plastic"
+    ],
+    "confidence_base": 0.8512619733810425,
+    "confidence_lba": 0.967837,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.8793101906776428,
+        0.12432841956615448,
+        0.14684726297855377,
+        0.9126959443092346,
+        0.9678370356559753
+    ]
+}

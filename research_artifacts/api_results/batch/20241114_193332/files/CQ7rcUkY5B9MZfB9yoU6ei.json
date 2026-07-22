@@ -1,0 +1,41 @@
+{
+    "question_id": "CQ7rcUkY5B9MZfB9yoU6ei",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow high is the railcar? 2.\nQuestion: This railcar is travelling at what position relative to the street-level?\n(A) at streer-level\n(B) elevated\n(C) underground\n(D) under water\nAnswer: The answer is ",
+    "main_question": "This railcar is travelling at what position relative to the street-level?\n(A) at streer-level\n(B) elevated\n(C) underground\n(D) under water",
+    "sub_question": [
+        "How high is the railcar?"
+    ],
+    "sub_answer": [
+        "2"
+    ],
+    "gt_ans": [
+        "elevated",
+        "south",
+        "straight",
+        "below",
+        "below",
+        "below",
+        "under",
+        "below",
+        "below",
+        "underground"
+    ],
+    "confidence_base": 0.6827576756477356,
+    "confidence_lba": 0.953485,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8590382933616638,
+        0.9534851312637329,
+        0.7664660811424255,
+        0.8791537880897522,
+        0.9134737849235535
+    ]
+}

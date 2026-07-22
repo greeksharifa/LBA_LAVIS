@@ -1,0 +1,30 @@
+{
+    "question_id": "22jbM6gDxdaMaunuzgrsBB",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the snog of the motorcyclist? flowers.\nQuestion: What is in the motorcyclist's mouth?\n(A) toothpick\n(B) food\n(C) popsicle stick\n(D) cigarette\nAnswer: The answer is ",
+    "main_question": "What is in the motorcyclist's mouth?\n(A) toothpick\n(B) food\n(C) popsicle stick\n(D) cigarette",
+    "sub_question": [
+        "What is in the snog of the motorcyclist?"
+    ],
+    "sub_answer": [
+        "flowers"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6406633257865906,
+    "confidence_lba": 0.98272,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9083502888679504,
+        0.8754127025604248,
+        0.917136549949646,
+        0.9827200174331665,
+        0.461130291223526
+    ]
+}

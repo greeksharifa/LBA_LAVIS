@@ -1,0 +1,30 @@
+{
+    "question_id": "CVVWeSyTpmWdozRWra6qbu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of region is this likely to be? southern.\nQuestion: What type of region is this likely?\n(A) farm\n(B) coastal\n(C) deserted\n(D) city\nAnswer: The answer is ",
+    "main_question": "What type of region is this likely?\n(A) farm\n(B) coastal\n(C) deserted\n(D) city",
+    "sub_question": [
+        "What kind of region is this likely to be?"
+    ],
+    "sub_answer": [
+        "southern"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.5919011831283569,
+    "confidence_lba": 0.91369,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(B)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.3476351201534271,
+        0.8653683066368103,
+        0.39945662021636963,
+        0.9136896133422852,
+        0.16722305119037628
+    ]
+}

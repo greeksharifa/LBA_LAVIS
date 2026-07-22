@@ -1,0 +1,30 @@
+{
+    "question_id": "CTrTbwL2BtnQqY9vjiEiFF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat might be drunk from these glasses? wine.\nQuestion: What might be drunk from this glasses?\n(A) coke\n(B) wine\n(C) juice\n(D) beer\nAnswer: The answer is ",
+    "main_question": "What might be drunk from this glasses?\n(A) coke\n(B) wine\n(C) juice\n(D) beer",
+    "sub_question": [
+        "What might be drunk from these glasses?"
+    ],
+    "sub_answer": [
+        "wine"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7663472294807434,
+    "confidence_lba": 0.974779,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9702697396278381,
+        0.9747785329818726,
+        0.9720197916030884,
+        0.9720197916030884,
+        0.9720197916030884
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "8qqTsLQFXdEDT9oeVgZekp",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the large circular shaped area? water hole.\nQuestion: What are some of the zebras standing in in the middle of the photo?\n(A) grass\n(B) water\n(C) mud\n(D) rocks\nAnswer: The answer is ",
+    "main_question": "What are some of the zebras standing in in the middle of the photo?\n(A) grass\n(B) water\n(C) mud\n(D) rocks",
+    "sub_question": [
+        "What is the large circular shaped area?"
+    ],
+    "sub_answer": [
+        "water hole"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7132550477981567,
+    "confidence_lba": 0.973975,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.32053110003471375,
+        0.9739749431610107,
+        0.7101681232452393,
+        0.9669463634490967,
+        0.8475594520568848
+    ]
+}

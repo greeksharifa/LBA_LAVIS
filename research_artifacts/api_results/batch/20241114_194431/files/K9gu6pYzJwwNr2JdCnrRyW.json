@@ -1,0 +1,30 @@
+{
+    "question_id": "K9gu6pYzJwwNr2JdCnrRyW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the black item called? rice.\nQuestion: What is the item with all of the visible black seeds called?\n(A) kiwi\n(B) honeydew\n(C) watermelon\n(D) apple\nAnswer: The answer is ",
+    "main_question": "What is the item with all of the visible black seeds called?\n(A) kiwi\n(B) honeydew\n(C) watermelon\n(D) apple",
+    "sub_question": [
+        "What is the black item called?"
+    ],
+    "sub_answer": [
+        "rice"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.38498157262802124,
+    "confidence_lba": 0.331302,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.3313016891479492,
+        0.14257988333702087,
+        0.23070599138736725,
+        0.17713992297649384,
+        0.06313078105449677
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "Bq4zFDne6edPRs7sBBMEad",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of fruit is used for decorating in china? oranges.\nQuestion: What kind of fruit is used for decorating?\n(A) mangoes\n(B) apples\n(C) bananas\n(D) oranges\nAnswer: The answer is ",
+    "main_question": "What kind of fruit is used for decorating?\n(A) mangoes\n(B) apples\n(C) bananas\n(D) oranges",
+    "sub_question": [
+        "What kind of fruit is used for decorating in china?"
+    ],
+    "sub_answer": [
+        "oranges"
+    ],
+    "gt_ans": [
+        "oranges",
+        "orange",
+        "orange",
+        "orange",
+        "oranges",
+        "oranges",
+        "orange",
+        "orange",
+        "orangemango",
+        "oranges"
+    ],
+    "confidence_base": 0.6939186453819275,
+    "confidence_lba": 0.951818,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7865562438964844,
+        0.9201527833938599,
+        0.6888105273246765,
+        0.9518182873725891,
+        0.9224854707717896
+    ]
+}

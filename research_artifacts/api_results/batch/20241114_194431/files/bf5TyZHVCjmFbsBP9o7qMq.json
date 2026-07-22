@@ -1,0 +1,30 @@
+{
+    "question_id": "bf5TyZHVCjmFbsBP9o7qMq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the shirt? black.\nQuestion: The clothing in this picture all includes what similarity?\n(A) all dresses\n(B) all suits\n(C) all costumes\n(D) same color\nAnswer: The answer is ",
+    "main_question": "The clothing in this picture all includes what similarity?\n(A) all dresses\n(B) all suits\n(C) all costumes\n(D) same color",
+    "sub_question": [
+        "What color is the shirt?"
+    ],
+    "sub_answer": [
+        "black"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.3189849853515625,
+    "confidence_lba": 0.959219,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.08758828788995743,
+        0.05054392293095589,
+        0.9090989232063293,
+        0.9592188596725464,
+        0.8914757370948792
+    ]
+}

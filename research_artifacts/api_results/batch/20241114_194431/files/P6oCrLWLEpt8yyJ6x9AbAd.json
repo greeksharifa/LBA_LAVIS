@@ -1,0 +1,30 @@
+{
+    "question_id": "P6oCrLWLEpt8yyJ6x9AbAd",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat city is this sign in which contains the heumarkt transit stop? amsterdam.\nQuestion: Which city is this sign in which contains the Heumarkt transit stop?\n(A) cologne germany\n(B) london\n(C) rome\n(D) vienna\nAnswer: The answer is ",
+    "main_question": "Which city is this sign in which contains the Heumarkt transit stop?\n(A) cologne germany\n(B) london\n(C) rome\n(D) vienna",
+    "sub_question": [
+        "What city is this sign in which contains the heumarkt transit stop?"
+    ],
+    "sub_answer": [
+        "amsterdam"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8562548756599426,
+    "confidence_lba": 0.917045,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.26084017753601074,
+        0.4995797276496887,
+        0.47358372807502747,
+        0.9170449376106262,
+        0.14480313658714294
+    ]
+}

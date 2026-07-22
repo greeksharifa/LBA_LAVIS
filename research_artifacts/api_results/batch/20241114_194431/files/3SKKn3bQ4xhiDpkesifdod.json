@@ -1,0 +1,30 @@
+{
+    "question_id": "3SKKn3bQ4xhiDpkesifdod",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country does the girl posses the device in her hand? canada.\nQuestion: The company producing the device in her hand is from what country?\n(A) usa\n(B) china\n(C) japan\n(D) spain\nAnswer: The answer is ",
+    "main_question": "The company producing the device in her hand is from what country?\n(A) usa\n(B) china\n(C) japan\n(D) spain",
+    "sub_question": [
+        "What country does the girl posses the device in her hand?"
+    ],
+    "sub_answer": [
+        "canada"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.38265812397003174,
+    "confidence_lba": 0.894576,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.22609028220176697,
+        0.2750890254974365,
+        0.1828586310148239,
+        0.894575834274292,
+        0.061817847192287445
+    ]
+}

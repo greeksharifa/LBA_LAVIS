@@ -1,0 +1,30 @@
+{
+    "question_id": "NaxFfMbXiDnFeK2TDQpBpL",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the main level of the ship nearest the camera? top.\nQuestion: What institution often performs the function represented by the word on the main level of the ship nearest the camera?\n(A) private enterprise\n(B) government\n(C) educational\n(D) commercial\nAnswer: The answer is ",
+    "main_question": "What institution often performs the function represented by the word on the main level of the ship nearest the camera?\n(A) private enterprise\n(B) government\n(C) educational\n(D) commercial",
+    "sub_question": [
+        "What is the main level of the ship nearest the camera?"
+    ],
+    "sub_answer": [
+        "top"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9045803546905518,
+    "confidence_lba": 0.972034,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8634418249130249,
+        0.9720339775085449,
+        0.8634026050567627,
+        0.9119565486907959,
+        0.6045897006988525
+    ]
+}

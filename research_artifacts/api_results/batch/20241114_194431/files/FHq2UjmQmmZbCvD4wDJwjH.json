@@ -1,0 +1,30 @@
+{
+    "question_id": "FHq2UjmQmmZbCvD4wDJwjH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of clothing is the woman in the picture wearing on her hands? gloves.\nQuestion: The piece of clothing the woman in the picture is wearing on her hands normally serves what purpose?\n(A) fashion\n(B) prevention\n(C) cure\n(D) protection\nAnswer: The answer is ",
+    "main_question": "The piece of clothing the woman in the picture is wearing on her hands normally serves what purpose?\n(A) fashion\n(B) prevention\n(C) cure\n(D) protection",
+    "sub_question": [
+        "What type of clothing is the woman in the picture wearing on her hands?"
+    ],
+    "sub_answer": [
+        "gloves"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.5793437957763672,
+    "confidence_lba": 0.950601,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9120216369628906,
+        0.9506014585494995,
+        0.8908530473709106,
+        0.9437109231948853,
+        0.9245867133140564
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MMgmqJzM4kBYppdQX5f3gL",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of mail service is used in the country? post office.\nQuestion: Which country uses this kind of mail service?\n(A) united states\n(B) kazakhstan\n(C) england\n(D) china\nAnswer: The answer is ",
+    "main_question": "Which country uses this kind of mail service?\n(A) united states\n(B) kazakhstan\n(C) england\n(D) china",
+    "sub_question": [
+        "What type of mail service is used in the country?"
+    ],
+    "sub_answer": [
+        "post office"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.891414999961853,
+    "confidence_lba": 0.955987,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9559869170188904,
+        0.5960848927497864,
+        0.6958566308021545,
+        0.9331575036048889,
+        0.6821833252906799
+    ]
+}

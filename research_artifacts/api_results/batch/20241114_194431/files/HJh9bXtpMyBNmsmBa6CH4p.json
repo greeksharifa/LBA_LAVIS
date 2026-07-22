@@ -1,0 +1,30 @@
+{
+    "question_id": "HJh9bXtpMyBNmsmBa6CH4p",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many rooms does the house have? three.\nQuestion: How many rooms/areas in the house are immediately visible in the photo?\n(A) three\n(B) four\n(C) one\n(D) two\nAnswer: The answer is ",
+    "main_question": "How many rooms/areas in the house are immediately visible in the photo?\n(A) three\n(B) four\n(C) one\n(D) two",
+    "sub_question": [
+        "How many rooms does the house have?"
+    ],
+    "sub_answer": [
+        "three"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.1740819364786148,
+    "confidence_lba": 0.566832,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.08061383664608002,
+        0.5668321251869202,
+        0.35824263095855713,
+        0.4721577763557434,
+        0.5208165645599365
+    ]
+}

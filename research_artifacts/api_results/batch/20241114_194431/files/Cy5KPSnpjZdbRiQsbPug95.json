@@ -1,0 +1,30 @@
+{
+    "question_id": "Cy5KPSnpjZdbRiQsbPug95",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat area is the horse currently located? barn.\nQuestion: Where is the horse currently located?\n(A) barn\n(B) farm\n(C) house\n(D) field\nAnswer: The answer is ",
+    "main_question": "Where is the horse currently located?\n(A) barn\n(B) farm\n(C) house\n(D) field",
+    "sub_question": [
+        "What area is the horse currently located?"
+    ],
+    "sub_answer": [
+        "barn"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8385106325149536,
+    "confidence_lba": 0.960699,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9463583827018738,
+        0.9460834860801697,
+        0.38605526089668274,
+        0.9606987237930298,
+        0.9591708183288574
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "QXpLwCmcjZXSBHQULTdAXu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is typically on top of a cake tier? icing.\nQuestion: What is typically on top of a cake?\n(A) chocolate\n(B) icing\n(C) candles\n(D) sprinkles\nAnswer: The answer is ",
+    "main_question": "What is typically on top of a cake?\n(A) chocolate\n(B) icing\n(C) candles\n(D) sprinkles",
+    "sub_question": [
+        "What is typically on top of a cake tier?"
+    ],
+    "sub_answer": [
+        "icing"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5395200252532959,
+    "confidence_lba": 0.968397,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.20601750910282135,
+        0.8286579847335815,
+        0.6733948588371277,
+        0.28424957394599915,
+        0.968396782875061
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "aAEJFGA3xJLXv4gMXqCd84",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man on the left wearing? a ski jacket.\nQuestion: Why is the man on the left wearing the goggles?\n(A) fashion\n(B) dress code\n(C) eye protection\n(D) cosplay\nAnswer: The answer is ",
+    "main_question": "Why is the man on the left wearing the goggles?\n(A) fashion\n(B) dress code\n(C) eye protection\n(D) cosplay",
+    "sub_question": [
+        "What is the man on the left wearing?"
+    ],
+    "sub_answer": [
+        "a ski jacket"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9261042475700378,
+    "confidence_lba": 0.960092,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9600918292999268,
+        0.7212039232254028,
+        0.917084813117981,
+        0.9471474289894104,
+        0.9435169100761414
+    ]
+}

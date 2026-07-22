@@ -1,0 +1,30 @@
+{
+    "question_id": "JTLLmy2W6V6VETwzhkgDPh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat can you see at the top of the picture? pizza.\nQuestion: How many people seem to be sitting down to eat?\n(A) three\n(B) two\n(C) one\n(D) four\nAnswer: The answer is ",
+    "main_question": "How many people seem to be sitting down to eat?\n(A) three\n(B) two\n(C) one\n(D) four",
+    "sub_question": [
+        "What can you see at the top of the picture?"
+    ],
+    "sub_answer": [
+        "pizza"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.23327898979187012,
+    "confidence_lba": 0.959665,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(C)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8962984085083008,
+        0.9596645832061768,
+        0.9405580163002014,
+        0.9233713150024414,
+        0.30687230825424194
+    ]
+}

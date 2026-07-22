@@ -1,0 +1,30 @@
+{
+    "question_id": "XogitwSQqMuD3ABqp25hgF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of parking is available? street.\nQuestion: What type of parking is available?\n(A) lot\n(B) parallel\n(C) diagonal\n(D) valet\nAnswer: The answer is ",
+    "main_question": "What type of parking is available?\n(A) lot\n(B) parallel\n(C) diagonal\n(D) valet",
+    "sub_question": [
+        "What kind of parking is available?"
+    ],
+    "sub_answer": [
+        "street"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.02735273167490959,
+    "confidence_lba": 0.162442,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(B)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.16244156658649445,
+        0.05873112380504608,
+        0.10257946699857712,
+        0.014550218358635902,
+        0.094294972717762
+    ]
+}

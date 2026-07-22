@@ -1,0 +1,30 @@
+{
+    "question_id": "DxR6agStFKhyFqTSYRUgPa",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is she at work? police officer.\nQuestion: How do we know this woman is at work?\n(A) signage\n(B) surroundings\n(C) helping customer\n(D) wearing uniform\nAnswer: The answer is ",
+    "main_question": "How do we know this woman is at work?\n(A) signage\n(B) surroundings\n(C) helping customer\n(D) wearing uniform",
+    "sub_question": [
+        "Why is she at work?"
+    ],
+    "sub_answer": [
+        "police officer"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9712716937065125,
+    "confidence_lba": 0.984017,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9218249320983887,
+        0.9381580352783203,
+        0.9804829359054565,
+        0.9101195931434631,
+        0.9840174317359924
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "RsfWYWW4vEUkb5XCQHUKTX",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the girl sitting on? a bench.\nQuestion: What are the girls sitting on?\n(A) dock\n(B) chairs\n(C) grass\n(D) boat\nAnswer: The answer is ",
+    "main_question": "What are the girls sitting on?\n(A) dock\n(B) chairs\n(C) grass\n(D) boat",
+    "sub_question": [
+        "What is the girl sitting on?"
+    ],
+    "sub_answer": [
+        "a bench"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.050622984766960144,
+    "confidence_lba": 0.977421,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(B)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.06302981078624725,
+        0.13290034234523773,
+        0.9774205088615417,
+        0.07387489825487137,
+        0.41443729400634766
+    ]
+}

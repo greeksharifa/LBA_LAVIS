@@ -1,0 +1,30 @@
+{
+    "question_id": "TCXSs2iG5qmduZYmRir2cK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of animal is the geese? duck.\nQuestion: What type of water are the geese floating in?\n(A) salt\n(B) still\n(C) brackish\n(D) fresh\nAnswer: The answer is ",
+    "main_question": "What type of water are the geese floating in?\n(A) salt\n(B) still\n(C) brackish\n(D) fresh",
+    "sub_question": [
+        "What type of animal is the geese?"
+    ],
+    "sub_answer": [
+        "duck"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.4648977220058441,
+    "confidence_lba": 0.960648,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9506402015686035,
+        0.9606481790542603,
+        0.8386896848678589,
+        0.7968617081642151,
+        0.8232405781745911
+    ]
+}

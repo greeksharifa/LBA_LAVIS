@@ -1,0 +1,30 @@
+{
+    "question_id": "2C8riXpRLX3CyM5jDz23m7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the white substance on top of the cupcakes? frosting.\nQuestion: What is the white substance on top of the cupcakes?\n(A) butter\n(B) mayo\n(C) ice cream\n(D) icing\nAnswer: The answer is ",
+    "main_question": "What is the white substance on top of the cupcakes?\n(A) butter\n(B) mayo\n(C) ice cream\n(D) icing",
+    "sub_question": [
+        "What is the white substance on top of the cupcakes?"
+    ],
+    "sub_answer": [
+        "frosting"
+    ],
+    "gt_ans": "icing",
+    "confidence_base": 0.9547929763793945,
+    "confidence_lba": 0.971397,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9713969826698303,
+        0.9713969826698303,
+        0.9713974595069885,
+        0.9713974595069885,
+        0.9713969826698303
+    ]
+}

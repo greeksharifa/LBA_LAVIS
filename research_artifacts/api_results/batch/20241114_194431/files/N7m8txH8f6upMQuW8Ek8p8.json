@@ -1,0 +1,30 @@
+{
+    "question_id": "N7m8txH8f6upMQuW8Ek8p8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the park bench empty? it is not being used.\nQuestion: What type of outer clothing does the person who last sat here like to wear?\n(A) hats\n(B) bras\n(C) belts\n(D) cowboy boots\nAnswer: The answer is ",
+    "main_question": "What type of outer clothing does the person who last sat here like to wear?\n(A) hats\n(B) bras\n(C) belts\n(D) cowboy boots",
+    "sub_question": [
+        "Why is the park bench empty?"
+    ],
+    "sub_answer": [
+        "it is not being used"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.9681639075279236,
+    "confidence_lba": 0.987933,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.24136918783187866,
+        0.979410707950592,
+        0.972019612789154,
+        0.9879333972930908,
+        0.9595814347267151
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "PSyBiDyNfASh3NPty6sGVq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the wedding ceremony for? a couple.\nQuestion: Why are the two holding hands in front of the people?\n(A) praying\n(B) to dance\n(C) getting married\n(D) to play\nAnswer: The answer is ",
+    "main_question": "Why are the two holding hands in front of the people?\n(A) praying\n(B) to dance\n(C) getting married\n(D) to play",
+    "sub_question": [
+        "What is the wedding ceremony for?"
+    ],
+    "sub_answer": [
+        "a couple"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.944368302822113,
+    "confidence_lba": 0.978759,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7300395965576172,
+        0.9787589907646179,
+        0.9770216941833496,
+        0.9190029501914978,
+        0.9515315294265747
+    ]
+}

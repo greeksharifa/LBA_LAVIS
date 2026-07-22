@@ -1,0 +1,41 @@
+{
+    "question_id": "3R6SnZ4MRGXXvao5ARVE8e",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy are there orange vehicles in the parking lot? they are waiting for planes.\nQuestion: What are the orange vehicles for?\n(A) police\n(B) shuttle\n(C) passengers\n(D) air traffic\nAnswer: The answer is ",
+    "main_question": "What are the orange vehicles for?\n(A) police\n(B) shuttle\n(C) passengers\n(D) air traffic",
+    "sub_question": [
+        "Why are there orange vehicles in the parking lot?"
+    ],
+    "sub_answer": [
+        "they are waiting for planes"
+    ],
+    "gt_ans": [
+        "air traffic",
+        "guide planes",
+        "pulling plane",
+        "safety vehicle",
+        "service airplanes",
+        "transport",
+        "maintenance",
+        "food delivery",
+        "luggage",
+        "maintenance"
+    ],
+    "confidence_base": 0.19777631759643555,
+    "confidence_lba": 0.829081,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.33393990993499756,
+        0.2554676830768585,
+        0.8290809988975525,
+        0.8065364360809326,
+        0.45113110542297363
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MdpQEymVqNWnxqPPxPXxvs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the last letter in the name on the license plate? c.\nQuestion: What is the last letter on the license plate?\n(A) l\n(B) z\n(C) j\n(D) c\nAnswer: The answer is ",
+    "main_question": "What is the last letter on the license plate?\n(A) l\n(B) z\n(C) j\n(D) c",
+    "sub_question": [
+        "What is the last letter in the name on the license plate?"
+    ],
+    "sub_answer": [
+        "c"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.05452468991279602,
+    "confidence_lba": 0.923792,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.013831283897161484,
+        0.017674891278147697,
+        0.01966126449406147,
+        0.902782142162323,
+        0.9237922430038452
+    ]
+}

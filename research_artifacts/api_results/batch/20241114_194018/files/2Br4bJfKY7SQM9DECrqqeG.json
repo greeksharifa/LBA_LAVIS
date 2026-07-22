@@ -1,0 +1,30 @@
+{
+    "question_id": "2Br4bJfKY7SQM9DECrqqeG",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is a reason the water is green? it is a pond.\nQuestion: What best describes the pool of water?\n(A) frozen\n(B) fresh\n(C) dirty\n(D) boiling\nAnswer: The answer is ",
+    "main_question": "What best describes the pool of water?\n(A) frozen\n(B) fresh\n(C) dirty\n(D) boiling",
+    "sub_question": [
+        "What is a reason the water is green?"
+    ],
+    "sub_answer": [
+        "it is a pond"
+    ],
+    "gt_ans": "dirty",
+    "confidence_base": 0.5690010786056519,
+    "confidence_lba": 0.913288,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8529750108718872,
+        0.8708024024963379,
+        0.9132877588272095,
+        0.8803779482841492,
+        0.8279672265052795
+    ]
+}

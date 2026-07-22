@@ -1,0 +1,30 @@
+{
+    "question_id": "WCss8XpjKYENCSuFCSKUz8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the sign that is red? fruit.\nQuestion: What color is the sign that is furthest to the right?\n(A) green\n(B) gray\n(C) orange\n(D) blue\nAnswer: The answer is ",
+    "main_question": "What color is the sign that is furthest to the right?\n(A) green\n(B) gray\n(C) orange\n(D) blue",
+    "sub_question": [
+        "What is the sign that is red?"
+    ],
+    "sub_answer": [
+        "fruit"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.03907431289553642,
+    "confidence_lba": 0.716922,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(A)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7169223427772522,
+        0.6799759864807129,
+        0.011087760329246521,
+        0.17744606733322144,
+        0.35566115379333496
+    ]
+}

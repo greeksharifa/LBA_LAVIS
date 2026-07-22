@@ -1,0 +1,30 @@
+{
+    "question_id": "EdDpJngBTrp6Bje83yQqDc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the weather like outside? sunny.\nQuestion: Why is the person using an umbrella?\n(A) rain\n(B) snow\n(C) sun\n(D) costume\nAnswer: The answer is ",
+    "main_question": "Why is the person using an umbrella?\n(A) rain\n(B) snow\n(C) sun\n(D) costume",
+    "sub_question": [
+        "What is the weather like outside?"
+    ],
+    "sub_answer": [
+        "sunny"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9066997170448303,
+    "confidence_lba": 0.988094,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9083937406539917,
+        0.9880944490432739,
+        0.9639567732810974,
+        0.5158358216285706,
+        0.23682716488838196
+    ]
+}

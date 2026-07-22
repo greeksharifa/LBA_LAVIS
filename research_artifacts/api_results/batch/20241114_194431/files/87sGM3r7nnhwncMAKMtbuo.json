@@ -1,0 +1,30 @@
+{
+    "question_id": "87sGM3r7nnhwncMAKMtbuo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat object should not get wet? an umbrella.\nQuestion: What object should never get wet?\n(A) laptop\n(B) computer monitor\n(C) tv\n(D) jacket\nAnswer: The answer is ",
+    "main_question": "What object should never get wet?\n(A) laptop\n(B) computer monitor\n(C) tv\n(D) jacket",
+    "sub_question": [
+        "What object should not get wet?"
+    ],
+    "sub_answer": [
+        "an umbrella"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.2866800129413605,
+    "confidence_lba": 0.490665,
+    "text_output_base": "(A)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.37401553988456726,
+        0.4906648099422455,
+        0.42576780915260315,
+        0.21896861493587494,
+        0.21897028386592865
+    ]
+}

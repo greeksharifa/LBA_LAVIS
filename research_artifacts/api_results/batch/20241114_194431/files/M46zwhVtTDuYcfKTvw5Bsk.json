@@ -1,0 +1,30 @@
+{
+    "question_id": "M46zwhVtTDuYcfKTvw5Bsk",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat would this fence contain? people.\nQuestion: What would this fence help to contain?\n(A) balls\n(B) animals\n(C) rocks\n(D) weeds\nAnswer: The answer is ",
+    "main_question": "What would this fence help to contain?\n(A) balls\n(B) animals\n(C) rocks\n(D) weeds",
+    "sub_question": [
+        "What would this fence contain?"
+    ],
+    "sub_answer": [
+        "people"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.6247727870941162,
+    "confidence_lba": 0.766423,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(A)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.18772108852863312,
+        0.23457065224647522,
+        0.766422688961029,
+        0.5202230215072632,
+        0.5202230215072632
+    ]
+}

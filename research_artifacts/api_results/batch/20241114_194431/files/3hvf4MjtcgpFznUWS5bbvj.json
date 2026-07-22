@@ -1,0 +1,30 @@
+{
+    "question_id": "3hvf4MjtcgpFznUWS5bbvj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of sport are they playing? baseball.\nQuestion: What sport are they mimicking?\n(A) baseball\n(B) lacrosse\n(C) cricket\n(D) basketball\nAnswer: The answer is ",
+    "main_question": "What sport are they mimicking?\n(A) baseball\n(B) lacrosse\n(C) cricket\n(D) basketball",
+    "sub_question": [
+        "What kind of sport are they playing?"
+    ],
+    "sub_answer": [
+        "baseball"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.041427042335271835,
+    "confidence_lba": 0.914686,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.08194956183433533,
+        0.8647368550300598,
+        0.7630373239517212,
+        0.8442979454994202,
+        0.9146857261657715
+    ]
+}

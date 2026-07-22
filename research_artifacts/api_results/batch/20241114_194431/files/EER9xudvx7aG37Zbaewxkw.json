@@ -1,0 +1,30 @@
+{
+    "question_id": "EER9xudvx7aG37Zbaewxkw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the car? beige.\nQuestion: What brand of soda is the can in the car?\n(A) sprite\n(B) coca cola\n(C) pepsi\n(D) mountain dew\nAnswer: The answer is ",
+    "main_question": "What brand of soda is the can in the car?\n(A) sprite\n(B) coca cola\n(C) pepsi\n(D) mountain dew",
+    "sub_question": [
+        "What color is the car?"
+    ],
+    "sub_answer": [
+        "beige"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.019245728850364685,
+    "confidence_lba": 0.967475,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.027773670852184296,
+        0.9674754738807678,
+        0.041404981166124344,
+        0.015471679158508778,
+        0.016179678961634636
+    ]
+}

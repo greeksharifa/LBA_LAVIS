@@ -1,0 +1,30 @@
+{
+    "question_id": "4t5DcDdFbw5x9PVRKis5AQ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow would you drink a cup of coffee? how would you drink a cup of coffee?.\nQuestion: What drink might these be good in?\n(A) beer\n(B) milkshake\n(C) gin\n(D) coffee\nAnswer: The answer is ",
+    "main_question": "What drink might these be good in?\n(A) beer\n(B) milkshake\n(C) gin\n(D) coffee",
+    "sub_question": [
+        "How would you drink a cup of coffee?"
+    ],
+    "sub_answer": [
+        "how would you drink a cup of coffee?"
+    ],
+    "gt_ans": "milkshake",
+    "confidence_base": 0.03836165368556976,
+    "confidence_lba": 0.872801,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.40009674429893494,
+        0.06118490546941757,
+        0.872800886631012,
+        0.6923395991325378,
+        0.48490869998931885
+    ]
+}

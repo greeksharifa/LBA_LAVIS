@@ -1,0 +1,30 @@
+{
+    "question_id": "DX4bBD5XMPxQuu3hqWAdDW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many calories do they contain per ounce? 100.\nQuestion: What do people gain when they eat too many of these?\n(A) hair\n(B) kindness\n(C) weight\n(D) intelligence\nAnswer: The answer is ",
+    "main_question": "What do people gain when they eat too many of these?\n(A) hair\n(B) kindness\n(C) weight\n(D) intelligence",
+    "sub_question": [
+        "How many calories do they contain per ounce?"
+    ],
+    "sub_answer": [
+        "100"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5771574378013611,
+    "confidence_lba": 0.937684,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.18274681270122528,
+        0.9376835227012634,
+        0.268084317445755,
+        0.5982296466827393,
+        0.1163913682103157
+    ]
+}

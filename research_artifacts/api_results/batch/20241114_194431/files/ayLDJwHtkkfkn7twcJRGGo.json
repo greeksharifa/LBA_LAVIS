@@ -1,0 +1,30 @@
+{
+    "question_id": "ayLDJwHtkkfkn7twcJRGGo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the building? hotel.\nQuestion: What is the white building with a green roof?\n(A) office building\n(B) resort\n(C) residential building\n(D) university\nAnswer: The answer is ",
+    "main_question": "What is the white building with a green roof?\n(A) office building\n(B) resort\n(C) residential building\n(D) university",
+    "sub_question": [
+        "What is the building?"
+    ],
+    "sub_answer": [
+        "hotel"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.15905410051345825,
+    "confidence_lba": 0.945455,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8827454447746277,
+        0.9454548954963684,
+        0.8251315951347351,
+        0.8251315951347351,
+        0.8251315951347351
+    ]
+}

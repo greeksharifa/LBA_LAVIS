@@ -1,0 +1,30 @@
+{
+    "question_id": "764XKetFB6T3wsiABqc79e",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of shape is the pie cut into? square.\nQuestion: In what shape is the quiche cut?\n(A) triangles\n(B) stars\n(C) circles\n(D) rectangles\nAnswer: The answer is ",
+    "main_question": "In what shape is the quiche cut?\n(A) triangles\n(B) stars\n(C) circles\n(D) rectangles",
+    "sub_question": [
+        "What kind of shape is the pie cut into?"
+    ],
+    "sub_answer": [
+        "square"
+    ],
+    "gt_ans": "triangles",
+    "confidence_base": 0.17261898517608643,
+    "confidence_lba": 0.231758,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.23175762593746185,
+        0.13835015892982483,
+        0.08676233142614365,
+        0.18295907974243164,
+        0.12793710827827454
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "VKDkZzDN4KTFxGbh2KrgSf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do people use ketchup for? condiment.\nQuestion: Where did the idea of ketchup originally come from?\n(A) japan\n(B) turkey\n(C) vietnam\n(D) china\nAnswer: The answer is ",
+    "main_question": "Where did the idea of ketchup originally come from?\n(A) japan\n(B) turkey\n(C) vietnam\n(D) china",
+    "sub_question": [
+        "What do people use ketchup for?"
+    ],
+    "sub_answer": [
+        "condiment"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.267909437417984,
+    "confidence_lba": 0.695176,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.0183581430464983,
+        0.5082506537437439,
+        0.3782751262187958,
+        0.6951755881309509,
+        0.5626242756843567
+    ]
+}

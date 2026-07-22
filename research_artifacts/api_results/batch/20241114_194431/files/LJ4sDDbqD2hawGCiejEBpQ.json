@@ -1,0 +1,30 @@
+{
+    "question_id": "LJ4sDDbqD2hawGCiejEBpQ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow are the skiers going down the hill? they are going down the slopes.\nQuestion: How are the skiers getting up the hill?\n(A) gondola\n(B) skiing\n(C) conveyer belt\n(D) chairlift\nAnswer: The answer is ",
+    "main_question": "How are the skiers getting up the hill?\n(A) gondola\n(B) skiing\n(C) conveyer belt\n(D) chairlift",
+    "sub_question": [
+        "How are the skiers going down the hill?"
+    ],
+    "sub_answer": [
+        "they are going down the slopes"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6593833565711975,
+    "confidence_lba": 0.879806,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6054691076278687,
+        0.09067162126302719,
+        0.6623433828353882,
+        0.8798055052757263,
+        0.29494789242744446
+    ]
+}

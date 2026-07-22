@@ -1,0 +1,30 @@
+{
+    "question_id": "KatNcK2tJQ8nr2oasRaXoD",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow will the boy feel if he hits? happy.\nQuestion: What will the boy do if he hits?\n(A) leave\n(B) run\n(C) apologize\n(D) stop\nAnswer: The answer is ",
+    "main_question": "What will the boy do if he hits?\n(A) leave\n(B) run\n(C) apologize\n(D) stop",
+    "sub_question": [
+        "How will the boy feel if he hits?"
+    ],
+    "sub_answer": [
+        "happy"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.031629323959350586,
+    "confidence_lba": 0.322574,
+    "text_output_base": "(B) run",
+    "text_output_lba": "(B) run",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B) run",
+        "(B) run",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.04289960488677025,
+        0.32257428765296936,
+        0.0521269366145134,
+        0.11078928411006927,
+        0.1107846274971962
+    ]
+}

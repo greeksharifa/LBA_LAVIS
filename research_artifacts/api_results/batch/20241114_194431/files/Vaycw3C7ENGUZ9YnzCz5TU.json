@@ -1,0 +1,30 @@
+{
+    "question_id": "Vaycw3C7ENGUZ9YnzCz5TU",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the two things the women are holding in their hands? donuts.\nQuestion: What are the non iced baked items shown boiled in?\n(A) icing\n(B) water\n(C) sesame oil\n(D) lard\nAnswer: The answer is ",
+    "main_question": "What are the non iced baked items shown boiled in?\n(A) icing\n(B) water\n(C) sesame oil\n(D) lard",
+    "sub_question": [
+        "What are the two things the women are holding in their hands?"
+    ],
+    "sub_answer": [
+        "donuts"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.3250351548194885,
+    "confidence_lba": 0.9917,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.09497600793838501,
+        0.0654887855052948,
+        0.9900515079498291,
+        0.9917002320289612,
+        0.05941160023212433
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "5Re4MQxw5XwLbQQzqQVZcV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat food has the most carbs? bread.\nQuestion: Which food has the least carbs?\n(A) soup\n(B) water\n(C) sandwich\n(D) buns\nAnswer: The answer is ",
+    "main_question": "Which food has the least carbs?\n(A) soup\n(B) water\n(C) sandwich\n(D) buns",
+    "sub_question": [
+        "What food has the most carbs?"
+    ],
+    "sub_answer": [
+        "bread"
+    ],
+    "gt_ans": [
+        "vegetable",
+        "soup",
+        "soup",
+        "soup",
+        "spinach",
+        "salad",
+        "lettuce",
+        "soup",
+        "drinks",
+        "vegetables"
+    ],
+    "confidence_base": 0.17617343366146088,
+    "confidence_lba": 0.469247,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06106187030673027,
+        0.4692467749118805,
+        0.43101122975349426,
+        0.3123566210269928,
+        0.42366665601730347
+    ]
+}

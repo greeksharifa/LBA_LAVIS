@@ -1,0 +1,30 @@
+{
+    "question_id": "RBwzjVcACZNAqMHpPZbv4i",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the purpose of the white surface? counter top.\nQuestion: What is the purpose of the slats on the black surface?\n(A) drainage\n(B) cook food\n(C) hold knives\n(D) stacking plates\nAnswer: The answer is ",
+    "main_question": "What is the purpose of the slats on the black surface?\n(A) drainage\n(B) cook food\n(C) hold knives\n(D) stacking plates",
+    "sub_question": [
+        "What is the purpose of the white surface?"
+    ],
+    "sub_answer": [
+        "counter top"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.6545050740242004,
+    "confidence_lba": 0.911048,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9110482931137085,
+        0.21944895386695862,
+        0.18739916384220123,
+        0.08695682883262634,
+        0.3043214976787567
+    ]
+}

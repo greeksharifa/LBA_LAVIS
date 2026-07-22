@@ -1,0 +1,30 @@
+{
+    "question_id": "Va5KLsXWHujm6DtfGdHssS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat time period is it in? 19th century.\nQuestion: What time period of the day is it?\n(A) afternoon\n(B) evening\n(C) dawn\n(D) morning\nAnswer: The answer is ",
+    "main_question": "What time period of the day is it?\n(A) afternoon\n(B) evening\n(C) dawn\n(D) morning",
+    "sub_question": [
+        "What time period is it in?"
+    ],
+    "sub_answer": [
+        "19th century"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.4402669668197632,
+    "confidence_lba": 0.716687,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.06281010061502457,
+        0.7081189751625061,
+        0.7166866660118103,
+        0.2786296308040619,
+        0.27297309041023254
+    ]
+}

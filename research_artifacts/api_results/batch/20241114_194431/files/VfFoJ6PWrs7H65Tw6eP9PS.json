@@ -1,0 +1,30 @@
+{
+    "question_id": "VfFoJ6PWrs7H65Tw6eP9PS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the type of instrument pictured? keyboard.\nQuestion: What type of instrument is found next to the attachable keyboard?\n(A) trackpad\n(B) pencil\n(C) mouse\n(D) phone\nAnswer: The answer is ",
+    "main_question": "What type of instrument is found next to the attachable keyboard?\n(A) trackpad\n(B) pencil\n(C) mouse\n(D) phone",
+    "sub_question": [
+        "What is the type of instrument pictured?"
+    ],
+    "sub_answer": [
+        "keyboard"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8949593305587769,
+    "confidence_lba": 0.961236,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.6881334781646729,
+        0.9612358212471008,
+        0.6535517573356628,
+        0.9368383288383484,
+        0.6403588652610779
+    ]
+}

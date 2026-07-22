@@ -1,0 +1,30 @@
+{
+    "question_id": "FddDsTHeVp9WJYZBjLoKUi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow does the conveyance move in the air? it flies.\nQuestion: What sort of surface/substance does the conveyance with a problem here move upon?\n(A) sea\n(B) sky\n(C) rail\n(D) road\nAnswer: The answer is ",
+    "main_question": "What sort of surface/substance does the conveyance with a problem here move upon?\n(A) sea\n(B) sky\n(C) rail\n(D) road",
+    "sub_question": [
+        "How does the conveyance move in the air?"
+    ],
+    "sub_answer": [
+        "it flies"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9522625803947449,
+    "confidence_lba": 0.974293,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.15398159623146057,
+        0.8061874508857727,
+        0.8642904162406921,
+        0.9742931127548218,
+        0.6675035953521729
+    ]
+}

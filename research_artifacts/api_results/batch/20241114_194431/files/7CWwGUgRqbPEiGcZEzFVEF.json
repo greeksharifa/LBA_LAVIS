@@ -1,0 +1,30 @@
+{
+    "question_id": "7CWwGUgRqbPEiGcZEzFVEF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat species of animal is visible here? cat.\nQuestion: What genus of animal is visible here?\n(A) canine\n(B) porcine\n(C) feline\n(D) rodent\nAnswer: The answer is ",
+    "main_question": "What genus of animal is visible here?\n(A) canine\n(B) porcine\n(C) feline\n(D) rodent",
+    "sub_question": [
+        "What species of animal is visible here?"
+    ],
+    "sub_answer": [
+        "cat"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8372693061828613,
+    "confidence_lba": 0.082969,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C) feline",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C) feline",
+        "(C) feline",
+        "(C)",
+        "(C) feline"
+    ],
+    "confidences_lba_list": [
+        0.07083785533905029,
+        0.042654771357774734,
+        0.05897558480501175,
+        0.07055334001779556,
+        0.08296891301870346
+    ]
+}

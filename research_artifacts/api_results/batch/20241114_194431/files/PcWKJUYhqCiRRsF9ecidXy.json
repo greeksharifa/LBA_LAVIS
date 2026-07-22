@@ -1,0 +1,30 @@
+{
+    "question_id": "PcWKJUYhqCiRRsF9ecidXy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of surface is the cat sitting on? wooden.\nQuestion: Which surface type is the cat sitting upon?\n(A) wood\n(B) snow\n(C) glass\n(D) metal\nAnswer: The answer is ",
+    "main_question": "Which surface type is the cat sitting upon?\n(A) wood\n(B) snow\n(C) glass\n(D) metal",
+    "sub_question": [
+        "What type of surface is the cat sitting on?"
+    ],
+    "sub_answer": [
+        "wooden"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.925910234451294,
+    "confidence_lba": 0.975664,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9714093804359436,
+        0.3817557990550995,
+        0.9398704767227173,
+        0.9623186588287354,
+        0.975663959980011
+    ]
+}

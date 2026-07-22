@@ -1,0 +1,30 @@
+{
+    "question_id": "QWSFPjnNokcHAt3aUzZCTT",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do these kids have in common? skateboarding.\nQuestion: What aboutthese kids makes it likely they go to school together?\n(A) same coach\n(B) same uniform\n(C) same parking\n(D) same house\nAnswer: The answer is ",
+    "main_question": "What aboutthese kids makes it likely they go to school together?\n(A) same coach\n(B) same uniform\n(C) same parking\n(D) same house",
+    "sub_question": [
+        "What do these kids have in common?"
+    ],
+    "sub_answer": [
+        "skateboarding"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.021687982603907585,
+    "confidence_lba": 0.763246,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.01755416952073574,
+        0.7632460594177246,
+        0.1868000626564026,
+        0.043832868337631226,
+        0.029103517532348633
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "PZuvxsHTeR4DzXQN7DQR59",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the t-shirt made of? cotton.\nQuestion: What is the clear plastic on the front for?\n(A) visibility\n(B) bug shield\n(C) sun shield\n(D) style\nAnswer: The answer is ",
+    "main_question": "What is the clear plastic on the front for?\n(A) visibility\n(B) bug shield\n(C) sun shield\n(D) style",
+    "sub_question": [
+        "What is the t-shirt made of?"
+    ],
+    "sub_answer": [
+        "cotton"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.29061391949653625,
+    "confidence_lba": 0.776531,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.026323823258280754,
+        0.24413257837295532,
+        0.7765308618545532,
+        0.37595951557159424,
+        0.09837828576564789
+    ]
+}

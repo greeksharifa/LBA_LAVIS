@@ -1,0 +1,30 @@
+{
+    "question_id": "G5UFNWEn9cZH66apuAaxQj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat time is it likely right now? 9 am.\nQuestion: What time of day is it likely right now?\n(A) evening\n(B) morning\n(C) afternoon\n(D) night\nAnswer: The answer is ",
+    "main_question": "What time of day is it likely right now?\n(A) evening\n(B) morning\n(C) afternoon\n(D) night",
+    "sub_question": [
+        "What time is it likely right now?"
+    ],
+    "sub_answer": [
+        "9 am"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.11485022306442261,
+    "confidence_lba": 0.762313,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.7623128890991211,
+        0.5575711131095886,
+        0.4449317455291748,
+        0.7256920337677002,
+        0.0647205114364624
+    ]
+}

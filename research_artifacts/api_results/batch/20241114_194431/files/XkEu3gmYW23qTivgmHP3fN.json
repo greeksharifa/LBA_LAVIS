@@ -1,0 +1,30 @@
+{
+    "question_id": "XkEu3gmYW23qTivgmHP3fN",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color does the stoplight light mean? green.\nQuestion: What does the color of the stoplight mean?\n(A) go\n(B) stop\n(C) get out\n(D) caution\nAnswer: The answer is ",
+    "main_question": "What does the color of the stoplight mean?\n(A) go\n(B) stop\n(C) get out\n(D) caution",
+    "sub_question": [
+        "What color does the stoplight light mean?"
+    ],
+    "sub_answer": [
+        "green"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.049010131508111954,
+    "confidence_lba": 0.761548,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.22614388167858124,
+        0.17133872210979462,
+        0.2391224056482315,
+        0.7615483999252319,
+        0.505890429019928
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "3asRExdxmWQtJw4sv49AGZ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the closest thing to the tree trunk? bicycle.\nQuestion: What is closest to the tree trunk?\n(A) closed doors\n(B) walking person\n(C) sitting person\n(D) open doors\nAnswer: The answer is ",
+    "main_question": "What is closest to the tree trunk?\n(A) closed doors\n(B) walking person\n(C) sitting person\n(D) open doors",
+    "sub_question": [
+        "What is the closest thing to the tree trunk?"
+    ],
+    "sub_answer": [
+        "bicycle"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.0267002172768116,
+    "confidence_lba": 0.084878,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(D)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.014900680631399155,
+        0.029223794117569923,
+        0.0848783627152443,
+        0.006193353328853846,
+        0.035579465329647064
+    ]
+}

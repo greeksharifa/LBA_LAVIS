@@ -1,0 +1,30 @@
+{
+    "question_id": "TU3Jt6U4vLxsHp26fpMWW8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is being sliced on? bread.\nQuestion: What type of board is being used?\n(A) poster board\n(B) charcuterie\n(C) billboard\n(D) cardboard\nAnswer: The answer is ",
+    "main_question": "What type of board is being used?\n(A) poster board\n(B) charcuterie\n(C) billboard\n(D) cardboard",
+    "sub_question": [
+        "What is being sliced on?"
+    ],
+    "sub_answer": [
+        "bread"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5145248770713806,
+    "confidence_lba": 0.968338,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9667665958404541,
+        0.968337893486023,
+        0.6343227028846741,
+        0.11068940162658691,
+        0.5257883667945862
+    ]
+}

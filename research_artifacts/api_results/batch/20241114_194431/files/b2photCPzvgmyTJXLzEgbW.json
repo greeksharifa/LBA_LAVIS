@@ -1,0 +1,30 @@
+{
+    "question_id": "b2photCPzvgmyTJXLzEgbW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow is the sofa set up? in the middle.\nQuestion: What colour are the couch and chair?\n(A) blue\n(B) cream\n(C) yellow\n(D) brown\nAnswer: The answer is ",
+    "main_question": "What colour are the couch and chair?\n(A) blue\n(B) cream\n(C) yellow\n(D) brown",
+    "sub_question": [
+        "How is the sofa set up?"
+    ],
+    "sub_answer": [
+        "in the middle"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.6933238506317139,
+    "confidence_lba": 0.540505,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.31864988803863525,
+        0.47991275787353516,
+        0.27133288979530334,
+        0.540505051612854,
+        0.36356326937675476
+    ]
+}

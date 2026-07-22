@@ -1,0 +1,30 @@
+{
+    "question_id": "5z9Zmf4GRKoCa7igqv4Ef7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in these cases? luggage.\nQuestion: What are these cases for?\n(A) clothing\n(B) instruments\n(C) clothing\n(D) food\nAnswer: The answer is ",
+    "main_question": "What are these cases for?\n(A) clothing\n(B) instruments\n(C) clothing\n(D) food",
+    "sub_question": [
+        "What is in these cases?"
+    ],
+    "sub_answer": [
+        "luggage"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.13235478103160858,
+    "confidence_lba": 0.333082,
+    "text_output_base": "(A)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(B)",
+        "(A)",
+        "(B)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.029205335304141045,
+        0.12629947066307068,
+        0.019576795399188995,
+        0.3330819308757782,
+        0.018111027777194977
+    ]
+}

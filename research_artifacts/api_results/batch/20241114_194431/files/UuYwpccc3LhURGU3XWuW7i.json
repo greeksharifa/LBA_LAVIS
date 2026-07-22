@@ -1,0 +1,30 @@
+{
+    "question_id": "UuYwpccc3LhURGU3XWuW7i",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the photographer's pose? taking a selfie.\nQuestion: Where is the photographer standing?\n(A) kitchen\n(B) closet\n(C) doorway\n(D) bedroom\nAnswer: The answer is ",
+    "main_question": "Where is the photographer standing?\n(A) kitchen\n(B) closet\n(C) doorway\n(D) bedroom",
+    "sub_question": [
+        "What is the photographer's pose?"
+    ],
+    "sub_answer": [
+        "taking a selfie"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8679609894752502,
+    "confidence_lba": 0.873206,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8732060790061951,
+        0.5463989973068237,
+        0.5052371025085449,
+        0.5678272247314453,
+        0.0616636723279953
+    ]
+}

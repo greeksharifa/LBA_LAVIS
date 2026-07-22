@@ -1,0 +1,30 @@
+{
+    "question_id": "EohV983PdD4udviqEUgU3D",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the skateboards doing? doing tricks.\nQuestion: How many skateboards are in the picture?\n(A) four\n(B) six\n(C) three\n(D) five\nAnswer: The answer is ",
+    "main_question": "How many skateboards are in the picture?\n(A) four\n(B) six\n(C) three\n(D) five",
+    "sub_question": [
+        "What are the skateboards doing?"
+    ],
+    "sub_answer": [
+        "doing tricks"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5320820212364197,
+    "confidence_lba": 0.373485,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.2213069349527359,
+        0.0502239428460598,
+        0.3734853267669678,
+        0.2801675796508789,
+        0.3516792953014374
+    ]
+}

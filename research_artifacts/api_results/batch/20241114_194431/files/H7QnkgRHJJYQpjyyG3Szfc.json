@@ -1,0 +1,30 @@
+{
+    "question_id": "H7QnkgRHJJYQpjyyG3Szfc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is used to pick up the luggage? hand.\nQuestion: What is used to pick up the suitcases?\n(A) rubber band\n(B) handle\n(C) tape\n(D) rope\nAnswer: The answer is ",
+    "main_question": "What is used to pick up the suitcases?\n(A) rubber band\n(B) handle\n(C) tape\n(D) rope",
+    "sub_question": [
+        "What is used to pick up the luggage?"
+    ],
+    "sub_answer": [
+        "hand"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.02754049003124237,
+    "confidence_lba": 0.208138,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D) rope",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.014997224323451519,
+        0.11995120346546173,
+        0.20813767611980438,
+        0.047979094088077545,
+        0.19416353106498718
+    ]
+}

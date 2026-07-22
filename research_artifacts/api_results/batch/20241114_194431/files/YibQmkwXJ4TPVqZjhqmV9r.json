@@ -1,0 +1,30 @@
+{
+    "question_id": "YibQmkwXJ4TPVqZjhqmV9r",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat food is the white powder sprinkled over the dessert? sugar.\nQuestion: What food is the white powder sprinkled over the dessert?\n(A) parmesan cheese\n(B) cornstarch\n(C) powdered sugar\n(D) rice flour\nAnswer: The answer is ",
+    "main_question": "What food is the white powder sprinkled over the dessert?\n(A) parmesan cheese\n(B) cornstarch\n(C) powdered sugar\n(D) rice flour",
+    "sub_question": [
+        "What food is the white powder sprinkled over the dessert?"
+    ],
+    "sub_answer": [
+        "sugar"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.795074462890625,
+    "confidence_lba": 0.969339,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8587640523910522,
+        0.9675920605659485,
+        0.9693387150764465,
+        0.9620127081871033,
+        0.9662560224533081
+    ]
+}

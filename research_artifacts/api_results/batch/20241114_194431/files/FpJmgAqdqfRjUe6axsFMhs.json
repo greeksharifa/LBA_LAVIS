@@ -1,0 +1,30 @@
+{
+    "question_id": "FpJmgAqdqfRjUe6axsFMhs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the object on the ceiling perform? fan.\nQuestion: The thing on the ceiling performs what function?\n(A) heating\n(B) cooking\n(C) cleaning\n(D) cooling\nAnswer: The answer is ",
+    "main_question": "The thing on the ceiling performs what function?\n(A) heating\n(B) cooking\n(C) cleaning\n(D) cooling",
+    "sub_question": [
+        "What does the object on the ceiling perform?"
+    ],
+    "sub_answer": [
+        "fan"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9527172446250916,
+    "confidence_lba": 0.978848,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9772228002548218,
+        0.97319096326828,
+        0.9788481593132019,
+        0.9631873965263367,
+        0.9757757782936096
+    ]
+}

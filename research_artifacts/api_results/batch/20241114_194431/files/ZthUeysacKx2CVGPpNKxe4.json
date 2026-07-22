@@ -1,0 +1,30 @@
+{
+    "question_id": "ZthUeysacKx2CVGPpNKxe4",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the traditional long printed skirts worn by the women called? long skirts.\nQuestion: What are the traditional long printed skirts worn by the women called?\n(A) broomstick skirt\n(B) sarong\n(C) prairie skirt\n(D) accordion skirt\nAnswer: The answer is ",
+    "main_question": "What are the traditional long printed skirts worn by the women called?\n(A) broomstick skirt\n(B) sarong\n(C) prairie skirt\n(D) accordion skirt",
+    "sub_question": [
+        "What is the traditional long printed skirts worn by the women called?"
+    ],
+    "sub_answer": [
+        "long skirts"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7930572032928467,
+    "confidence_lba": 0.870256,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8702555298805237,
+        0.8263941407203674,
+        0.8058711886405945,
+        0.6183664798736572,
+        0.7966718077659607
+    ]
+}

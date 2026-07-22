@@ -1,0 +1,30 @@
+{
+    "question_id": "aXA73vtTRAUJ79PHaVuhF8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the skateboard most likely constructed from? chocolate.\nQuestion: What is the skateboard being cut into most likely constructed from?\n(A) acrylic\n(B) cake\n(C) plastic\n(D) wood\nAnswer: The answer is ",
+    "main_question": "What is the skateboard being cut into most likely constructed from?\n(A) acrylic\n(B) cake\n(C) plastic\n(D) wood",
+    "sub_question": [
+        "What is the skateboard most likely constructed from?"
+    ],
+    "sub_answer": [
+        "chocolate"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.0787551999092102,
+    "confidence_lba": 0.954608,
+    "text_output_base": "(D)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.526626467704773,
+        0.9546079039573669,
+        0.9431153535842896,
+        0.9431153535842896,
+        0.9431153535842896
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "6SYTPwk8BEHMp486oLsFgw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country is the license plate from? japan.\nQuestion: What state was the licence plate issues?\n(A) connecticut\n(B) rhode island\n(C) new jersey\n(D) new york\nAnswer: The answer is ",
+    "main_question": "What state was the licence plate issues?\n(A) connecticut\n(B) rhode island\n(C) new jersey\n(D) new york",
+    "sub_question": [
+        "What country is the license plate from?"
+    ],
+    "sub_answer": [
+        "japan"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.0434599332511425,
+    "confidence_lba": 0.978987,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.2553529143333435,
+        0.2597496211528778,
+        0.9612548351287842,
+        0.978986918926239,
+        0.13170434534549713
+    ]
+}

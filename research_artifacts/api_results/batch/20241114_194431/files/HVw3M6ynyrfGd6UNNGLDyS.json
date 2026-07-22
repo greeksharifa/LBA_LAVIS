@@ -1,0 +1,30 @@
+{
+    "question_id": "HVw3M6ynyrfGd6UNNGLDyS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of object is being hit? baseball.\nQuestion: What area of the baseball field are the players almost colliding over as one blocks the other most likely?\n(A) batter's box\n(B) home plate\n(C) catcher's box\n(D) pitcher's mound\nAnswer: The answer is ",
+    "main_question": "What area of the baseball field are the players almost colliding over as one blocks the other most likely?\n(A) batter's box\n(B) home plate\n(C) catcher's box\n(D) pitcher's mound",
+    "sub_question": [
+        "What type of object is being hit?"
+    ],
+    "sub_answer": [
+        "baseball"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.033190492540597916,
+    "confidence_lba": 0.377831,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.06601396203041077,
+        0.3778310716152191,
+        0.3379514813423157,
+        0.04885326698422432,
+        0.007199570070952177
+    ]
+}

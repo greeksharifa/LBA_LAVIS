@@ -1,0 +1,30 @@
+{
+    "question_id": "Fu2ZLJDqhQqxBgT7KdAavf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many colors are in a rooster? four.\nQuestion: How many colours of floor tiles are there?\n(A) three\n(B) two\n(C) one\n(D) four\nAnswer: The answer is ",
+    "main_question": "How many colours of floor tiles are there?\n(A) three\n(B) two\n(C) one\n(D) four",
+    "sub_question": [
+        "How many colors are in a rooster?"
+    ],
+    "sub_answer": [
+        "four"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.05894405394792557,
+    "confidence_lba": 0.499568,
+    "text_output_base": "(B)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.045652471482753754,
+        0.17478103935718536,
+        0.020850174129009247,
+        0.49956783652305603,
+        0.031437914818525314
+    ]
+}

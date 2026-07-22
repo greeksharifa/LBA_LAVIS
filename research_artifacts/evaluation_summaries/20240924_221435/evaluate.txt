@@ -1,0 +1,14 @@
+{
+    "max_conf_gap         ": "0.34400",
+    "acc_origin           ": "39.43%",
+    "Previous_work_acc    ": "39.81%",
+    "max_acc_by_tau       ": "40.77%",
+    "Interaction          ": "41.05% =  984.0 /  2397",
+    "Sequence             ": "41.45% = 1486.0 /  3585",
+    "Prediction           ": "39.00% =  243.0 /   623",
+    "Feasibility          ": "36.61% =  179.0 /   489",
+    "max_arg_confidence   ": "0.628564",
+    "confidence_percentile": "97.69%",
+    "E_CR                 ": "18.24%",
+    "E_IC                 ": "28.65%"
+}

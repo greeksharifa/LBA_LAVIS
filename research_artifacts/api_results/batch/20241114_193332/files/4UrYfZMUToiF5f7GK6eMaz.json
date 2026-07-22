@@ -1,0 +1,41 @@
+{
+    "question_id": "4UrYfZMUToiF5f7GK6eMaz",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color vest is the man wearing? yellow.\nQuestion: Why are the men's vests orange?\n(A) fashion\n(B) camouflage\n(C) visibility\n(D) dress code\nAnswer: The answer is ",
+    "main_question": "Why are the men's vests orange?\n(A) fashion\n(B) camouflage\n(C) visibility\n(D) dress code",
+    "sub_question": [
+        "What color vest is the man wearing?"
+    ],
+    "sub_answer": [
+        "yellow"
+    ],
+    "gt_ans": [
+        "safety",
+        "safety",
+        "safety reflection",
+        "safety",
+        "visibility",
+        "safety",
+        "workers",
+        "visibility",
+        "visibility",
+        "safety reflection"
+    ],
+    "confidence_base": 0.7126324772834778,
+    "confidence_lba": 0.897131,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7892762422561646,
+        0.897131085395813,
+        0.7540592551231384,
+        0.7854516506195068,
+        0.04500788822770119
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "B89EaRFhsoHzAy55JKCZJJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow old is the woman? old.\nQuestion: What is the most likely age of the person?\n(A) eight\n(B) 24\n(C) 90\n(D) 52\nAnswer: The answer is ",
+    "main_question": "What is the most likely age of the person?\n(A) eight\n(B) 24\n(C) 90\n(D) 52",
+    "sub_question": [
+        "How old is the woman?"
+    ],
+    "sub_answer": [
+        "old"
+    ],
+    "gt_ans": [
+        "eighty years",
+        "eighty",
+        "eighty",
+        "80s",
+        "90",
+        "90",
+        "thirty",
+        "senior eighties",
+        "17",
+        "eighty"
+    ],
+    "confidence_base": 0.0958542600274086,
+    "confidence_lba": 0.682636,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.055299222469329834,
+        0.04965313896536827,
+        0.6826364994049072,
+        0.6035120487213135,
+        0.660041868686676
+    ]
+}

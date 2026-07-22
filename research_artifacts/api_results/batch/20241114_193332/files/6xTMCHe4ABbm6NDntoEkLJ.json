@@ -1,0 +1,41 @@
+{
+    "question_id": "6xTMCHe4ABbm6NDntoEkLJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of tree is in front of the blue building? palm tree.\nQuestion: What type of tree is in front of the blue building?\n(A) palm tree\n(B) bonsai tree\n(C) maple tree\n(D) pine tree\nAnswer: The answer is ",
+    "main_question": "What type of tree is in front of the blue building?\n(A) palm tree\n(B) bonsai tree\n(C) maple tree\n(D) pine tree",
+    "sub_question": [
+        "What type of tree is in front of the blue building?"
+    ],
+    "sub_answer": [
+        "palm tree"
+    ],
+    "gt_ans": [
+        "palm tree",
+        "palm tree",
+        "palm",
+        "palm",
+        "palm",
+        "palm tree",
+        "palm tree",
+        "palm",
+        "palm tree",
+        "palm tree"
+    ],
+    "confidence_base": 0.2160577028989792,
+    "confidence_lba": 0.994867,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5336562991142273,
+        0.0230585765093565,
+        0.04316352307796478,
+        0.046302132308483124,
+        0.9948671460151672
+    ]
+}

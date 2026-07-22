@@ -1,0 +1,30 @@
+{
+    "question_id": "VZPbBERyU2LCkuew7SrWaw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many years can a giraffe live? 10.\nQuestion: How long does the average giraffe live?\n(A) 50 years\n(B) 15 years\n(C) 20-30 years\n(D) 40 years\nAnswer: The answer is ",
+    "main_question": "How long does the average giraffe live?\n(A) 50 years\n(B) 15 years\n(C) 20-30 years\n(D) 40 years",
+    "sub_question": [
+        "How many years can a giraffe live?"
+    ],
+    "sub_answer": [
+        "10"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.058732692152261734,
+    "confidence_lba": 0.054272,
+    "text_output_base": "(C) 20-30 years",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C) 20-30 years",
+        "(C) 20-30 years",
+        "(B)",
+        "(C) 20-30 years",
+        "(C) 20-30 years"
+    ],
+    "confidences_lba_list": [
+        0.0016483910148963332,
+        0.0009296619682572782,
+        0.054272376000881195,
+        0.006287556141614914,
+        0.016903212293982506
+    ]
+}

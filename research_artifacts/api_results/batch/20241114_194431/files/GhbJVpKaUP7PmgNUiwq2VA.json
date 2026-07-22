@@ -1,0 +1,30 @@
+{
+    "question_id": "GhbJVpKaUP7PmgNUiwq2VA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the object that the foxes are grazing on? white.\nQuestion: What color is the object that the animals have their heads buried in?\n(A) purple\n(B) yellow\n(C) red\n(D) green\nAnswer: The answer is ",
+    "main_question": "What color is the object that the animals have their heads buried in?\n(A) purple\n(B) yellow\n(C) red\n(D) green",
+    "sub_question": [
+        "What color is the object that the foxes are grazing on?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.3432506024837494,
+    "confidence_lba": 0.730767,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.06130392476916313,
+        0.7307671308517456,
+        0.04614238440990448,
+        0.12773750722408295,
+        0.43756893277168274
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "KUFqsDY7LxQj86DWy5PV33",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich season is it? summer.\nQuestion: The white object in the right window is used most often during what season?\n(A) fall\n(B) spring\n(C) winter\n(D) summer\nAnswer: The answer is ",
+    "main_question": "The white object in the right window is used most often during what season?\n(A) fall\n(B) spring\n(C) winter\n(D) summer",
+    "sub_question": [
+        "Which season is it?"
+    ],
+    "sub_answer": [
+        "summer"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.13755856454372406,
+    "confidence_lba": 0.95159,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.18999966979026794,
+        0.4258234202861786,
+        0.9515895247459412,
+        0.1675698310136795,
+        0.6282024383544922
+    ]
+}

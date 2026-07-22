@@ -1,0 +1,30 @@
+{
+    "question_id": "Hnor848pYZFWrEeYWfuYCF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the counter used for? cooking.\nQuestion: What is the white appliance on the counter used to make?\n(A) bagels\n(B) smoothies\n(C) toast\n(D) coffee\nAnswer: The answer is ",
+    "main_question": "What is the white appliance on the counter used to make?\n(A) bagels\n(B) smoothies\n(C) toast\n(D) coffee",
+    "sub_question": [
+        "What is the counter used for?"
+    ],
+    "sub_answer": [
+        "cooking"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.777649462223053,
+    "confidence_lba": 0.991118,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.4399626553058624,
+        0.9911176562309265,
+        0.3735932409763336,
+        0.5450278520584106,
+        0.1280418336391449
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "WLG7VBozfPSsZPwKjaUXYy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the two men wearing that indicate they are from the religion of the two men in white clothes and caps? the two men in white clothes and caps.\nQuestion: What religion is indicated by the garments of the two men in white clothes and caps?\n(A) buddhism\n(B) judaism\n(C) sikhism\n(D) islam\nAnswer: The answer is ",
+    "main_question": "What religion is indicated by the garments of the two men in white clothes and caps?\n(A) buddhism\n(B) judaism\n(C) sikhism\n(D) islam",
+    "sub_question": [
+        "What are the two men wearing that indicate they are from the religion of the two men in white clothes and caps?"
+    ],
+    "sub_answer": [
+        "the two men in white clothes and caps"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.08382964134216309,
+    "confidence_lba": 0.977513,
+    "text_output_base": "(A)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9775130748748779,
+        0.28823408484458923,
+        0.4230567216873169,
+        0.15945307910442352,
+        0.13528624176979065
+    ]
+}

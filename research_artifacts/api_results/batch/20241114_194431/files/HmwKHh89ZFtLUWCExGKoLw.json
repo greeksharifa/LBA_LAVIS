@@ -1,0 +1,30 @@
+{
+    "question_id": "HmwKHh89ZFtLUWCExGKoLw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat word is on the towel? tv.\nQuestion: What word is on the pillow?\n(A) goodbye\n(B) hello\n(C) sadness\n(D) thank you\nAnswer: The answer is ",
+    "main_question": "What word is on the pillow?\n(A) goodbye\n(B) hello\n(C) sadness\n(D) thank you",
+    "sub_question": [
+        "What word is on the towel?"
+    ],
+    "sub_answer": [
+        "tv"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.020252389833331108,
+    "confidence_lba": 0.207576,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.010765360668301582,
+        0.20757579803466797,
+        0.040907666087150574,
+        0.13785693049430847,
+        0.06439780443906784
+    ]
+}

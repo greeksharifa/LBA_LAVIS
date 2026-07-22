@@ -1,0 +1,30 @@
+{
+    "question_id": "ZVihanJCkC9cEENhpyucEn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat season has just started? autumn.\nQuestion: What has caused the leaves to fall from the trees?\n(A) snow\n(B) solar eclipse\n(C) weather\n(D) tornado\nAnswer: The answer is ",
+    "main_question": "What has caused the leaves to fall from the trees?\n(A) snow\n(B) solar eclipse\n(C) weather\n(D) tornado",
+    "sub_question": [
+        "What season has just started?"
+    ],
+    "sub_answer": [
+        "autumn"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.7112995386123657,
+    "confidence_lba": 0.972856,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8104261159896851,
+        0.9728556871414185,
+        0.832801878452301,
+        0.6774983406066895,
+        0.6774983406066895
+    ]
+}

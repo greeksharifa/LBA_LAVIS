@@ -1,0 +1,30 @@
+{
+    "question_id": "ZeUzimMiTU6aJb3tFM7ie3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of climate is it now? tropical.\nQuestion: What type of climate is it?\n(A) tropical\n(B) tundra\n(C) arctic\n(D) wetlands\nAnswer: The answer is ",
+    "main_question": "What type of climate is it?\n(A) tropical\n(B) tundra\n(C) arctic\n(D) wetlands",
+    "sub_question": [
+        "What type of climate is it now?"
+    ],
+    "sub_answer": [
+        "tropical"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.44020500779151917,
+    "confidence_lba": 0.93334,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.7858167290687561,
+        0.7504310011863708,
+        0.92274010181427,
+        0.9088436961174011,
+        0.9333398342132568
+    ]
+}

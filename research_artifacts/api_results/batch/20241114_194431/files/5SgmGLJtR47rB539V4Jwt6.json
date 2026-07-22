@@ -1,0 +1,30 @@
+{
+    "question_id": "5SgmGLJtR47rB539V4Jwt6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy are the men in yellow vests? they are on motorcycles.\nQuestion: Why are the men wearing yellow vests?\n(A) visibility\n(B) fashion\n(C) warmth\n(D) costume\nAnswer: The answer is ",
+    "main_question": "Why are the men wearing yellow vests?\n(A) visibility\n(B) fashion\n(C) warmth\n(D) costume",
+    "sub_question": [
+        "Why are the men in yellow vests?"
+    ],
+    "sub_answer": [
+        "they are on motorcycles"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.9920755624771118,
+    "confidence_lba": 0.992783,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9910983443260193,
+        0.9927389621734619,
+        0.9883165955543518,
+        0.992782711982727,
+        0.9900451302528381
+    ]
+}

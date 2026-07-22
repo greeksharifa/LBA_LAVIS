@@ -1,0 +1,30 @@
+{
+    "question_id": "GuEXoRNmgAED6SJqUXtHhA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are in the field? cattle.\nQuestion: What animals are in the field?\n(A) chicken\n(B) sheep\n(C) cow\n(D) goat\nAnswer: The answer is ",
+    "main_question": "What animals are in the field?\n(A) chicken\n(B) sheep\n(C) cow\n(D) goat",
+    "sub_question": [
+        "What are in the field?"
+    ],
+    "sub_answer": [
+        "cattle"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9784531593322754,
+    "confidence_lba": 0.988736,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9160252213478088,
+        0.9887359142303467,
+        0.959499180316925,
+        0.9642449021339417,
+        0.9642449021339417
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MgGUyCE42FnnjzSi8wqRBt",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat number is on the player that is half visible? 1.\nQuestion: What number is on the player that's fully visible?\n(A) 11\n(B) five\n(C) 21\n(D) 22\nAnswer: The answer is ",
+    "main_question": "What number is on the player that's fully visible?\n(A) 11\n(B) five\n(C) 21\n(D) 22",
+    "sub_question": [
+        "What number is on the player that is half visible?"
+    ],
+    "sub_answer": [
+        "1"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.007117602974176407,
+    "confidence_lba": 0.042192,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.015058004297316074,
+        0.04219202697277069,
+        0.040670931339263916,
+        0.01248270832002163,
+        0.014096034690737724
+    ]
+}

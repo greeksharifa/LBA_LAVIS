@@ -1,0 +1,30 @@
+{
+    "question_id": "M24oDREQRXZxbPHeX82hTm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow would someone sit here? at a table.\nQuestion: Why would someone sit here?\n(A) paint\n(B) work\n(C) drive\n(D) eat\nAnswer: The answer is ",
+    "main_question": "Why would someone sit here?\n(A) paint\n(B) work\n(C) drive\n(D) eat",
+    "sub_question": [
+        "How would someone sit here?"
+    ],
+    "sub_answer": [
+        "at a table"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6114874482154846,
+    "confidence_lba": 0.992943,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9030141234397888,
+        0.9800257682800293,
+        0.9929432272911072,
+        0.9744958281517029,
+        0.9886956214904785
+    ]
+}

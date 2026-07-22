@@ -1,0 +1,30 @@
+{
+    "question_id": "AyYa5v5HCXAjDeLXgP2CN5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is hanging on the left wall? computer.\nQuestion: What is hanging on the right wall next the desk?\n(A) towels\n(B) diplomas\n(C) pictures\n(D) coats\nAnswer: The answer is ",
+    "main_question": "What is hanging on the right wall next the desk?\n(A) towels\n(B) diplomas\n(C) pictures\n(D) coats",
+    "sub_question": [
+        "What is hanging on the left wall?"
+    ],
+    "sub_answer": [
+        "computer"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.7623523473739624,
+    "confidence_lba": 0.835016,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8350155353546143,
+        0.2857915163040161,
+        0.10839356482028961,
+        0.6380152106285095,
+        0.7433451414108276
+    ]
+}

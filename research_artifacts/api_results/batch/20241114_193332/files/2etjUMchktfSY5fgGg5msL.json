@@ -1,0 +1,41 @@
+{
+    "question_id": "2etjUMchktfSY5fgGg5msL",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat item on the desk could help with a fever? tea.\nQuestion: What item on the desk could help with a cold?\n(A) cough drops\n(B) syringe\n(C) pills\n(D) herbal tea\nAnswer: The answer is ",
+    "main_question": "What item on the desk could help with a cold?\n(A) cough drops\n(B) syringe\n(C) pills\n(D) herbal tea",
+    "sub_question": [
+        "What item on the desk could help with a fever?"
+    ],
+    "sub_answer": [
+        "tea"
+    ],
+    "gt_ans": [
+        "cough drops",
+        "tissue",
+        "ricola",
+        "cough drops",
+        "tissue box",
+        "ricola",
+        "cough drops",
+        "tissue",
+        "tissue",
+        "tissues"
+    ],
+    "confidence_base": 0.6338971853256226,
+    "confidence_lba": 0.98811,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(A)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9881097078323364,
+        0.09783762693405151,
+        0.3070414364337921,
+        0.08222943544387817,
+        0.9422167539596558
+    ]
+}

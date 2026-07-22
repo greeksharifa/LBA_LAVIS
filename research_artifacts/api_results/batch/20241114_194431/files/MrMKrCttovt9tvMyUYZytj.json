@@ -1,0 +1,30 @@
+{
+    "question_id": "MrMKrCttovt9tvMyUYZytj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of ad is there? tennis.\nQuestion: What type of company has an ad at the court?\n(A) clothing\n(B) travel\n(C) health\n(D) food\nAnswer: The answer is ",
+    "main_question": "What type of company has an ad at the court?\n(A) clothing\n(B) travel\n(C) health\n(D) food",
+    "sub_question": [
+        "What type of ad is there?"
+    ],
+    "sub_answer": [
+        "tennis"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.05152789503335953,
+    "confidence_lba": 0.974006,
+    "text_output_base": "(A)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(A)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.033401794731616974,
+        0.9740060567855835,
+        0.08427170664072037,
+        0.04704512283205986,
+        0.06966215372085571
+    ]
+}

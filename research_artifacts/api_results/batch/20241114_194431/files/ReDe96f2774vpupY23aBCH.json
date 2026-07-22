@@ -1,0 +1,30 @@
+{
+    "question_id": "ReDe96f2774vpupY23aBCH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWho is the best player ever? no one.\nQuestion: What player has an all time record in this sport?\n(A) tiger woods\n(B) john stockton\n(C) chris paul\n(D) pete rose\nAnswer: The answer is ",
+    "main_question": "What player has an all time record in this sport?\n(A) tiger woods\n(B) john stockton\n(C) chris paul\n(D) pete rose",
+    "sub_question": [
+        "Who is the best player ever?"
+    ],
+    "sub_answer": [
+        "no one"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.3358859717845917,
+    "confidence_lba": 0.243934,
+    "text_output_base": "(D)",
+    "text_output_lba": "no one",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "no one",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.0430583730340004,
+        0.0535578653216362,
+        0.11724910140037537,
+        0.24393361806869507,
+        0.05820196866989136
+    ]
+}

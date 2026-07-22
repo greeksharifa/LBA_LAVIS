@@ -1,0 +1,30 @@
+{
+    "question_id": "6pTSACKywJKkVRa7WGmzKe",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color are the curtains in the room? green.\nQuestion: What color are the walls in the room?\n(A) orange\n(B) yellow\n(C) blue\n(D) green\nAnswer: The answer is ",
+    "main_question": "What color are the walls in the room?\n(A) orange\n(B) yellow\n(C) blue\n(D) green",
+    "sub_question": [
+        "What color are the curtains in the room?"
+    ],
+    "sub_answer": [
+        "green"
+    ],
+    "gt_ans": "green",
+    "confidence_base": 0.5550858974456787,
+    "confidence_lba": 0.676455,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.3639601469039917,
+        0.6764549016952515,
+        0.35313066840171814,
+        0.09816575795412064,
+        0.2780381739139557
+    ]
+}

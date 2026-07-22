@@ -1,0 +1,30 @@
+{
+    "question_id": "4C2cZitDfGX5ytw6YTcxiL",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is likely behind the rug? refrigerator.\nQuestion: What is likely in front of the rug?\n(A) refrigerator\n(B) pantry\n(C) washing machine\n(D) sink\nAnswer: The answer is ",
+    "main_question": "What is likely in front of the rug?\n(A) refrigerator\n(B) pantry\n(C) washing machine\n(D) sink",
+    "sub_question": [
+        "What is likely behind the rug?"
+    ],
+    "sub_answer": [
+        "refrigerator"
+    ],
+    "gt_ans": "sink",
+    "confidence_base": 0.05612141266465187,
+    "confidence_lba": 0.982757,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.3483927845954895,
+        0.08523228764533997,
+        0.9827565550804138,
+        0.9620344638824463,
+        0.47360125184059143
+    ]
+}

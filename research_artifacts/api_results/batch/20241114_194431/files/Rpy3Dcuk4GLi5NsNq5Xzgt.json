@@ -1,0 +1,30 @@
+{
+    "question_id": "Rpy3Dcuk4GLi5NsNq5Xzgt",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the sign? no sign.\nQuestion: What symbol is repeated on the sign?\n(A) minus\n(B) period\n(C) exclamation\n(D) plus\nAnswer: The answer is ",
+    "main_question": "What symbol is repeated on the sign?\n(A) minus\n(B) period\n(C) exclamation\n(D) plus",
+    "sub_question": [
+        "What is on the sign?"
+    ],
+    "sub_answer": [
+        "no sign"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.14796718955039978,
+    "confidence_lba": 0.089511,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(C)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.06341302394866943,
+        0.009503106586635113,
+        0.04749589413404465,
+        0.08951066434383392,
+        0.04104282334446907
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "RHuE3kjsrxziVFTSuHGQTD",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat animal has the same color stripes as zebras? giraffe.\nQuestion: What animal is a close relative of zebras?\n(A) bear\n(B) horse\n(C) wolf\n(D) dog\nAnswer: The answer is ",
+    "main_question": "What animal is a close relative of zebras?\n(A) bear\n(B) horse\n(C) wolf\n(D) dog",
+    "sub_question": [
+        "What animal has the same color stripes as zebras?"
+    ],
+    "sub_answer": [
+        "giraffe"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.863242506980896,
+    "confidence_lba": 0.88123,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.4669325351715088,
+        0.856138288974762,
+        0.8812304735183716,
+        0.1490347534418106,
+        0.8195783495903015
+    ]
+}

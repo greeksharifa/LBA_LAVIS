@@ -1,0 +1,41 @@
+{
+    "question_id": "2LCLpdpD3yy2dgH5tQbcFe",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the person holding the appliance use it for? drying hair.\nQuestion: What is the appliance the woman is holding used for?\n(A) cutting hair\n(B) brushing teeth\n(C) drying hair\n(D) painting nails\nAnswer: The answer is ",
+    "main_question": "What is the appliance the woman is holding used for?\n(A) cutting hair\n(B) brushing teeth\n(C) drying hair\n(D) painting nails",
+    "sub_question": [
+        "What does the person holding the appliance use it for?"
+    ],
+    "sub_answer": [
+        "drying hair"
+    ],
+    "gt_ans": [
+        "drying hair",
+        "combing hair",
+        "drying hair",
+        "blowing hair",
+        "hair drying",
+        "steamer",
+        "hair styling",
+        "dryer",
+        "hairdryer",
+        "hair drying"
+    ],
+    "confidence_base": 0.9781218767166138,
+    "confidence_lba": 0.976617,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9766173362731934,
+        0.9715242981910706,
+        0.9009965658187866,
+        0.9676646590232849,
+        0.9737078547477722
+    ]
+}

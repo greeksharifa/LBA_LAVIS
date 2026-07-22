@@ -1,0 +1,41 @@
+{
+    "question_id": "DAEcXR5DWNgEcEVRqA4xFS",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat are the two objects in the middle? a stove and a sink.\nQuestion: What is the rectangular object in the back left used to do?\n(A) blend food\n(B) watch tv\n(C) store bread\n(D) cook food\nAnswer: The answer is ",
+    "main_question": "What is the rectangular object in the back left used to do?\n(A) blend food\n(B) watch tv\n(C) store bread\n(D) cook food",
+    "sub_question": [
+        "What are the two objects in the middle?"
+    ],
+    "sub_answer": [
+        "a stove and a sink"
+    ],
+    "gt_ans": [
+        "watch tv",
+        "television",
+        "microwave food",
+        "watch tv",
+        "microwave food",
+        "microwave food",
+        "watching tv",
+        "watch television",
+        "watching tv",
+        "tv"
+    ],
+    "confidence_base": 0.41406217217445374,
+    "confidence_lba": 0.961527,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8149203062057495,
+        0.7071748375892639,
+        0.9615269899368286,
+        0.05182981491088867,
+        0.35163024067878723
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "PPFTmUK9jTLmCYzJ8UK7Bf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat state is the room located in? california.\nQuestion: Where is this room located at?\n(A) apartment\n(B) school\n(C) house\n(D) museum\nAnswer: The answer is ",
+    "main_question": "Where is this room located at?\n(A) apartment\n(B) school\n(C) house\n(D) museum",
+    "sub_question": [
+        "What state is the room located in?"
+    ],
+    "sub_answer": [
+        "california"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.11707699298858643,
+    "confidence_lba": 0.937064,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7224036455154419,
+        0.9370641708374023,
+        0.928504467010498,
+        0.9349063634872437,
+        0.27899429202079773
+    ]
+}

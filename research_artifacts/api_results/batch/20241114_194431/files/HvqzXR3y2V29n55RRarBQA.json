@@ -1,0 +1,30 @@
+{
+    "question_id": "HvqzXR3y2V29n55RRarBQA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the baseball game about? a pitcher is throwing a pitch.\nQuestion: Why is the black net set up behind the batter?\n(A) safety\n(B) to film\n(C) to climb\n(D) photo opportunities\nAnswer: The answer is ",
+    "main_question": "Why is the black net set up behind the batter?\n(A) safety\n(B) to film\n(C) to climb\n(D) photo opportunities",
+    "sub_question": [
+        "What is the baseball game about?"
+    ],
+    "sub_answer": [
+        "a pitcher is throwing a pitch"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8276511430740356,
+    "confidence_lba": 0.989196,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9232852458953857,
+        0.9891960620880127,
+        0.8923256397247314,
+        0.8991928696632385,
+        0.9327600598335266
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "K4hCLffyy8Lq3xuDXr4Tue",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat might the man be selling? guns.\nQuestion: What profession might this man work as?\n(A) politician\n(B) bartender\n(C) sherriff\n(D) librarian\nAnswer: The answer is ",
+    "main_question": "What profession might this man work as?\n(A) politician\n(B) bartender\n(C) sherriff\n(D) librarian",
+    "sub_question": [
+        "What might the man be selling?"
+    ],
+    "sub_answer": [
+        "guns"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9699929356575012,
+    "confidence_lba": 0.98187,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.977602481842041,
+        0.9818696975708008,
+        0.9563530683517456,
+        0.9694080352783203,
+        0.9415768384933472
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "bsEAp6tE9zHfcQ2ZASJYbZ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the object in the photo swiveling in the air? giraffe.\nQuestion: What is the closest animal's neck most directly useful for?\n(A) breathing underwater\n(B) eating leaves\n(C) peacocking\n(D) fighting predators\nAnswer: The answer is ",
+    "main_question": "What is the closest animal's neck most directly useful for?\n(A) breathing underwater\n(B) eating leaves\n(C) peacocking\n(D) fighting predators",
+    "sub_question": [
+        "What is the object in the photo swiveling in the air?"
+    ],
+    "sub_answer": [
+        "giraffe"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.38969066739082336,
+    "confidence_lba": 0.736399,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06755857169628143,
+        0.31599971652030945,
+        0.7363994717597961,
+        0.536978006362915,
+        0.12467548251152039
+    ]
+}

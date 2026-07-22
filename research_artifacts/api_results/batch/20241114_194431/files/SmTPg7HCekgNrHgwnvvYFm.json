@@ -1,0 +1,30 @@
+{
+    "question_id": "SmTPg7HCekgNrHgwnvvYFm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many glasses of beer are there? four.\nQuestion: How many glasses of beer are at least partially visible?\n(A) four\n(B) eight\n(C) five\n(D) three\nAnswer: The answer is ",
+    "main_question": "How many glasses of beer are at least partially visible?\n(A) four\n(B) eight\n(C) five\n(D) three",
+    "sub_question": [
+        "How many glasses of beer are there?"
+    ],
+    "sub_answer": [
+        "four"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.006937672384083271,
+    "confidence_lba": 0.954258,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(B)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.016995329409837723,
+        0.9542580246925354,
+        0.03675375133752823,
+        0.01447549369186163,
+        0.3211379051208496
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "9Vcrsyxf2zbSBauWavQbju",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow can a person be cold? in a lake.\nQuestion: Which person would be the coldest?\n(A) left\n(B) middle\n(C) right\n(D) none\nAnswer: The answer is ",
+    "main_question": "Which person would be the coldest?\n(A) left\n(B) middle\n(C) right\n(D) none",
+    "sub_question": [
+        "How can a person be cold?"
+    ],
+    "sub_answer": [
+        "in a lake"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.018927060067653656,
+    "confidence_lba": 0.062936,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.0368572361767292,
+        0.06293594092130661,
+        0.06119091808795929,
+        0.016975583508610725,
+        0.022804873064160347
+    ]
+}

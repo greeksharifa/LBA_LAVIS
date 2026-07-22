@@ -1,0 +1,41 @@
+{
+    "question_id": "8MMdCgrej5iBZ7PitRYrt3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of bag is the girl carrying? suitcase.\nQuestion: What kind of bag is this?\n(A) suitcase\n(B) backpack\n(C) purse\n(D) briefcase\nAnswer: The answer is ",
+    "main_question": "What kind of bag is this?\n(A) suitcase\n(B) backpack\n(C) purse\n(D) briefcase",
+    "sub_question": [
+        "What kind of bag is the girl carrying?"
+    ],
+    "sub_answer": [
+        "suitcase"
+    ],
+    "gt_ans": [
+        "suitcase",
+        "suitcase",
+        "suitcase",
+        "roll away",
+        "suitcase",
+        "doll bag",
+        "backpack",
+        "suitcase",
+        "suitcase",
+        "suitcase"
+    ],
+    "confidence_base": 0.9828975200653076,
+    "confidence_lba": 0.991051,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9879295825958252,
+        0.9910507202148438,
+        0.9555173516273499,
+        0.9664915800094604,
+        0.9871882200241089
+    ]
+}

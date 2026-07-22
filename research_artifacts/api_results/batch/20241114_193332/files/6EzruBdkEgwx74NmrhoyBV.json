@@ -1,0 +1,41 @@
+{
+    "question_id": "6EzruBdkEgwx74NmrhoyBV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nThe natural light streams into the room through the windows? i think so.\nQuestion: What is the natural light streaming into the room through?\n(A) door\n(B) lightbulb\n(C) clock\n(D) candle\nAnswer: The answer is ",
+    "main_question": "What is the natural light streaming into the room through?\n(A) door\n(B) lightbulb\n(C) clock\n(D) candle",
+    "sub_question": [
+        "The natural light streams into the room through the windows?"
+    ],
+    "sub_answer": [
+        "i think so"
+    ],
+    "gt_ans": [
+        "sunlight",
+        "clock",
+        "clock",
+        "clock",
+        "clock",
+        "clock",
+        "skylight",
+        "window",
+        "clock",
+        "clock window"
+    ],
+    "confidence_base": 0.045698389410972595,
+    "confidence_lba": 0.15617,
+    "text_output_base": "(A)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.03976494073867798,
+        0.07489023357629776,
+        0.1561703383922577,
+        0.054054539650678635,
+        0.054055243730545044
+    ]
+}

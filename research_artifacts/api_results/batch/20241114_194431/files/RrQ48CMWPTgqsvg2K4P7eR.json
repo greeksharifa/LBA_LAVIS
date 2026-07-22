@@ -1,0 +1,30 @@
+{
+    "question_id": "RrQ48CMWPTgqsvg2K4P7eR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the physical position of the player? catcher.\nQuestion: When actively playing what physical position will this player be in?\n(A) upside down\n(B) crouch\n(C) lying down\n(D) stand\nAnswer: The answer is ",
+    "main_question": "When actively playing what physical position will this player be in?\n(A) upside down\n(B) crouch\n(C) lying down\n(D) stand",
+    "sub_question": [
+        "What is the physical position of the player?"
+    ],
+    "sub_answer": [
+        "catcher"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.4946753680706024,
+    "confidence_lba": 0.725539,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.06390643864870071,
+        0.08448436856269836,
+        0.7255385518074036,
+        0.13357383012771606,
+        0.10461718589067459
+    ]
+}

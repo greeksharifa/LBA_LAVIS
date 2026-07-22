@@ -1,0 +1,30 @@
+{
+    "question_id": "BWmRhAFKF4KHK6QqPKS5Q3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the ground near the bench? leaves.\nQuestion: What type of container is near the benches?\n(A) ticket\n(B) trash\n(C) food\n(D) water\nAnswer: The answer is ",
+    "main_question": "What type of container is near the benches?\n(A) ticket\n(B) trash\n(C) food\n(D) water",
+    "sub_question": [
+        "What is on the ground near the bench?"
+    ],
+    "sub_answer": [
+        "leaves"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5867008566856384,
+    "confidence_lba": 0.988443,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9883449673652649,
+        0.9704686999320984,
+        0.9884430766105652,
+        0.4084402024745941,
+        0.9457372426986694
+    ]
+}

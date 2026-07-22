@@ -1,0 +1,30 @@
+{
+    "question_id": "UrWnWqFNL2XNxWBvkt3nLp",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the wall? white.\nQuestion: The blue tape on the wall is in the shape of a letter that is needed to spell what word?\n(A) goal\n(B) ax\n(C) mead\n(D) moon\nAnswer: The answer is ",
+    "main_question": "The blue tape on the wall is in the shape of a letter that is needed to spell what word?\n(A) goal\n(B) ax\n(C) mead\n(D) moon",
+    "sub_question": [
+        "What color is the wall?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.6522857546806335,
+    "confidence_lba": 0.829532,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.5451812744140625,
+        0.3375359773635864,
+        0.7165640592575073,
+        0.829531729221344,
+        0.7063387036323547
+    ]
+}

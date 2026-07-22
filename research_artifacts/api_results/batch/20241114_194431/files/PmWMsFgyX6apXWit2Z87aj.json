@@ -1,0 +1,30 @@
+{
+    "question_id": "PmWMsFgyX6apXWit2Z87aj",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere would you most likely find this advertisement? in a magazine.\nQuestion: Where would you most likely find this advertisement?\n(A) book\n(B) newspaper\n(C) library\n(D) magazine\nAnswer: The answer is ",
+    "main_question": "Where would you most likely find this advertisement?\n(A) book\n(B) newspaper\n(C) library\n(D) magazine",
+    "sub_question": [
+        "Where would you most likely find this advertisement?"
+    ],
+    "sub_answer": [
+        "in a magazine"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.5561136603355408,
+    "confidence_lba": 0.942232,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.6079863905906677,
+        0.931239902973175,
+        0.493632972240448,
+        0.37091293931007385,
+        0.9422322511672974
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "JCLA7VcpiUFhSr4WfS22EA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat time of day is it? morning.\nQuestion: What time of day is this?\n(A) daytime\n(B) dawn\n(C) evening\n(D) night\nAnswer: The answer is ",
+    "main_question": "What time of day is this?\n(A) daytime\n(B) dawn\n(C) evening\n(D) night",
+    "sub_question": [
+        "What time of day is it?"
+    ],
+    "sub_answer": [
+        "morning"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.8395049571990967,
+    "confidence_lba": 0.959362,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.8601210117340088,
+        0.9593621492385864,
+        0.6515989899635315,
+        0.32202422618865967,
+        0.5982856154441833
+    ]
+}

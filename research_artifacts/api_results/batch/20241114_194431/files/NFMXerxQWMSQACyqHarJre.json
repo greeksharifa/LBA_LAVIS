@@ -1,0 +1,30 @@
+{
+    "question_id": "NFMXerxQWMSQACyqHarJre",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of energy does the boy use to power the device? electrical.\nQuestion: How is the device the boy is holding powered?\n(A) solar\n(B) battery\n(C) gas\n(D) electricity\nAnswer: The answer is ",
+    "main_question": "How is the device the boy is holding powered?\n(A) solar\n(B) battery\n(C) gas\n(D) electricity",
+    "sub_question": [
+        "What kind of energy does the boy use to power the device?"
+    ],
+    "sub_answer": [
+        "electrical"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.22575494647026062,
+    "confidence_lba": 0.71472,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.1948184221982956,
+        0.23799286782741547,
+        0.056736767292022705,
+        0.7147203087806702,
+        0.5705164670944214
+    ]
+}

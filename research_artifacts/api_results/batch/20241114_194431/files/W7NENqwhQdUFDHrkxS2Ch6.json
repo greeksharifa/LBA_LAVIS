@@ -1,0 +1,30 @@
+{
+    "question_id": "W7NENqwhQdUFDHrkxS2Ch6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the woman holding? umbrella.\nQuestion: What is the reflective surface behind the woman holding the umbrella?\n(A) water\n(B) ice\n(C) glass\n(D) rain\nAnswer: The answer is ",
+    "main_question": "What is the reflective surface behind the woman holding the umbrella?\n(A) water\n(B) ice\n(C) glass\n(D) rain",
+    "sub_question": [
+        "What is the woman holding?"
+    ],
+    "sub_answer": [
+        "umbrella"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9076273441314697,
+    "confidence_lba": 0.969891,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9698913097381592,
+        0.8523443937301636,
+        0.901973307132721,
+        0.8566728830337524,
+        0.8581243753433228
+    ]
+}

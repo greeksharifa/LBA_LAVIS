@@ -1,0 +1,41 @@
+{
+    "question_id": "BaNWccWHEXHgtdo2h5795T",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the purpose of the stop sign? to stop traffic.\nQuestion: What type of sign is visible?\n(A) directional\n(B) traffic\n(C) price\n(D) brand\nAnswer: The answer is ",
+    "main_question": "What type of sign is visible?\n(A) directional\n(B) traffic\n(C) price\n(D) brand",
+    "sub_question": [
+        "What is the purpose of the stop sign?"
+    ],
+    "sub_answer": [
+        "to stop traffic"
+    ],
+    "gt_ans": [
+        "stop sign",
+        "traffic",
+        "stop",
+        "stop",
+        "stop sign",
+        "stop",
+        "stop",
+        "stop",
+        "stop sign",
+        "stop sign"
+    ],
+    "confidence_base": 0.24132542312145233,
+    "confidence_lba": 0.79418,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.4301547110080719,
+        0.3640298545360565,
+        0.5865081548690796,
+        0.48247620463371277,
+        0.7941800951957703
+    ]
+}

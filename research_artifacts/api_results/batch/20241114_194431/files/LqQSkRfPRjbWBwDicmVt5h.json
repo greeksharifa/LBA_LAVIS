@@ -1,0 +1,30 @@
+{
+    "question_id": "LqQSkRfPRjbWBwDicmVt5h",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the trailer? tire.\nQuestion: What is the first word on the trailer?\n(A) clean\n(B) dry\n(C) emergency\n(D) services\nAnswer: The answer is ",
+    "main_question": "What is the first word on the trailer?\n(A) clean\n(B) dry\n(C) emergency\n(D) services",
+    "sub_question": [
+        "What is on the trailer?"
+    ],
+    "sub_answer": [
+        "tire"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.05333564430475235,
+    "confidence_lba": 0.971397,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(A)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9713967442512512,
+        0.07262831181287766,
+        0.08496763557195663,
+        0.05434315279126167,
+        0.05470028519630432
+    ]
+}

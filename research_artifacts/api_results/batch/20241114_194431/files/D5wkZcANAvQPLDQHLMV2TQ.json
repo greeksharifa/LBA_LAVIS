@@ -1,0 +1,30 @@
+{
+    "question_id": "D5wkZcANAvQPLDQHLMV2TQ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat show is on the man's tv? fox news.\nQuestion: What kind of show is the man on?\n(A) cooking show\n(B) reality show\n(C) talk show\n(D) movie\nAnswer: The answer is ",
+    "main_question": "What kind of show is the man on?\n(A) cooking show\n(B) reality show\n(C) talk show\n(D) movie",
+    "sub_question": [
+        "What show is on the man's tv?"
+    ],
+    "sub_answer": [
+        "fox news"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9022714495658875,
+    "confidence_lba": 0.93695,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(B)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.37765276432037354,
+        0.8078762888908386,
+        0.7885454893112183,
+        0.667119026184082,
+        0.9369504451751709
+    ]
+}

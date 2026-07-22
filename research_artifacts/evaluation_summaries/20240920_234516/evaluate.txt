@@ -1,0 +1,11 @@
+{
+    "max_conf_gap         ": "0.91100",
+    "acc_origin           ": "37.93%",
+    "Previous_work_acc    ": "37.99%",
+    "max_acc_by_tau       ": "38.14%",
+    "TVQA                 ": "38.14% = 5817.0 / 15252",
+    "max_arg_confidence   ": "0.014061",
+    "confidence_percentile": "18.12%",
+    "E_CR                 ": "14.92%",
+    "E_IC                 ": "33.90%"
+}

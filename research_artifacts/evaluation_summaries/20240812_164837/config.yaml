@@ -1,0 +1,37 @@
+runner:
+  visualize: false
+  match1ok: true
+  select_high_confidence: true
+  train_recomposer_examplar: false
+  random_frame: false
+  threshold_lba: false
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /data2/
+  device_map: cuda:0
+  batch_size: 32
+  num_sub_qa_generate: 1
+  num_sub_qa_select: 1
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+  debug: false
+  cfg_pkl_path: SeViLA/cfg.pkl
+datasets:
+  dataset_name: AOKVQA
+  num_data: -1
+  split: val
+  data_type: images
+  vqa_acc: true
+  ann_paths:
+    train:
+    - /data1/aokvqa/annotations/aokvqa_v1p0_train.json
+    val:
+    - /data1/aokvqa/annotations/aokvqa_v1p0_val.json
+  vis_root: /data1/coco/images/
+model:
+  cache_dir: /data2/
+dataset_name: AOKVQA
+num_data: -1

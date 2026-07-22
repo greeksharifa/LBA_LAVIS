@@ -1,0 +1,30 @@
+{
+    "question_id": "5TbBvzzr5N35YUs7yBd7Ah",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the skateboard balanced on? rail.\nQuestion: What is the skateboard balanced on?\n(A) post\n(B) air\n(C) chain\n(D) ground\nAnswer: The answer is ",
+    "main_question": "What is the skateboard balanced on?\n(A) post\n(B) air\n(C) chain\n(D) ground",
+    "sub_question": [
+        "What is the skateboard balanced on?"
+    ],
+    "sub_answer": [
+        "rail"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.03027983009815216,
+    "confidence_lba": 0.036764,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.036764390766620636,
+        0.032159022986888885,
+        0.03215892240405083,
+        0.032159097492694855,
+        0.03215892240405083
+    ]
+}

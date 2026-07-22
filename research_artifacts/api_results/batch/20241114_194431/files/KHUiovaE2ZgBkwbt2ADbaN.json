@@ -1,0 +1,30 @@
+{
+    "question_id": "KHUiovaE2ZgBkwbt2ADbaN",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich of these emotions would a person most likely be experiencing? happy.\nQuestion: Which of these emotions is the person least likely to be experiencing?\n(A) contentedness\n(B) sadness\n(C) joy\n(D) happiness\nAnswer: The answer is ",
+    "main_question": "Which of these emotions is the person least likely to be experiencing?\n(A) contentedness\n(B) sadness\n(C) joy\n(D) happiness",
+    "sub_question": [
+        "Which of these emotions would a person most likely be experiencing?"
+    ],
+    "sub_answer": [
+        "happy"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.11939695477485657,
+    "confidence_lba": 0.643902,
+    "text_output_base": "B",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.5914372801780701,
+        0.6439023017883301,
+        0.49251988530158997,
+        0.4647514224052429,
+        0.33564436435699463
+    ]
+}

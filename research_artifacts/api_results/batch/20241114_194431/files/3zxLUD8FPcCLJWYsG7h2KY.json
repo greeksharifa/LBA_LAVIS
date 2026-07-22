@@ -1,0 +1,30 @@
+{
+    "question_id": "3zxLUD8FPcCLJWYsG7h2KY",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of venue do you want to go to? a restaurant.\nQuestion: What kind of venue is it?\n(A) garage\n(B) commercial kitchen\n(C) auto shop\n(D) domestic kitchen\nAnswer: The answer is ",
+    "main_question": "What kind of venue is it?\n(A) garage\n(B) commercial kitchen\n(C) auto shop\n(D) domestic kitchen",
+    "sub_question": [
+        "What kind of venue do you want to go to?"
+    ],
+    "sub_answer": [
+        "a restaurant"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6412089467048645,
+    "confidence_lba": 0.78947,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(D)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6687358021736145,
+        0.2914125621318817,
+        0.752165675163269,
+        0.7894695997238159,
+        0.6772974133491516
+    ]
+}

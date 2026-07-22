@@ -1,0 +1,30 @@
+{
+    "question_id": "B725pHrrknZKDAqoLBjeof",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of fruit is the clock? apple.\nQuestion: What fruit is the clock shaped as?\n(A) orange\n(B) pineapple\n(C) apple\n(D) pear\nAnswer: The answer is ",
+    "main_question": "What fruit is the clock shaped as?\n(A) orange\n(B) pineapple\n(C) apple\n(D) pear",
+    "sub_question": [
+        "What kind of fruit is the clock?"
+    ],
+    "sub_answer": [
+        "apple"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9411450028419495,
+    "confidence_lba": 0.974288,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9406106472015381,
+        0.973188042640686,
+        0.9742875695228577,
+        0.9167100787162781,
+        0.9734023213386536
+    ]
+}

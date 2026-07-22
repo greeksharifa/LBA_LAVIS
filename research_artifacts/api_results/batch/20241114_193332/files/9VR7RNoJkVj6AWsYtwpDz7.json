@@ -1,0 +1,41 @@
+{
+    "question_id": "9VR7RNoJkVj6AWsYtwpDz7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow would a vegeterian eat this food? how would a vegetarian eat this food.\nQuestion: What kind of a person usually eats food like this?\n(A) obese\n(B) competitive eater\n(C) glutton\n(D) nutritionist\nAnswer: The answer is ",
+    "main_question": "What kind of a person usually eats food like this?\n(A) obese\n(B) competitive eater\n(C) glutton\n(D) nutritionist",
+    "sub_question": [
+        "How would a vegeterian eat this food?"
+    ],
+    "sub_answer": [
+        "how would a vegetarian eat this food"
+    ],
+    "gt_ans": [
+        "vegetarian",
+        "vegetarian",
+        "japanese",
+        "vegetarian",
+        "vegetarian",
+        "vegan",
+        "vegetarian",
+        "vegetarian",
+        "nutritionist",
+        "healthy"
+    ],
+    "confidence_base": 0.8184570074081421,
+    "confidence_lba": 0.974721,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.16516420245170593,
+        0.97472083568573,
+        0.6623345613479614,
+        0.9496214985847473,
+        0.9189323782920837
+    ]
+}

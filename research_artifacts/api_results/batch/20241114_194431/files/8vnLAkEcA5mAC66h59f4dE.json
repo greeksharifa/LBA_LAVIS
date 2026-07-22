@@ -1,0 +1,30 @@
+{
+    "question_id": "8vnLAkEcA5mAC66h59f4dE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nAre the people boarding this bus? no.\nQuestion: Are the people boarding this train?\n(A) absolutely no\n(B) probably yes\n(C) probably no\n(D) yes\nAnswer: The answer is ",
+    "main_question": "Are the people boarding this train?\n(A) absolutely no\n(B) probably yes\n(C) probably no\n(D) yes",
+    "sub_question": [
+        "Are the people boarding this bus?"
+    ],
+    "sub_answer": [
+        "no"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.04804254323244095,
+    "confidence_lba": 0.547404,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.01727723889052868,
+        0.02989313192665577,
+        0.5474036931991577,
+        0.038809195160865784,
+        0.007117928937077522
+    ]
+}

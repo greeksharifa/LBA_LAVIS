@@ -1,0 +1,30 @@
+{
+    "question_id": "LNUVUyUrSmACQeFCKtKq6U",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy does the surfboard have the gray colored residue? it was sprayed with water.\nQuestion: What is the gray colored residue seen on the outer part of the middle of the board?\n(A) wax\n(B) dust\n(C) paint\n(D) mud\nAnswer: The answer is ",
+    "main_question": "What is the gray colored residue seen on the outer part of the middle of the board?\n(A) wax\n(B) dust\n(C) paint\n(D) mud",
+    "sub_question": [
+        "Why does the surfboard have the gray colored residue?"
+    ],
+    "sub_answer": [
+        "it was sprayed with water"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.13006794452667236,
+    "confidence_lba": 0.994526,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.29573890566825867,
+        0.9945264458656311,
+        0.24463580548763275,
+        0.5455567240715027,
+        0.19550643861293793
+    ]
+}

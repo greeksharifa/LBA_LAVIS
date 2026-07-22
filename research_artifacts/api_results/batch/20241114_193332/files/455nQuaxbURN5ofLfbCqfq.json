@@ -1,0 +1,41 @@
+{
+    "question_id": "455nQuaxbURN5ofLfbCqfq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the terrain like? dry.\nQuestion: What kind of terrain is it?\n(A) beach\n(B) desert\n(C) savanna\n(D) valley\nAnswer: The answer is ",
+    "main_question": "What kind of terrain is it?\n(A) beach\n(B) desert\n(C) savanna\n(D) valley",
+    "sub_question": [
+        "What is the terrain like?"
+    ],
+    "sub_answer": [
+        "dry"
+    ],
+    "gt_ans": [
+        "savanna",
+        "rugged",
+        "grassy hilly",
+        "sandy",
+        "plains",
+        "safari",
+        "jungle",
+        "savannas",
+        "plains",
+        "savanna"
+    ],
+    "confidence_base": 0.3618386685848236,
+    "confidence_lba": 0.909573,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(C)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.1201951652765274,
+        0.152382954955101,
+        0.044521503150463104,
+        0.9095726013183594,
+        0.08332067728042603
+    ]
+}

@@ -1,0 +1,66 @@
+runner:
+  visualize: false
+  sub_mode: subqa
+  select_high_confidence: true
+  train_recomposer_examplar: false
+  threshold_lba: false
+  vision_supple: true
+  use_pre_generated_sub_q: false
+  use_pre_generated_sub_a: false
+  num_sub_qa_generate: 3
+  num_sub_qa_select: 1
+  num_frame_sampling: 3
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /data2/
+  device_map: cuda:0
+  batch_size: 8
+  seed: 44
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+  num_heatmap_row: 10
+  debug: false
+  sevila_cfg_pkl_path: SeViLA/cfg.pkl
+  flipped_vqa_cfg_pkl_path: flipped_vqa/cfg.pkl
+datasets:
+  dataset_name: DramaQA
+  root_dir: /data/video_datasets
+  num_data: -1
+  split: val
+  data_type: videos
+  n_frms: 4
+  vqa_acc: false
+  only_scene: false
+  ann_paths:
+    train:
+    - AnotherMissOh/AnotherMissOhQA_train_set.json
+    val:
+    - AnotherMissOh/AnotherMissOhQA_val_set.json
+    - AnotherMissOh/sub_questions_val.json
+  vis_root: AnotherMissOh/images/
+  vis_processor:
+    train:
+      name: alpro_video_train
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+    eval:
+      name: alpro_video_eval
+      n_frms: 5
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+  text_processor:
+    train:
+      name: blip_question
+    eval:
+      name: blip_caption
+model:
+  cache_dir: /data/LLMs/
+dataset_name: DramaQA
+num_data: -1
+root_dir: /data/video_datasets

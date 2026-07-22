@@ -1,0 +1,41 @@
+{
+    "question_id": "8w7GuH4PjCommJcwHaGge6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of bus are the blue buses? double decker.\nQuestion: Where are the buses with blue trim probably assembled?\n(A) stadium\n(B) lot\n(C) lane\n(D) terminal\nAnswer: The answer is ",
+    "main_question": "Where are the buses with blue trim probably assembled?\n(A) stadium\n(B) lot\n(C) lane\n(D) terminal",
+    "sub_question": [
+        "What type of bus are the blue buses?"
+    ],
+    "sub_answer": [
+        "double decker"
+    ],
+    "gt_ans": [
+        "factory",
+        "asia",
+        "plant manufacturer",
+        "asia",
+        "japan",
+        "bus station",
+        "detroit",
+        "unknown",
+        "china",
+        "terminal"
+    ],
+    "confidence_base": 0.36579763889312744,
+    "confidence_lba": 0.374826,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.07299885153770447,
+        0.12185333669185638,
+        0.3739156723022461,
+        0.37482646107673645,
+        0.2411247193813324
+    ]
+}

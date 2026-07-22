@@ -1,0 +1,30 @@
+{
+    "question_id": "J6Kwvdi26GWFDHeADMXSWW",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of balloons are they? balloons for a birthday.\nQuestion: How are these balloons floating?\n(A) fan\n(B) wind\n(C) remote\n(D) helium\nAnswer: The answer is ",
+    "main_question": "How are these balloons floating?\n(A) fan\n(B) wind\n(C) remote\n(D) helium",
+    "sub_question": [
+        "What kind of balloons are they?"
+    ],
+    "sub_answer": [
+        "balloons for a birthday"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.5241625308990479,
+    "confidence_lba": 0.88279,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.12349162995815277,
+        0.6403770446777344,
+        0.388026624917984,
+        0.8827904462814331,
+        0.8432973027229309
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "JwnCRZQToshydgQiSHz6Qk",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the masonry on the wall to the left of the kitchen? it is a fireplace.\nQuestion: What is the purpose of the masonry on the wall to the left of the kitchen?\n(A) fireplace\n(B) structural wall\n(C) home foundation\n(D) visual aesthetics\nAnswer: The answer is ",
+    "main_question": "What is the purpose of the masonry on the wall to the left of the kitchen?\n(A) fireplace\n(B) structural wall\n(C) home foundation\n(D) visual aesthetics",
+    "sub_question": [
+        "Why is the masonry on the wall to the left of the kitchen?"
+    ],
+    "sub_answer": [
+        "it is a fireplace"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.09784232079982758,
+    "confidence_lba": 0.910726,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(D)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.2659413516521454,
+        0.8753136992454529,
+        0.41224026679992676,
+        0.16489659249782562,
+        0.9107263088226318
+    ]
+}

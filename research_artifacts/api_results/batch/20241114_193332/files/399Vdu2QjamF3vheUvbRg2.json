@@ -1,0 +1,41 @@
+{
+    "question_id": "399Vdu2QjamF3vheUvbRg2",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is this vehicle called? alaska airlines.\nQuestion: What type of transportation is this?\n(A) air\n(B) water\n(C) road\n(D) road\nAnswer: The answer is ",
+    "main_question": "What type of transportation is this?\n(A) air\n(B) water\n(C) road\n(D) road",
+    "sub_question": [
+        "What is this vehicle called?"
+    ],
+    "sub_answer": [
+        "alaska airlines"
+    ],
+    "gt_ans": [
+        "airplane",
+        "airplane",
+        "airplane",
+        "airplane",
+        "air",
+        "air",
+        "airplane",
+        "plane",
+        "airplane",
+        "airplane"
+    ],
+    "confidence_base": 0.9663416743278503,
+    "confidence_lba": 0.99048,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.13981609046459198,
+        0.8563031554222107,
+        0.8586779236793518,
+        0.9218759536743164,
+        0.990479588508606
+    ]
+}

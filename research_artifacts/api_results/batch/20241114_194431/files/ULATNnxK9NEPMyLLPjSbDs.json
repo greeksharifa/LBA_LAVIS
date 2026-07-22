@@ -1,0 +1,30 @@
+{
+    "question_id": "ULATNnxK9NEPMyLLPjSbDs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy did the man feel compelled to give a speech? he was a politician.\nQuestion: What is the likely ethnicity of the man?\n(A) japanese\n(B) korean\n(C) indian\n(D) chinese\nAnswer: The answer is ",
+    "main_question": "What is the likely ethnicity of the man?\n(A) japanese\n(B) korean\n(C) indian\n(D) chinese",
+    "sub_question": [
+        "Why did the man feel compelled to give a speech?"
+    ],
+    "sub_answer": [
+        "he was a politician"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.07283104956150055,
+    "confidence_lba": 0.073402,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.018532192334532738,
+        0.033009592443704605,
+        0.019180050119757652,
+        0.04476557672023773,
+        0.07340193539857864
+    ]
+}

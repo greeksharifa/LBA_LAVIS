@@ -1,0 +1,30 @@
+{
+    "question_id": "2YfYkRjcnnsVzjycPehWPA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the darker colored fruit? grapes.\nQuestion: What kind of fruit is cut in half and darker than the other?\n(A) grapes\n(B) apples\n(C) lettuce\n(D) radish\nAnswer: The answer is ",
+    "main_question": "What kind of fruit is cut in half and darker than the other?\n(A) grapes\n(B) apples\n(C) lettuce\n(D) radish",
+    "sub_question": [
+        "What is the darker colored fruit?"
+    ],
+    "sub_answer": [
+        "grapes"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.12104585766792297,
+    "confidence_lba": 0.982718,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.13652880489826202,
+        0.04368991777300835,
+        0.049338310956954956,
+        0.054212864488363266,
+        0.9827175736427307
+    ]
+}

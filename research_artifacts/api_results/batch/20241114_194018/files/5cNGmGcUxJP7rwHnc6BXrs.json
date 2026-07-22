@@ -1,0 +1,30 @@
+{
+    "question_id": "5cNGmGcUxJP7rwHnc6BXrs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the green object used for? boat.\nQuestion: The green object on the smaller boat is used as what?\n(A) cabin\n(B) restroom\n(C) dining\n(D) kitchen\nAnswer: The answer is ",
+    "main_question": "The green object on the smaller boat is used as what?\n(A) cabin\n(B) restroom\n(C) dining\n(D) kitchen",
+    "sub_question": [
+        "What is the green object used for?"
+    ],
+    "sub_answer": [
+        "boat"
+    ],
+    "gt_ans": "restroom",
+    "confidence_base": 0.4808526337146759,
+    "confidence_lba": 0.920847,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.3199351131916046,
+        0.9208467602729797,
+        0.7838875651359558,
+        0.8560298681259155,
+        0.8712741136550903
+    ]
+}

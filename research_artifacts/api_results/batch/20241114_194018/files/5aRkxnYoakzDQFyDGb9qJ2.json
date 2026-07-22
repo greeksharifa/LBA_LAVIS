@@ -1,0 +1,30 @@
+{
+    "question_id": "5aRkxnYoakzDQFyDGb9qJ2",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat was the name of the street in the movie \"the princess bride\"? the street.\nQuestion: The name of the street is the same as the last name of what actress?\n(A) eva mendes\n(B) jessica biel\n(C) eva green\n(D) jessica alba\nAnswer: The answer is ",
+    "main_question": "The name of the street is the same as the last name of what actress?\n(A) eva mendes\n(B) jessica biel\n(C) eva green\n(D) jessica alba",
+    "sub_question": [
+        "What was the name of the street in the movie \"the princess bride\"?"
+    ],
+    "sub_answer": [
+        "the street"
+    ],
+    "gt_ans": "jessica biel",
+    "confidence_base": 0.03095245733857155,
+    "confidence_lba": 0.164195,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.01277100294828415,
+        0.01337571069598198,
+        0.16419541835784912,
+        0.019034668803215027,
+        0.01903473399579525
+    ]
+}

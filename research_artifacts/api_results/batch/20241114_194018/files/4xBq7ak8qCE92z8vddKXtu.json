@@ -1,0 +1,30 @@
+{
+    "question_id": "4xBq7ak8qCE92z8vddKXtu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow are you feeling today? happy.\nQuestion: What direction is the narrow end of the flag pointing?\n(A) north\n(B) south\n(C) east\n(D) west\nAnswer: The answer is ",
+    "main_question": "What direction is the narrow end of the flag pointing?\n(A) north\n(B) south\n(C) east\n(D) west",
+    "sub_question": [
+        "How are you feeling today?"
+    ],
+    "sub_answer": [
+        "happy"
+    ],
+    "gt_ans": "west",
+    "confidence_base": 0.015344786457717419,
+    "confidence_lba": 0.932405,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(D)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9324051737785339,
+        0.9312787652015686,
+        0.0999952107667923,
+        0.043231043964624405,
+        0.0432310625910759
+    ]
+}

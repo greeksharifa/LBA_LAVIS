@@ -1,0 +1,30 @@
+{
+    "question_id": "Gr2guph9meudkWEM6Gbpwr",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow much energy is used to cook the turkey? no energy.\nQuestion: What energy is used to cook the turkey?\n(A) carbon fire\n(B) gas\n(C) electricity\n(D) wood fire\nAnswer: The answer is ",
+    "main_question": "What energy is used to cook the turkey?\n(A) carbon fire\n(B) gas\n(C) electricity\n(D) wood fire",
+    "sub_question": [
+        "How much energy is used to cook the turkey?"
+    ],
+    "sub_answer": [
+        "no energy"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.09710593521595001,
+    "confidence_lba": 0.385386,
+    "text_output_base": "(B)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(C)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.04164385050535202,
+        0.2362026870250702,
+        0.3853859305381775,
+        0.1579544097185135,
+        0.0986047238111496
+    ]
+}

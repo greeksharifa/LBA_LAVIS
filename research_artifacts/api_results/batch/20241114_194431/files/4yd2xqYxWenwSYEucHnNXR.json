@@ -1,0 +1,30 @@
+{
+    "question_id": "4yd2xqYxWenwSYEucHnNXR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is this scene located? paris.\nQuestion: In what nation is this scene located?\n(A) spain\n(B) china\n(C) italy\n(D) france\nAnswer: The answer is ",
+    "main_question": "In what nation is this scene located?\n(A) spain\n(B) china\n(C) italy\n(D) france",
+    "sub_question": [
+        "Where is this scene located?"
+    ],
+    "sub_answer": [
+        "paris"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.7795997262001038,
+    "confidence_lba": 0.98188,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9695445895195007,
+        0.9072976112365723,
+        0.981879711151123,
+        0.958173930644989,
+        0.9633222818374634
+    ]
+}

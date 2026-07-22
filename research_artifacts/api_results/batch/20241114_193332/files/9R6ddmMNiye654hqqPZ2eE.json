@@ -1,0 +1,41 @@
+{
+    "question_id": "9R6ddmMNiye654hqqPZ2eE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy are the white rocks white? they are sandstone.\nQuestion: What are the white rocks for?\n(A) breaking\n(B) prevent fire\n(C) water retainment\n(D) decoration\nAnswer: The answer is ",
+    "main_question": "What are the white rocks for?\n(A) breaking\n(B) prevent fire\n(C) water retainment\n(D) decoration",
+    "sub_question": [
+        "Why are the white rocks white?"
+    ],
+    "sub_answer": [
+        "they are sandstone"
+    ],
+    "gt_ans": [
+        "prevent fire",
+        "guidance",
+        "barrier",
+        "border",
+        "walking on",
+        "train tracks",
+        "barrier",
+        "usa",
+        "decoration",
+        "border"
+    ],
+    "confidence_base": 0.10797646641731262,
+    "confidence_lba": 0.697668,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.34184274077415466,
+        0.69766765832901,
+        0.1712118536233902,
+        0.13646066188812256,
+        0.1364608108997345
+    ]
+}

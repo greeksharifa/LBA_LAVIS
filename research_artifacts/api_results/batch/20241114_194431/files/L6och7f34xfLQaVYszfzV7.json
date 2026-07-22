@@ -1,0 +1,30 @@
+{
+    "question_id": "L6och7f34xfLQaVYszfzV7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow would you feel if you ate a pizza with fruit on it? happy.\nQuestion: What kind of flavor would the fruit on the pizza add?\n(A) sweet\n(B) spicy\n(C) umami\n(D) sour\nAnswer: The answer is ",
+    "main_question": "What kind of flavor would the fruit on the pizza add?\n(A) sweet\n(B) spicy\n(C) umami\n(D) sour",
+    "sub_question": [
+        "How would you feel if you ate a pizza with fruit on it?"
+    ],
+    "sub_answer": [
+        "happy"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.945243239402771,
+    "confidence_lba": 0.996027,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9663515090942383,
+        0.996027410030365,
+        0.9801894426345825,
+        0.9957882761955261,
+        0.9917556643486023
+    ]
+}

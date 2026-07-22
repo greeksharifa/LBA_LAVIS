@@ -1,0 +1,30 @@
+{
+    "question_id": "2Aq5RiEn7eyfWjEbpuYT2o",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich number is the most important? 1.\nQuestion: Which number birthday is probably being celebrated?\n(A) one\n(B) ten\n(C) nine\n(D) thirty\nAnswer: The answer is ",
+    "main_question": "Which number birthday is probably being celebrated?\n(A) one\n(B) ten\n(C) nine\n(D) thirty",
+    "sub_question": [
+        "Which number is the most important?"
+    ],
+    "sub_answer": [
+        "1"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.02568124793469906,
+    "confidence_lba": 0.98937,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.047135673463344574,
+        0.8297765851020813,
+        0.3536563515663147,
+        0.9893698692321777,
+        0.9581713676452637
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "SGt3LAcTjvTtjzjBAtJsCd",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich of the animals heads are closest to the sky? the sheep.\nQuestion: Which of these animals heads is closest to the ground?\n(A) upper-left\n(B) upper-right\n(C) bottom-right\n(D) bottom-left\nAnswer: The answer is ",
+    "main_question": "Which of these animals heads is closest to the ground?\n(A) upper-left\n(B) upper-right\n(C) bottom-right\n(D) bottom-left",
+    "sub_question": [
+        "Which of the animals heads are closest to the sky?"
+    ],
+    "sub_answer": [
+        "the sheep"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.02573375031352043,
+    "confidence_lba": 0.237973,
+    "text_output_base": "(C)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.07434119284152985,
+        0.10797110944986343,
+        0.1279841810464859,
+        0.23797349631786346,
+        0.15016169846057892
+    ]
+}

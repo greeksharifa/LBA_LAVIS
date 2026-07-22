@@ -1,0 +1,30 @@
+{
+    "question_id": "Q7cdndwDheQypkx5d6WvbN",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich person is telling us their job? clown.\nQuestion: Which person is telling us their occupation?\n(A) doctor\n(B) nurse\n(C) clown\n(D) teacher\nAnswer: The answer is ",
+    "main_question": "Which person is telling us their occupation?\n(A) doctor\n(B) nurse\n(C) clown\n(D) teacher",
+    "sub_question": [
+        "Which person is telling us their job?"
+    ],
+    "sub_answer": [
+        "clown"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9253112077713013,
+    "confidence_lba": 0.980867,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9640272259712219,
+        0.9224774837493896,
+        0.9798280596733093,
+        0.3590703010559082,
+        0.9808669686317444
+    ]
+}

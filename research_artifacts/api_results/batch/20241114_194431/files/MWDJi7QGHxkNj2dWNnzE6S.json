@@ -1,0 +1,30 @@
+{
+    "question_id": "MWDJi7QGHxkNj2dWNnzE6S",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the first visible red word in the word'reveal'? reveal.\nQuestion: What is the first visible red word?\n(A) fast\n(B) go\n(C) was\n(D) one\nAnswer: The answer is ",
+    "main_question": "What is the first visible red word?\n(A) fast\n(B) go\n(C) was\n(D) one",
+    "sub_question": [
+        "What is the first visible red word in the word'reveal'?"
+    ],
+    "sub_answer": [
+        "reveal"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.3313102722167969,
+    "confidence_lba": 0.948139,
+    "text_output_base": "D",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.019411399960517883,
+        0.05559937283396721,
+        0.09990648180246353,
+        0.9481386542320251,
+        0.022984618321061134
+    ]
+}

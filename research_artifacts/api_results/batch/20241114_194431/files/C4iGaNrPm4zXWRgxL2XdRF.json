@@ -1,0 +1,30 @@
+{
+    "question_id": "C4iGaNrPm4zXWRgxL2XdRF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy did they ask for a sample? they wanted to test it.\nQuestion: What meal might be eaten at the time shown on the clock?\n(A) supper\n(B) tea\n(C) breakfast\n(D) elevenses\nAnswer: The answer is ",
+    "main_question": "What meal might be eaten at the time shown on the clock?\n(A) supper\n(B) tea\n(C) breakfast\n(D) elevenses",
+    "sub_question": [
+        "Why did they ask for a sample?"
+    ],
+    "sub_answer": [
+        "they wanted to test it"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.020122092217206955,
+    "confidence_lba": 0.965095,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.034826867282390594,
+        0.06179114803671837,
+        0.655598521232605,
+        0.9650951027870178,
+        0.054736603051424026
+    ]
+}

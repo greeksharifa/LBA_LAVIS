@@ -1,0 +1,30 @@
+{
+    "question_id": "M3yABkFk8uMPsVkecGAnZR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is done with this utensil? it is stirred.\nQuestion: What can be done with this utensil?\n(A) brush\n(B) stir\n(C) flip\n(D) cut\nAnswer: The answer is ",
+    "main_question": "What can be done with this utensil?\n(A) brush\n(B) stir\n(C) flip\n(D) cut",
+    "sub_question": [
+        "What is done with this utensil?"
+    ],
+    "sub_answer": [
+        "it is stirred"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.9546840190887451,
+    "confidence_lba": 0.986028,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9535657167434692,
+        0.9687099456787109,
+        0.9831444025039673,
+        0.9860283136367798,
+        0.9798886179924011
+    ]
+}

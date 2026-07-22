@@ -1,0 +1,30 @@
+{
+    "question_id": "4mgcpzD4d6adkPQP7cxg54",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the bus likely doing? driving.\nQuestion: The bus is likely driving through which American city?\n(A) chicago\n(B) new york\n(C) philadelphia\n(D) boston\nAnswer: The answer is ",
+    "main_question": "The bus is likely driving through which American city?\n(A) chicago\n(B) new york\n(C) philadelphia\n(D) boston",
+    "sub_question": [
+        "What is the bus likely doing?"
+    ],
+    "sub_answer": [
+        "driving"
+    ],
+    "gt_ans": "new york",
+    "confidence_base": 0.766242265701294,
+    "confidence_lba": 0.972945,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6435902714729309,
+        0.5992191433906555,
+        0.9729450941085815,
+        0.9654420018196106,
+        0.6833934783935547
+    ]
+}

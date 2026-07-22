@@ -1,0 +1,30 @@
+{
+    "question_id": "8pfeZwe43HT9mMjVmdZhzm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow many people were there? two.\nQuestion: How many bake pans were utilized?\n(A) one\n(B) none\n(C) four\n(D) three\nAnswer: The answer is ",
+    "main_question": "How many bake pans were utilized?\n(A) one\n(B) none\n(C) four\n(D) three",
+    "sub_question": [
+        "How many people were there?"
+    ],
+    "sub_answer": [
+        "two"
+    ],
+    "gt_ans": "four",
+    "confidence_base": 0.13183991611003876,
+    "confidence_lba": 0.98975,
+    "text_output_base": "(D)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(A)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.2936345040798187,
+        0.010287976823747158,
+        0.9897496104240417,
+        0.020753832533955574,
+        0.01568133756518364
+    ]
+}

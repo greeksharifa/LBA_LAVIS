@@ -1,0 +1,30 @@
+{
+    "question_id": "JR77UNbyj38mU3p6Ku6Qn8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of vegetable is on the plate? broccoli.\nQuestion: What type cruciferous vegetable is topping this pie?\n(A) tomato\n(B) pepperoni\n(C) feta\n(D) broccoli\nAnswer: The answer is ",
+    "main_question": "What type cruciferous vegetable is topping this pie?\n(A) tomato\n(B) pepperoni\n(C) feta\n(D) broccoli",
+    "sub_question": [
+        "What kind of vegetable is on the plate?"
+    ],
+    "sub_answer": [
+        "broccoli"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6878256797790527,
+    "confidence_lba": 0.967204,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.39130014181137085,
+        0.9636744856834412,
+        0.9470341205596924,
+        0.9672037363052368,
+        0.8875476121902466
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MdawSWWcrGZdyq4yMLZRMN",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow are they likely to be viewed? by the public.\nQuestion: The costumed character is likely seated in what locale?\n(A) theme park\n(B) carnival\n(C) sidewalk\n(D) campus\nAnswer: The answer is ",
+    "main_question": "The costumed character is likely seated in what locale?\n(A) theme park\n(B) carnival\n(C) sidewalk\n(D) campus",
+    "sub_question": [
+        "How are they likely to be viewed?"
+    ],
+    "sub_answer": [
+        "by the public"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.6039383411407471,
+    "confidence_lba": 0.305646,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.30564582347869873,
+        0.22135239839553833,
+        0.060927003622055054,
+        0.21086080372333527,
+        0.25311723351478577
+    ]
+}

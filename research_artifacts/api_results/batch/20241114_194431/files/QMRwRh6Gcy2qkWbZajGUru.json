@@ -1,0 +1,30 @@
+{
+    "question_id": "QMRwRh6Gcy2qkWbZajGUru",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the ground below the red vehicles made from? cobblestone.\nQuestion: What is the ground below the blue vehicles made from?\n(A) glass\n(B) wood\n(C) stone\n(D) steel\nAnswer: The answer is ",
+    "main_question": "What is the ground below the blue vehicles made from?\n(A) glass\n(B) wood\n(C) stone\n(D) steel",
+    "sub_question": [
+        "What is the ground below the red vehicles made from?"
+    ],
+    "sub_answer": [
+        "cobblestone"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.2689305543899536,
+    "confidence_lba": 0.326952,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C) stone",
+        "(C)",
+        "(C) stone"
+    ],
+    "confidences_lba_list": [
+        0.056587815284729004,
+        0.16596804559230804,
+        0.1445549577474594,
+        0.32695236802101135,
+        0.1714257299900055
+    ]
+}

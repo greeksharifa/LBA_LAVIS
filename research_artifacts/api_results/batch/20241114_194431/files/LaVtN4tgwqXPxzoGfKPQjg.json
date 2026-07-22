@@ -1,0 +1,30 @@
+{
+    "question_id": "LaVtN4tgwqXPxzoGfKPQjg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the same color as the second most abundant color here? purple.\nQuestion: What is the same color as the most abundant color here?\n(A) peapod\n(B) orange\n(C) carrot\n(D) corn\nAnswer: The answer is ",
+    "main_question": "What is the same color as the most abundant color here?\n(A) peapod\n(B) orange\n(C) carrot\n(D) corn",
+    "sub_question": [
+        "What is the same color as the second most abundant color here?"
+    ],
+    "sub_answer": [
+        "purple"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.4386875629425049,
+    "confidence_lba": 0.610527,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(B)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.44652822613716125,
+        0.6105273365974426,
+        0.08053450286388397,
+        0.5840033292770386,
+        0.05640850216150284
+    ]
+}

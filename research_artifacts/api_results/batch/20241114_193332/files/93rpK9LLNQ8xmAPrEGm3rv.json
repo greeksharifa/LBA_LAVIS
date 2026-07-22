@@ -1,0 +1,41 @@
+{
+    "question_id": "93rpK9LLNQ8xmAPrEGm3rv",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the small house behind the cattle made up of? brick.\nQuestion: What is the small house behind the cattle made up of?\n(A) plastic\n(B) reef\n(C) stone\n(D) thatch\nAnswer: The answer is ",
+    "main_question": "What is the small house behind the cattle made up of?\n(A) plastic\n(B) reef\n(C) stone\n(D) thatch",
+    "sub_question": [
+        "What is the small house behind the cattle made up of?"
+    ],
+    "sub_answer": [
+        "brick"
+    ],
+    "gt_ans": [
+        "brick",
+        "bricks",
+        "stone",
+        "stone",
+        "stones",
+        "stone",
+        "stone",
+        "bricks",
+        "bricks",
+        "stone"
+    ],
+    "confidence_base": 0.6181705594062805,
+    "confidence_lba": 0.568121,
+    "text_output_base": "(D)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.12409290671348572,
+        0.1932990700006485,
+        0.1167711615562439,
+        0.5681208372116089,
+        0.5681201219558716
+    ]
+}

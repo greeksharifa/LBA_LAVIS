@@ -1,0 +1,30 @@
+{
+    "question_id": "KSBuivjEvKXo6nskDiHPRK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat likely fills the refrigerator? cereal.\nQuestion: What food type likely fills the freezer?\n(A) vegetables\n(B) pasta\n(C) ice cream\n(D) meat\nAnswer: The answer is ",
+    "main_question": "What food type likely fills the freezer?\n(A) vegetables\n(B) pasta\n(C) ice cream\n(D) meat",
+    "sub_question": [
+        "What likely fills the refrigerator?"
+    ],
+    "sub_answer": [
+        "cereal"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8104045987129211,
+    "confidence_lba": 0.892139,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7683116793632507,
+        0.8767573833465576,
+        0.8547014594078064,
+        0.8064031004905701,
+        0.8921386003494263
+    ]
+}

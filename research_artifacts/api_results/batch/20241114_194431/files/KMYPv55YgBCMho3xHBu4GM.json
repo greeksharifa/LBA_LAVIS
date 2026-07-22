@@ -1,0 +1,30 @@
+{
+    "question_id": "KMYPv55YgBCMho3xHBu4GM",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhere is this in? the city.\nQuestion: What country is this in?\n(A) united states\n(B) england\n(C) canada\n(D) mexico\nAnswer: The answer is ",
+    "main_question": "What country is this in?\n(A) united states\n(B) england\n(C) canada\n(D) mexico",
+    "sub_question": [
+        "Where is this in?"
+    ],
+    "sub_answer": [
+        "the city"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.022221939638257027,
+    "confidence_lba": 0.966488,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9113283157348633,
+        0.9585757255554199,
+        0.9664876461029053,
+        0.9049746990203857,
+        0.1327429860830307
+    ]
+}

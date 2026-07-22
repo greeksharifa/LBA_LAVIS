@@ -1,0 +1,15 @@
+{
+    "max_tau2          ": "0.00335547",
+    "I(max_tau2)       ": "8.22",
+    "acc_origin        ": "40.43%",
+    "max_acc_by_tau    ": "41.10%",
+    "Interaction       ": "42.34%",
+    "Sequence          ": "40.61%",
+    "Prediction        ": "39.65%",
+    "Feasibility       ": "40.29%",
+    "max_arg_conf      ": "0.036478",
+    "conf_%            ": "26.01%",
+    "E_CR              ": "17.24%",
+    "E_IC              ": "27.91%",
+    "final_acc         ": "40.34%"
+}

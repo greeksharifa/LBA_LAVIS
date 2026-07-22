@@ -1,0 +1,41 @@
+{
+    "question_id": "2U3SiXdyEgJBHNThL4YbPz",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the child's age? 3.\nQuestion: What interests the child most here?\n(A) table\n(B) fork\n(C) candle\n(D) floor\nAnswer: The answer is ",
+    "main_question": "What interests the child most here?\n(A) table\n(B) fork\n(C) candle\n(D) floor",
+    "sub_question": [
+        "What is the child's age?"
+    ],
+    "sub_answer": [
+        "3"
+    ],
+    "gt_ans": [
+        "candle",
+        "cake",
+        "candle flame",
+        "cupcake",
+        "candle",
+        "flame",
+        "fire",
+        "candle",
+        "cupcake",
+        "candle"
+    ],
+    "confidence_base": 0.8417500257492065,
+    "confidence_lba": 0.976408,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.6858784556388855,
+        0.9764081835746765,
+        0.8683754801750183,
+        0.8551603555679321,
+        0.699187695980072
+    ]
+}

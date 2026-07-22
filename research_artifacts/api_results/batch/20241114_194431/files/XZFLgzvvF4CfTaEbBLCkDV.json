@@ -1,0 +1,30 @@
+{
+    "question_id": "XZFLgzvvF4CfTaEbBLCkDV",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the stuffed animal look like? bear.\nQuestion: What month is written on the chest of the stuffed animal?\n(A) september\n(B) june\n(C) july\n(D) august\nAnswer: The answer is ",
+    "main_question": "What month is written on the chest of the stuffed animal?\n(A) september\n(B) june\n(C) july\n(D) august",
+    "sub_question": [
+        "What does the stuffed animal look like?"
+    ],
+    "sub_answer": [
+        "bear"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.016411542892456055,
+    "confidence_lba": 0.048536,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.02219461463391781,
+        0.006829635240137577,
+        0.048535849899053574,
+        0.029155397787690163,
+        0.02245960384607315
+    ]
+}

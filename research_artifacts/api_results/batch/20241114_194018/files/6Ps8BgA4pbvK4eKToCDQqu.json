@@ -1,0 +1,30 @@
+{
+    "question_id": "6Ps8BgA4pbvK4eKToCDQqu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of nook do you see? fireplace.\nQuestion: What seems to be contained in the nook underneath the TV?\n(A) bookshelf\n(B) lamp\n(C) fireplace\n(D) stereo\nAnswer: The answer is ",
+    "main_question": "What seems to be contained in the nook underneath the TV?\n(A) bookshelf\n(B) lamp\n(C) fireplace\n(D) stereo",
+    "sub_question": [
+        "What type of nook do you see?"
+    ],
+    "sub_answer": [
+        "fireplace"
+    ],
+    "gt_ans": "fireplace",
+    "confidence_base": 0.6282255053520203,
+    "confidence_lba": 0.983006,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.1410309225320816,
+        0.9830060601234436,
+        0.9810086488723755,
+        0.9366528391838074,
+        0.8679203987121582
+    ]
+}

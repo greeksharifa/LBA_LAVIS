@@ -1,0 +1,41 @@
+{
+    "question_id": "2RN4dwhRZR3ZSKHtRnJdX3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country is this aircraft in? the united states.\nQuestion: What country do these planes belong to?\n(A) united states\n(B) germany\n(C) canada\n(D) mexico\nAnswer: The answer is ",
+    "main_question": "What country do these planes belong to?\n(A) united states\n(B) germany\n(C) canada\n(D) mexico",
+    "sub_question": [
+        "What country is this aircraft in?"
+    ],
+    "sub_answer": [
+        "the united states"
+    ],
+    "gt_ans": [
+        "united states",
+        "united states",
+        "usa",
+        "united states",
+        "united states",
+        "ukraine",
+        "germany",
+        "germany",
+        "america",
+        "usa"
+    ],
+    "confidence_base": 0.9610466361045837,
+    "confidence_lba": 0.9777,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8692917227745056,
+        0.9777004718780518,
+        0.9772818684577942,
+        0.7035090923309326,
+        0.9437586069107056
+    ]
+}

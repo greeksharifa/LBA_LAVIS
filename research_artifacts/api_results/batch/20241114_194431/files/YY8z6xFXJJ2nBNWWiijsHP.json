@@ -1,0 +1,30 @@
+{
+    "question_id": "YY8z6xFXJJ2nBNWWiijsHP",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the kite represent? children.\nQuestion: What movie is on the kite?\n(A) shrek\n(B) up\n(C) toy story\n(D) cars\nAnswer: The answer is ",
+    "main_question": "What movie is on the kite?\n(A) shrek\n(B) up\n(C) toy story\n(D) cars",
+    "sub_question": [
+        "What does the kite represent?"
+    ],
+    "sub_answer": [
+        "children"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.21715156733989716,
+    "confidence_lba": 0.181923,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.024831034243106842,
+        0.18192318081855774,
+        0.04026724025607109,
+        0.04951154440641403,
+        0.04371987655758858
+    ]
+}

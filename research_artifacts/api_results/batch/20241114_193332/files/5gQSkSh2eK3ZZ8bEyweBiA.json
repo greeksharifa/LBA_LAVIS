@@ -1,0 +1,41 @@
+{
+    "question_id": "5gQSkSh2eK3ZZ8bEyweBiA",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat would you use this bag for? travel.\nQuestion: Why would you use this bag?\n(A) shop\n(B) travel\n(C) catch\n(D) preserve\nAnswer: The answer is ",
+    "main_question": "Why would you use this bag?\n(A) shop\n(B) travel\n(C) catch\n(D) preserve",
+    "sub_question": [
+        "What would you use this bag for?"
+    ],
+    "sub_answer": [
+        "travel"
+    ],
+    "gt_ans": [
+        "travel",
+        "safety",
+        "travel",
+        "trip",
+        "travel",
+        "traveling",
+        "carry samples",
+        "vacation",
+        "personal items",
+        "travelling"
+    ],
+    "confidence_base": 0.048448801040649414,
+    "confidence_lba": 0.562801,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.1766023337841034,
+        0.5628006458282471,
+        0.4350701570510864,
+        0.4625033438205719,
+        0.49095505475997925
+    ]
+}

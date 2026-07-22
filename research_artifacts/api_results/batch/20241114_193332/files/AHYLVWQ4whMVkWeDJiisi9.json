@@ -1,0 +1,41 @@
+{
+    "question_id": "AHYLVWQ4whMVkWeDJiisi9",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the red umbrella over? two women.\nQuestion: Where are the people laying?\n(A) field\n(B) park\n(C) beach\n(D) bed\nAnswer: The answer is ",
+    "main_question": "Where are the people laying?\n(A) field\n(B) park\n(C) beach\n(D) bed",
+    "sub_question": [
+        "What is the red umbrella over?"
+    ],
+    "sub_answer": [
+        "two women"
+    ],
+    "gt_ans": [
+        "beach towels",
+        "beach",
+        "beach towels",
+        "beach",
+        "beach",
+        "beach",
+        "beach",
+        "beach",
+        "beach",
+        "beach"
+    ],
+    "confidence_base": 0.5914708375930786,
+    "confidence_lba": 0.808665,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.38145655393600464,
+        0.12422427535057068,
+        0.47909054160118103,
+        0.8086649775505066,
+        0.738871693611145
+    ]
+}

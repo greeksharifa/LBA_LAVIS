@@ -1,0 +1,30 @@
+{
+    "question_id": "b6tZAg7f28UHbins7nWcpo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow did the carrots taste? good.\nQuestion: In what way were the carrots cooked?\n(A) baked\n(B) steamed\n(C) boiled\n(D) roasted\nAnswer: The answer is ",
+    "main_question": "In what way were the carrots cooked?\n(A) baked\n(B) steamed\n(C) boiled\n(D) roasted",
+    "sub_question": [
+        "How did the carrots taste?"
+    ],
+    "sub_answer": [
+        "good"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.0184082742780447,
+    "confidence_lba": 0.838415,
+    "text_output_base": "(B)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.787534236907959,
+        0.007699803449213505,
+        0.03612447902560234,
+        0.8384151458740234,
+        0.031377244740724564
+    ]
+}

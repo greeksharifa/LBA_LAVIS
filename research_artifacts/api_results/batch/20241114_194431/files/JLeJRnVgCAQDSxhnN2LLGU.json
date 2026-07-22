@@ -1,0 +1,30 @@
+{
+    "question_id": "JLeJRnVgCAQDSxhnN2LLGU",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of bun is being used for the burger? white.\nQuestion: What is being used as a bun for the burger?\n(A) bagel\n(B) donut\n(C) toast\n(D) roll\nAnswer: The answer is ",
+    "main_question": "What is being used as a bun for the burger?\n(A) bagel\n(B) donut\n(C) toast\n(D) roll",
+    "sub_question": [
+        "What kind of bun is being used for the burger?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.047998543828725815,
+    "confidence_lba": 0.231965,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(D)",
+        "(B)",
+        "(B)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.13224957883358002,
+        0.222802072763443,
+        0.23196539282798767,
+        0.06341944634914398,
+        0.12482461333274841
+    ]
+}

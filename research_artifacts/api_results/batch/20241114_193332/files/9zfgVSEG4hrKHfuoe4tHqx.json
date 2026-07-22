@@ -1,0 +1,41 @@
+{
+    "question_id": "9zfgVSEG4hrKHfuoe4tHqx",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat will the couple do after they stand in the boat? they will leave the boat.\nQuestion: Why does the couple standing in the boat?\n(A) fun\n(B) reduce stress\n(C) tradition\n(D) spend time\nAnswer: The answer is ",
+    "main_question": "Why does the couple standing in the boat?\n(A) fun\n(B) reduce stress\n(C) tradition\n(D) spend time",
+    "sub_question": [
+        "What will the couple do after they stand in the boat?"
+    ],
+    "sub_answer": [
+        "they will leave the boat"
+    ],
+    "gt_ans": [
+        "holding hands",
+        "talking",
+        "talking",
+        "being transported",
+        "view",
+        "viewing scenery",
+        "fishing",
+        "their boat",
+        "spend time",
+        "fishing"
+    ],
+    "confidence_base": 0.41972610354423523,
+    "confidence_lba": 0.632695,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.3117963969707489,
+        0.3785105049610138,
+        0.531132161617279,
+        0.6326947808265686,
+        0.15362392365932465
+    ]
+}

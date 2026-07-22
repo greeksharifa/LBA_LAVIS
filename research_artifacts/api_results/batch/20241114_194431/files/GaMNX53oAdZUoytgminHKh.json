@@ -1,0 +1,30 @@
+{
+    "question_id": "GaMNX53oAdZUoytgminHKh",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the woman's shirt? blue.\nQuestion: Which color of clothing is unique to just one of the two people here?\n(A) white\n(B) yellow\n(C) grey\n(D) black\nAnswer: The answer is ",
+    "main_question": "Which color of clothing is unique to just one of the two people here?\n(A) white\n(B) yellow\n(C) grey\n(D) black",
+    "sub_question": [
+        "What color is the woman's shirt?"
+    ],
+    "sub_answer": [
+        "blue"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.5342565178871155,
+    "confidence_lba": 0.686203,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(A)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.6862027049064636,
+        0.1708008199930191,
+        0.014605313539505005,
+        0.013578252866864204,
+        0.03530370071530342
+    ]
+}

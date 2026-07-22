@@ -1,0 +1,30 @@
+{
+    "question_id": "EAWGdocBoaqPxLQuJ3UJb6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow much sunlight does this building receive? no sunlight.\nQuestion: What season of the year is shown here?\n(A) early summer\n(B) fall-winter\n(C) summer\n(D) late spring\nAnswer: The answer is ",
+    "main_question": "What season of the year is shown here?\n(A) early summer\n(B) fall-winter\n(C) summer\n(D) late spring",
+    "sub_question": [
+        "How much sunlight does this building receive?"
+    ],
+    "sub_answer": [
+        "no sunlight"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.06699611246585846,
+    "confidence_lba": 0.956193,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9487857222557068,
+        0.9561925530433655,
+        0.9507073760032654,
+        0.9523547887802124,
+        0.8514379858970642
+    ]
+}

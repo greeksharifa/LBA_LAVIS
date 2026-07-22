@@ -1,0 +1,30 @@
+{
+    "question_id": "Pgr2EjnVJiyNjUnPs2qgkg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the cat watching? television.\nQuestion: Why is the cat looking at the screen?\n(A) warmth\n(B) no reason\n(C) light\n(D) curiosity\nAnswer: The answer is ",
+    "main_question": "Why is the cat looking at the screen?\n(A) warmth\n(B) no reason\n(C) light\n(D) curiosity",
+    "sub_question": [
+        "What is the cat watching?"
+    ],
+    "sub_answer": [
+        "television"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.23767906427383423,
+    "confidence_lba": 0.506898,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5068975687026978,
+        0.17997348308563232,
+        0.345507949590683,
+        0.45115628838539124,
+        0.23040680587291718
+    ]
+}

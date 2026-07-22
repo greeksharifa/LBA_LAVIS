@@ -1,0 +1,30 @@
+{
+    "question_id": "bJibpiu5MQYbPEn4czsCea",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nThey are probably at a corporate lunch? ?.\nQuestion: The kind of lunch they are sitting down to is most likely what type?\n(A) school\n(B) family\n(C) work\n(D) casual\nAnswer: The answer is ",
+    "main_question": "The kind of lunch they are sitting down to is most likely what type?\n(A) school\n(B) family\n(C) work\n(D) casual",
+    "sub_question": [
+        "They are probably at a corporate lunch?"
+    ],
+    "sub_answer": [
+        "?"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.6422802209854126,
+    "confidence_lba": 0.858194,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.4697016477584839,
+        0.1909925937652588,
+        0.03666958585381508,
+        0.4269530773162842,
+        0.8581938743591309
+    ]
+}

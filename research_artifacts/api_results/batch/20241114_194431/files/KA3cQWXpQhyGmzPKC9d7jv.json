@@ -1,0 +1,30 @@
+{
+    "question_id": "KA3cQWXpQhyGmzPKC9d7jv",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the man playing in the dirt for? baseball.\nQuestion: Why is the man standing in the dirt?\n(A) target practice\n(B) playing baseball\n(C) farming\n(D) making fort\nAnswer: The answer is ",
+    "main_question": "Why is the man standing in the dirt?\n(A) target practice\n(B) playing baseball\n(C) farming\n(D) making fort",
+    "sub_question": [
+        "What is the man playing in the dirt for?"
+    ],
+    "sub_answer": [
+        "baseball"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.9727827906608582,
+    "confidence_lba": 0.986648,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.986648440361023,
+        0.944694995880127,
+        0.9800789952278137,
+        0.9730604290962219,
+        0.9626727104187012
+    ]
+}

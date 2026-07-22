@@ -1,0 +1,41 @@
+{
+    "question_id": "9KA8dr22Hiveh2s9JwvPLZ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the cow's name? no.\nQuestion: Which body part of the cow could you look at to find out which identity and/or owner the cow has?\n(A) ear\n(B) foot\n(C) rump\n(D) knee\nAnswer: The answer is ",
+    "main_question": "Which body part of the cow could you look at to find out which identity and/or owner the cow has?\n(A) ear\n(B) foot\n(C) rump\n(D) knee",
+    "sub_question": [
+        "What is the cow's name?"
+    ],
+    "sub_answer": [
+        "no"
+    ],
+    "gt_ans": [
+        "ear",
+        "ear",
+        "ear",
+        "ear",
+        "tag",
+        "ear",
+        "ear",
+        "ear",
+        "tag",
+        "ear"
+    ],
+    "confidence_base": 0.5780665874481201,
+    "confidence_lba": 0.681994,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.4862207770347595,
+        0.6819943785667419,
+        0.630511462688446,
+        0.6075935959815979,
+        0.4130280017852783
+    ]
+}

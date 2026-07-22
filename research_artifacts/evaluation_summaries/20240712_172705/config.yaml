@@ -1,0 +1,24 @@
+runner:
+  visualize: false
+  match1ok: false
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+datasets:
+  dataset_name: VQA_Introspect
+  num_data: -1
+  split: val
+  data_type: images
+  vqa_acc: true
+  ann_paths:
+    train:
+    - /data1/VQA-Introspect/VQAIntrospect_trainv1.0.json
+    - /data1/VQA/v2/v2_mscoco_train2014_annotations.json
+    val:
+    - /data1/VQA-Introspect/VQAIntrospect_valv1.0.json
+    - /data1/VQA/v2/v2_mscoco_val2014_annotations.json
+  vis_root: /data1/coco/images/
+model: {}

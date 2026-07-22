@@ -1,0 +1,30 @@
+{
+    "question_id": "PBPtqNj8ChAWcqKW5qxQvR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat do the items that are tied together by the rope look like? boats.\nQuestion: What shape are the items that are tied together by the rope?\n(A) triangle\n(B) rectangle\n(C) sphere\n(D) square\nAnswer: The answer is ",
+    "main_question": "What shape are the items that are tied together by the rope?\n(A) triangle\n(B) rectangle\n(C) sphere\n(D) square",
+    "sub_question": [
+        "What do the items that are tied together by the rope look like?"
+    ],
+    "sub_answer": [
+        "boats"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.030462870374321938,
+    "confidence_lba": 0.427399,
+    "text_output_base": "(A)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(A)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.13223999738693237,
+        0.4273993670940399,
+        0.13109266757965088,
+        0.08601529151201248,
+        0.0860154777765274
+    ]
+}

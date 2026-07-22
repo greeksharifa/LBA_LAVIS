@@ -1,0 +1,30 @@
+{
+    "question_id": "H5ij2UADeZudHffAeLzw6z",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the desk? computer.\nQuestion: What brand of electronics is the person using on the desk?\n(A) microsoft\n(B) hp\n(C) apple\n(D) dell\nAnswer: The answer is ",
+    "main_question": "What brand of electronics is the person using on the desk?\n(A) microsoft\n(B) hp\n(C) apple\n(D) dell",
+    "sub_question": [
+        "What is on the desk?"
+    ],
+    "sub_answer": [
+        "computer"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.02696533128619194,
+    "confidence_lba": 0.978494,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.04700682684779167,
+        0.9784937500953674,
+        0.06014244630932808,
+        0.050859082490205765,
+        0.0405176617205143
+    ]
+}

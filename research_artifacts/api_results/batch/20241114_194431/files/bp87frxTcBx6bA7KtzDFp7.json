@@ -1,0 +1,30 @@
+{
+    "question_id": "bp87frxTcBx6bA7KtzDFp7",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat street are the animals on? the main street.\nQuestion: Where are the white animals walking?\n(A) mountain\n(B) trail\n(C) street\n(D) school\nAnswer: The answer is ",
+    "main_question": "Where are the white animals walking?\n(A) mountain\n(B) trail\n(C) street\n(D) school",
+    "sub_question": [
+        "What street are the animals on?"
+    ],
+    "sub_answer": [
+        "the main street"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.9006982445716858,
+    "confidence_lba": 0.968182,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.9595425724983215,
+        0.9507268667221069,
+        0.9612553715705872,
+        0.9622223377227783,
+        0.9681820273399353
+    ]
+}

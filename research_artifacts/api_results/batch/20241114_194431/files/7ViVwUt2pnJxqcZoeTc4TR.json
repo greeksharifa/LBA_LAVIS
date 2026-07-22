@@ -1,0 +1,30 @@
+{
+    "question_id": "7ViVwUt2pnJxqcZoeTc4TR",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color are the bananas? green.\nQuestion: What is placed on the ground that will eventually turn yellow?\n(A) bananas\n(B) pears\n(C) tomatoes\n(D) apples\nAnswer: The answer is ",
+    "main_question": "What is placed on the ground that will eventually turn yellow?\n(A) bananas\n(B) pears\n(C) tomatoes\n(D) apples",
+    "sub_question": [
+        "What color are the bananas?"
+    ],
+    "sub_answer": [
+        "green"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7669801115989685,
+    "confidence_lba": 0.977049,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(A)",
+        "(D)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.035524554550647736,
+        0.977048933506012,
+        0.021899104118347168,
+        0.9560628533363342,
+        0.9344242215156555
+    ]
+}

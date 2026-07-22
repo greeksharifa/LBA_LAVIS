@@ -1,0 +1,30 @@
+{
+    "question_id": "ZDyf8aLqsUSUVCTRMk6zAu",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat did the child use to build a fake game controller? legos.\nQuestion: What did the child use to develop a fake game controller?\n(A) legos\n(B) recycled plastics\n(C) building blocks\n(D) lincoln logs\nAnswer: The answer is ",
+    "main_question": "What did the child use to develop a fake game controller?\n(A) legos\n(B) recycled plastics\n(C) building blocks\n(D) lincoln logs",
+    "sub_question": [
+        "What did the child use to build a fake game controller?"
+    ],
+    "sub_answer": [
+        "legos"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.7706624865531921,
+    "confidence_lba": 0.974519,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.6688972115516663,
+        0.9745192527770996,
+        0.9673409461975098,
+        0.9640419483184814,
+        0.9709165096282959
+    ]
+}

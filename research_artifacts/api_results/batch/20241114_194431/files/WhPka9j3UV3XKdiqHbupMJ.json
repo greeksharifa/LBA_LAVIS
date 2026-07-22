@@ -1,0 +1,30 @@
+{
+    "question_id": "WhPka9j3UV3XKdiqHbupMJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat object is in the frame? elephants.\nQuestion: Which thing is closest to the photographer?\n(A) long-haired person\n(B) left elephant\n(C) woman w/glasses\n(D) right elephant\nAnswer: The answer is ",
+    "main_question": "Which thing is closest to the photographer?\n(A) long-haired person\n(B) left elephant\n(C) woman w/glasses\n(D) right elephant",
+    "sub_question": [
+        "What object is in the frame?"
+    ],
+    "sub_answer": [
+        "elephants"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.05440070852637291,
+    "confidence_lba": 0.323347,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(B)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.04637455567717552,
+        0.04362870007753372,
+        0.047452669590711594,
+        0.32334667444229126,
+        0.05254293978214264
+    ]
+}

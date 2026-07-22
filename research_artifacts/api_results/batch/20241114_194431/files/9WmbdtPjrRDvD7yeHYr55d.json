@@ -1,0 +1,30 @@
+{
+    "question_id": "9WmbdtPjrRDvD7yeHYr55d",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat pattern is on the bottom of the wall? black and white.\nQuestion: What pattern is on the bottom of the skateboard?\n(A) zigzag\n(B) plaid\n(C) stripes\n(D) polka dots\nAnswer: The answer is ",
+    "main_question": "What pattern is on the bottom of the skateboard?\n(A) zigzag\n(B) plaid\n(C) stripes\n(D) polka dots",
+    "sub_question": [
+        "What pattern is on the bottom of the wall?"
+    ],
+    "sub_answer": [
+        "black and white"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.11039379984140396,
+    "confidence_lba": 0.787937,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(A)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7090187072753906,
+        0.7879372835159302,
+        0.03589829429984093,
+        0.03300178050994873,
+        0.05524831637740135
+    ]
+}

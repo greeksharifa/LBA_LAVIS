@@ -1,0 +1,41 @@
+{
+    "question_id": "2N5sYXgyFqbDnuUhJFAWr5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does this sound like? cat.\nQuestion: What is the descriptive word for this surface?\n(A) barren\n(B) crowded\n(C) minimalist\n(D) empty\nAnswer: The answer is ",
+    "main_question": "What is the descriptive word for this surface?\n(A) barren\n(B) crowded\n(C) minimalist\n(D) empty",
+    "sub_question": [
+        "What does this sound like?"
+    ],
+    "sub_answer": [
+        "cat"
+    ],
+    "gt_ans": [
+        "desk",
+        "desktop",
+        "glossy",
+        "computer",
+        "busy",
+        "crowded",
+        "table",
+        "smooth",
+        "desk",
+        "cluttered"
+    ],
+    "confidence_base": 0.2788649797439575,
+    "confidence_lba": 0.153443,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(B)",
+        "(C)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.013777513056993484,
+        0.15344327688217163,
+        0.07678959518671036,
+        0.13309291005134583,
+        0.03585142269730568
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "NYcTJoQKwAGgyi4FB5gAt8",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy is the man riding a bike with a woman on the back? he is trying to get away from the cows.\nQuestion: Why is the woman sitting in the back of the man's bike on the right?\n(A) to terrorize\n(B) to scare\n(C) to sleep\n(D) to travel\nAnswer: The answer is ",
+    "main_question": "Why is the woman sitting in the back of the man's bike on the right?\n(A) to terrorize\n(B) to scare\n(C) to sleep\n(D) to travel",
+    "sub_question": [
+        "Why is the man riding a bike with a woman on the back?"
+    ],
+    "sub_answer": [
+        "he is trying to get away from the cows"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.6929554343223572,
+    "confidence_lba": 0.940174,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7077986001968384,
+        0.7923781275749207,
+        0.8004409670829773,
+        0.9401740431785583,
+        0.7531564831733704
+    ]
+}

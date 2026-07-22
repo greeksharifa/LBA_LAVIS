@@ -1,0 +1,41 @@
+{
+    "question_id": "6HizsyvwUgduwabP2dWha5",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the distance? buildings.\nQuestion: What can be seen through the buildings?\n(A) clouds\n(B) birds\n(C) more buildings\n(D) sunlight\nAnswer: The answer is ",
+    "main_question": "What can be seen through the buildings?\n(A) clouds\n(B) birds\n(C) more buildings\n(D) sunlight",
+    "sub_question": [
+        "What is in the distance?"
+    ],
+    "sub_answer": [
+        "buildings"
+    ],
+    "gt_ans": [
+        "sun",
+        "sun",
+        "sunlight",
+        "sun",
+        "sun",
+        "sunlight",
+        "sunlight",
+        "sun",
+        "sunlight",
+        "sun"
+    ],
+    "confidence_base": 0.7483736872673035,
+    "confidence_lba": 0.975414,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.40780970454216003,
+        0.9754137992858887,
+        0.0866122618317604,
+        0.24175375699996948,
+        0.24174948036670685
+    ]
+}

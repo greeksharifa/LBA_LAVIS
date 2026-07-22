@@ -1,0 +1,30 @@
+{
+    "question_id": "MvjdGpXqcdaADbsGwjo2Bm",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is used to keep their balance while riding a horse? saddle.\nQuestion: What is used to keep their balance?\n(A) snow\n(B) swords\n(C) ski poles\n(D) knives\nAnswer: The answer is ",
+    "main_question": "What is used to keep their balance?\n(A) snow\n(B) swords\n(C) ski poles\n(D) knives",
+    "sub_question": [
+        "What is used to keep their balance while riding a horse?"
+    ],
+    "sub_answer": [
+        "saddle"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.753645658493042,
+    "confidence_lba": 0.930262,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.412841260433197,
+        0.7357198596000671,
+        0.6381629705429077,
+        0.7844492197036743,
+        0.9302624464035034
+    ]
+}

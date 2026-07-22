@@ -1,0 +1,41 @@
+{
+    "question_id": "DNGTUpUeLqmbKUNNns3kZs",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the person jump? a skateboard.\nQuestion: Which height he jumps?\n(A) 11 inch\n(B) 16 inch\n(C) 17inch\n(D) 10 inch\nAnswer: The answer is ",
+    "main_question": "Which height he jumps?\n(A) 11 inch\n(B) 16 inch\n(C) 17inch\n(D) 10 inch",
+    "sub_question": [
+        "What does the person jump?"
+    ],
+    "sub_answer": [
+        "a skateboard"
+    ],
+    "gt_ans": [
+        "six feet",
+        "high",
+        "4 feet",
+        "not question",
+        "above fence",
+        "ramp",
+        "high",
+        "16 inch",
+        "five feet",
+        "high"
+    ],
+    "confidence_base": 0.020525114610791206,
+    "confidence_lba": 0.117736,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.03551822155714035,
+        0.11773575842380524,
+        0.07565660029649734,
+        0.03204809129238129,
+        0.04240024462342262
+    ]
+}

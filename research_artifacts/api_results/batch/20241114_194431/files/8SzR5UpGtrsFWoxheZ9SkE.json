@@ -1,0 +1,30 @@
+{
+    "question_id": "8SzR5UpGtrsFWoxheZ9SkE",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the boy's age? 8.\nQuestion: What video game system is the boy playing on?\n(A) nintendo wii\n(B) playstation 3\n(C) xbox one\n(D) playstation 4\nAnswer: The answer is ",
+    "main_question": "What video game system is the boy playing on?\n(A) nintendo wii\n(B) playstation 3\n(C) xbox one\n(D) playstation 4",
+    "sub_question": [
+        "What is the boy's age?"
+    ],
+    "sub_answer": [
+        "8"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.5468096137046814,
+    "confidence_lba": 0.993539,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.19029057025909424,
+        0.21145160496234894,
+        0.1387346386909485,
+        0.9935391545295715,
+        0.41362690925598145
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "73ixwXaUcqfgsJYLzCABWC",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow does the man get into the air? a kite.\nQuestion: What did the man use to get into the air?\n(A) kite\n(B) blimp\n(C) balloon\n(D) plane\nAnswer: The answer is ",
+    "main_question": "What did the man use to get into the air?\n(A) kite\n(B) blimp\n(C) balloon\n(D) plane",
+    "sub_question": [
+        "How does the man get into the air?"
+    ],
+    "sub_answer": [
+        "a kite"
+    ],
+    "gt_ans": [
+        "kite",
+        "parasail",
+        "wind",
+        "parasail",
+        "wind",
+        "handle",
+        "sail",
+        "boat engine",
+        "parachute",
+        "kite"
+    ],
+    "confidence_base": 0.9776706099510193,
+    "confidence_lba": 0.997826,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.9921172261238098,
+        0.9922213554382324,
+        0.9978256225585938,
+        0.9924963712692261,
+        0.9966066479682922
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "BJxwGHyivgHAjykCUoSUXo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country are the pieces of fruit likely to be from? asia.\nQuestion: Where were these pieces of fruit likely purchased?\n(A) roadside stand\n(B) online\n(C) grocery store\n(D) farm\nAnswer: The answer is ",
+    "main_question": "Where were these pieces of fruit likely purchased?\n(A) roadside stand\n(B) online\n(C) grocery store\n(D) farm",
+    "sub_question": [
+        "What country are the pieces of fruit likely to be from?"
+    ],
+    "sub_answer": [
+        "asia"
+    ],
+    "gt_ans": [
+        "grocery store",
+        "market",
+        "supermarket",
+        "market",
+        "market",
+        "market",
+        "florida",
+        "grocery store",
+        "grocery store",
+        "market"
+    ],
+    "confidence_base": 0.7630769610404968,
+    "confidence_lba": 0.831416,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.7340081334114075,
+        0.7169327735900879,
+        0.7584809064865112,
+        0.8314164280891418,
+        0.32134735584259033
+    ]
+}

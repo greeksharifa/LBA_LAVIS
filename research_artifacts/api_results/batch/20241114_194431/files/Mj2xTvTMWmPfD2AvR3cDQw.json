@@ -1,0 +1,30 @@
+{
+    "question_id": "Mj2xTvTMWmPfD2AvR3cDQw",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the kind of animal the truck is? elephant.\nQuestion: What kind of animal is is the truck?\n(A) horse\n(B) elephant\n(C) zebra\n(D) giraffe\nAnswer: The answer is ",
+    "main_question": "What kind of animal is is the truck?\n(A) horse\n(B) elephant\n(C) zebra\n(D) giraffe",
+    "sub_question": [
+        "What is the kind of animal the truck is?"
+    ],
+    "sub_answer": [
+        "elephant"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.9558550119400024,
+    "confidence_lba": 0.965053,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9190957546234131,
+        0.798212468624115,
+        0.9650527238845825,
+        0.8852425217628479,
+        0.9580584168434143
+    ]
+}

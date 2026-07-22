@@ -1,0 +1,41 @@
+{
+    "question_id": "7NxakvvZZEHKsh8MbNHHvz",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the straw stuck in? glass.\nQuestion: What type of container is the straw sticking out of?\n(A) pint glass\n(B) martini glass\n(C) mason jar\n(D) vase\nAnswer: The answer is ",
+    "main_question": "What type of container is the straw sticking out of?\n(A) pint glass\n(B) martini glass\n(C) mason jar\n(D) vase",
+    "sub_question": [
+        "What is the straw stuck in?"
+    ],
+    "sub_answer": [
+        "glass"
+    ],
+    "gt_ans": [
+        "jar",
+        "canning jar",
+        "glass jar",
+        "mason jar",
+        "glass",
+        "canning jar",
+        "jar",
+        "mason jar",
+        "mason jar",
+        "ball jar"
+    ],
+    "confidence_base": 0.2682639956474304,
+    "confidence_lba": 0.21034,
+    "text_output_base": "(C)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(C)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.2103404402732849,
+        0.044872649013996124,
+        0.1935708224773407,
+        0.19305633008480072,
+        0.0804470032453537
+    ]
+}

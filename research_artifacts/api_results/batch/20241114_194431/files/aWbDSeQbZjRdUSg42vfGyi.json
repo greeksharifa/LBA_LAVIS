@@ -1,0 +1,30 @@
+{
+    "question_id": "aWbDSeQbZjRdUSg42vfGyi",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the brand of the dressing? mayo.\nQuestion: What famous person is likely on the bottle of dressing that is closest to and facing the camera?\n(A) robert redford\n(B) apollo crews\n(C) kefka palazzo\n(D) paul newman\nAnswer: The answer is ",
+    "main_question": "What famous person is likely on the bottle of dressing that is closest to and facing the camera?\n(A) robert redford\n(B) apollo crews\n(C) kefka palazzo\n(D) paul newman",
+    "sub_question": [
+        "What is the brand of the dressing?"
+    ],
+    "sub_answer": [
+        "mayo"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.08851504325866699,
+    "confidence_lba": 0.247068,
+    "text_output_base": "(A)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.025341087952256203,
+        0.20370133221149445,
+        0.24706830084323883,
+        0.019813457503914833,
+        0.04456896334886551
+    ]
+}

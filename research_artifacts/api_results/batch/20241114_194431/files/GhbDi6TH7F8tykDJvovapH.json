@@ -1,0 +1,30 @@
+{
+    "question_id": "GhbDi6TH7F8tykDJvovapH",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the image look like in color? blue sky.\nQuestion: What is this type of photography called?\n(A) visual style\n(B) light emission\n(C) time lapse\n(D) infrared\nAnswer: The answer is ",
+    "main_question": "What is this type of photography called?\n(A) visual style\n(B) light emission\n(C) time lapse\n(D) infrared",
+    "sub_question": [
+        "What does the image look like in color?"
+    ],
+    "sub_answer": [
+        "blue sky"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.7807731628417969,
+    "confidence_lba": 0.854399,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.8543986082077026,
+        0.18376129865646362,
+        0.054200440645217896,
+        0.2592688798904419,
+        0.3523385226726532
+    ]
+}

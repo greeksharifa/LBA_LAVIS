@@ -1,0 +1,30 @@
+{
+    "question_id": "avHqQqojSySkp7zg2o7afF",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the grass blocking the view of? a clock tower.\nQuestion: What is blocking the view of the buildings?\n(A) clouds\n(B) books\n(C) trees\n(D) boats\nAnswer: The answer is ",
+    "main_question": "What is blocking the view of the buildings?\n(A) clouds\n(B) books\n(C) trees\n(D) boats",
+    "sub_question": [
+        "What is the grass blocking the view of?"
+    ],
+    "sub_answer": [
+        "a clock tower"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8741479516029358,
+    "confidence_lba": 0.983071,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.18524165451526642,
+        0.9830707907676697,
+        0.9808176159858704,
+        0.7766935229301453,
+        0.8768020868301392
+    ]
+}

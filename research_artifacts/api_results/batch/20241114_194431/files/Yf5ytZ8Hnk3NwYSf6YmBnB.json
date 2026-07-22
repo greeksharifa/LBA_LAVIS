@@ -1,0 +1,30 @@
+{
+    "question_id": "Yf5ytZ8Hnk3NwYSf6YmBnB",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nHow does the light source affect the person's eyes? the person's eyes are dark.\nQuestion: What is the light source in the room?\n(A) lamp\n(B) window\n(C) flashlight\n(D) laptop screen\nAnswer: The answer is ",
+    "main_question": "What is the light source in the room?\n(A) lamp\n(B) window\n(C) flashlight\n(D) laptop screen",
+    "sub_question": [
+        "How does the light source affect the person's eyes?"
+    ],
+    "sub_answer": [
+        "the person's eyes are dark"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.4352688789367676,
+    "confidence_lba": 0.978248,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.12262439727783203,
+        0.9782479405403137,
+        0.04268785938620567,
+        0.1025754064321518,
+        0.1025754064321518
+    ]
+}

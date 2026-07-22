@@ -1,0 +1,30 @@
+{
+    "question_id": "A2yJNQmbyDNtQEq4b2EZWx",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhy does the bird appear to be there? to perch.\nQuestion: How did the animal on the car arrive there?\n(A) horseback\n(B) uber\n(C) greyhound\n(D) flying\nAnswer: The answer is ",
+    "main_question": "How did the animal on the car arrive there?\n(A) horseback\n(B) uber\n(C) greyhound\n(D) flying",
+    "sub_question": [
+        "Why does the bird appear to be there?"
+    ],
+    "sub_answer": [
+        "to perch"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.9887385368347168,
+    "confidence_lba": 0.989838,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.9898384213447571,
+        0.981842041015625,
+        0.950467586517334,
+        0.9607961773872375,
+        0.9866878986358643
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "KVAeyTAfrvN8fst6NXA6MT",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the pizza contain? mushrooms.\nQuestion: What is the healthiest ingredient on the pizza?\n(A) crust\n(B) sauce\n(C) cheese\n(D) mushroom\nAnswer: The answer is ",
+    "main_question": "What is the healthiest ingredient on the pizza?\n(A) crust\n(B) sauce\n(C) cheese\n(D) mushroom",
+    "sub_question": [
+        "What does the pizza contain?"
+    ],
+    "sub_answer": [
+        "mushrooms"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.3921777307987213,
+    "confidence_lba": 0.986156,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.7454954385757446,
+        0.9861560463905334,
+        0.9690209031105042,
+        0.9292091727256775,
+        0.9613914489746094
+    ]
+}

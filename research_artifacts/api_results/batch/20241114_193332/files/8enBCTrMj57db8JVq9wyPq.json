@@ -1,0 +1,41 @@
+{
+    "question_id": "8enBCTrMj57db8JVq9wyPq",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the fruit he is holding? orange.\nQuestion: Which is the fruit?\n(A) meat\n(B) chocolate\n(C) nuts\n(D) orange slices\nAnswer: The answer is ",
+    "main_question": "Which is the fruit?\n(A) meat\n(B) chocolate\n(C) nuts\n(D) orange slices",
+    "sub_question": [
+        "What is the fruit he is holding?"
+    ],
+    "sub_answer": [
+        "orange"
+    ],
+    "gt_ans": [
+        "oranges",
+        "orange",
+        "orange flowers",
+        "orange slices",
+        "cantaloupe",
+        "oranges",
+        "orange",
+        "orange slices",
+        "orange",
+        "oranges"
+    ],
+    "confidence_base": 0.900370180606842,
+    "confidence_lba": 0.938172,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.926837146282196,
+        0.9177696108818054,
+        0.8537886738777161,
+        0.9316651821136475,
+        0.9381717443466187
+    ]
+}

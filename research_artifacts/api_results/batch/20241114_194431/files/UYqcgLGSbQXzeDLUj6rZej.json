@@ -1,0 +1,30 @@
+{
+    "question_id": "UYqcgLGSbQXzeDLUj6rZej",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the large white object on the elephant called? white.\nQuestion: What is the large white object on the elephant called?\n(A) tusk\n(B) tooth\n(C) horn\n(D) bone\nAnswer: The answer is ",
+    "main_question": "What is the large white object on the elephant called?\n(A) tusk\n(B) tooth\n(C) horn\n(D) bone",
+    "sub_question": [
+        "What color is the large white object on the elephant called?"
+    ],
+    "sub_answer": [
+        "white"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.5857166051864624,
+    "confidence_lba": 0.985089,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.8618936538696289,
+        0.9850894212722778,
+        0.9515366554260254,
+        0.10939668118953705,
+        0.1093963161110878
+    ]
+}

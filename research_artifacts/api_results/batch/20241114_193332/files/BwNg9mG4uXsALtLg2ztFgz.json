@@ -1,0 +1,41 @@
+{
+    "question_id": "BwNg9mG4uXsALtLg2ztFgz",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the type of leavening in this item? yeast.\nQuestion: What leavening is used in this item?\n(A) salt\n(B) baking powder\n(C) sourdough starter\n(D) yeast\nAnswer: The answer is ",
+    "main_question": "What leavening is used in this item?\n(A) salt\n(B) baking powder\n(C) sourdough starter\n(D) yeast",
+    "sub_question": [
+        "What is the type of leavening in this item?"
+    ],
+    "sub_answer": [
+        "yeast"
+    ],
+    "gt_ans": [
+        "yeast",
+        "yeast",
+        "yeast",
+        "yeast",
+        "unknown",
+        "yeast",
+        "yeast",
+        "yeast",
+        "flour",
+        "yeast"
+    ],
+    "confidence_base": 0.7753216624259949,
+    "confidence_lba": 0.957675,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5858555436134338,
+        0.9541162252426147,
+        0.5637072324752808,
+        0.9459288716316223,
+        0.9576748609542847
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "MgwZ9gzpwfp2xz2oGjemMc",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of lens does it have? circular.\nQuestion: What is the round glass object?\n(A) window\n(B) microscope\n(C) camera lens\n(D) magnifying glass\nAnswer: The answer is ",
+    "main_question": "What is the round glass object?\n(A) window\n(B) microscope\n(C) camera lens\n(D) magnifying glass",
+    "sub_question": [
+        "What kind of lens does it have?"
+    ],
+    "sub_answer": [
+        "circular"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8850793242454529,
+    "confidence_lba": 0.968378,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5400665402412415,
+        0.7340192198753357,
+        0.8687214255332947,
+        0.9683783650398254,
+        0.8398758172988892
+    ]
+}

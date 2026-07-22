@@ -1,0 +1,30 @@
+{
+    "question_id": "b57dJ74KfRbDSDzkD8bSWJ",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat country are the people in? australia.\nQuestion: What country is this in?\n(A) england\n(B) germany\n(C) united states\n(D) china\nAnswer: The answer is ",
+    "main_question": "What country is this in?\n(A) england\n(B) germany\n(C) united states\n(D) china",
+    "sub_question": [
+        "What country are the people in?"
+    ],
+    "sub_answer": [
+        "australia"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.6773399114608765,
+    "confidence_lba": 0.495195,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.01407754234969616,
+        0.4855841398239136,
+        0.4951949119567871,
+        0.4712199866771698,
+        0.05370674282312393
+    ]
+}

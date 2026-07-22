@@ -1,0 +1,30 @@
+{
+    "question_id": "K7FEvSfPCq94Y7Uzwvju4J",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich location fries snacks on site? french fries.\nQuestion: Which location here fries snacks on site?\n(A) dunkin coffee\n(B) pizza shop\n(C) party store\n(D) cheese monger\nAnswer: The answer is ",
+    "main_question": "Which location here fries snacks on site?\n(A) dunkin coffee\n(B) pizza shop\n(C) party store\n(D) cheese monger",
+    "sub_question": [
+        "Which location fries snacks on site?"
+    ],
+    "sub_answer": [
+        "french fries"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.029209541156888008,
+    "confidence_lba": 0.642375,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(D)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.42087480425834656,
+        0.35826459527015686,
+        0.11357525736093521,
+        0.0333697646856308,
+        0.6423745155334473
+    ]
+}

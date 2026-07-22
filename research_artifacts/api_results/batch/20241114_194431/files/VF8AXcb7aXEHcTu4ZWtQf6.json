@@ -1,0 +1,30 @@
+{
+    "question_id": "VF8AXcb7aXEHcTu4ZWtQf6",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the best way to eat this pizza? with a spoon.\nQuestion: Where is the pie most likely shown?\n(A) cafeteria\n(B) restaurant\n(C) kitchen\n(D) home\nAnswer: The answer is ",
+    "main_question": "Where is the pie most likely shown?\n(A) cafeteria\n(B) restaurant\n(C) kitchen\n(D) home",
+    "sub_question": [
+        "What is the best way to eat this pizza?"
+    ],
+    "sub_answer": [
+        "with a spoon"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.5532336831092834,
+    "confidence_lba": 0.536433,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(D)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.08831866830587387,
+        0.11466871947050095,
+        0.20375487208366394,
+        0.5364326238632202,
+        0.24458616971969604
+    ]
+}

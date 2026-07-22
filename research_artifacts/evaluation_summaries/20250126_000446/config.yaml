@@ -1,0 +1,53 @@
+runner:
+  visualize: false
+  sub_mode: subqa
+  select_high_confidence: true
+  examplar: default
+  threshold_lba: false
+  vision_supple: false
+  use_pre_generated_sub_q: true
+  use_pre_generated_sub_a: true
+  num_sub_qa_generate: 5
+  num_sub_qa_select: 1
+  num_frame_sampling: 3
+  recomposer_name: llava-hf/llava-v1.6-mistral-7b-hf
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /model/
+  device_map: cuda
+  qwen_prompt: false
+  max_new_tokens_subq: 100
+  max_new_tokens_suba: 100
+  max_new_tokens_maina: 256
+  batch_size: 4
+  seed: 44
+  output_dir: output/
+  print_freq: 20
+  use_vqa_tool: false
+  num_bin: 20
+  num_heatmap_row: 10
+  debug: false
+  sevila_cfg_pkl_path: SeViLA/cfg.pkl
+  flipped_vqa_cfg_pkl_path: flipped_vqa/cfg.pkl
+  model_tag: xl
+datasets:
+  dataset_name: VQA_Introspect
+  root_dir: /data/
+  num_data: 5000
+  split: val
+  data_type: images
+  vqa_acc: true
+  open_ended: true
+  ann_paths:
+    train:
+    - VQA_Introspect/VQAIntrospect_trainv1.0.json
+    - VQA/v2/v2_mscoco_train2014_annotations.json
+    val:
+    - VQA_Introspect/VQAIntrospect_valv1.0.json
+    - VQA/v2/v2_mscoco_val2014_annotations.json
+    - /data/VQA_Introspect/sub_qas_val_xl_fewshot_vqaintrospect_unique.json
+  vis_root: coco/images/
+model:
+  cache_dir: /model/
+dataset_name: VQA_Introspect
+num_data: 5000

@@ -1,0 +1,41 @@
+{
+    "question_id": "45ZJiwQ8E4sqUTyJSUzEN3",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the bin on the right made from? wood.\nQuestion: What is the bin on the left made from?\n(A) plastic\n(B) ceramic\n(C) steel\n(D) glass\nAnswer: The answer is ",
+    "main_question": "What is the bin on the left made from?\n(A) plastic\n(B) ceramic\n(C) steel\n(D) glass",
+    "sub_question": [
+        "What is the bin on the right made from?"
+    ],
+    "sub_answer": [
+        "wood"
+    ],
+    "gt_ans": [
+        "metal",
+        "metal",
+        "metal",
+        "food tray",
+        "wood",
+        "steel",
+        "aluminum",
+        "metal",
+        "steel",
+        "metal"
+    ],
+    "confidence_base": 0.7724687457084656,
+    "confidence_lba": 0.665779,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.6657788753509521,
+        0.041874147951602936,
+        0.0418742373585701,
+        0.0418742373585701,
+        0.04187428951263428
+    ]
+}

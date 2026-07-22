@@ -1,0 +1,30 @@
+{
+    "question_id": "UdzPZ8vzkJg3Bp2pMQP5f2",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat animal is in the water? a swan.\nQuestion: What animal is near the water?\n(A) rat\n(B) goose\n(C) dog\n(D) cat\nAnswer: The answer is ",
+    "main_question": "What animal is near the water?\n(A) rat\n(B) goose\n(C) dog\n(D) cat",
+    "sub_question": [
+        "What animal is in the water?"
+    ],
+    "sub_answer": [
+        "a swan"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.4068658947944641,
+    "confidence_lba": 0.984867,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B) goose"
+    ],
+    "confidences_lba_list": [
+        0.7825751304626465,
+        0.9848671555519104,
+        0.28260430693626404,
+        0.4626340866088867,
+        0.07733237743377686
+    ]
+}

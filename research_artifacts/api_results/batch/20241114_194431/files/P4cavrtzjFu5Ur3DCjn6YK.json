@@ -1,0 +1,30 @@
+{
+    "question_id": "P4cavrtzjFu5Ur3DCjn6YK",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the small wheel on the right doing? spinning.\nQuestion: What does the large wheel on the left do?\n(A) purify water\n(B) generate electricity\n(C) sightseeing rides\n(D) mill grain\nAnswer: The answer is ",
+    "main_question": "What does the large wheel on the left do?\n(A) purify water\n(B) generate electricity\n(C) sightseeing rides\n(D) mill grain",
+    "sub_question": [
+        "What is the small wheel on the right doing?"
+    ],
+    "sub_answer": [
+        "spinning"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.6388702392578125,
+    "confidence_lba": 0.758018,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.7580175399780273,
+        0.31450754404067993,
+        0.3168833255767822,
+        0.24948740005493164,
+        0.04852228984236717
+    ]
+}

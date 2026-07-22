@@ -1,0 +1,30 @@
+{
+    "question_id": "GYERWEzeTRB8TqAZXguSbG",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat color is the motorcycle? black.\nQuestion: What is the gray thing on the nearest motorcycle for?\n(A) displaying wealth\n(B) rain protection\n(C) just aesthetics\n(D) heating food\nAnswer: The answer is ",
+    "main_question": "What is the gray thing on the nearest motorcycle for?\n(A) displaying wealth\n(B) rain protection\n(C) just aesthetics\n(D) heating food",
+    "sub_question": [
+        "What color is the motorcycle?"
+    ],
+    "sub_answer": [
+        "black"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.7624841332435608,
+    "confidence_lba": 0.953569,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.9427279233932495,
+        0.4888446629047394,
+        0.8478407859802246,
+        0.9535694718360901,
+        0.932809591293335
+    ]
+}

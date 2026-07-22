@@ -1,0 +1,30 @@
+{
+    "question_id": "7RjA6a3CFR8w5fVRc8Arji",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nA vegetarian is someone who does not eat meat? yes.\nQuestion: A person following what kind of diet is least likely to eat this meal?\n(A) atkins\n(B) weight watchers\n(C) vegetarian\n(D) ketogenic\nAnswer: The answer is ",
+    "main_question": "A person following what kind of diet is least likely to eat this meal?\n(A) atkins\n(B) weight watchers\n(C) vegetarian\n(D) ketogenic",
+    "sub_question": [
+        "A vegetarian is someone who does not eat meat?"
+    ],
+    "sub_answer": [
+        "yes"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.04527219757437706,
+    "confidence_lba": 0.924185,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.6074419617652893,
+        0.688435435295105,
+        0.8847590088844299,
+        0.9241847395896912,
+        0.6229003667831421
+    ]
+}

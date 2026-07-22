@@ -1,0 +1,41 @@
+{
+    "question_id": "DwKTiqQxFH5Ei2cQGR3Y9U",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in this dish? broccoli.\nQuestion: What is this dish being cooked in?\n(A) wok\n(B) stock pot\n(C) frying pan\n(D) teapot\nAnswer: The answer is ",
+    "main_question": "What is this dish being cooked in?\n(A) wok\n(B) stock pot\n(C) frying pan\n(D) teapot",
+    "sub_question": [
+        "What is in this dish?"
+    ],
+    "sub_answer": [
+        "broccoli"
+    ],
+    "gt_ans": [
+        "wok",
+        "wok",
+        "wok",
+        "wok",
+        "wok",
+        "wok",
+        "stir fry",
+        "pan",
+        "wok",
+        "saucer pan"
+    ],
+    "confidence_base": 0.14053070545196533,
+    "confidence_lba": 0.81823,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.7268258929252625,
+        0.7896761894226074,
+        0.8182295560836792,
+        0.5212424397468567,
+        0.3020993173122406
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "question_id": "LpbiGZE3yGNeqQXPc8cB7v",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat object is used to write on and is on the desk? notebook.\nQuestion: Which of these objects is used to write on and is present on the desk?\n(A) post-its\n(B) graph paper\n(C) chalk board\n(D) clip board\nAnswer: The answer is ",
+    "main_question": "Which of these objects is used to write on and is present on the desk?\n(A) post-its\n(B) graph paper\n(C) chalk board\n(D) clip board",
+    "sub_question": [
+        "What object is used to write on and is on the desk?"
+    ],
+    "sub_answer": [
+        "notebook"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.18267202377319336,
+    "confidence_lba": 0.760359,
+    "text_output_base": "(A)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(B)",
+        "(A)",
+        "(A)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.5099977850914001,
+        0.3076446056365967,
+        0.42910102009773254,
+        0.6323152780532837,
+        0.7603586912155151
+    ]
+}

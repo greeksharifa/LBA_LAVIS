@@ -1,0 +1,41 @@
+{
+    "question_id": "2vGs6CLETM2BJPstdHjku9",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat activity does the cat look up at? cooking.\nQuestion: What activity does the cat appear most likely to do?\n(A) drink\n(B) jump\n(C) eat\n(D) sleep\nAnswer: The answer is ",
+    "main_question": "What activity does the cat appear most likely to do?\n(A) drink\n(B) jump\n(C) eat\n(D) sleep",
+    "sub_question": [
+        "What activity does the cat look up at?"
+    ],
+    "sub_answer": [
+        "cooking"
+    ],
+    "gt_ans": [
+        "jump",
+        "jump",
+        "watching television",
+        "jump",
+        "eat food",
+        "jump",
+        "jump",
+        "jump",
+        "beg",
+        "eat"
+    ],
+    "confidence_base": 0.7491302490234375,
+    "confidence_lba": 0.805957,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.751808226108551,
+        0.7673588991165161,
+        0.8045355677604675,
+        0.8059572577476501,
+        0.7415010929107666
+    ]
+}

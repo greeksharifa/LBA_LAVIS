@@ -1,0 +1,30 @@
+{
+    "question_id": "UCbMvJEQ5bXNnFJMtybA48",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat type of screen is generally used for what? television.\nQuestion: The screen type is generally used for what?\n(A) large tv\n(B) music\n(C) vcr\n(D) computer\nAnswer: The answer is ",
+    "main_question": "The screen type is generally used for what?\n(A) large tv\n(B) music\n(C) vcr\n(D) computer",
+    "sub_question": [
+        "What type of screen is generally used for what?"
+    ],
+    "sub_answer": [
+        "television"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.2592032551765442,
+    "confidence_lba": 0.73584,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(D) computer",
+        "(A)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.40636247396469116,
+        0.42868557572364807,
+        0.3459702730178833,
+        0.6995469331741333,
+        0.7358404397964478
+    ]
+}

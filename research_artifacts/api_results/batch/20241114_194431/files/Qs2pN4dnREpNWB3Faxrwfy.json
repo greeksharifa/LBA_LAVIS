@@ -1,0 +1,30 @@
+{
+    "question_id": "Qs2pN4dnREpNWB3Faxrwfy",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the size of the mirror? large.\nQuestion: What type of mirror has been installed here?\n(A) two way\n(B) projection\n(C) dome lit\n(D) vanity\nAnswer: The answer is ",
+    "main_question": "What type of mirror has been installed here?\n(A) two way\n(B) projection\n(C) dome lit\n(D) vanity",
+    "sub_question": [
+        "What is the size of the mirror?"
+    ],
+    "sub_answer": [
+        "large"
+    ],
+    "gt_ans": "A",
+    "confidence_base": 0.05265163630247116,
+    "confidence_lba": 0.787041,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5784718990325928,
+        0.2969009578227997,
+        0.7870405912399292,
+        0.7032255530357361,
+        0.6819682717323303
+    ]
+}

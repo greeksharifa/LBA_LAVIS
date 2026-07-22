@@ -1,0 +1,30 @@
+{
+    "question_id": "T8Mak9BHbJd5WqH2jhjBZo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat team is playing? no team.\nQuestion: Who is winning the game?\n(A) preston\n(B) ryan\n(C) michael\n(D) harrison\nAnswer: The answer is ",
+    "main_question": "Who is winning the game?\n(A) preston\n(B) ryan\n(C) michael\n(D) harrison",
+    "sub_question": [
+        "What team is playing?"
+    ],
+    "sub_answer": [
+        "no team"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.0723765566945076,
+    "confidence_lba": 0.096385,
+    "text_output_base": "(A)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(A)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.09638497978448868,
+        0.05963517352938652,
+        0.012997329235076904,
+        0.011050201021134853,
+        0.008765783160924911
+    ]
+}

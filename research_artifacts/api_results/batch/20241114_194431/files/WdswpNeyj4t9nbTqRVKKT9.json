@@ -1,0 +1,30 @@
+{
+    "question_id": "WdswpNeyj4t9nbTqRVKKT9",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the term for a process in cooking? cooking.\nQuestion: What is this cooking process called?\n(A) boiling\n(B) sautee\n(C) stir frying\n(D) caramelizing\nAnswer: The answer is ",
+    "main_question": "What is this cooking process called?\n(A) boiling\n(B) sautee\n(C) stir frying\n(D) caramelizing",
+    "sub_question": [
+        "What is the term for a process in cooking?"
+    ],
+    "sub_answer": [
+        "cooking"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.2053917497396469,
+    "confidence_lba": 0.956562,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(B)",
+        "(B)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.3119617998600006,
+        0.956562340259552,
+        0.28132498264312744,
+        0.3239312171936035,
+        0.08300305902957916
+    ]
+}

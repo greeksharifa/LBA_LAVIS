@@ -1,0 +1,30 @@
+{
+    "question_id": "aL2mrGutdZCcG5Da5m6avg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the weather like today? sunny.\nQuestion: The weather must have a moderate amount of what?\n(A) rain\n(B) snow\n(C) wind\n(D) cold\nAnswer: The answer is ",
+    "main_question": "The weather must have a moderate amount of what?\n(A) rain\n(B) snow\n(C) wind\n(D) cold",
+    "sub_question": [
+        "What is the weather like today?"
+    ],
+    "sub_answer": [
+        "sunny"
+    ],
+    "gt_ans": "C",
+    "confidence_base": 0.8569420576095581,
+    "confidence_lba": 0.584135,
+    "text_output_base": "(C)",
+    "text_output_lba": "(C)",
+    "text_outputs_lba_list": [
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.5257037281990051,
+        0.5841349959373474,
+        0.49364084005355835,
+        0.4593716859817505,
+        0.28154483437538147
+    ]
+}

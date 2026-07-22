@@ -1,0 +1,41 @@
+{
+    "question_id": "3qnvp3XRGpc5L6RMhRZ3gg",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is in the bottles? perfume.\nQuestion: The visible bottles most likely contain what kind of items?\n(A) body wash\n(B) shampoo conditioner\n(C) lotions\n(D) mouthwash\nAnswer: The answer is ",
+    "main_question": "The visible bottles most likely contain what kind of items?\n(A) body wash\n(B) shampoo conditioner\n(C) lotions\n(D) mouthwash",
+    "sub_question": [
+        "What is in the bottles?"
+    ],
+    "sub_answer": [
+        "perfume"
+    ],
+    "gt_ans": [
+        "shampoo",
+        "soap",
+        "shampoo",
+        "shampoo conditioner",
+        "shampoo",
+        "shampoo conditioner",
+        "shampoo",
+        "shampoo conditioner",
+        "shampoo",
+        "shampoo conditioner"
+    ],
+    "confidence_base": 0.24149931967258453,
+    "confidence_lba": 0.950909,
+    "text_output_base": "(C)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(A)",
+        "(D)",
+        "(B)",
+        "(B)",
+        "(C)"
+    ],
+    "confidences_lba_list": [
+        0.006283764727413654,
+        0.11261289566755295,
+        0.9509091377258301,
+        0.8838787078857422,
+        0.5326700210571289
+    ]
+}

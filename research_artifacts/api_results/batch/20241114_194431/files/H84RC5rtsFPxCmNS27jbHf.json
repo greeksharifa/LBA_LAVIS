@@ -1,0 +1,30 @@
+{
+    "question_id": "H84RC5rtsFPxCmNS27jbHf",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is the object she is putting in her mouth? cigarette.\nQuestion: What is coming out of her mouth?\n(A) food\n(B) sweat\n(C) blood\n(D) smoke\nAnswer: The answer is ",
+    "main_question": "What is coming out of her mouth?\n(A) food\n(B) sweat\n(C) blood\n(D) smoke",
+    "sub_question": [
+        "What is the object she is putting in her mouth?"
+    ],
+    "sub_answer": [
+        "cigarette"
+    ],
+    "gt_ans": "D",
+    "confidence_base": 0.855255126953125,
+    "confidence_lba": 0.98999,
+    "text_output_base": "(D)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.5566655397415161,
+        0.9899900555610657,
+        0.8779051899909973,
+        0.9824339747428894,
+        0.9895498752593994
+    ]
+}

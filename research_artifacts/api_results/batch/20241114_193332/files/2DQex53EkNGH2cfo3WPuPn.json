@@ -1,0 +1,41 @@
+{
+    "question_id": "2DQex53EkNGH2cfo3WPuPn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat kind of device is next to the laptop? cell phone.\nQuestion: What type of device is sitting next to the laptop?\n(A) mouse\n(B) mobile phone\n(C) pen\n(D) keyboard\nAnswer: The answer is ",
+    "main_question": "What type of device is sitting next to the laptop?\n(A) mouse\n(B) mobile phone\n(C) pen\n(D) keyboard",
+    "sub_question": [
+        "What kind of device is next to the laptop?"
+    ],
+    "sub_answer": [
+        "cell phone"
+    ],
+    "gt_ans": [
+        "cell phone",
+        "vodafone",
+        "phone",
+        "phone",
+        "phone",
+        "phone",
+        "cell phone",
+        "phone",
+        "phone",
+        "mobile phone"
+    ],
+    "confidence_base": 0.7645472884178162,
+    "confidence_lba": 0.954717,
+    "text_output_base": "(B)",
+    "text_output_lba": "(B)",
+    "text_outputs_lba_list": [
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)",
+        "(B)"
+    ],
+    "confidences_lba_list": [
+        0.21798178553581238,
+        0.9547170996665955,
+        0.9031407237052917,
+        0.8232502341270447,
+        0.942398190498352
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "question_id": "4U4iSWxvXv9RtE6V9KpxJo",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat is on the side of the yellow plane? a wing.\nQuestion: What is on the side of the yellow plane?\n(A) phone number\n(B) call letters\n(C) company name\n(D) decoration\nAnswer: The answer is ",
+    "main_question": "What is on the side of the yellow plane?\n(A) phone number\n(B) call letters\n(C) company name\n(D) decoration",
+    "sub_question": [
+        "What is on the side of the yellow plane?"
+    ],
+    "sub_answer": [
+        "a wing"
+    ],
+    "gt_ans": [
+        "call letters",
+        "number",
+        "number",
+        "numbers",
+        "call numbers",
+        "big windows",
+        "orange planes",
+        "call sign",
+        "wing",
+        "identification number"
+    ],
+    "confidence_base": 0.4048575758934021,
+    "confidence_lba": 0.455901,
+    "text_output_base": "(B)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)",
+        "(D)"
+    ],
+    "confidences_lba_list": [
+        0.18079149723052979,
+        0.05658610537648201,
+        0.45590081810951233,
+        0.45590081810951233,
+        0.4559006690979004
+    ]
+}

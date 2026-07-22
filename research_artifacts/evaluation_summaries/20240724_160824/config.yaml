@@ -1,0 +1,26 @@
+runner:
+  visualize: false
+  match1ok: false
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  HF_HOME: /data2/
+  batch_size: 32
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+datasets:
+  dataset_name: OKVQA
+  num_data: -1
+  split: val
+  data_type: images
+  vqa_acc: true
+  ann_paths:
+    train:
+    - /data1/okvqa/annotations/okvqa_train.json
+    val:
+    - /data1/okvqa/annotations/vqa_val_eval.json
+  vis_root: /data1/coco/images/
+model:
+  cache_dir: /data2/
+dataset_name: OKVQA

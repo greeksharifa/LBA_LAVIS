@@ -1,0 +1,55 @@
+runner:
+  visualize: false
+  match1ok: false
+  select_high_confidence: true
+  recomposer_examplar: true
+  random_frame: true
+  recomposer_name: Salesforce/blip2-flan-t5-xl
+  decomposer_name: self
+  answerer_name: Salesforce/blip2-flan-t5-xl
+  HF_HOME: /data2/
+  device_map: cuda:0
+  batch_size: 16
+  num_sub_qa_generate: 3
+  num_sub_qa_select: 1
+  output_dir: output/
+  print_freq: 50
+  use_vqa_tool: false
+  num_bin: 50
+  debug: false
+  cfg_pkl_path: SeViLA/cfg.pkl
+datasets:
+  dataset_name: NExTQA
+  num_data: -1
+  split: val
+  data_type: videos
+  n_frms: 4
+  vqa_acc: false
+  ann_paths:
+    train:
+    - /data1/NExT-QA/sevila_style/train.json
+    val:
+    - /data1/NExT-QA/sevila_style/val.json
+  vis_root: /data1/NExT-QA/NExTVideo/
+  vis_processor:
+    train:
+      name: blip_video_eval
+      n_frms: 4
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+    eval:
+      name: blip_video_eval
+      n_frms: 4
+      image_size: 224
+      min_scale: 0.9
+      max_scale: 1.0
+  text_processor:
+    train:
+      name: blip_question
+    eval:
+      name: blip_caption
+model:
+  cache_dir: /data2/
+dataset_name: NExTQA
+num_data: -1

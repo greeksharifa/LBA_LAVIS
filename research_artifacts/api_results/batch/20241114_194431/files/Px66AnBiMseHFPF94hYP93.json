@@ -1,0 +1,30 @@
+{
+    "question_id": "Px66AnBiMseHFPF94hYP93",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhich street fighter character comes from a country that reveres this animal? Ken.\nQuestion: Which Street Fighter character comes from a country that reveres this animal?\n(A) ken\n(B) dhalsim\n(C) m. bison\n(D) ryu\nAnswer: The answer is ",
+    "main_question": "Which Street Fighter character comes from a country that reveres this animal?\n(A) ken\n(B) dhalsim\n(C) m. bison\n(D) ryu",
+    "sub_question": [
+        "Which street fighter character comes from a country that reveres this animal?"
+    ],
+    "sub_answer": [
+        "Ken"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.06529317796230316,
+    "confidence_lba": 0.981021,
+    "text_output_base": "(B)",
+    "text_output_lba": "(A)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(B)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.22611992061138153,
+        0.054153863340616226,
+        0.3696364164352417,
+        0.7369382977485657,
+        0.9810211062431335
+    ]
+}

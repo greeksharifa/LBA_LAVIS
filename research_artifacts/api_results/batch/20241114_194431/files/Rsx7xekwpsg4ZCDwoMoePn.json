@@ -1,0 +1,30 @@
+{
+    "question_id": "Rsx7xekwpsg4ZCDwoMoePn",
+    "text_input": "Context: is the sky blue? no. are there clouds in the sky? yes. Question: what weather is likely? Short answer: rain.\nContext:\nWhat does the red button do on a guitar? mute.\nQuestion: What actress has the first name that is seen on these jerseys?\n(A) joan crawford\n(B) kimberly elise\n(C) jenna elfman\n(D) jessica stroup\nAnswer: The answer is ",
+    "main_question": "What actress has the first name that is seen on these jerseys?\n(A) joan crawford\n(B) kimberly elise\n(C) jenna elfman\n(D) jessica stroup",
+    "sub_question": [
+        "What does the red button do on a guitar?"
+    ],
+    "sub_answer": [
+        "mute"
+    ],
+    "gt_ans": "B",
+    "confidence_base": 0.08349141478538513,
+    "confidence_lba": 0.356224,
+    "text_output_base": "(A)",
+    "text_output_lba": "(D)",
+    "text_outputs_lba_list": [
+        "(D)",
+        "(D)",
+        "(A)",
+        "(D)",
+        "(A)"
+    ],
+    "confidences_lba_list": [
+        0.3562237620353699,
+        0.04432281106710434,
+        0.006814021151512861,
+        0.05828530341386795,
+        0.0815129205584526
+    ]
+}
