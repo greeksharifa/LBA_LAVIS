@@ -1,34 +1,74 @@
 import torch
 from .base_dataset import BaseDataset
+from .inquirer_paths import resolve_dataset_path, resolve_inquirer_path
 import json
 import copy
 import pysrt
+import random
 
 class TVQA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
-        json_path = f'./data/tvqa/tvqa_{split}.jsonl'
-        feature_path = f'./data/tvqa/clipvitl14.pth'
+        source_root = getattr(args, "inquirer_source_root", None)
+        original_json_path = resolve_dataset_path(
+            "tvqa",
+            f"tvqa_{split}.jsonl",
+        )
+        original_data = [
+            json.loads(line)
+            for line in original_json_path.read_text().splitlines()
+        ]
+        if split == 'train':
+            if args.naive == True:
+                additional_data_path = resolve_inquirer_path(
+                    "tvqa",
+                    f"tvqa_{split}_add_prob.jsonl",
+                    source_root=source_root,
+                )
+                additional_data = [
+                    json.loads(line)
+                    for line in additional_data_path.read_text().splitlines()
+                ]
+                total_naive_data = random.sample(additional_data, args.naive_num)
+                self.data = original_data + total_naive_data
 
-        with open(json_path, "r") as f: 
-            data_list = list(f)
-        self.data = [json.loads(x) for x in data_list]
+                #additional_data.sort(key=lambda x: x['perplex'])
+                #r = args.add_filter_ratio
+                #self.data = original_data + additional_data[int(len(additional_data) * r):]
+            else:
+                additional_data_path = resolve_inquirer_path(
+                    "tvqa",
+                    f"tvqa_{split}_add_prob.jsonl",
+                    source_root=source_root,
+                )
+                additional_data = [
+                    json.loads(line)
+                    for line in additional_data_path.read_text().splitlines()
+                ]
+                additional_data.sort(key=lambda x: x['perplex'])
+                r = args.add_filter_ratio
+                self.data = original_data + additional_data[int(len(additional_data) * r):]
+        else:
+            self.data = original_data
+
+        feature_path = resolve_dataset_path("tvqa", "clipvitl14.pth")
         self.features = torch.load(feature_path)
-        self.subtitle_path = f'./data/tvqa/tvqa_subtitles/' # provided as castle_s01e01_seg02_clip_00.srt
+        self.subtitle_path = resolve_dataset_path("tvqa", "tvqa_subtitles")
         self.answer_mapping = {0: '(A)', 1: '(B)', 2: '(C)', 3 : '(D)', 4: '(E)'}
         self.num_options = 5
         self.sub = args.sub
-        print(f"Num {split} data: {len(self.data)}") 
+        if getattr(args, "rank", 0) == 0:
+            print(f"Num {split} data: {len(self.data)}")
 
     def _get_text(self, idx, choices, vid, start, end):
         question = self.data[idx]["q"].capitalize().strip()
         if question[-1] != "?":
             question = str(question) + "?"
-        
+
         if self.sub:
             dialogue = ''
-            
-            for t in pysrt.open(self.subtitle_path+f'{vid}'+'.srt'):
+
+            for t in pysrt.open(str(self.subtitle_path / f"{vid}.srt")):
                 txt = t.text.replace('\n', ' ')
                 st = t.start.minutes * 60 + t.start.seconds
                 et = t.end.minutes * 60 + t.end.seconds
@@ -37,13 +77,13 @@ class TVQA(BaseDataset):
 
             if dialogue != '': d_text = f"Dialogue: {dialogue}\n"
             else: d_text =  ''
-            
-        else: 
+
+        else:
             d_text = ""
-        
+
         q_text = f"Question: {question}\n"
         o_text = f"Choices: \n"
-        
+
         assert len(choices) == self.num_options, "Double check number of choices"
         for i, option in enumerate(choices):
             o_text += f"{self.answer_mapping[i]} {option}\n"
@@ -74,7 +114,7 @@ class TVQA(BaseDataset):
 
     def _get_padding_id(self, text_id, prefix_index, prefix_i, prefix_main, type):
         padding_text_id = torch.zeros((len(text_id), self.max_seq_len), dtype=torch.int64) - 1
-        
+
         prefix = prefix_index
         for i, tid in enumerate(text_id):
             padding = self.max_seq_len - len(tid)
@@ -115,7 +155,7 @@ class TVQA(BaseDataset):
         vqa_id = [torch.tensor(v_id, dtype=torch.int64) for v_id in vqa_id]
         vaq_id = [torch.tensor(v_id, dtype=torch.int64) for v_id in vaq_id]
         qav_id = [torch.tensor(v_id, dtype=torch.int64) for v_id in qav_id]
-        
+
         vqa_padding_text_id, vqa_prefix_index = self._get_padding_id(vqa_id, vqa_prefix_index, vqa_prefix_i, vqa_prefix_q, "vqa")
         vaq_padding_text_id, vaq_prefix_index = self._get_padding_id(vaq_id, vaq_prefix_index, vaq_prefix_i, vaq_prefix_q, "vaq")
         qav_padding_text_id, qav_prefix_index = self._get_padding_id(qav_id, qav_prefix_index, qav_prefix_i, qav_prefix_q, "qav")
@@ -126,19 +166,19 @@ class TVQA(BaseDataset):
         vqa_label_mask = vqa_label.ge(0)
         vqa_label[~vqa_label_mask] = 0
         vqa_label_mask = vqa_label_mask.float()
-        
+
         vaq_label = copy.deepcopy(vaq_padding_text_id)
         vaq_label[:, :vaq_prefix_index] = -1
         vaq_label_mask = vaq_label.ge(0)
         vaq_label[~vaq_label_mask] = 0
         vaq_label_mask = vaq_label_mask.float()
-        
+
         qav_label = torch.ones_like(qav_padding_text_id) * -1
         qav_label[:, qav_prefix_index:qav_prefix_index+self.max_feats] = torch.arange(self.max_feats)
         qav_label_mask = torch.zeros_like(qav_padding_text_id)
         qav_label_mask[:, qav_prefix_index] = 1
         qav_label_mask = qav_label_mask.float()
-                
+
         # text mask
         vqa_text_mask = vqa_padding_text_id.ge(0)
         vqa_padding_text_id[~vqa_text_mask] = 0
@@ -146,12 +186,12 @@ class TVQA(BaseDataset):
         vaq_padding_text_id[~vaq_text_mask] = 0
         qav_text_mask = qav_padding_text_id.ge(0)
         qav_padding_text_id[~qav_text_mask] = 0
-        
+
         # video index
         vqa_video_index = torch.arange(vqa_prefix_index, vqa_prefix_index + self.max_feats)
         vaq_video_index = torch.arange(vaq_prefix_index, vaq_prefix_index + self.max_feats)
         qav_video_index = torch.arange(qav_prefix_index, qav_prefix_index + self.max_feats)
-        
+
         text_id = {'vqa': vqa_padding_text_id, 'vaq': vaq_padding_text_id, 'qav': qav_padding_text_id}
         label = {'vqa': vqa_label, 'vaq': vaq_label, 'qav': qav_label}
         video_start = {'vqa': vqa_video_start, 'vaq': vaq_video_start, 'qav': qav_prefix_index}
@@ -166,11 +206,11 @@ class TVQA(BaseDataset):
         answer =  self.data[idx]['answer_idx']
 
         start, end = map(float, self.data[idx]['ts'].split('-'))
-        try: 
+        try:
             start, end = round(start), round(end)
-        except: 
+        except:
             start, end = -1000, 1000
-        
+
         video, video_len = self._get_video(f'{vid}', start, end)
         text = self._get_text(idx, choices, f'{vid}', start, end)
         text_id, label, video_start, video_index, label_mask = self._get_text_token(text, answer)

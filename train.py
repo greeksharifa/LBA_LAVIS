@@ -43,6 +43,11 @@ def get_args_parser():
 
     # Dataset parameters
     parser.add_argument('--dataset', default='nextqa', type=str, help='dataset')
+    parser.add_argument(
+        '--inquirer-source-root',
+        default=os.environ.get('INQUIRER_SOURCE_ROOT', 'data/inquirer-source'),
+        help='root containing generated INQUIRER QA inputs',
+    )
     parser.add_argument('--output_dir', default='./output_dir', help='path where to save, empty for no saving')
     parser.add_argument('--device', default='cuda', help='device to use for training / testing')
     parser.add_argument('--seed', default=0, type=int)
@@ -58,12 +63,17 @@ def get_args_parser():
     parser.add_argument('--local_rank', default=-1, type=int)
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
-    
+
     parser.add_argument('--vaq', action='store_true', help='vaq loss')
     parser.add_argument('--qav', action='store_true', help='qav loss')
     parser.add_argument('--bias', type=float, default=3., help='attention bias')
     parser.add_argument('--tau', type=float, default=100., help='tau')
     parser.add_argument('--sub', action='store_true', help='subtitles for VLEP and TVQA')
+
+    # ywjang // wschoi
+    parser.add_argument('--add_filter_ratio', type=float, required=True, help='filter ratio. 0.75 means 75% of additional data is filtered out')
+    parser.add_argument('--naive', action='store_true', help='Testing with naive questions')
+    parser.add_argument('--naive_num', default=1.0, type=int, help='Testing with naive questions')
 
     return parser
 
@@ -71,8 +81,9 @@ def get_args_parser():
 def main(args):
     misc.init_distributed_mode(args)
 
-    print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
-    print("{}".format(args).replace(', ', ',\n'))
+    if misc.is_main_process():
+        print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
+        print("{}".format(args).replace(', ', ',\n'))
 
     device = torch.device(args.device)
 
@@ -92,33 +103,33 @@ def main(args):
     model.to(device)
 
     model_without_ddp = model
-    # print("Model = %s" % str(model_without_ddp))
-
     eff_batch_size = args.batch_size * args.accum_iter * misc.get_world_size()
-    
+
     if args.lr is None:  # only base_lr is specified
         args.lr = args.blr * eff_batch_size / 256
 
-    print("base lr: %.2e" % (args.lr * 256 / eff_batch_size))
-    print("actual lr: %.2e" % args.lr)
+    if misc.is_main_process():
+        print("base lr: %.2e" % (args.lr * 256 / eff_batch_size))
+        print("actual lr: %.2e" % args.lr)
+        print("accumulate grad iterations: %d" % args.accum_iter)
+        print("effective batch size: %d" % eff_batch_size)
 
-    print("accumulate grad iterations: %d" % args.accum_iter)
-    print("effective batch size: %d" % eff_batch_size)
-    
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
         model_without_ddp = model.module
-    
+
     # following timm: set wd as 0 for bias and norm layers
     param_groups = optim_factory.param_groups_weight_decay(model_without_ddp, args.weight_decay)
     optimizer = torch.optim.AdamW(param_groups, lr=args.lr, betas=(0.9, 0.95))
-    print(optimizer)
+    if misc.is_main_process():
+        print(optimizer)
     loss_scaler = NativeScaler()
     best_acc = 0.
 
     misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
-    print(f"Start training for {args.epochs} epochs")
+    if misc.is_main_process():
+        print(f"Start training for {args.epochs} epochs")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
 
@@ -131,7 +142,7 @@ def main(args):
 
         if args.output_dir and best_acc < val_stats['acc']:
             best_acc = val_stats['acc']
-            model_name = 'checkpoint_best'
+            model_name = 'checkpoint_best_unfiltered_kg'
             misc.save_model(args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler, epoch=epoch, name=model_name)
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()}, 'epoch': epoch, **{f'val_{k}': v for k, v in val_stats.items()}}
@@ -142,7 +153,8 @@ def main(args):
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    print('Training time {}'.format(total_time_str))
+    if misc.is_main_process():
+        print('Training time {}'.format(total_time_str))
 
 
 if __name__ == '__main__':

@@ -2,13 +2,15 @@ import torch
 from util import misc
 from .nextqa import NextQA
 from .dramaqa import DramaQA
+from .dramaqa_kg import DramaQA_KG
 from .star import STAR
 from .vlep import VLEP
 from .tvqa import TVQA
+from .how2qa import How2QA
 
 
-dataset_mapping = {'nextqa': NextQA, 'star': STAR, 'dramaqa': DramaQA, 'vlep': VLEP, 'tvqa': TVQA}
-num_options_mapping = {'nextqa': 5, 'star': 4, 'dramaqa': 5, 'vlep': 2, 'tvqa': 5}
+dataset_mapping = {'nextqa': NextQA, 'star': STAR, 'dramaqa': DramaQA, 'vlep': VLEP, 'tvqa': TVQA, 'dramaqa_kg': DramaQA_KG, 'how2qa': How2QA}
+num_options_mapping = {'nextqa': 5, 'star': 4, 'dramaqa': 5, 'vlep': 2, 'tvqa': 5, 'dramaqa_kg': 5, 'how2qa': 4}
 
 def load_data(args, tokenizer, split='train'):
     args.num_options = num_options_mapping[args.dataset]
