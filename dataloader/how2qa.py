@@ -5,6 +5,15 @@ import pandas as pd
 import math
 
 
+def _normalize_segment(start, end):
+    try:
+        if not math.isfinite(start) or not math.isfinite(end):
+            return None, None
+    except (TypeError, ValueError):
+        return None, None
+    return int(round(start)), int(round(end))
+
+
 class How2QA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split="train"):
         super().__init__(args, tokenizer, split)
@@ -65,7 +74,7 @@ class How2QA(BaseDataset):
             print(video_id)
             video = torch.zeros(1, self.features_dim)
         else:
-            if start is not None and not math.isnan(start):
+            if start is not None and end is not None:
                 video = self.features[video_id][int(start) : int(end) + 1].float()
             else:
                 video = self.features[video_id].float()
@@ -94,8 +103,9 @@ class How2QA(BaseDataset):
         answer = self.data["answer_id"].values[idx]
         text = self._get_text(idx)
         text_id, label, video_start, video_index, label_mask = self._get_text_token(text, answer)
-        start, end = round(self.data["start"].values[idx]), round(
-            self.data["end"].values[idx]
+        start, end = _normalize_segment(
+            self.data["start"].values[idx],
+            self.data["end"].values[idx],
         )
         video, video_len = self._get_video(f"{vid}", start, end)
         return {"vid": vid, "video": video, "video_len": video_len, "text": text, "text_id": text_id, "label": label, "video_start": video_start,
