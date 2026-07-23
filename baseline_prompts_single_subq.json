@@ -1,0 +1,6 @@
+{
+  "Baseline_SingleSubQ": {
+    "exemplar": " Context : is the sky blue ? no . are there clouds in the sky ? yes . Question : what weather is likely ? Short answer : rain ",
+    "suffix": "Generate 1 sub-question about image that will help answer the main question. Question : {question}"
+  }
+}
