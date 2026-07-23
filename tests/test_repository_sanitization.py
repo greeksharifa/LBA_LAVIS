@@ -78,10 +78,11 @@ FORBIDDEN_CONTENT = {
         rb"\bCUDA_VISIBLE_DEVICES(?:[\"']?\])?\s*(?:=|:)\s*"
         rb"[\"']?\d+(?:\s*,\s*\d+)*[\"']?"
     ),
-    "AWS access key": re.compile(rb"\bAKIA[0-9A-Z]{16}\b"),
+    "AWS access key": re.compile(rb"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"),
     "OpenAI-style key": re.compile(rb"\bsk[-_][A-Za-z0-9_-]{8,}\b"),
     "GitHub token": re.compile(
-        rb"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{8,}\b"
+        rb"\b(?:(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{8,}|"
+        rb"github_pat_[A-Za-z0-9_]{20,})\b"
     ),
     "private key": re.compile(rb"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     "credential assignment": re.compile(
@@ -238,3 +239,29 @@ def test_scanner_allows_environment_credential_references(tmp_path) -> None:
     )
 
     assert violations == []
+
+
+def test_scanner_detects_bare_modern_credentials_in_structured_text(
+    tmp_path,
+) -> None:
+    json_fixture = tmp_path / "config.json"
+    json_fixture.write_text(
+        '{"value": "github_pat_fixtureToken1234567890"}\n'
+    )
+    yaml_fixture = tmp_path / "config.yaml"
+    yaml_fixture.write_text("value: ASIAABCDEFGHIJKLMNOP\n")
+    url_fixture = tmp_path / "url.txt"
+    url_fixture.write_text(
+        "https://example.invalid/github_pat_secondFixture1234567890/status\n"
+    )
+    docs_fixture = tmp_path / "README.md"
+    docs_fixture.write_text("temporary identifier: ASIA1234567890ABCDEF\n")
+
+    violations = scan_paths(
+        [json_fixture, yaml_fixture, url_fixture, docs_fixture],
+        repository_root=tmp_path,
+        scanner_path=None,
+    )
+
+    assert sum("GitHub token" in item for item in violations) == 2
+    assert sum("AWS access key" in item for item in violations) == 2
