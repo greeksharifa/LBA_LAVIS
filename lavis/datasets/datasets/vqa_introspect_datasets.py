@@ -350,9 +350,9 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         self.prompt_type = prompt_type
         
         if prompt_type in ["Answerer"]:
-            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 50)
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths)
         elif prompt_type in ["Questioner_SingleSubQ", "Questioner_MultipleSubQ", "Reasoner"]:
-            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 50)
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths)
         
         self.img_ids = {}
         n = 0
@@ -429,4 +429,3 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         # logging.info(f"_return: {_return}")
 
         return _return
-
