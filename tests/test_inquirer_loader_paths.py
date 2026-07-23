@@ -77,86 +77,94 @@ def test_resolves_generated_qa_inputs_below_source_root(
 
 
 @pytest.mark.parametrize(
-    ("dataset", "dataset_environment", "media_environment", "media_name"),
+    ("dataset", "dataset_environment"),
     [
-        ("star", "STAR_DATASET_ROOT", "STAR_VIDEO_ROOT", "video.mp4"),
-        ("tvqa", "TVQA_DATASET_ROOT", "TVQA_VIDEO_ROOT", "video.mp4"),
-        ("how2qa", "HOW2QA_DATASET_ROOT", "HOW2QA_VIDEO_ROOT", "clip.mp4"),
+        ("star", "STAR_DATASET_ROOT"),
+        ("tvqa", "TVQA_DATASET_ROOT"),
+        ("how2qa", "HOW2QA_DATASET_ROOT"),
     ],
 )
-def test_dataset_assets_and_media_use_independent_environment_roots(
+def test_dataset_assets_use_dedicated_environment_roots(
     tmp_path: Path,
     dataset: str,
     dataset_environment: str,
-    media_environment: str,
-    media_name: str,
 ) -> None:
     paths = load_path_module()
     dataset_root = tmp_path / "metadata-and-features"
-    media_root = tmp_path / "raw-media"
-    environment = {
-        dataset_environment: str(dataset_root),
-        media_environment: str(media_root),
-    }
 
     asset_path = paths.resolve_dataset_path(
         dataset,
         "features.pth",
-        environ=environment,
-    )
-    media_path = paths.resolve_media_path(
-        dataset,
-        media_name,
-        environ=environment,
+        environ={dataset_environment: str(dataset_root)},
     )
 
-    assert asset_path == dataset_root / "features.pth"
-    assert media_path == media_root / media_name
+    assert asset_path == (dataset_root / "features.pth").resolve()
 
 
-def test_dramaqa_media_uses_image_subdirectory_of_dataset_root(
+def test_dramaqa_assets_use_dramaqa_root(
     tmp_path: Path,
 ) -> None:
     paths = load_path_module()
     dataset_root = tmp_path / "dramaqa"
-    environment = {"DRAMAQA_ROOT": str(dataset_root)}
 
     asset_path = paths.resolve_dataset_path(
         "dramaqa",
         "clipvitl14.pth",
-        environ=environment,
-    )
-    media_path = paths.resolve_media_path(
-        "dramaqa",
-        "episode/scene/frame.jpg",
-        environ=environment,
+        environ={"DRAMAQA_ROOT": str(dataset_root)},
     )
 
-    assert asset_path == dataset_root / "clipvitl14.pth"
-    assert media_path == (
-        dataset_root
-        / "AnotherMissOh_images"
-        / "episode/scene/frame.jpg"
-    )
+    assert asset_path == (dataset_root / "clipvitl14.pth").resolve()
 
 
 @pytest.mark.parametrize(
-    ("dataset", "dataset_root", "media_root"),
+    ("dataset", "dataset_root"),
     [
-        ("star", "data/star", "data/star/videos"),
-        ("tvqa", "data/tvqa", "data/tvqa/videos"),
-        ("how2qa", "data/how2qa", "data/how2qa/clips"),
+        ("star", "data/star"),
+        ("tvqa", "data/tvqa"),
+        ("how2qa", "data/how2qa"),
     ],
 )
-def test_dataset_and_media_roots_have_independent_neutral_defaults(
+def test_dataset_roots_have_neutral_defaults(
     dataset: str,
     dataset_root: str,
-    media_root: str,
 ) -> None:
     paths = load_path_module()
 
     assert paths.resolve_dataset_root(dataset, environ={}) == Path(dataset_root)
-    assert paths.resolve_media_root(dataset, environ={}) == Path(media_root)
+
+
+def test_resolver_rejects_internal_symlink_escape(tmp_path: Path) -> None:
+    paths = load_path_module()
+    dataset_root = tmp_path / "dataset"
+    outside_root = tmp_path / "outside"
+    dataset_root.mkdir()
+    outside_root.mkdir()
+    (dataset_root / "escape").symlink_to(outside_root, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="escapes configured root"):
+        paths.resolve_dataset_path(
+            "star",
+            "escape/features.pth",
+            dataset_root=dataset_root,
+            environ={},
+        )
+
+
+def test_resolver_allows_root_itself_to_be_a_symlink(tmp_path: Path) -> None:
+    paths = load_path_module()
+    real_root = tmp_path / "shared-dataset"
+    configured_root = tmp_path / "dataset-link"
+    real_root.mkdir()
+    configured_root.symlink_to(real_root, target_is_directory=True)
+
+    actual = paths.resolve_dataset_path(
+        "star",
+        "features.pth",
+        dataset_root=configured_root,
+        environ={},
+    )
+
+    assert actual == (real_root / "features.pth").resolve()
 
 
 def test_source_root_uses_environment_then_neutral_default(tmp_path: Path) -> None:
@@ -259,27 +267,39 @@ def test_entrypoints_expose_configurable_inquirer_source_root(
     for option in (
         "--dramaqa-root",
         "--star-dataset-root",
-        "--star-video-root",
         "--tvqa-dataset-root",
-        "--tvqa-video-root",
         "--how2qa-dataset-root",
-        "--how2qa-video-root",
     ):
         assert option in source
 
 
-def test_readme_documents_separate_dataset_and_media_roots() -> None:
+def test_augmentation_branch_has_no_dead_media_root_surface() -> None:
+    resolver_source = MODULE_PATH.read_text()
+    entrypoint_source = (
+        (REPOSITORY_ROOT / "train.py").read_text()
+        + (REPOSITORY_ROOT / "eval.py").read_text()
+    )
+    readme_source = (REPOSITORY_ROOT / "README.md").read_text()
+
+    assert "resolve_media_" not in resolver_source
+    assert "--star-video-root" not in entrypoint_source
+    assert "--tvqa-video-root" not in entrypoint_source
+    assert "--how2qa-video-root" not in entrypoint_source
+    assert "STAR_VIDEO_ROOT" not in readme_source
+    assert "TVQA_VIDEO_ROOT" not in readme_source
+    assert "HOW2QA_VIDEO_ROOT" not in readme_source
+
+
+def test_readme_documents_precomputed_dataset_roots() -> None:
     source = (REPOSITORY_ROOT / "README.md").read_text()
 
     for environment_variable in (
         "STAR_DATASET_ROOT",
-        "STAR_VIDEO_ROOT",
         "TVQA_DATASET_ROOT",
-        "TVQA_VIDEO_ROOT",
         "HOW2QA_DATASET_ROOT",
-        "HOW2QA_VIDEO_ROOT",
     ):
         assert environment_variable in source
+    assert "precomputed features" in source
 
 
 def test_build_dramaqa_split_reads_and_writes_configured_roots(
@@ -306,9 +326,67 @@ def test_build_dramaqa_split_reads_and_writes_configured_roots(
         filter_ratio=0.5,
     )
 
-    assert output_path == dataset_root / "dramaqa_train_filtered05_Naive.json"
+    assert output_path == (
+        dataset_root / "dramaqa_train_filtered_r0p5_Naive.json"
+    ).resolve()
     assert split_data.json.loads(output_path.read_text()) == [
         {"qid": 1},
         {"qid": 2, "perplex": 0.1},
         {"qid": 4, "perplex": 0.2},
     ]
+
+
+def test_split_output_names_encode_ratio_without_collisions(
+    tmp_path: Path,
+) -> None:
+    split_data = load_split_module()
+    dataset_root = tmp_path / "dramaqa"
+    source_root = tmp_path / "inquirer-source"
+    dataset_root.mkdir()
+    (source_root / "prompts").mkdir(parents=True)
+    (dataset_root / "AnotherMissOhQA_train_set_ori_scsh.json").write_text("[]")
+    for name in ("scene", "shot"):
+        (
+            source_root
+            / f"prompts/AnotherMissOhQA_train_set_naive_{name}prob.json"
+        ).write_text('[{"perplex": 0.1}]')
+
+    ratio_half = split_data.build_dramaqa_split(
+        source_root=source_root,
+        dataset_root=dataset_root,
+        filter_ratio=0.5,
+    )
+    ratio_five_percent = split_data.build_dramaqa_split(
+        source_root=source_root,
+        dataset_root=dataset_root,
+        filter_ratio=0.05,
+    )
+
+    assert ratio_half.name == "dramaqa_train_filtered_r0p5_Naive.json"
+    assert ratio_five_percent.name == "dramaqa_train_filtered_r0p05_Naive.json"
+    assert ratio_half != ratio_five_percent
+
+
+def test_split_rejects_output_symlink_escape(tmp_path: Path) -> None:
+    split_data = load_split_module()
+    dataset_root = tmp_path / "dramaqa"
+    source_root = tmp_path / "inquirer-source"
+    outside_root = tmp_path / "outside"
+    dataset_root.mkdir()
+    outside_root.mkdir()
+    (source_root / "prompts").mkdir(parents=True)
+    (dataset_root / "AnotherMissOhQA_train_set_ori_scsh.json").write_text("[]")
+    for name in ("scene", "shot"):
+        (
+            source_root
+            / f"prompts/AnotherMissOhQA_train_set_naive_{name}prob.json"
+        ).write_text("[]")
+    output_path = dataset_root / "dramaqa_train_filtered_r0p5_Naive.json"
+    output_path.symlink_to(outside_root / "escaped.json")
+
+    with pytest.raises(ValueError, match="escapes configured root"):
+        split_data.build_dramaqa_split(
+            source_root=source_root,
+            dataset_root=dataset_root,
+            filter_ratio=0.5,
+        )

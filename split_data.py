@@ -4,6 +4,11 @@ import argparse
 import json
 from pathlib import Path
 
+from dataloader.inquirer_augmentation import (
+    filter_generated_items,
+    format_ratio_tag,
+    removal_ratio,
+)
 from dataloader.inquirer_paths import (
     resolve_dataset_path,
     resolve_dataset_root,
@@ -37,20 +42,16 @@ def build_dramaqa_split(
     original_data = json.loads(original_path.read_text())
     scene_additional_data = json.loads(scene_path.read_text())
     shot_additional_data = json.loads(shot_path.read_text())
-    scene_additional_data.sort(key=lambda item: item["perplex"], reverse=True)
-    shot_additional_data.sort(key=lambda item: item["perplex"], reverse=True)
-
-    scene_start = int(len(scene_additional_data) * filter_ratio)
-    shot_start = int(len(shot_additional_data) * filter_ratio)
     data = (
         original_data
-        + scene_additional_data[scene_start:]
-        + shot_additional_data[shot_start:]
+        + filter_generated_items(scene_additional_data, filter_ratio)
+        + filter_generated_items(shot_additional_data, filter_ratio)
     )
 
+    ratio_tag = format_ratio_tag(filter_ratio)
     output_path = resolve_dataset_path(
         "dramaqa",
-        "dramaqa_train_filtered05_Naive.json",
+        f"dramaqa_train_filtered_{ratio_tag}_Naive.json",
         dataset_root=dataset_root,
     )
     output_path.write_text(
@@ -72,7 +73,11 @@ def get_args_parser() -> argparse.ArgumentParser:
         "--dramaqa-root",
         default=str(resolve_dataset_root("dramaqa")),
     )
-    parser.add_argument("--filter-ratio", type=float, default=0.5)
+    parser.add_argument(
+        "--filter-ratio",
+        type=removal_ratio,
+        default=0.5,
+    )
     return parser
 
 

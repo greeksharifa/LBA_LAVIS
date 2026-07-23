@@ -1,80 +1,54 @@
 import torch
 from .base_dataset import BaseDataset
+from .inquirer_augmentation import (
+    filter_generated_items,
+    positive_int,
+    removal_ratio,
+    sample_generated_items,
+)
 from .inquirer_paths import resolve_dataset_path, resolve_inquirer_path
 import json
-import random
 
 class STAR(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
         dataset_root = getattr(args, "star_dataset_root", None)
+        remove_ratio = removal_ratio(args.add_filter_ratio)
+        naive_count = positive_int(args.naive_num)
         if split == 'train':
-            if args.naive == True:
-                original_data = json.loads(
-                    resolve_dataset_path(
-                        "star",
-                        f"STAR_{split}_ori.json",
-                        dataset_root=dataset_root,
-                    ).read_text()
+            original_data = json.loads(
+                resolve_dataset_path(
+                    "star",
+                    f"STAR_{split}_ori.json",
+                    dataset_root=dataset_root,
+                ).read_text()
+            )
+            generated_data = []
+            if remove_ratio < 1.0:
+                suffix = (
+                    "naive_prob_filtered.json"
+                    if args.naive
+                    else "add_prob.json"
                 )
-                total_naive_data = json.loads(
+                generated_data = json.loads(
                     resolve_inquirer_path(
                         "star",
-                        f"STAR_{split}_naive_prob_filtered.json",
+                        f"STAR_{split}_{suffix}",
                         source_root=source_root,
                     ).read_text()
                 )
-                #additional_data.sort(key=lambda x: x['perplex']) # Descending
-                #additional_data.sort(key=lambda x: x['perplex'], reverse=True) # Ascending
-                #r = args.add_filter_ratio
-
-                #self.data = original_data + additional_data[int(len(additional_data) * r):] # Ascending
-                #self.data = original_data + additional_data[:int(len(additional_data) * r)] # Descending
-                # 87.5% = 5625, 75% = 11250, 50% = 22500
-                r = args.add_filter_ratio
-                len_total_naive_data = int(len(total_naive_data) * r)
-                total_naive_data = random.sample(total_naive_data, len_total_naive_data)
-                #total_naive_data = random.sample(total_naive_data, args.naive_num)
-                self.data = original_data + total_naive_data
-            else:
-                original_data = json.loads(
-                    resolve_dataset_path(
-                        "star",
-                        f"STAR_{split}_ori.json",
-                        dataset_root=dataset_root,
-                    ).read_text()
+                generated_data = filter_generated_items(
+                    generated_data,
+                    remove_ratio,
                 )
-                additional_data = json.loads(
-                    resolve_inquirer_path(
-                        "star",
-                        f"STAR_{split}_add_prob.json",
-                        source_root=source_root,
-                    ).read_text()
-                )
-                '''
-                {
-                    'question_id': 'Interaction_T1_4',
-                    'video_id': 'TJZ0P',
-                    'start': 7.7,
-                    'end': 15.7,
-                    'question': 'What type of object was present in the scene?',
-                    'answer': 'A sandwich.',
-                    'choices': [
-                        {'choice_id': 0, 'choice': 'A sandwich.'},
-                        {'choice_id': 1, 'choice': 'A chair.'},
-                        {'choice_id': 2, 'choice': 'A book.'},
-                        {'choice_id': 3, 'choice': 'A bottle.'}
-                    ],
-                    'q_type': 'Feature specification',
-                    'perplex': 0.00020488160953391343
-                }
-                '''
-                #additional_data.sort(key=lambda x: x['perplex']) # Descending
-                additional_data.sort(key=lambda x: x['perplex'], reverse=True) # Ascending
-                r = args.add_filter_ratio
-                self.data = original_data + additional_data[int(len(additional_data) * r):]
-                #self.data = original_data + additional_data[:int(len(additional_data) * r)]
+                if args.naive:
+                    generated_data = sample_generated_items(
+                        generated_data,
+                        count=naive_count,
+                        seed=args.seed,
+                    )
+            self.data = original_data + generated_data
         else:
             original_data = json.loads(
                 resolve_dataset_path(

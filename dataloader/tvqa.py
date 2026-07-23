@@ -1,16 +1,23 @@
 import torch
 from .base_dataset import BaseDataset
+from .inquirer_augmentation import (
+    filter_generated_items,
+    positive_int,
+    removal_ratio,
+    sample_generated_items,
+)
 from .inquirer_paths import resolve_dataset_path, resolve_inquirer_path
 import json
 import copy
 import pysrt
-import random
 
 class TVQA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
         dataset_root = getattr(args, "tvqa_dataset_root", None)
+        remove_ratio = removal_ratio(args.add_filter_ratio)
+        naive_count = positive_int(args.naive_num)
         original_json_path = resolve_dataset_path(
             "tvqa",
             f"tvqa_{split}.jsonl",
@@ -21,35 +28,33 @@ class TVQA(BaseDataset):
             for line in original_json_path.read_text().splitlines()
         ]
         if split == 'train':
-            if args.naive == True:
+            generated_data = []
+            if remove_ratio < 1.0:
+                suffix = (
+                    "naive_filtered.jsonl"
+                    if args.naive
+                    else "add_prob.jsonl"
+                )
                 additional_data_path = resolve_inquirer_path(
                     "tvqa",
-                    f"tvqa_{split}_add_prob.jsonl",
+                    f"tvqa_{split}_{suffix}",
                     source_root=source_root,
                 )
-                additional_data = [
+                generated_data = [
                     json.loads(line)
                     for line in additional_data_path.read_text().splitlines()
                 ]
-                total_naive_data = random.sample(additional_data, args.naive_num)
-                self.data = original_data + total_naive_data
-
-                #additional_data.sort(key=lambda x: x['perplex'])
-                #r = args.add_filter_ratio
-                #self.data = original_data + additional_data[int(len(additional_data) * r):]
-            else:
-                additional_data_path = resolve_inquirer_path(
-                    "tvqa",
-                    f"tvqa_{split}_add_prob.jsonl",
-                    source_root=source_root,
+                generated_data = filter_generated_items(
+                    generated_data,
+                    remove_ratio,
                 )
-                additional_data = [
-                    json.loads(line)
-                    for line in additional_data_path.read_text().splitlines()
-                ]
-                additional_data.sort(key=lambda x: x['perplex'])
-                r = args.add_filter_ratio
-                self.data = original_data + additional_data[int(len(additional_data) * r):]
+                if args.naive:
+                    generated_data = sample_generated_items(
+                        generated_data,
+                        count=naive_count,
+                        seed=args.seed,
+                    )
+            self.data = original_data + generated_data
         else:
             self.data = original_data
 

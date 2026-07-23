@@ -1,96 +1,57 @@
 import torch
 from .base_dataset import BaseDataset
+from .inquirer_augmentation import (
+    filter_generated_items,
+    positive_int,
+    removal_ratio,
+    sample_generated_items,
+)
 from .inquirer_paths import resolve_dataset_path, resolve_inquirer_path
 import json
-import random
 
 class DramaQA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
         dataset_root = getattr(args, "dramaqa_root", None)
+        remove_ratio = removal_ratio(args.add_filter_ratio)
+        naive_count = positive_int(args.naive_num)
         if split == 'train':
-            if args.naive == True:
-                if args.add_filter_ratio < 1.0:
-                    original_data = json.loads(
-                        resolve_dataset_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_ori_scsh.json",
-                            dataset_root=dataset_root,
-                        ).read_text()
-                    )
-                    scene_additional_data = json.loads(
-                        resolve_inquirer_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_add_sceneprob.json",
-                            source_root=source_root,
-                        ).read_text()
-                    )
-                    shot_additional_data = json.loads(
-                        resolve_inquirer_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_add_shotprob.json",
-                            source_root=source_root,
-                        ).read_text()
-                    )
-
-                    #Descending
-                    #scene_additional_data.sort(key=lambda x: x['perplex'])
-                    #shot_additional_data.sort(key=lambda x: x['perplex'])
-
-                    #Ascending
-                    scene_additional_data.sort(key=lambda x: x['perplex'], reverse=True)
-                    shot_additional_data.sort(key=lambda x: x['perplex'], reverse=True)
-                    r = args.add_filter_ratio
-                    self.data = original_data + scene_additional_data[int(len(scene_additional_data) * r):] + shot_additional_data[int(len(shot_additional_data) * r):]
-                else:
-                    original_data = json.loads(
-                        resolve_dataset_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_ori_scsh.json",
-                            dataset_root=dataset_root,
-                        ).read_text()
-                    )
-                    scene_additional_data = json.loads(
-                        resolve_inquirer_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_naive_sceneprob.json",
-                            source_root=source_root,
-                        ).read_text()
-                    )
-                    shot_additional_data = json.loads(
-                        resolve_inquirer_path(
-                            "dramaqa",
-                            f"AnotherMissOhQA_{split}_set_naive_shotprob.json",
-                            source_root=source_root,
-                        ).read_text()
-                    )
-
-                    #Filtering
-                    #Descending
-                    #scene_additional_data.sort(key=lambda x: x['perplex'])
-                    #shot_additional_data.sort(key=lambda x: x['perplex'])
-
-                    #Ascending
-                    #scene_additional_data.sort(key=lambda x: x['perplex'], reverse=True)
-                    #shot_additional_data.sort(key=lambda x: x['perplex'], reverse=True)
-                    total_naive_data = scene_additional_data[:] + shot_additional_data[:]
-                    # 87.5% = 2308, 75% = 4616, 50% = 9233
-                    total_naive_data = random.sample(total_naive_data, args.naive_num)
-
-                    #r = args.add_filter_ratio
-                    #self.data = original_data + scene_additional_data[int(len(scene_additional_data) * r):] + shot_additional_data[int(len(shot_additional_data) * r):]
-                    self.data = original_data + total_naive_data
-
-            else:
-                original_data = json.loads(
-                    resolve_dataset_path(
+            original_data = json.loads(
+                resolve_dataset_path(
+                    "dramaqa",
+                    f"AnotherMissOhQA_{split}_set_ori_scsh.json",
+                    dataset_root=dataset_root,
+                ).read_text()
+            )
+            generated_data = []
+            if remove_ratio < 1.0:
+                variant = "naive" if args.naive else "add"
+                scene_generated = json.loads(
+                    resolve_inquirer_path(
                         "dramaqa",
-                        f"AnotherMissOhQA_{split}_scene.json",
-                        dataset_root=dataset_root,
+                        f"AnotherMissOhQA_{split}_set_{variant}_sceneprob.json",
+                        source_root=source_root,
                     ).read_text()
                 )
-                self.data = original_data
+                shot_generated = json.loads(
+                    resolve_inquirer_path(
+                        "dramaqa",
+                        f"AnotherMissOhQA_{split}_set_{variant}_shotprob.json",
+                        source_root=source_root,
+                    ).read_text()
+                )
+                generated_data = filter_generated_items(
+                    scene_generated + shot_generated,
+                    remove_ratio,
+                )
+                if args.naive:
+                    generated_data = sample_generated_items(
+                        generated_data,
+                        count=naive_count,
+                        seed=args.seed,
+                    )
+            self.data = original_data + generated_data
 
         else:
             original_data = json.loads(

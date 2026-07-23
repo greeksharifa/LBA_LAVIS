@@ -18,6 +18,7 @@ from engine import train_one_epoch, val_one_epoch
 from llama import Tokenizer
 from llama_vqa import LLaMA_VQA
 from dataloader import load_data
+from dataloader.inquirer_augmentation import positive_int, removal_ratio
 
 
 def get_args_parser():
@@ -59,31 +60,21 @@ def get_args_parser():
         help='root containing STAR annotations and features',
     )
     parser.add_argument(
-        '--star-video-root',
-        default=os.environ.get('STAR_VIDEO_ROOT', 'data/star/videos'),
-        help='root containing STAR videos',
-    )
-    parser.add_argument(
         '--tvqa-dataset-root',
         default=os.environ.get('TVQA_DATASET_ROOT', 'data/tvqa'),
         help='root containing TVQA annotations and features',
-    )
-    parser.add_argument(
-        '--tvqa-video-root',
-        default=os.environ.get('TVQA_VIDEO_ROOT', 'data/tvqa/videos'),
-        help='root containing TVQA videos',
     )
     parser.add_argument(
         '--how2qa-dataset-root',
         default=os.environ.get('HOW2QA_DATASET_ROOT', 'data/how2qa'),
         help='root containing How2QA annotations and features',
     )
-    parser.add_argument(
-        '--how2qa-video-root',
-        default=os.environ.get('HOW2QA_VIDEO_ROOT', 'data/how2qa/clips'),
-        help='root containing How2QA clips',
-    )
     parser.add_argument('--output_dir', default='./output_dir', help='path where to save, empty for no saving')
+    parser.add_argument(
+        '--checkpoint-name',
+        default=None,
+        help='override the default best-checkpoint name',
+    )
     parser.add_argument('--device', default='cuda', help='device to use for training / testing')
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--resume', default='', help='resume from checkpoint')
@@ -105,8 +96,23 @@ def get_args_parser():
     parser.add_argument('--tau', type=float, default=100., help='tau')
     parser.add_argument('--sub', action='store_true', help='subtitles for VLEP and TVQA')
 
-    parser.add_argument('--add_filter_ratio', type=float, required=True, help='filter ratio. 0.75 means 75% of additional data is filtered out')
-    #parser.add_argument('--naive', action=store_true, help='Testing with naive questions')
+    parser.add_argument(
+        '--add_filter_ratio',
+        '--add-filter-ratio',
+        dest='add_filter_ratio',
+        type=removal_ratio,
+        default=0.0,
+        help='fraction of generated candidates to remove',
+    )
+    parser.add_argument('--naive', action='store_true', help='Testing with naive questions')
+    parser.add_argument(
+        '--naive_num',
+        '--naive-num',
+        dest='naive_num',
+        default=1,
+        type=positive_int,
+        help='number of naive generated questions to sample',
+    )
 
     return parser
 
