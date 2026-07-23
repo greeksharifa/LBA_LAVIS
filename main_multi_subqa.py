@@ -551,6 +551,8 @@ Answer: The answer is (A)\n"""
                     "text_outputs_lba_list": text_outputs_lba_list[i],
                     "confidences_lba_list": confidences_lba_list[i],
                 })
+                if cfg.datasets_cfg.dataset_name == 'MME':
+                    result['image_path'] = batch['image_path'][i]
                 if args.verbose:
                     w2r, r2w, w, r = sample_print(text_outputs_base[i], final_text_outputs_lba[i], gt_answers[i], dataset.get_accuracy, i)
                     wrong2right += w2r

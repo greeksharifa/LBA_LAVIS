@@ -1,9 +1,9 @@
 [submodule "Ask-Anything"]
 	path = Ask-Anything
 	url = https://github.com/OpenGVLab/Ask-Anything.git
-# [submodule "SeViLA"]
-# 	path = SeViLA
-# 	url = https://github.com/Yui010206/SeViLA.git
+[submodule "SeViLA"]
+	path = SeViLA
+	url = https://github.com/Yui010206/SeViLA.git
 [submodule "Flipped-VQA"]
 	path = Flipped-VQA
 	url = https://github.com/mlvlab/Flipped-VQA.git

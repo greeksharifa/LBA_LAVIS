@@ -275,7 +275,7 @@ class Recomposer(nn.Module):
             self.processor = LlavaNextProcessor.from_pretrained(model_name, cache_dir=cache_dir)
             self.processor.tokenizer.padding_side = "left"
             self.model = LlavaNextForConditionalGeneration.from_pretrained(model_name, torch_dtype=torch.float16, low_cpu_mem_usage=True, 
-                                                                           use_flash_attention_2=True,
+                                                                           use_flash_attention_2=cfg.model_cfg.use_flash_attention_2,
                                                                            cache_dir=cache_dir, device_map="auto")
             self.model.generation_config.pad_token_id = self.processor.tokenizer.pad_token_id
         elif "instructblip" in model_name:
