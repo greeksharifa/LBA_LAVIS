@@ -169,3 +169,12 @@ debug*/
 *.gz
 
 cache/
+
+# Local Qwen environment and generated research outputs.
+/.venv-qwen/
+/subqa/self/
+/thesis/
+/thesis_smoke/
+/ywjang_log.txt
+/temp.py
+/temp/
