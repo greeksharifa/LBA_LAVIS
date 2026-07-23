@@ -21,16 +21,33 @@ def render_path_with_placeholder(
     root: Path,
     placeholder: str,
 ) -> str:
-    path_value = Path(path)
-    try:
-        relative_path = path_value.relative_to(root)
-    except ValueError:
-        return str(path)
-    if relative_path == Path("."):
-        return placeholder or "."
-    if not placeholder:
-        return relative_path.as_posix()
-    return f"{placeholder}/{relative_path.as_posix()}"
+    return render_path_with_placeholders(path, ((root, placeholder),))
+
+
+def render_path_with_placeholders(
+    path: str | Path,
+    roots: tuple[tuple[Path, str], ...],
+) -> str:
+    resolved_path = Path(path).expanduser().resolve(strict=False)
+    resolved_roots = sorted(
+        (
+            (root.expanduser().resolve(strict=False), placeholder)
+            for root, placeholder in roots
+        ),
+        key=lambda item: len(item[0].parts),
+        reverse=True,
+    )
+    for resolved_root, placeholder in resolved_roots:
+        try:
+            relative_path = resolved_path.relative_to(resolved_root)
+        except ValueError:
+            continue
+        if relative_path == Path("."):
+            return placeholder or "."
+        if not placeholder:
+            return relative_path.as_posix()
+        return f"{placeholder}/{relative_path.as_posix()}"
+    return str(path)
 
 
 INQUIRER_SOURCE_ROOT = path_from_env("INQUIRER_SOURCE_ROOT", "data/inquirer-source")
@@ -257,12 +274,29 @@ def build_star_records(generated_items: list[dict[str, Any]], original_items: li
     return [grouped[key] for key in sorted(grouped)]
 
 
-def _tvqa_group_consecutive_items(generated_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+def _tvqa_anchor(
+    item: dict[str, Any],
+    *,
+    row_kind: str,
+    index: int,
+) -> tuple[str, str]:
+    missing_fields = [field for field in ("vid_name", "ts") if field not in item]
+    if missing_fields:
+        missing = ", ".join(missing_fields)
+        raise ValueError(
+            f"TVQA {row_kind} row {index} is missing anchor field(s): {missing}"
+        )
+    return item["vid_name"], item["ts"]
+
+
+def _tvqa_group_consecutive_items(
+    generated_items: list[dict[str, Any]],
+) -> list[list[dict[str, Any]]]:
     groups: list[list[dict[str, Any]]] = []
     current_group: list[dict[str, Any]] = []
     current_key: tuple[str, str] | None = None
-    for item in generated_items:
-        item_key = (item["vid_name"], item["ts"])
+    for index, item in enumerate(generated_items):
+        item_key = _tvqa_anchor(item, row_kind="generated", index=index)
         if current_key is None or item_key == current_key:
             current_group.append(item)
         else:
@@ -274,9 +308,36 @@ def _tvqa_group_consecutive_items(generated_items: list[dict[str, Any]]) -> list
     return groups
 
 
-def build_tvqa_block_records(generated_items: list[dict[str, Any]], original_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def build_tvqa_block_records(
+    generated_items: list[dict[str, Any]],
+    original_items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    generated_groups = _tvqa_group_consecutive_items(generated_items)
+    if len(generated_groups) != len(original_items):
+        raise ValueError(
+            f"TVQA generated group count ({len(generated_groups)}) does not match "
+            f"original item count ({len(original_items)})"
+        )
+
     records = []
-    for original, block in zip(original_items, _tvqa_group_consecutive_items(generated_items)):
+    for index, (original, block) in enumerate(
+        zip(original_items, generated_groups, strict=True)
+    ):
+        original_anchor = _tvqa_anchor(
+            original,
+            row_kind="original",
+            index=index,
+        )
+        generated_anchor = _tvqa_anchor(
+            block[0],
+            row_kind="generated",
+            index=index,
+        )
+        if original_anchor != generated_anchor:
+            raise ValueError(
+                f"TVQA anchor mismatch at index {index}: "
+                f"original {original_anchor!r} != generated {generated_anchor!r}"
+            )
         records.append(
             {
                 "key": str(original["qid"]),
@@ -322,41 +383,57 @@ def build_tvqa_naive_records(
     generated_items: list[dict[str, Any]],
     original_items: list[dict[str, Any]],
     results_index: dict[str, list[dict[str, Any]]],
-    results_by_source_key: dict[str, dict[str, Any]] | None = None,
     results_by_query_key: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     original_map = {str(item["qid"]): item for item in original_items}
-    results_by_source_key = results_by_source_key or {}
     results_by_query_key = results_by_query_key or {}
     grouped: dict[str, dict[str, Any]] = {}
 
-    for item in generated_items:
+    for index, item in enumerate(generated_items):
         signature = _normalized_tvqa_signature(item)
         matched_results = results_index.get(signature, [])
         target_key = None
-        matched_result_item: dict[str, Any] | None = None
         if matched_results:
             matched = matched_results.pop(0)
-            target_key = matched["source_key"]
-            matched_result_item = matched["item"]
+            target_key = str(matched["source_key"])
         else:
             query_key = _tvqa_result_match_key(item)
             query_matches = results_by_query_key.get(query_key, [])
             if query_matches:
                 matched = query_matches.pop(0)
-                target_key = matched["source_key"]
-                matched_result_item = matched["item"]
-            else:
-                fallback_key = str(item["qid"] - 1)
-                if fallback_key in original_map:
-                    target_key = fallback_key
-                    matched_result_item = results_by_source_key.get(fallback_key)
+                target_key = str(matched["source_key"])
         if target_key is None:
-            continue
+            raise ValueError(
+                f"Could not match generated TVQA QA at index {index} "
+                f"(qid={item.get('qid')!r}) to an original item"
+            )
 
         original = original_map.get(target_key)
         if original is None:
-            continue
+            raise ValueError(
+                f"Generated TVQA QA at index {index} matched missing original "
+                f"qid {target_key!r}"
+            )
+        if "answer_idx" not in item:
+            raise ValueError(
+                f"TVQA generated QA at index {index} is missing generated answer_idx"
+            )
+        answer_key = f"a{item['answer_idx']}"
+        if answer_key not in item or item[answer_key] is None:
+            raise ValueError(
+                f"TVQA generated QA at index {index} is missing generated "
+                f"answer choice {answer_key}"
+            )
+        answer_text = item[answer_key]
+        if (
+            "answer" in item
+            and item["answer"] is not None
+            and item["answer"] != answer_text
+        ):
+            raise ValueError(
+                f"TVQA generated QA at index {index} explicit answer "
+                f"{item['answer']!r} does not match {answer_key}={answer_text!r}"
+            )
         if target_key not in grouped:
             grouped[target_key] = {
                 "key": target_key,
@@ -368,14 +445,6 @@ def build_tvqa_naive_records(
                 },
             }
         grouped[target_key]["value"]["new Q"].append(item["q"])
-        answer_key = f"a{item['answer_idx']}"
-        answer_text = item.get(answer_key)
-        if answer_text is None and matched_result_item is not None:
-            answer_text = matched_result_item.get(answer_key)
-        if answer_text is None:
-            answer_text = original.get(answer_key, "")
-        if answer_text is None:
-            answer_text = ""
         grouped[target_key]["value"]["new A"].append(answer_text)
     return [grouped[key] for key in sorted(grouped, key=lambda x: int(x))]
 
@@ -413,17 +482,15 @@ def build_how2qa_records(generated_items: list[dict[str, Any]], original_items: 
 
 
 def render_media_path_for_summary(path: str) -> str:
-    rendered_path = path
-    for root, placeholder in (
-        (DRAMAQA_ROOT, "$DRAMAQA_ROOT"),
-        (STAR_VIDEO_ROOT, "$STAR_VIDEO_ROOT"),
-        (TVQA_VIDEO_ROOT, "$TVQA_VIDEO_ROOT"),
-        (HOW2QA_VIDEO_ROOT, "$HOW2QA_VIDEO_ROOT"),
-    ):
-        candidate = render_path_with_placeholder(path, root, placeholder)
-        if candidate != path:
-            return candidate
-    return rendered_path
+    return render_path_with_placeholders(
+        path,
+        (
+            (DRAMAQA_ROOT, "$DRAMAQA_ROOT"),
+            (STAR_VIDEO_ROOT, "$STAR_VIDEO_ROOT"),
+            (TVQA_VIDEO_ROOT, "$TVQA_VIDEO_ROOT"),
+            (HOW2QA_VIDEO_ROOT, "$HOW2QA_VIDEO_ROOT"),
+        ),
+    )
 
 
 def render_media_value_for_summary(value: str | list[str]) -> str | list[str]:
@@ -561,13 +628,11 @@ def build_records_for_spec(spec: SourceSpec) -> list[dict[str, Any]]:
             results_path = base / "gen_tvqa/chatgpt_result/results.json"
             raw_results = load_json(results_path)
             results_index: dict[str, list[dict[str, Any]]] = defaultdict(list)
-            results_by_source_key: dict[str, dict[str, Any]] = {}
             results_by_query_key: dict[str, list[dict[str, Any]]] = defaultdict(list)
             for source_key in sorted(raw_results, key=lambda x: int(x)):
                 result_item = _coerce_tvqa_result_item(raw_results[source_key])
                 if result_item is None:
                     continue
-                results_by_source_key[str(source_key)] = result_item
                 results_index[_normalized_tvqa_signature(result_item)].append(
                     {"source_key": source_key, "item": result_item}
                 )
@@ -578,7 +643,6 @@ def build_records_for_spec(spec: SourceSpec) -> list[dict[str, Any]]:
                 items,
                 original_items,
                 results_index,
-                results_by_source_key=results_by_source_key,
                 results_by_query_key=results_by_query_key,
             )
         return build_tvqa_block_records(items, original_items)

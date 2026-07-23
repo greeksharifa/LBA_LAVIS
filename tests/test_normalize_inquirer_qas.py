@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools import normalize_inquirer_qas
@@ -350,6 +352,7 @@ def test_build_tvqa_naive_records_prefers_results_json_exact_matches():
             "a2": "A travel group.",
             "a3": "A sports group.",
             "a4": "A charity group.",
+            "a5": "Bunnies.",
             "vid_name": "met_s06e05_seg02_clip_09",
             "ts": "45.05-61.29",
             "show_name": "How I Met You Mother",
@@ -357,37 +360,12 @@ def test_build_tvqa_naive_records_prefers_results_json_exact_matches():
         },
     ]
     results_index = {
-        '{"a0": "At the lab", "answer_idx": 0, "q": "Where does George think Meredith might be?", "qid": 20, "show_name": "Grey\'s Anatomy", "ts": "76.01-84.2", "vid_name": "grey_s03e20_seg02_clip_14"}': [
-            {"source_key": "0"}
+        normalize_inquirer_qas._normalized_tvqa_signature(generated_items[0]): [
+            {"source_key": "0", "item": generated_items[0]}
         ],
-        '{"a0": "A study group.", "a1": "A volunteer group.", "a2": "A travel group.", "a3": "A sports group.", "a4": "A charity group.", "answer_idx": 5, "q": "What kind of group did Zoey say she was part of?", "qid": 99, "show_name": "How I Met You Mother", "ts": "45.05-61.29", "vid_name": "met_s06e05_seg02_clip_09"}': [
-            {
-                "source_key": "1",
-                "item": {
-                    "a0": "A study group.",
-                    "a1": "A volunteer group.",
-                    "a2": "A travel group.",
-                    "a3": "A sports group.",
-                    "a4": "A charity group.",
-                    "a5": "Bunnies.",
-                    "answer_idx": 5,
-                    "q": "What kind of group did Zoey say she was part of?",
-                    "qid": 99,
-                    "show_name": "How I Met You Mother",
-                    "ts": "45.05-61.29",
-                    "vid_name": "met_s06e05_seg02_clip_09",
-                },
-            }
+        normalize_inquirer_qas._normalized_tvqa_signature(generated_items[1]): [
+            {"source_key": "1", "item": generated_items[1]}
         ],
-    }
-    results_index['{"a0": "At the lab", "answer_idx": 0, "q": "Where does George think Meredith might be?", "qid": 20, "show_name": "Grey\'s Anatomy", "ts": "76.01-84.2", "vid_name": "grey_s03e20_seg02_clip_14"}'][0]["item"] = {
-        "a0": "At the lab",
-        "answer_idx": 0,
-        "q": "Where does George think Meredith might be?",
-        "qid": 20,
-        "show_name": "Grey's Anatomy",
-        "ts": "76.01-84.2",
-        "vid_name": "grey_s03e20_seg02_clip_14",
     }
 
     records = build_tvqa_naive_records(generated_items, original_items, results_index)
@@ -414,7 +392,7 @@ def test_build_tvqa_naive_records_prefers_results_json_exact_matches():
     ]
 
 
-def test_build_tvqa_naive_records_recovers_answers_from_query_and_source_fallbacks():
+def test_build_tvqa_naive_records_uses_answers_from_generated_payload():
     original_items = [
         {
             "qid": 0,
@@ -441,6 +419,7 @@ def test_build_tvqa_naive_records_recovers_answers_from_query_and_source_fallbac
             "qid": 49207,
             "q": "What does House do to redirect the conversation when questioned about his own health?",
             "answer_idx": 1,
+            "a1": "Reminds them of their dying patient.",
             "vid_name": "house_s04e08_seg02_clip_19",
             "ts": "39.19-85.19",
             "show_name": "House M.D.",
@@ -455,6 +434,7 @@ def test_build_tvqa_naive_records_recovers_answers_from_query_and_source_fallbac
             "a2": "The apartment got robbed.",
             "a3": "He took the wrong bus home.",
             "a4": "Leonard is upset about his job.",
+            "a5": "Amy gets upset about Leonard's marriage.",
             "vid_name": "s09e01_seg01_clip_02",
             "ts": "0-5.17",
             "show_name": "The Big Bang Theory",
@@ -494,7 +474,6 @@ def test_build_tvqa_naive_records_recovers_answers_from_query_and_source_fallbac
         generated_items,
         original_items,
         results_index,
-        results_by_source_key=results_by_source_key,
         results_by_query_key=results_by_query_key,
     )
 
@@ -646,3 +625,254 @@ def test_build_summary_renders_configured_paths_as_placeholders(monkeypatch):
     assert "$INQUIRER_SOURCE_ROOT/prompts/generated.json" in summary
     assert "$INQUIRER_WORKSPACE/normalized/dramaqa_normalized.json" in summary
     assert "$DRAMAQA_ROOT/AnotherMissOh_images/scene/frame.jpg" in summary
+
+
+def test_build_tvqa_block_records_rejects_missing_generated_group():
+    original_items = [
+        {"qid": 0, "q": "Q0", "vid_name": "video_0", "ts": "0-1"},
+        {"qid": 1, "q": "Q1", "vid_name": "video_1", "ts": "1-2"},
+    ]
+    generated_items = [
+        {
+            "qid": 10,
+            "q": "Generated 0",
+            "answer_idx": 0,
+            "a0": "A0",
+            "vid_name": "video_0",
+            "ts": "0-1",
+        }
+    ]
+
+    with pytest.raises(
+        ValueError,
+        match=r"generated group count \(1\).*original item count \(2\)",
+    ):
+        build_tvqa_block_records(generated_items, original_items)
+
+
+def test_build_tvqa_block_records_rejects_extra_generated_group():
+    original_items = [
+        {"qid": 0, "q": "Q0", "vid_name": "video_0", "ts": "0-1"}
+    ]
+    generated_items = [
+        {
+            "qid": 10,
+            "q": "Generated 0",
+            "answer_idx": 0,
+            "a0": "A0",
+            "vid_name": "video_0",
+            "ts": "0-1",
+        },
+        {
+            "qid": 11,
+            "q": "Generated 1",
+            "answer_idx": 0,
+            "a0": "A1",
+            "vid_name": "video_1",
+            "ts": "1-2",
+        },
+    ]
+
+    with pytest.raises(
+        ValueError,
+        match=r"generated group count \(2\).*original item count \(1\)",
+    ):
+        build_tvqa_block_records(generated_items, original_items)
+
+
+def test_build_tvqa_block_records_rejects_reordered_anchor():
+    original_items = [
+        {"qid": 0, "q": "Q0", "vid_name": "video_0", "ts": "0-1"},
+        {"qid": 1, "q": "Q1", "vid_name": "video_1", "ts": "1-2"},
+    ]
+    generated_items = [
+        {
+            "qid": 10,
+            "q": "Generated 1",
+            "answer_idx": 0,
+            "a0": "A1",
+            "vid_name": "video_1",
+            "ts": "1-2",
+        },
+        {
+            "qid": 11,
+            "q": "Generated 0",
+            "answer_idx": 0,
+            "a0": "A0",
+            "vid_name": "video_0",
+            "ts": "0-1",
+        },
+    ]
+
+    with pytest.raises(ValueError, match=r"anchor mismatch at index 0"):
+        build_tvqa_block_records(generated_items, original_items)
+
+
+def test_build_tvqa_block_records_rejects_missing_generated_anchor():
+    original_items = [
+        {"qid": 0, "q": "Q0", "vid_name": "video_0", "ts": "0-1"}
+    ]
+    generated_items = [
+        {
+            "qid": 10,
+            "q": "Generated 0",
+            "answer_idx": 0,
+            "a0": "A0",
+            "vid_name": "video_0",
+        }
+    ]
+
+    with pytest.raises(ValueError, match=r"generated row 0.*missing anchor.*ts"):
+        build_tvqa_block_records(generated_items, original_items)
+
+
+def test_build_tvqa_block_records_rejects_missing_original_anchor():
+    original_items = [{"qid": 0, "q": "Q0", "vid_name": "video_0"}]
+    generated_items = [
+        {
+            "qid": 10,
+            "q": "Generated 0",
+            "answer_idx": 0,
+            "a0": "A0",
+            "vid_name": "video_0",
+            "ts": "0-1",
+        }
+    ]
+
+    with pytest.raises(ValueError, match=r"original row 0.*missing anchor.*ts"):
+        build_tvqa_block_records(generated_items, original_items)
+
+
+def test_build_tvqa_naive_records_rejects_unmatched_generated_qa():
+    original_items = [
+        {"qid": 0, "q": "Original", "vid_name": "video_0", "ts": "0-1"}
+    ]
+    generated_items = [
+        {
+            "qid": 20,
+            "q": "Generated",
+            "answer_idx": 0,
+            "a0": "Generated answer",
+            "vid_name": "video_0",
+            "ts": "0-1",
+        }
+    ]
+
+    with pytest.raises(
+        ValueError,
+        match=r"(?i)could not match generated TVQA QA.*20",
+    ):
+        build_tvqa_naive_records(generated_items, original_items, {})
+
+
+def test_build_tvqa_naive_records_rejects_missing_generated_answer():
+    original_items = [
+        {
+            "qid": 0,
+            "q": "Original",
+            "vid_name": "video_0",
+            "ts": "0-1",
+            "a1": "Original answer must not be reused",
+        }
+    ]
+    generated = {
+        "qid": 20,
+        "q": "Generated",
+        "answer_idx": 1,
+        "vid_name": "video_0",
+        "ts": "0-1",
+    }
+    results_index = {
+        normalize_inquirer_qas._normalized_tvqa_signature(generated): [
+            {"source_key": "0", "item": generated}
+        ]
+    }
+
+    with pytest.raises(ValueError, match=r"missing generated answer choice a1"):
+        build_tvqa_naive_records([generated], original_items, results_index)
+
+
+def test_build_tvqa_naive_records_rejects_missing_generated_answer_index():
+    original_items = [
+        {"qid": 0, "q": "Original", "vid_name": "video_0", "ts": "0-1"}
+    ]
+    generated = {
+        "qid": 20,
+        "q": "Generated",
+        "a0": "Generated answer",
+        "vid_name": "video_0",
+        "ts": "0-1",
+    }
+    results_index = {
+        normalize_inquirer_qas._normalized_tvqa_signature(generated): [
+            {"source_key": "0", "item": generated}
+        ]
+    }
+
+    with pytest.raises(ValueError, match=r"missing generated answer_idx"):
+        build_tvqa_naive_records([generated], original_items, results_index)
+
+
+def test_build_tvqa_naive_records_rejects_inconsistent_explicit_answer():
+    original_items = [
+        {"qid": 0, "q": "Original", "vid_name": "video_0", "ts": "0-1"}
+    ]
+    generated = {
+        "qid": 20,
+        "q": "Generated",
+        "answer_idx": 1,
+        "answer": "Different answer",
+        "a1": "Indexed answer",
+        "vid_name": "video_0",
+        "ts": "0-1",
+    }
+    results_index = {
+        normalize_inquirer_qas._normalized_tvqa_signature(generated): [
+            {"source_key": "0", "item": generated}
+        ]
+    }
+
+    with pytest.raises(ValueError, match=r"explicit answer.*does not match.*a1"):
+        build_tvqa_naive_records([generated], original_items, results_index)
+
+
+def test_symbolic_renderer_prefers_the_most_specific_root(tmp_path):
+    broad_root = tmp_path / "source"
+    specific_root = broad_root / "workspace"
+    path = specific_root / "normalized/result.json"
+
+    rendered = normalize_inquirer_qas.render_path_with_placeholders(
+        path,
+        (
+            (broad_root, "$INQUIRER_SOURCE_ROOT"),
+            (specific_root, "$INQUIRER_WORKSPACE"),
+        ),
+    )
+
+    assert rendered == "$INQUIRER_WORKSPACE/normalized/result.json"
+
+
+def test_symbolic_renderer_does_not_hide_parent_escape(tmp_path):
+    root = tmp_path / "workspace"
+    escaped_path = root / ".." / "outside" / "result.json"
+
+    rendered = normalize_inquirer_qas.render_path_with_placeholders(
+        escaped_path,
+        ((root, "$INQUIRER_WORKSPACE"),),
+    )
+
+    assert rendered == str(escaped_path)
+    assert not rendered.startswith("$INQUIRER_WORKSPACE")
+
+
+def test_committed_summary_matches_deterministic_generator_wording():
+    generated_summary = normalize_inquirer_qas.build_summary([])
+    committed_summary = (
+        normalize_inquirer_qas.REPO_ROOT / "docs/inquirer_qa_summary.md"
+    ).read_text()
+    generated_media_section = generated_summary.split("## Media path 규칙", 1)[1].split(
+        "## 병합본 메모",
+        1,
+    )[0]
+
+    assert generated_media_section in committed_summary

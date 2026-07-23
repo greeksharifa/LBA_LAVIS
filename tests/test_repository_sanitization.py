@@ -17,46 +17,45 @@ EXCLUDED_PARTS = {
     ".tox",
     ".venv",
     "__pycache__",
-    "artifacts",
-    "build",
     "cache",
     "caches",
-    "checkpoint",
-    "checkpoints",
-    "data",
-    "dataset",
-    "datasets",
-    "dist",
-    "generated",
     "node_modules",
-    "output",
-    "outputs",
-    "runs",
     "venv",
-    "wandb",
 }
 EXCLUDED_SUFFIXES = {
     ".7z",
     ".avi",
+    ".arrow",
     ".bin",
     ".bmp",
     ".bz2",
     ".ckpt",
+    ".db",
+    ".feather",
     ".gif",
     ".gz",
+    ".h5",
+    ".hdf5",
     ".ico",
     ".jpeg",
     ".jpg",
     ".mkv",
+    ".lmdb",
     ".mov",
     ".mp3",
     ".mp4",
     ".npy",
     ".npz",
+    ".onnx",
+    ".parquet",
     ".pdf",
+    ".pickle",
+    ".pkl",
     ".png",
     ".pt",
     ".pth",
+    ".safetensors",
+    ".sqlite",
     ".tar",
     ".tgz",
     ".webm",
@@ -81,15 +80,17 @@ FORBIDDEN_CONTENT = {
     ),
     "AWS access key": re.compile(rb"\bAKIA[0-9A-Z]{16}\b"),
     "OpenAI-style key": re.compile(rb"\bsk[-_][A-Za-z0-9_-]{8,}\b"),
-    "GitHub token": re.compile(rb"\bghp_[A-Za-z0-9]{8,}\b"),
+    "GitHub token": re.compile(
+        rb"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{8,}\b"
+    ),
     "private key": re.compile(rb"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     "credential assignment": re.compile(
-        rb"(?i)\b(?:api[_ -]?key|access[_ -]?token|secret[_ -]?key|password)"
-        rb"[\"']?\s*(?::=|=|:)\s*[\"']?[^\s\"'${}][^\s\"']*"
-    ),
-    "session assignment": re.compile(
-        rb"(?i)\b(?:cookie|session_id|session_token)"
-        rb"[\"']?\s*(?::=|=|:)\s*[\"']?[^\s\"'${}][^\s\"']*"
+        rb"(?i)\b(?:[a-z0-9]+_)*(?:api_key|secret_access_key|secret_key|"
+        rb"access_token|github_token|password|session_token|session_id|cookie)"
+        rb"[\"']?\s*(?::=|=|:)\s*"
+        rb"(?!(?:os\.)?(?:environ(?:\.get)?\s*(?:\[|\()|getenv\s*\()|\$)"
+        rb"(?:[rubf]{0,2}[\"'][^\"'\n]+[\"']|"
+        rb"(?!(?:None|True|False)\b)[A-Za-z0-9][A-Za-z0-9._/-]{3,})"
     ),
 }
 
@@ -115,23 +116,40 @@ def repository_candidates() -> list[Path]:
     ]
 
 
-def is_excluded(path: Path) -> bool:
-    relative_path = path.relative_to(REPOSITORY_ROOT)
+def is_excluded(
+    path: Path,
+    *,
+    repository_root: Path = REPOSITORY_ROOT,
+    scanner_path: Path | None = SCANNER_PATH,
+) -> bool:
+    relative_path = path.relative_to(repository_root)
     return (
-        path == SCANNER_PATH
+        (scanner_path is not None and path == scanner_path)
         or bool(EXCLUDED_PARTS.intersection(relative_path.parts))
         or path.suffix.lower() in EXCLUDED_SUFFIXES
     )
 
 
-def test_repository_contains_no_sensitive_filenames_or_content() -> None:
+def scan_paths(
+    paths: list[Path],
+    *,
+    repository_root: Path = REPOSITORY_ROOT,
+    scanner_path: Path | None = SCANNER_PATH,
+) -> list[str]:
     violations: list[str] = []
 
-    for path in repository_candidates():
-        if is_excluded(path) or not path.is_file():
+    for path in paths:
+        if (
+            is_excluded(
+                path,
+                repository_root=repository_root,
+                scanner_path=scanner_path,
+            )
+            or not path.is_file()
+        ):
             continue
 
-        relative_path = path.relative_to(REPOSITORY_ROOT)
+        relative_path = path.relative_to(repository_root)
         if any(pattern.fullmatch(path.name) for pattern in FORBIDDEN_FILENAMES):
             violations.append(f"{relative_path}: forbidden filename")
             continue
@@ -145,4 +163,78 @@ def test_repository_contains_no_sensitive_filenames_or_content() -> None:
                 line_number = content.count(b"\n", 0, match.start()) + 1
                 violations.append(f"{relative_path}:{line_number}: {label}")
 
+    return violations
+
+
+def test_repository_contains_no_sensitive_filenames_or_content() -> None:
+    violations = scan_paths(repository_candidates())
+
     assert not violations, "Repository sanitization violations:\n" + "\n".join(violations)
+
+
+def test_scanner_checks_code_and_docs_under_data_like_directories(tmp_path) -> None:
+    generated_config = tmp_path / "generated/config.py"
+    generated_config.parent.mkdir(parents=True)
+    generated_config.write_text('OPENAI_API_KEY = "literal-fixture-value"\n')
+    data_readme = tmp_path / "data/README.md"
+    data_readme.parent.mkdir(parents=True)
+    data_readme.write_text("server root: /home/example/private\n")
+
+    violations = scan_paths(
+        [generated_config, data_readme],
+        repository_root=tmp_path,
+        scanner_path=None,
+    )
+
+    assert any("generated/config.py:1: credential assignment" in item for item in violations)
+    assert any("data/README.md:1: personal home path" in item for item in violations)
+
+
+def test_scanner_detects_prefixed_credentials_and_github_tokens(tmp_path) -> None:
+    fixture = tmp_path / "config.py"
+    fixture.write_text(
+        "\n".join(
+            [
+                'OPENAI_API_KEY = "literal-api-value"',
+                'AWS_SECRET_ACCESS_KEY = "literal-aws-value"',
+                'GITHUB_TOKEN = "gho_fixturetoken123"',
+                'DATABASE_PASSWORD = "literal-password-value"',
+                'APP_SESSION_TOKEN = "literal-session-value"',
+                'SECOND_TOKEN = "ghu_fixturetoken123"',
+                'THIRD_TOKEN = "ghs_fixturetoken123"',
+                'FOURTH_TOKEN = "ghr_fixturetoken123"',
+            ]
+        )
+    )
+
+    violations = scan_paths(
+        [fixture],
+        repository_root=tmp_path,
+        scanner_path=None,
+    )
+
+    assert sum("credential assignment" in item for item in violations) >= 5
+    assert sum("GitHub token" in item for item in violations) == 4
+
+
+def test_scanner_allows_environment_credential_references(tmp_path) -> None:
+    fixture = tmp_path / "config.py"
+    fixture.write_text(
+        "\n".join(
+            [
+                'OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]',
+                'AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")',
+                'GITHUB_TOKEN = getenv("GITHUB_TOKEN")',
+                'DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")',
+                'APP_SESSION_TOKEN = os.getenv("APP_SESSION_TOKEN")',
+            ]
+        )
+    )
+
+    violations = scan_paths(
+        [fixture],
+        repository_root=tmp_path,
+        scanner_path=None,
+    )
+
+    assert violations == []

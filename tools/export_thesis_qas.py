@@ -16,6 +16,7 @@ from tools.normalize_inquirer_qas import (
     build_how2qa_records,
     load_items,
     render_path_with_placeholder,
+    render_path_with_placeholders,
 )
 
 
@@ -157,15 +158,13 @@ def thesis_output_path(dataset: str, model: str) -> Path:
 
 
 def render_export_path(path: str | Path) -> str:
-    rendered_path = str(path)
-    for root, placeholder in (
-        (INQUIRER_SOURCE_ROOT, "$INQUIRER_SOURCE_ROOT"),
-        (INQUIRER_WORKSPACE, "$INQUIRER_WORKSPACE"),
-    ):
-        candidate = render_path_with_placeholder(path, root, placeholder)
-        if candidate != str(path):
-            return candidate
-    return rendered_path
+    return render_path_with_placeholders(
+        path,
+        (
+            (INQUIRER_SOURCE_ROOT, "$INQUIRER_SOURCE_ROOT"),
+            (INQUIRER_WORKSPACE, "$INQUIRER_WORKSPACE"),
+        ),
+    )
 
 
 def render_export_sources(sources: str | tuple[Path, ...]) -> str:

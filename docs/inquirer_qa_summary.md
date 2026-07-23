@@ -208,10 +208,10 @@
 
 ## Media path 규칙
 
-- DramaQA: `$DRAMAQA_ROOT/AnotherMissOh_images/...` 아래의 대표 frame path를 사용했습니다. scene는 shot별 대표 frame list, shot은 대표 frame 1개입니다.
-- STAR: `$STAR_VIDEO_ROOT/{video_id}.mp4`를 사용했습니다.
-- TVQA: 존재 확인된 `$TVQA_VIDEO_ROOT/{vid_name}.mp4`를 우선 사용했습니다.
-- How2QA: 서버에서 clip root를 직접 확인하지 못해 canonical config path `$HOW2QA_VIDEO_ROOT/{video_id}.mp4`를 사용했습니다.
+- DramaQA: `$DRAMAQA_ROOT/AnotherMissOh_images/...` 아래의 대표 frame path를 사용합니다. scene는 shot별 대표 frame list, shot은 대표 frame 1개입니다.
+- STAR: `$STAR_VIDEO_ROOT/{video_id}.mp4`를 사용합니다.
+- TVQA: `$TVQA_VIDEO_ROOT/{vid_name}.mp4`를 사용합니다.
+- How2QA: `$HOW2QA_VIDEO_ROOT/{video_id}.mp4`를 사용합니다.
 
 ## 병합본 메모
 
