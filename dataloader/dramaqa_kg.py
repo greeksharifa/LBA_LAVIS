@@ -6,14 +6,20 @@ import json
 class DramaQA_KG(BaseDataset_kg):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
+        dataset_root = getattr(args, "dramaqa_root", None)
         self.data = json.loads(
             resolve_dataset_path(
                 "dramaqa",
                 f"AnotherMissOhQA_{split}_scene.json",
+                dataset_root=dataset_root,
             ).read_text()
         )
         self.features = torch.load(
-            resolve_dataset_path("dramaqa", "clipvitl14.pth")
+            resolve_dataset_path(
+                "dramaqa",
+                "clipvitl14.pth",
+                dataset_root=dataset_root,
+            )
         )
         self.answer_mapping = {0: '(A)', 1: '(B)', 2: '(C)', 3: '(D)', 4: '(E)'}
         self.num_options = 5

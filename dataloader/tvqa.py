@@ -10,9 +10,11 @@ class TVQA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
+        dataset_root = getattr(args, "tvqa_dataset_root", None)
         original_json_path = resolve_dataset_path(
             "tvqa",
             f"tvqa_{split}.jsonl",
+            dataset_root=dataset_root,
         )
         original_data = [
             json.loads(line)
@@ -51,9 +53,17 @@ class TVQA(BaseDataset):
         else:
             self.data = original_data
 
-        feature_path = resolve_dataset_path("tvqa", "clipvitl14.pth")
+        feature_path = resolve_dataset_path(
+            "tvqa",
+            "clipvitl14.pth",
+            dataset_root=dataset_root,
+        )
         self.features = torch.load(feature_path)
-        self.subtitle_path = resolve_dataset_path("tvqa", "tvqa_subtitles")
+        self.subtitle_path = resolve_dataset_path(
+            "tvqa",
+            "tvqa_subtitles",
+            dataset_root=dataset_root,
+        )
         self.answer_mapping = {0: '(A)', 1: '(B)', 2: '(C)', 3 : '(D)', 4: '(E)'}
         self.num_options = 5
         self.sub = args.sub

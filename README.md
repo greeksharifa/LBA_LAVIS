@@ -51,6 +51,20 @@ rm -rf Flipped-VQA-Data ./data/tvqa/tvqa_subtitles.zip
        └─ tokenizer.model
 ```
 
+INQUIRER augmentation inputs can be relocated with environment variables or
+the matching `train.py`/`eval.py` options. Dataset roots contain annotations
+and precomputed features; media roots contain only raw videos or clips.
+
+| Dataset | Dataset assets | Raw media |
+| --- | --- | --- |
+| DramaQA | `DRAMAQA_ROOT` (`data/dramaqa`) | `DRAMAQA_ROOT/AnotherMissOh_images` |
+| STAR | `STAR_DATASET_ROOT` (`data/star`) | `STAR_VIDEO_ROOT` (`data/star/videos`) |
+| TVQA | `TVQA_DATASET_ROOT` (`data/tvqa`) | `TVQA_VIDEO_ROOT` (`data/tvqa/videos`) |
+| How2QA | `HOW2QA_DATASET_ROOT` (`data/how2qa`) | `HOW2QA_VIDEO_ROOT` (`data/how2qa/clips`) |
+
+Generated QA files remain under `INQUIRER_SOURCE_ROOT`
+(`data/inquirer-source`).
+
 ## Training LLaMA-VQA (LLaMA + Flipped-VQA)
 
 ### NExT-QA
@@ -112,4 +126,3 @@ This repo is built upon [LLaMA-Adapter](https://github.com/OpenGVLab/LLaMA-Adapt
   year={2023}
 }
 ```
-

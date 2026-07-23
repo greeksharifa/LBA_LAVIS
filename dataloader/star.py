@@ -8,12 +8,14 @@ class STAR(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
+        dataset_root = getattr(args, "star_dataset_root", None)
         if split == 'train':
             if args.naive == True:
                 original_data = json.loads(
                     resolve_dataset_path(
                         "star",
                         f"STAR_{split}_ori.json",
+                        dataset_root=dataset_root,
                     ).read_text()
                 )
                 total_naive_data = json.loads(
@@ -40,6 +42,7 @@ class STAR(BaseDataset):
                     resolve_dataset_path(
                         "star",
                         f"STAR_{split}_ori.json",
+                        dataset_root=dataset_root,
                     ).read_text()
                 )
                 additional_data = json.loads(
@@ -77,11 +80,18 @@ class STAR(BaseDataset):
                 resolve_dataset_path(
                     "star",
                     f"STAR_{split}_ori.json",
+                    dataset_root=dataset_root,
                 ).read_text()
             )
             self.data = original_data
 
-        self.features = torch.load(resolve_dataset_path("star", "clipvitl14.pth"))
+        self.features = torch.load(
+            resolve_dataset_path(
+                "star",
+                "clipvitl14.pth",
+                dataset_root=dataset_root,
+            )
+        )
         self.answer_mapping = {0: '(A)', 1: '(B)', 2: '(C)', 3: '(D)'}
         self.qtype_mapping = {'Interaction': 1, 'Sequence': 2, 'Prediction': 3, 'Feasibility': 4}
         self.num_options = 4

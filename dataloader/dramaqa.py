@@ -8,6 +8,7 @@ class DramaQA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split='train'):
         super().__init__(args, tokenizer, split)
         source_root = getattr(args, "inquirer_source_root", None)
+        dataset_root = getattr(args, "dramaqa_root", None)
         if split == 'train':
             if args.naive == True:
                 if args.add_filter_ratio < 1.0:
@@ -15,6 +16,7 @@ class DramaQA(BaseDataset):
                         resolve_dataset_path(
                             "dramaqa",
                             f"AnotherMissOhQA_{split}_set_ori_scsh.json",
+                            dataset_root=dataset_root,
                         ).read_text()
                     )
                     scene_additional_data = json.loads(
@@ -46,6 +48,7 @@ class DramaQA(BaseDataset):
                         resolve_dataset_path(
                             "dramaqa",
                             f"AnotherMissOhQA_{split}_set_ori_scsh.json",
+                            dataset_root=dataset_root,
                         ).read_text()
                     )
                     scene_additional_data = json.loads(
@@ -84,6 +87,7 @@ class DramaQA(BaseDataset):
                     resolve_dataset_path(
                         "dramaqa",
                         f"AnotherMissOhQA_{split}_scene.json",
+                        dataset_root=dataset_root,
                     ).read_text()
                 )
                 self.data = original_data
@@ -93,11 +97,16 @@ class DramaQA(BaseDataset):
                 resolve_dataset_path(
                     "dramaqa",
                     f"AnotherMissOhQA_{split}_scene.json",
+                    dataset_root=dataset_root,
                 ).read_text()
             )
             self.data = original_data
         self.features = torch.load(
-            resolve_dataset_path("dramaqa", "clipvitl14.pth")
+            resolve_dataset_path(
+                "dramaqa",
+                "clipvitl14.pth",
+                dataset_root=dataset_root,
+            )
         )
         self.answer_mapping = {0: '(A)', 1: '(B)', 2: '(C)', 3: '(D)', 4: '(E)'}
         self.num_options = 5

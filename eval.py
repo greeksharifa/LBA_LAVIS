@@ -48,6 +48,41 @@ def get_args_parser():
         default=os.environ.get('INQUIRER_SOURCE_ROOT', 'data/inquirer-source'),
         help='root containing generated INQUIRER QA inputs',
     )
+    parser.add_argument(
+        '--dramaqa-root',
+        default=os.environ.get('DRAMAQA_ROOT', 'data/dramaqa'),
+        help='root containing DramaQA annotations, features, and images',
+    )
+    parser.add_argument(
+        '--star-dataset-root',
+        default=os.environ.get('STAR_DATASET_ROOT', 'data/star'),
+        help='root containing STAR annotations and features',
+    )
+    parser.add_argument(
+        '--star-video-root',
+        default=os.environ.get('STAR_VIDEO_ROOT', 'data/star/videos'),
+        help='root containing STAR videos',
+    )
+    parser.add_argument(
+        '--tvqa-dataset-root',
+        default=os.environ.get('TVQA_DATASET_ROOT', 'data/tvqa'),
+        help='root containing TVQA annotations and features',
+    )
+    parser.add_argument(
+        '--tvqa-video-root',
+        default=os.environ.get('TVQA_VIDEO_ROOT', 'data/tvqa/videos'),
+        help='root containing TVQA videos',
+    )
+    parser.add_argument(
+        '--how2qa-dataset-root',
+        default=os.environ.get('HOW2QA_DATASET_ROOT', 'data/how2qa'),
+        help='root containing How2QA annotations and features',
+    )
+    parser.add_argument(
+        '--how2qa-video-root',
+        default=os.environ.get('HOW2QA_VIDEO_ROOT', 'data/how2qa/clips'),
+        help='root containing How2QA clips',
+    )
     parser.add_argument('--output_dir', default='./output_dir', help='path where to save, empty for no saving')
     parser.add_argument('--device', default='cuda', help='device to use for training / testing')
     parser.add_argument('--seed', default=0, type=int)

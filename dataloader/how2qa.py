@@ -8,11 +8,20 @@ import math
 class How2QA(BaseDataset):
     def __init__(self, args=None, tokenizer=None, split="train"):
         super().__init__(args, tokenizer, split)
+        dataset_root = getattr(args, "how2qa_dataset_root", None)
         self.data = pd.read_csv(
-            resolve_dataset_path("how2qa", f"{split}_unfiltered_kg.csv")
+            resolve_dataset_path(
+                "how2qa",
+                f"{split}_unfiltered_kg.csv",
+                dataset_root=dataset_root,
+            )
         )
         self.features = torch.load(
-            resolve_dataset_path("how2qa", "clipvitl14_split.pth")
+            resolve_dataset_path(
+                "how2qa",
+                "clipvitl14_split.pth",
+                dataset_root=dataset_root,
+            )
         )
         self.answer_mapping = {0: "(A)", 1: "(B)", 2: "(C)", 3: "(D)"}
         self.num_options = 4
