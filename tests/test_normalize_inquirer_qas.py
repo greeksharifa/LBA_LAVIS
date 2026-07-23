@@ -601,3 +601,48 @@ def test_build_how2qa_records_falls_back_to_original_answer_id_when_missing():
             },
         }
     ]
+
+
+def test_build_summary_renders_configured_paths_as_placeholders(monkeypatch):
+    source_root = Path("/") / "home" / "researcher" / "inquirer-source"
+    workspace_root = Path("/") / "home" / "researcher" / "inquirer-workspace"
+    dramaqa_root = Path("/") / "data1" / "dramaqa"
+    monkeypatch.setattr(normalize_inquirer_qas, "INQUIRER_SOURCE_ROOT", source_root)
+    monkeypatch.setattr(normalize_inquirer_qas, "INQUIRER_WORKSPACE", workspace_root)
+    monkeypatch.setattr(
+        normalize_inquirer_qas,
+        "DEFAULT_OUTPUT_DIR",
+        workspace_root / "normalized",
+    )
+    monkeypatch.setattr(normalize_inquirer_qas, "DRAMAQA_ROOT", dramaqa_root)
+
+    spec = normalize_inquirer_qas.SourceSpec(
+        dataset="DramaQA",
+        variant="KG scene-level",
+        source_path=source_root / "prompts/generated.json",
+        output_name="dramaqa_normalized.json",
+        group_kind="dramaqa_scene_generated",
+        notes="fixture",
+    )
+    records = [
+        {
+            "key": "1",
+            "value": {
+                "main_question": "What happened?",
+                "new Q": ["Who arrived?"],
+                "new A": ["John."],
+                "image_or_video_path": [
+                    str(dramaqa_root / "AnotherMissOh_images/scene/frame.jpg")
+                ],
+            },
+        }
+    ]
+
+    summary = normalize_inquirer_qas.build_summary([(spec, records)])
+
+    assert str(source_root) not in summary
+    assert str(workspace_root) not in summary
+    assert str(dramaqa_root) not in summary
+    assert "$INQUIRER_SOURCE_ROOT/prompts/generated.json" in summary
+    assert "$INQUIRER_WORKSPACE/normalized/dramaqa_normalized.json" in summary
+    assert "$DRAMAQA_ROOT/AnotherMissOh_images/scene/frame.jpg" in summary

@@ -11,9 +11,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.normalize_inquirer_qas import (
     DEFAULT_OUTPUT_DIR,
     INQUIRER_SOURCE_ROOT,
+    INQUIRER_WORKSPACE,
     REPO_ROOT,
     build_how2qa_records,
     load_items,
+    render_path_with_placeholder,
 )
 
 
@@ -154,7 +156,25 @@ def thesis_output_path(dataset: str, model: str) -> Path:
     return THESIS_ROOT / dataset / model / "new_qas.json"
 
 
-def build_summary(created: list[dict[str, str]], skipped: list[dict[str, str]]) -> str:
+def render_export_path(path: str | Path) -> str:
+    rendered_path = str(path)
+    for root, placeholder in (
+        (INQUIRER_SOURCE_ROOT, "$INQUIRER_SOURCE_ROOT"),
+        (INQUIRER_WORKSPACE, "$INQUIRER_WORKSPACE"),
+    ):
+        candidate = render_path_with_placeholder(path, root, placeholder)
+        if candidate != str(path):
+            return candidate
+    return rendered_path
+
+
+def render_export_sources(sources: str | tuple[Path, ...]) -> str:
+    if isinstance(sources, str):
+        return sources
+    return ", ".join(f"`{render_export_path(path)}`" for path in sources)
+
+
+def build_summary(created: list[dict[str, Any]], skipped: list[dict[str, str]]) -> str:
     lines = [
         "# Thesis QA Exports",
         "",
@@ -170,8 +190,10 @@ def build_summary(created: list[dict[str, str]], skipped: list[dict[str, str]]) 
         "|---|---|---|---|---|",
     ]
     for row in created:
+        output_path = render_path_with_placeholder(row["output"], REPO_ROOT, "")
+        sources = render_export_sources(row["sources"])
         lines.append(
-            f"| {row['dataset']} | {row['model']} | `{row['output']}` | {row['sources']} | {row['notes']} |"
+            f"| {row['dataset']} | {row['model']} | `{output_path}` | {sources} | {row['notes']} |"
         )
     if skipped:
         lines.extend(["", "## Skipped", "", "| Dataset | Model | Reason |", "|---|---|---|"])
@@ -182,7 +204,7 @@ def build_summary(created: list[dict[str, str]], skipped: list[dict[str, str]]) 
 
 def main() -> None:
     THESIS_ROOT.mkdir(parents=True, exist_ok=True)
-    created: list[dict[str, str]] = []
+    created: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
 
     for spec in export_specs():
@@ -198,14 +220,17 @@ def main() -> None:
         records = build_records_for_spec(spec)
         output_path = thesis_output_path(spec.dataset, spec.model)
         write_json(output_path, convert_normalized_records_to_thesis_entries(records))
-        sources = ", ".join(f"`{path}`" for path in spec.normalized_inputs)
+        sources = spec.normalized_inputs
         if spec.special_builder == "how2qa_naive":
-            sources = "`$INQUIRER_SOURCE_ROOT/gen_how2qa/how2qa_train_naive_prob.json`"
+            sources = (
+                INQUIRER_SOURCE_ROOT
+                / "gen_how2qa/how2qa_train_naive_prob.json",
+            )
         created.append(
             {
                 "dataset": spec.dataset,
                 "model": spec.model,
-                "output": str(output_path),
+                "output": output_path,
                 "sources": sources,
                 "notes": spec.notes,
             }

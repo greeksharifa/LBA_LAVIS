@@ -16,6 +16,23 @@ def path_from_env(name: str, default: str) -> Path:
     return Path(configured).expanduser() if configured else REPO_ROOT / default
 
 
+def render_path_with_placeholder(
+    path: str | Path,
+    root: Path,
+    placeholder: str,
+) -> str:
+    path_value = Path(path)
+    try:
+        relative_path = path_value.relative_to(root)
+    except ValueError:
+        return str(path)
+    if relative_path == Path("."):
+        return placeholder or "."
+    if not placeholder:
+        return relative_path.as_posix()
+    return f"{placeholder}/{relative_path.as_posix()}"
+
+
 INQUIRER_SOURCE_ROOT = path_from_env("INQUIRER_SOURCE_ROOT", "data/inquirer-source")
 INQUIRER_WORKSPACE = path_from_env("INQUIRER_WORKSPACE", "artifacts/inquirer")
 DRAMAQA_ROOT = path_from_env("DRAMAQA_ROOT", "data/dramaqa")
@@ -395,8 +412,40 @@ def build_how2qa_records(generated_items: list[dict[str, Any]], original_items: 
     return [grouped[key] for key in sorted(grouped, key=lambda x: (len(x), x))]
 
 
+def render_media_path_for_summary(path: str) -> str:
+    rendered_path = path
+    for root, placeholder in (
+        (DRAMAQA_ROOT, "$DRAMAQA_ROOT"),
+        (STAR_VIDEO_ROOT, "$STAR_VIDEO_ROOT"),
+        (TVQA_VIDEO_ROOT, "$TVQA_VIDEO_ROOT"),
+        (HOW2QA_VIDEO_ROOT, "$HOW2QA_VIDEO_ROOT"),
+    ):
+        candidate = render_path_with_placeholder(path, root, placeholder)
+        if candidate != path:
+            return candidate
+    return rendered_path
+
+
+def render_media_value_for_summary(value: str | list[str]) -> str | list[str]:
+    if isinstance(value, list):
+        return [render_media_path_for_summary(path) for path in value]
+    return render_media_path_for_summary(value)
+
+
 def summarize_example(record: dict[str, Any]) -> str:
-    return json.dumps(record, ensure_ascii=False, indent=2)
+    rendered_record = record
+    value = record.get("value")
+    if isinstance(value, dict) and "image_or_video_path" in value:
+        rendered_record = {
+            **record,
+            "value": {
+                **value,
+                "image_or_video_path": render_media_value_for_summary(
+                    value["image_or_video_path"]
+                ),
+            },
+        }
+    return json.dumps(rendered_record, ensure_ascii=False, indent=2)
 
 
 def specs() -> list[SourceSpec]:
@@ -578,7 +627,12 @@ def build_summary(spec_to_records: list[tuple[SourceSpec, list[dict[str, Any]]]]
         if dataset in example_specs:
             spec, example = example_specs[dataset]
             lines.append(f"### {dataset} example")
-            lines.append(f"- source: `{spec.source_path}`")
+            source_path = render_path_with_placeholder(
+                spec.source_path,
+                INQUIRER_SOURCE_ROOT,
+                "$INQUIRER_SOURCE_ROOT",
+            )
+            lines.append(f"- source: `{source_path}`")
             lines.append("```json")
             lines.append(summarize_example(example))
             lines.append("```")
@@ -594,8 +648,18 @@ def build_summary(spec_to_records: list[tuple[SourceSpec, list[dict[str, Any]]]]
     )
     for spec, records in spec_to_records:
         normalized_path = DEFAULT_OUTPUT_DIR / spec.output_name
+        source_path = render_path_with_placeholder(
+            spec.source_path,
+            INQUIRER_SOURCE_ROOT,
+            "$INQUIRER_SOURCE_ROOT",
+        )
+        normalized_display_path = render_path_with_placeholder(
+            normalized_path,
+            INQUIRER_WORKSPACE,
+            "$INQUIRER_WORKSPACE",
+        )
         lines.append(
-            f"| {spec.dataset} | {spec.variant} | `{spec.source_path}` | `{normalized_path}` | {len(records)} | {spec.notes} |"
+            f"| {spec.dataset} | {spec.variant} | `{source_path}` | `{normalized_display_path}` | {len(records)} | {spec.notes} |"
         )
 
     lines.extend(

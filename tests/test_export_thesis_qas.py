@@ -3,6 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from tools import export_thesis_qas
 from tools.export_thesis_qas import build_summary, convert_normalized_records_to_thesis_entries, merge_record_sets
 
 
@@ -58,3 +59,34 @@ def test_build_summary_omits_skipped_section_when_nothing_is_skipped():
 
     assert "## Skipped" not in summary
     assert "baseline" not in summary
+
+
+def test_build_summary_renders_source_and_workspace_placeholders(monkeypatch):
+    source_root = Path("/") / "home" / "researcher" / "inquirer-source"
+    workspace_root = Path("/") / "data1" / "inquirer-workspace"
+    monkeypatch.setattr(export_thesis_qas, "INQUIRER_SOURCE_ROOT", source_root)
+    monkeypatch.setattr(export_thesis_qas, "INQUIRER_WORKSPACE", workspace_root)
+    created = [
+        {
+            "dataset": "STAR",
+            "model": "INQUIRER",
+            "output": export_thesis_qas.REPO_ROOT
+            / "thesis"
+            / "STAR"
+            / "INQUIRER"
+            / "new_qas.json",
+            "sources": (
+                source_root / "gen_starQA/STAR_train_add_prob.json",
+                workspace_root / "normalized/star_kg_normalized.json",
+            ),
+            "notes": "fixture",
+        }
+    ]
+
+    summary = build_summary(created, [])
+
+    assert str(source_root) not in summary
+    assert str(workspace_root) not in summary
+    assert "$INQUIRER_SOURCE_ROOT/gen_starQA/STAR_train_add_prob.json" in summary
+    assert "$INQUIRER_WORKSPACE/normalized/star_kg_normalized.json" in summary
+    assert "`thesis/STAR/INQUIRER/new_qas.json`" in summary
