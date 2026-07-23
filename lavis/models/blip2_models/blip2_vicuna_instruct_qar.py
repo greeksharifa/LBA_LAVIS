@@ -46,21 +46,7 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         Blip2VicunaInstructQAR.Questioner = questioner
         Blip2VicunaInstructQAR.Answerer = answerer
         Blip2VicunaInstructQAR.finetuned = finetuned
-    
-        # base와 비교
-        base_json = json.load(open("lavis/ywjang_output_qar_test/20230815093/result/val_vqa_result.json", "r"))
-        
-        for elem in base_json:
-            question_id = elem["question_id"]
-            question = elem["question"]
-            gt_ans = elem["gt_ans"]
-            pred_ans = elem["pred_ans"]
-            
-            Blip2VicunaInstructQAR.base[question_id] = {
-                "question": question,
-                "gt_ans": gt_ans,
-                "base_pred_ans": pred_ans
-            }
+        Blip2VicunaInstructQAR.base = dict()
     
     
     # dummy
@@ -115,13 +101,19 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         # logging.info(Colors.BRIGHT_MAGENTA + f"Questioner device: {Blip2VicunaInstructQAR.Questioner.device}" + Colors.RESET)
         # logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
         # logging.info(Colors.BRIGHT_MAGENTA + f"Image device: {samples['image'].device}" + Colors.RESET)
-        
-        if hasattr(Blip2VicunaInstructQAR.Questioner, "device") and samples["image"].device != Blip2VicunaInstructQAR.Questioner.device:
-            Blip2VicunaInstructQAR.Questioner.to(samples["image"].device)
-            logging.info(Colors.BRIGHT_MAGENTA + f"Questioner device move: {Blip2VicunaInstructQAR.Questioner.device}" + Colors.RESET)
-        if hasattr(Blip2VicunaInstructQAR.Answerer, "device") and samples["image"].device != Blip2VicunaInstructQAR.Answerer.device:
-            Blip2VicunaInstructQAR.Answerer.to(samples["image"].device)
-            logging.info(Colors.BRIGHT_MAGENTA + f"Answerer device move: {Blip2VicunaInstructQAR.Answerer.device}" + Colors.RESET)
+
+        def _samples_for_device(device):
+            if not torch.is_tensor(samples["image"]) or samples["image"].device == device:
+                return samples
+
+            device_samples = {}
+            for key, value in samples.items():
+                if torch.is_tensor(value):
+                    device_samples[key] = value.to(device)
+                else:
+                    device_samples[key] = value
+
+            return device_samples
         
         main_question = list(samples["text_input"])
         # logging.info(Colors.BRIGHT_MAGENTA + f"main_question: {main_question}" + Colors.RESET)
@@ -146,9 +138,15 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
         
         for i in range(1, 1+1):
             # Questioner
-            samples["prompt"] = questioner_prompt if i == 1 else questioner_prompt + '.'
+            questioner_device = getattr(
+                Blip2VicunaInstructQAR.Questioner, "device", samples["image"].device
+            )
+            questioner_samples = _samples_for_device(questioner_device)
+            questioner_samples["prompt"] = (
+                questioner_prompt if i == 1 else questioner_prompt + '.'
+            )
             # print('i:', i, 'questioner samples["prompt"]:', samples["prompt"], sep='\t')
-            sub_question = Blip2VicunaInstructQAR.Questioner.generate(samples)
+            sub_question = Blip2VicunaInstructQAR.Questioner.generate(questioner_samples)
             if sub_question is None:
                 if i == 1:
                     sub_qa_is_none = True
@@ -165,11 +163,15 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             questioner_prompt += questioner_prompts["pair_prompt"].format(i, sub_question)
             
             # Answerer
+            answerer_device = getattr(
+                Blip2VicunaInstructQAR.Answerer, "device", samples["image"].device
+            )
+            answerer_samples = _samples_for_device(answerer_device)
             answerer_prompt = answerer_prompts["init_prompt"].format(sub_question)
-            samples["prompt"] = answerer_prompt
+            answerer_samples["prompt"] = answerer_prompt
             # print('i:', i, 'answerer samples["prompt"]:', samples["prompt"], sep='\t')
 
-            sub_answer = Blip2VicunaInstructQAR.Answerer.generate(samples)#, answerer=True)
+            sub_answer = Blip2VicunaInstructQAR.Answerer.generate(answerer_samples)#, answerer=True)
             # print('i:', i, 'sub_answer:', sub_answer, sep='\t')
             if isinstance(sub_answer, list):
                 sub_answer = sub_answer[0]
@@ -277,6 +279,9 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
             padding="longest",
             return_tensors="pt"
         ).to(image.device)
+
+        max_new_tokens = max(1, int(max_length))
+        min_new_tokens = max(0, min(int(min_length), max_new_tokens))
         
         with self.maybe_autocast():
             inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens.input_ids)
@@ -291,8 +296,8 @@ class Blip2VicunaInstructQAR(Blip2VicunaInstruct):
                 top_p=top_p,
                 temperature=temperature,
                 num_beams=num_beams,
-                max_length=max_length,
-                min_length=min_length,
+                max_new_tokens=max_new_tokens,
+                min_new_tokens=min_new_tokens,
                 # eos_token_id=self.eos_token_id,
                 # eos_token_id=self.llm_tokenizer.eos_token_id,
                 repetition_penalty=repetition_penalty,

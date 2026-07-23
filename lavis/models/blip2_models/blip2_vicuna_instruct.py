@@ -382,6 +382,9 @@ class Blip2VicunaInstruct(Blip2Base):
             padding="longest",
             return_tensors="pt"
         ).to(image.device)
+
+        max_new_tokens = max(1, int(max_length))
+        min_new_tokens = max(0, min(int(min_length), max_new_tokens))
         
         with self.maybe_autocast():
             inputs_embeds = self.llm_model.get_input_embeddings()(llm_tokens.input_ids)
@@ -396,8 +399,8 @@ class Blip2VicunaInstruct(Blip2Base):
                 top_p=top_p,
                 temperature=temperature,
                 num_beams=num_beams,
-                max_length=max_length,
-                min_length=min_length,
+                max_new_tokens=max_new_tokens,
+                min_new_tokens=min_new_tokens,
                 # eos_token_id=self.eos_token_id,
                 # eos_token_id=self.llm_tokenizer.eos_token_id,
                 repetition_penalty=repetition_penalty,

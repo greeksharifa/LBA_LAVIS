@@ -87,14 +87,14 @@ class RunnerBase:
         if self._model.device != self.device:
             self._model = self._model.to(self.device)
 
-            # distributed training wrapper
-            if self.use_distributed:
-                if self._wrapped_model is None:
-                    self._wrapped_model = DDP(
-                        self._model, device_ids=[self.config.run_cfg.gpu]
-                    )
-            else:
-                self._wrapped_model = self._model
+        # distributed training wrapper
+        if self.use_distributed:
+            if self._wrapped_model is None:
+                self._wrapped_model = DDP(
+                    self._model, device_ids=[self.config.run_cfg.gpu]
+                )
+        else:
+            self._wrapped_model = self._model
 
         return self._wrapped_model
 

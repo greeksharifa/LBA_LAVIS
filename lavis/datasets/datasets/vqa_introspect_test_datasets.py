@@ -29,6 +29,10 @@ import torch
 from PIL import Image
 
 from lavis.datasets.datasets.vqa_datasets import VQADataset, VQAEvalDataset
+from subqa.vqa_introspect_data import (
+    build_vqa_introspect_records,
+    get_vqa_introspect_image_path,
+)
 
 
 class __DisplMixin:
@@ -147,17 +151,13 @@ class VQAIntrospectTestDataset(VQADataset, __DisplMixin):
     def __init__(self, vis_processor, text_processor, vis_root, ann_paths):
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
+        self.dataset_split = "train"
         
-        self.annotation = []
         json_data = json.load(open(ann_paths[0], "r"))
-        for question_id, value in json_data.items():
-            _sample = {
-                "image_id": value["image_id"],
-                "question_id": question_id,
-                "question": value["reasoning_question"],
-                "answer": value["reasoning_answer_most_common"],
-            }
-            self.annotation.append(_sample)
+        sample_stride = int(os.environ.get("VQA_INTROSPECT_SAMPLE_STRIDE", "1"))
+        self.annotation = build_vqa_introspect_records(
+            json_data, sample_stride=sample_stride
+        )
         
         self.img_ids = {}
         n = 0
@@ -176,6 +176,53 @@ class VQAIntrospectTestDataset(VQADataset, __DisplMixin):
         # logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectQARVQAEvalDataset len: {len(self.annotation)}{Colors.RESET}")
         print(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectTestDataset len: {len(self.annotation)}{Colors.RESET}")
 
+    def collater(self, samples):
+        (
+            image_list,
+            image_id_list,
+            instance_id_list,
+            question_list,
+            question_id_list,
+            answer_list,
+        ) = ([], [], [], [], [], [])
+
+        for sample in samples:
+            image_list.append(sample["image"])
+            image_id_list.append(sample["image_id"])
+            instance_id_list.append(sample["instance_id"])
+            question_list.append(sample["text_input"])
+            question_id_list.append(sample["question_id"])
+            answer_list.append(sample["answer"])
+
+        return {
+            "image": torch.stack(image_list, dim=0),
+            "image_id": image_id_list,
+            "instance_id": instance_id_list,
+            "text_input": question_list,
+            "question_id": question_id_list,
+            "answer": answer_list,
+        }
+
+    def __getitem__(self, index):
+        ann = self.annotation[index]
+
+        image_path = get_vqa_introspect_image_path(
+            self.vis_root, ann["image_id"], self.dataset_split
+        )
+        image = Image.open(image_path).convert("RGB")
+        image = self.vis_processor(image)
+
+        question = self.text_processor(ann["question"])
+
+        return {
+            "image": image,
+            "image_id": ann["image_id"],
+            "instance_id": ann["instance_id"],
+            "text_input": question,
+            "question_id": ann["question_id"],
+            "answer": ann["answer"],
+        }
+
 
 
 class VQAIntrospectTestEvalDataset(VQAEvalDataset, __DisplMixin):
@@ -187,20 +234,13 @@ class VQAIntrospectTestEvalDataset(VQAEvalDataset, __DisplMixin):
         """
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
         self.vis_root = vis_root
+        self.dataset_split = "val"
 
-        self.annotation = []
         json_data = json.load(open(ann_paths[0], "r"))
-        for i, (main_question_id, value) in enumerate(json_data.items()):
-            # if i >= 2000:    break
-            if i % 50 != 0:
-                continue
-            _sample = {
-                "image_id": value["image_id"],
-                "question_id": main_question_id,
-                "question": value["reasoning_question"],
-                "answer": value["reasoning_answer_most_common"],
-            }
-            self.annotation.append(_sample)
+        sample_stride = int(os.environ.get("VQA_INTROSPECT_SAMPLE_STRIDE", "1"))
+        self.annotation = build_vqa_introspect_records(
+            json_data, sample_stride=sample_stride
+        )
 
         self.img_ids = {}
         n = 0
@@ -250,9 +290,9 @@ class VQAIntrospectTestEvalDataset(VQAEvalDataset, __DisplMixin):
     def __getitem__(self, index):
         ann = self.annotation[index]
         
-        # val2014/COCO_val2014_000000265814.jpg
-        image_path = os.path.join(self.vis_root, f'val2014/COCO_val2014_{ann["image_id"]:012}.jpg')
-        # image_path = os.path.join(self.vis_root, ann["image"])
+        image_path = get_vqa_introspect_image_path(
+            self.vis_root, ann["image_id"], self.dataset_split
+        )
         image = Image.open(image_path).convert("RGB")
         image = self.vis_processor(image)
         
@@ -269,4 +309,3 @@ class VQAIntrospectTestEvalDataset(VQAEvalDataset, __DisplMixin):
         # logging.info(f"_return: {_return}")
 
         return _return
-
