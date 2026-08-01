@@ -134,6 +134,16 @@ class MMMUOpenTests(unittest.TestCase):
             ),
         )
 
+    def test_multiline_final_conclusion_overrides_intermediate_answer(self):
+        dataset = make_adapter()
+        for prediction in (
+            "The answer is 4.\nTherefore, the final answer is 5.",
+            "The answer is 4\nTherefore, the final answer is 5.",
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(0, dataset.get_score(prediction, "4", "open_ended"))
+                self.assertEqual(1, dataset.get_score(prediction, "5", "open_ended"))
+
     def test_multiple_choice_remains_exact_normalized_option_letter_match(self):
         dataset = make_adapter()
 

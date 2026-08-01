@@ -56,10 +56,12 @@ def _key_subresponses(response: str) -> List[str]:
             for candidate in candidates
             if candidate not in ("", ":", ",", ".", ";", "!", "?", "'")
         ]
-        if candidates:
-            key_responses.append(min(candidates, key=len))
+        key_responses.extend(candidates)
 
-    return key_responses or [response]
+    if key_responses:
+        # On equal-length tails, prefer the later (final) conclusion.
+        return [min(reversed(key_responses), key=len)]
+    return [response]
 
 
 def parse_open_response(response: str) -> List[NormalizedAnswer]:
