@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from tests.test_artifacts import SamplingDataset, make_config
+from util.artifacts import MANIFEST_FILENAME, create_manifest, write_manifest
 from util.path import get_output_dir, get_sub_qas_path
 
 
@@ -37,6 +38,19 @@ def write_dependency(path: Path, stage, qids=("q0",)):
     path.write_text(json.dumps(dependency_payload(stage, qids)))
 
 
+def write_completed_manifest(cfg, qids=("q0",), stages=("subq", "suba", "base")):
+    manifest = create_manifest(cfg, qids)
+    for stage in stages:
+        manifest["stages"][stage].update(
+            {
+                "completed": True,
+                "state": "completed",
+                "generation_id": f"{stage}-generation",
+            }
+        )
+    write_manifest(get_output_dir(cfg) / MANIFEST_FILENAME, manifest)
+
+
 class DatasetDependencyTests(unittest.TestCase):
     def test_base_and_subq_need_no_prior_artifacts(self):
         for mode in ("base", "subq"):
@@ -58,6 +72,7 @@ class DatasetDependencyTests(unittest.TestCase):
             write_annotations(root)
             cfg = make_config(root).for_stage("suba")
             subq_path, _ = get_sub_qas_path(cfg)
+            write_completed_manifest(cfg, stages=("subq",))
 
             with self.assertRaises(FileNotFoundError) as raised:
                 SamplingDataset(cfg)
@@ -71,6 +86,7 @@ class DatasetDependencyTests(unittest.TestCase):
             cfg = make_config(root).for_stage("refined")
             subq_path, suba_path = get_sub_qas_path(cfg)
             base_path = get_output_dir(cfg) / "base_outputs.json"
+            write_completed_manifest(cfg)
 
             for expected_missing, available in (
                 (subq_path, ()),
@@ -97,6 +113,7 @@ class DatasetDependencyTests(unittest.TestCase):
             cfg = make_config(root).for_stage("refined")
             subq_path, suba_path = get_sub_qas_path(cfg)
             base_path = get_output_dir(cfg) / "base_outputs.json"
+            write_completed_manifest(cfg, qids=("q0", "q1"))
             write_dependency(subq_path, "subq", qids=("q0", "q1"))
             write_dependency(suba_path, "suba", qids=("q0",))
             write_dependency(base_path, "base", qids=("q0", "q1"))
@@ -115,6 +132,7 @@ class DatasetDependencyTests(unittest.TestCase):
             cfg = make_config(root).for_stage("refined")
             subq_path, suba_path = get_sub_qas_path(cfg)
             base_path = get_output_dir(cfg) / "base_outputs.json"
+            write_completed_manifest(cfg)
             write_dependency(subq_path, "subq")
             write_dependency(suba_path, "suba")
             invalid_base = dependency_payload("base")
@@ -137,6 +155,7 @@ class DatasetDependencyTests(unittest.TestCase):
             cfg = make_config(root, num_data=1).for_stage("refined")
             subq_path, suba_path = get_sub_qas_path(cfg)
             base_path = get_output_dir(cfg) / "base_outputs.json"
+            write_completed_manifest(cfg, qids=("q0",))
             write_dependency(subq_path, "subq", qids=("q0",))
             write_dependency(suba_path, "suba", qids=("q0",))
             write_dependency(base_path, "base", qids=("q0",))
@@ -148,6 +167,36 @@ class DatasetDependencyTests(unittest.TestCase):
             self.assertEqual(["subq value"], sample["subq_list"])
             self.assertEqual(["suba value"], sample["suba_list"])
             self.assertEqual("answer", sample["base_answer"])
+
+    def test_suba_rejects_stale_subq_json_without_completed_manifest(self):
+        scenarios = ("missing", "running", "incomplete")
+        for scenario in scenarios:
+            with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                write_annotations(root)
+                cfg = make_config(root).for_stage("suba")
+                subq_path, _ = get_sub_qas_path(cfg)
+                write_dependency(subq_path, "subq")
+                manifest_path = get_output_dir(cfg) / MANIFEST_FILENAME
+
+                if scenario != "missing":
+                    manifest = create_manifest(cfg, ["q0"])
+                    if scenario == "running":
+                        manifest["stages"]["subq"].update(
+                            {
+                                "completed": False,
+                                "state": "running",
+                                "generation_id": "failed-rerun",
+                            }
+                        )
+                    write_manifest(manifest_path, manifest)
+
+                with self.assertRaises((FileNotFoundError, ValueError)) as raised:
+                    SamplingDataset(cfg)
+
+                message = str(raised.exception)
+                self.assertIn("subq", message)
+                self.assertIn(str(manifest_path), message)
 
 
 if __name__ == "__main__":

@@ -85,6 +85,94 @@ def fake_formatter(mode, outputs, qids, n):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_suba_prompt_count_must_match_configured_n_before_generation(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=2, m=1, k=1).for_stage("suba")
+            sample = fixture_sample()
+            sample["subq_list"] = ["corrupted short list"]
+
+            class GenerationMustNotRun(FakeModel):
+                def generate(self, prompts):
+                    raise AssertionError("generation must not run")
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "prompt count mismatch.*suba.*q0.*expected 2.*got 1",
+            ):
+                run_stage(
+                    cfg,
+                    GenerationMustNotRun(),
+                    dataset_loader=lambda stage_cfg: [sample],
+                )
+
+    def test_refined_prompt_count_must_match_configured_k_before_generation(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=1, m=1, k=2).for_stage("refined")
+
+            class GenerationMustNotRun(FakeModel):
+                def generate(self, prompts):
+                    raise AssertionError("generation must not run")
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "prompt count mismatch.*refined.*q0.*expected 2.*got 1",
+            ):
+                run_stage(
+                    cfg,
+                    GenerationMustNotRun(),
+                    dataset_loader=lambda stage_cfg: [fixture_sample()],
+                    prompt_builder=(
+                        lambda mode, sample, stage_cfg, sampler: [
+                            "refine" for _ in sampler.indices
+                        ]
+                    ),
+                )
+
+    def test_subq_and_base_require_one_prompt_per_qid(self):
+        from pipeline import run_stage
+
+        class GenerationMustNotRun(FakeModel):
+            def generate(self, prompts):
+                raise AssertionError("generation must not run")
+
+        for mode in ("subq", "base"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as tmp:
+                cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage(mode)
+                with self.assertRaisesRegex(
+                    ValueError,
+                    f"prompt count mismatch.*{mode}.*q0.*expected 1.*got 2",
+                ):
+                    run_stage(
+                        cfg,
+                        GenerationMustNotRun(),
+                        dataset_loader=lambda stage_cfg: [fixture_sample()],
+                        prompt_builder=(
+                            lambda mode, sample, stage_cfg, sampler: ["a", "b"]
+                        ),
+                        output_formatter=fake_formatter,
+                    )
+
+    def test_empty_dataset_is_rejected_before_manifest_creation(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage("base")
+            with self.assertRaisesRegex(ValueError, "dataset.*no samples"):
+                run_stage(
+                    cfg,
+                    FakeModel(),
+                    dataset_loader=lambda stage_cfg: [],
+                    output_formatter=fake_formatter,
+                )
+
+            run_dir = get_output_dir(cfg)
+            self.assertFalse((run_dir / MANIFEST_FILENAME).exists())
+            self.assertFalse((run_dir / get_output_filename(cfg)).exists())
+
     def test_real_formatter_keeps_singleton_suba_and_refined_values_as_lists(self):
         from pipeline import run_stage
 

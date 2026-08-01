@@ -204,6 +204,26 @@ def _validate_formatted_outputs(formatted, sample_qids, prompt_qids, mode, n):
                 )
 
 
+def _validate_prompt_counts(cfg, sample_qids, prompt_qids, mode):
+    if not sample_qids:
+        raise ValueError(f"{mode} dataset has no samples")
+
+    expected_count = {
+        "subq": 1,
+        "base": 1,
+        "suba": int(cfg.runner_cfg.N),
+        "refined": int(cfg.runner_cfg.K),
+    }[mode]
+    prompt_counts = Counter(prompt_qids)
+    for qid in sample_qids:
+        actual_count = prompt_counts[qid]
+        if actual_count != expected_count:
+            raise ValueError(
+                f"prompt count mismatch for {mode} qid {qid}: "
+                f"expected {expected_count}, got {actual_count}"
+            )
+
+
 def run_stage(
     cfg,
     model,
@@ -252,6 +272,7 @@ def run_stage(
             qids.append(qid)
 
     sample_qids = list(samples)
+    _validate_prompt_counts(cfg, sample_qids, qids, mode)
     manifest_path = _prepare_manifest(cfg, sample_qids, output_dir)
     started_manifest = mark_stage_started(manifest_path, mode)
     generation_id = started_manifest["stages"][mode]["generation_id"]

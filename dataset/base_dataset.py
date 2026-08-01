@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from util.logger import get_logger
 from util.utils import create_answer_mapping
 from util.path import get_sub_qas_path, get_output_dir
+from util.artifacts import MANIFEST_FILENAME, validate_completed_stage
 
 
 class BaseDataset(ABC):
@@ -182,8 +183,18 @@ class BaseDataset(ABC):
             "base": get_output_dir(self.cfg) / "base_outputs.json",
         }
         selected_qids = [ann["qid"] for ann in self.annotation]
+        manifest_path = get_output_dir(self.cfg) / MANIFEST_FILENAME
+        required_stages = self._required_artifact_stages()
 
-        for stage in self._required_artifact_stages():
+        for stage in required_stages:
+            validate_completed_stage(
+                manifest_path,
+                stage,
+                self.cfg,
+                selected_qids,
+            )
+
+        for stage in required_stages:
             path = paths[stage]
             if not path.is_file():
                 raise FileNotFoundError(f"required {stage} artifact not found: {path}")

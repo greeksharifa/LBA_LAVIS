@@ -162,3 +162,38 @@ def validate_manifest(manifest: Mapping[str, Any], cfg, qids: Iterable[Any]) -> 
             f"missing={missing}, unexpected={unexpected}, "
             f"expected_count={len(expected_qids)}, actual_count={len(actual_qids)}"
         )
+
+
+def validate_completed_stage(
+    path: Path,
+    stage: str,
+    cfg,
+    qids: Iterable[Any],
+) -> Dict[str, Any]:
+    """Validate compatibility and completion before consuming a stage artifact."""
+    if stage not in STAGES:
+        raise ValueError(f"unknown manifest stage: {stage}")
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"required {stage} manifest not found: {path}")
+    try:
+        manifest = load_manifest(path)
+        validate_manifest(manifest, cfg, qids)
+    except (json.JSONDecodeError, ValueError) as error:
+        raise ValueError(
+            f"required {stage} manifest invalid at {path}: {error}"
+        ) from error
+
+    stage_status = manifest.get("stages", {}).get(stage)
+    if not isinstance(stage_status, Mapping):
+        raise ValueError(f"required {stage} status missing in manifest {path}")
+    if (
+        stage_status.get("completed") is not True
+        or stage_status.get("state") != "completed"
+    ):
+        raise ValueError(
+            f"required {stage} stage is not completed in manifest {path}: "
+            f"completed={stage_status.get('completed')!r}, "
+            f"state={stage_status.get('state')!r}"
+        )
+    return manifest
