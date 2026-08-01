@@ -63,6 +63,10 @@ def manifest(
     generation_id="generation-1",
     resolved_path=None,
     num_data=-1,
+    tensor_parallel_size=4,
+    enforce_eager=True,
+    swap_space=0.0,
+    limit_mm_per_prompt=None,
 ):
     annotation_name = {"val": "dev", "test": "validation"}.get(split, split)
     resolved_path = resolved_path or f"/data/MMMU/{annotation_name}.json"
@@ -79,22 +83,75 @@ def manifest(
             "annotation_paths": [f"MMMU/{annotation_name}.json"],
             "annotation_paths_resolved": [resolved_path],
             "num_data": num_data,
+            "tensor_parallel_size": tensor_parallel_size,
+            "enforce_eager": enforce_eager,
+            "swap_space": swap_space,
+            "limit_mm_per_prompt": (
+                {"image": 7, "video": 0}
+                if limit_mm_per_prompt is None
+                else limit_mm_per_prompt
+            ),
         },
         "qids": list(qids),
         "stages": {
+            "subq": {
+                "completed": True,
+                "state": "completed",
+                "generation_id": "subq-generation",
+                "parent_generations": {},
+            },
+            "suba": {
+                "completed": True,
+                "state": "completed",
+                "generation_id": "suba-generation",
+                "parent_generations": {"subq": "subq-generation"},
+            },
+            "base": {
+                "completed": True,
+                "state": "completed",
+                "generation_id": "base-generation",
+                "parent_generations": {},
+            },
             "refined": {
                 "completed": True,
                 "state": "completed",
                 "generation_id": generation_id,
+                "parent_generations": {
+                    "subq": "subq-generation",
+                    "suba": "suba-generation",
+                    "base": "base-generation",
+                },
             }
         },
     }
 
 
-def write_run(root, name, split, records, **manifest_kwargs):
+def write_annotation(root, name, qids):
+    path = (root / f"{name}-annotations.json").resolve()
+    path.write_text(
+        json.dumps([{"question_id": qid} for qid in qids]),
+        encoding="utf-8",
+    )
+    return path
+
+
+def write_run(
+    root,
+    name,
+    split,
+    records,
+    *,
+    annotation_qids=None,
+    **manifest_kwargs,
+):
     run_dir = root / name
     run_dir.mkdir()
     qids = [item["qid"] for item in records]
+    annotation_qids = qids if annotation_qids is None else annotation_qids
+    if manifest_kwargs.get("resolved_path") is None:
+        manifest_kwargs["resolved_path"] = str(
+            write_annotation(root, f"{name}-{split}", annotation_qids)
+        )
     (run_dir / "run_manifest.json").write_text(
         json.dumps(manifest(split, qids, **manifest_kwargs)), encoding="utf-8"
     )
@@ -325,16 +382,90 @@ class RunLoadingTests(unittest.TestCase):
                 load_run(missing_manifest_generation)
 
     def test_loader_rejects_manifest_generation_change_during_read(self):
-        first = manifest("val", ["q0"])
+        first = manifest(
+            "val",
+            ["q0"],
+            resolved_path=str(Path("/data/MMMU/dev.json").resolve()),
+        )
         changed = json.loads(json.dumps(first))
         changed["stages"]["refined"]["generation_id"] = "generation-2"
 
         with patch(
             "evaluation.c2r._load_json",
-            side_effect=[first, [record("q0")], changed],
+            side_effect=[
+                first,
+                [record("q0")],
+                [{"question_id": "q0"}],
+                changed,
+            ],
         ):
             with self.assertRaisesRegex(ValueError, "changed while reading"):
                 load_run("unused")
+
+    def test_loader_rechecks_manifest_after_reading_annotation(self):
+        from evaluation import c2r as c2r_module
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run_dir = write_run(root, "run", "val", [record("q0")])
+            manifest_path = run_dir / "run_manifest.json"
+            real_load_json = c2r_module._load_json
+
+            def load_and_mutate(path, label):
+                result = real_load_json(path, label)
+                if label == "annotation JSON":
+                    changed = json.loads(manifest_path.read_text())
+                    changed["stages"]["refined"][
+                        "generation_id"
+                    ] = "generation-after-annotation"
+                    manifest_path.write_text(json.dumps(changed))
+                return result
+
+            with patch(
+                "evaluation.c2r._load_json",
+                side_effect=load_and_mutate,
+            ):
+                with self.assertRaisesRegex(ValueError, "changed while reading"):
+                    load_run(run_dir)
+
+    def test_loader_requires_exact_current_lineage_for_every_completed_stage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, mutate in (
+                (
+                    "missing-parent-map",
+                    lambda saved: saved["stages"]["refined"].pop(
+                        "parent_generations"
+                    ),
+                ),
+                (
+                    "extra-parent",
+                    lambda saved: saved["stages"]["suba"][
+                        "parent_generations"
+                    ].update({"base": "base-generation"}),
+                ),
+                (
+                    "stale-parent",
+                    lambda saved: saved["stages"]["refined"][
+                        "parent_generations"
+                    ].update({"subq": "stale-subq"}),
+                ),
+                (
+                    "legacy-parentless",
+                    lambda saved: saved["stages"]["base"].pop(
+                        "parent_generations"
+                    ),
+                ),
+            ):
+                run_dir = write_run(root, name, "val", [record("q0")])
+                manifest_path = run_dir / "run_manifest.json"
+                saved = json.loads(manifest_path.read_text())
+                mutate(saved)
+                manifest_path.write_text(json.dumps(saved))
+
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, "parent_generations"):
+                        load_run(run_dir)
 
     def test_loader_rejects_malformed_gold_and_manifest_integer_fields(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -348,6 +479,8 @@ class RunLoadingTests(unittest.TestCase):
                 ("zero-n", "N", 0),
                 ("bool-k", "K", True),
                 ("string-num-data", "num_data", "-1"),
+                ("zero-num-data", "num_data", 0),
+                ("negative-num-data", "num_data", -2),
             ):
                 run_dir = write_run(root, name, "val", [record("q0")])
                 saved = json.loads((run_dir / "run_manifest.json").read_text())
@@ -356,6 +489,156 @@ class RunLoadingTests(unittest.TestCase):
                 with self.subTest(field=field):
                     with self.assertRaisesRegex(ValueError, field):
                         load_run(run_dir)
+
+    def test_loader_requires_runtime_provenance_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for field in (
+                "tensor_parallel_size",
+                "enforce_eager",
+                "swap_space",
+                "limit_mm_per_prompt",
+            ):
+                run_dir = write_run(root, field, "val", [record("q0")])
+                manifest_path = run_dir / "run_manifest.json"
+                saved = json.loads(manifest_path.read_text())
+                saved["config"].pop(field)
+                manifest_path.write_text(json.dumps(saved))
+
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(ValueError, "provenance fields"):
+                        load_run(run_dir)
+
+    def test_loader_rejects_invalid_runtime_provenance_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cases = (
+                ("bool-tp", "tensor_parallel_size", True),
+                ("zero-tp", "tensor_parallel_size", 0),
+                ("string-tp", "tensor_parallel_size", "4"),
+                ("numeric-eager", "enforce_eager", 1),
+                ("bool-swap", "swap_space", True),
+                ("negative-swap", "swap_space", -1.0),
+                ("infinite-swap", "swap_space", float("inf")),
+                ("list-limit", "limit_mm_per_prompt", []),
+                ("bool-limit", "limit_mm_per_prompt", {"image": True}),
+                ("negative-limit", "limit_mm_per_prompt", {"image": -1}),
+                ("string-limit", "limit_mm_per_prompt", {"image": "7"}),
+                ("empty-modality", "limit_mm_per_prompt", {"": 7}),
+            )
+            for name, field, value in cases:
+                run_dir = write_run(root, name, "val", [record("q0")])
+                manifest_path = run_dir / "run_manifest.json"
+                saved = json.loads(manifest_path.read_text())
+                saved["config"][field] = value
+                manifest_path.write_text(json.dumps(saved))
+
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, field):
+                        load_run(run_dir)
+
+    def test_loader_validates_manifest_qids_against_annotation_selection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            full = write_run(
+                root,
+                "incomplete-full",
+                "val",
+                [record("q0")],
+                annotation_qids=["q0", "q1"],
+                num_data=-1,
+            )
+            with self.assertRaisesRegex(ValueError, "annotation selection mismatch"):
+                load_run(full)
+
+            annotations = ["q0", "q1", "q2", "q3", "q4"]
+            for name, selected in (
+                ("wrong-positive-qids", ["q0", "q1", "q4"]),
+                ("wrong-positive-count", ["q0", "q4"]),
+            ):
+                run_dir = write_run(
+                    root,
+                    name,
+                    "val",
+                    [record(qid) for qid in selected],
+                    annotation_qids=annotations,
+                    num_data=3,
+                )
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(
+                        ValueError, "annotation selection mismatch"
+                    ):
+                        load_run(run_dir)
+
+            selected = write_run(
+                root,
+                "correct-positive",
+                "val",
+                [record(qid) for qid in ("q0", "q2", "q4")],
+                annotation_qids=annotations,
+                num_data=3,
+            )
+            self.assertEqual(["q0", "q2", "q4"], load_run(selected)["qids"])
+
+    def test_loader_rejects_unsafe_annotation_path_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, mutate in (
+                (
+                    "relative-resolved",
+                    lambda config: config.update(
+                        {"annotation_paths_resolved": ["relative.json"]}
+                    ),
+                ),
+                (
+                    "path-count",
+                    lambda config: config["annotation_paths"].append("extra.json"),
+                ),
+            ):
+                run_dir = write_run(root, name, "val", [record("q0")])
+                manifest_path = run_dir / "run_manifest.json"
+                saved = json.loads(manifest_path.read_text())
+                mutate(saved["config"])
+                manifest_path.write_text(json.dumps(saved))
+
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, "annotation path"):
+                        load_run(run_dir)
+
+    def test_loader_rejects_malformed_annotation_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            malformed = (
+                ("container", {}, "must contain a list"),
+                ("record", ["q0"], "record 0 must be an object"),
+                ("missing-id", [{"qid": "q0"}], "question_id"),
+                ("empty-id", [{"question_id": ""}], "question_id"),
+                (
+                    "duplicate-id",
+                    [{"question_id": "q0"}, {"question_id": "q0"}],
+                    "duplicate",
+                ),
+            )
+            for name, content, message in malformed:
+                run_dir = write_run(root, name, "val", [record("q0")])
+                saved = json.loads((run_dir / "run_manifest.json").read_text())
+                annotation_path = Path(
+                    saved["config"]["annotation_paths_resolved"][0]
+                )
+                annotation_path.write_text(json.dumps(content))
+
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, message):
+                        load_run(run_dir)
+
+            run_dir = write_run(root, "duplicate-path", "val", [record("q0")])
+            manifest_path = run_dir / "run_manifest.json"
+            saved = json.loads(manifest_path.read_text())
+            saved["config"]["annotation_paths"] *= 2
+            saved["config"]["annotation_paths_resolved"] *= 2
+            manifest_path.write_text(json.dumps(saved))
+            with self.assertRaisesRegex(ValueError, "annotation path.*duplicate"):
+                load_run(run_dir)
 
     def test_loader_rejects_malformed_confidence_schema_before_scoring(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -418,6 +701,14 @@ class RunLoadingTests(unittest.TestCase):
             for name, bad_manifest, bad_records, message in cases:
                 case_dir = root / name
                 case_dir.mkdir()
+                annotation_path = write_annotation(
+                    root,
+                    f"{name}-case",
+                    list(dict.fromkeys(bad_manifest["qids"])),
+                )
+                bad_manifest["config"]["annotation_paths_resolved"] = [
+                    str(annotation_path)
+                ]
                 (case_dir / "run_manifest.json").write_text(json.dumps(bad_manifest))
                 (case_dir / "refined_samples.json").write_text(json.dumps(bad_records))
                 with self.subTest(name=name):
@@ -446,7 +737,7 @@ class RunLoadingTests(unittest.TestCase):
                 )
             self.assertEqual([], calls)
 
-    def test_pair_accepts_matching_full_selection_policy(self):
+    def test_pair_rejects_incomplete_matching_full_selection_policy(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             dev_dir = write_run(
@@ -454,6 +745,7 @@ class RunLoadingTests(unittest.TestCase):
                 "dev",
                 "val",
                 [record("d")],
+                annotation_qids=["d", "d-extra"],
                 num_data=-1,
             )
             validation_dir = write_run(
@@ -461,6 +753,33 @@ class RunLoadingTests(unittest.TestCase):
                 "validation",
                 "test",
                 [record("v", split="test")],
+                annotation_qids=["v", "v-extra"],
+                num_data=-1,
+            )
+
+            with self.assertRaisesRegex(ValueError, "annotation selection mismatch"):
+                evaluate_run_pair(
+                    dev_dir,
+                    validation_dir,
+                    scorer=exact_scorer,
+                    bootstrap_count=10,
+                )
+
+    def test_pair_accepts_matching_full_selection_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_dir = write_run(
+                root,
+                "dev",
+                "val",
+                [record("d"), record("d-extra")],
+                num_data=-1,
+            )
+            validation_dir = write_run(
+                root,
+                "validation",
+                "test",
+                [record("v", split="test"), record("v-extra", split="test")],
                 num_data=-1,
             )
 
@@ -473,6 +792,42 @@ class RunLoadingTests(unittest.TestCase):
 
             self.assertEqual(-1, report["dev"]["num_data"])
             self.assertEqual(-1, report["validation"]["num_data"])
+
+    def test_pair_rejects_runtime_provenance_mismatch_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for field, override in (
+                ("tensor_parallel_size", {"tensor_parallel_size": 2}),
+                ("enforce_eager", {"enforce_eager": False}),
+                ("swap_space", {"swap_space": 8.0}),
+                (
+                    "limit_mm_per_prompt",
+                    {"limit_mm_per_prompt": {"image": 8, "video": 0}},
+                ),
+            ):
+                case = root / field
+                case.mkdir()
+                dev_dir = write_run(case, "dev", "val", [record("d")])
+                validation_dir = write_run(
+                    case,
+                    "validation",
+                    "test",
+                    [record("v", split="test")],
+                    **override,
+                )
+                calls = []
+
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(
+                        ValueError, f"incompatible run manifests.*{field}"
+                    ):
+                        evaluate_run_pair(
+                            dev_dir,
+                            validation_dir,
+                            scorer=lambda *args: calls.append(args),
+                            bootstrap_count=10,
+                        )
+                    self.assertEqual([], calls)
 
     def test_pair_rejects_mismatched_num_data_before_scoring(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -552,16 +907,10 @@ class RunLoadingTests(unittest.TestCase):
             calls = []
             for name, val_qid, resolved_path, message in (
                 ("qid-overlap", "same", None, "qid overlap"),
-                (
-                    "annotation-overlap",
-                    "validation",
-                    "/shared/data.json",
-                    "annotation path overlap",
-                ),
             ):
                 case = root / name
                 case.mkdir()
-                shared_path = "/shared/data.json" if resolved_path else None
+                shared_path = resolved_path
                 dev = write_run(
                     case,
                     "dev",
@@ -585,6 +934,31 @@ class RunLoadingTests(unittest.TestCase):
                             bootstrap_count=10,
                         )
             self.assertEqual([], calls)
+
+    def test_pair_rejects_annotation_overlap_before_scoring(self):
+        dev_manifest = manifest("val", ["d"], resolved_path="/shared/data.json")
+        validation_manifest = manifest(
+            "test", ["v"], resolved_path="/shared/data.json"
+        )
+        dev_run = {"config": dev_manifest["config"], "qids": ["d"]}
+        validation_run = {
+            "config": validation_manifest["config"],
+            "qids": ["v"],
+        }
+        calls = []
+
+        with patch(
+            "evaluation.c2r.load_run",
+            side_effect=[dev_run, validation_run],
+        ):
+            with self.assertRaisesRegex(ValueError, "annotation path overlap"):
+                evaluate_run_pair(
+                    "dev",
+                    "validation",
+                    scorer=lambda *args: calls.append(args),
+                    bootstrap_count=10,
+                )
+        self.assertEqual([], calls)
 
     def test_report_contains_metrics_threshold_source_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:

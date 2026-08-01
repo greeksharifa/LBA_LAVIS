@@ -53,10 +53,14 @@ def make_config(root: Path, *, split="dev", n=5, m=2, k=8, num_data=-1):
                 "question_type": "open_ended",
                 "data_type": "text",
                 "vqa_acc": False,
+                "limit_mm_per_prompt": {"image": 7, "video": 0},
             },
             "model": {
                 "model_name": "fixture-model",
                 "model_id": "fixture/model-id",
+                "tensor_parallel_size": 4,
+                "enforce_eager": True,
+                "swap_space": 0,
             },
         }
     )
@@ -113,6 +117,7 @@ class ArtifactTests(unittest.TestCase):
                     "generation_id": f"{stage}-old",
                 }
             )
+            manifest["generation_history"][stage].append(f"{stage}-old")
         return manifest
 
     def test_core_run_config_records_active_annotation_provenance(self):
@@ -137,6 +142,28 @@ class ArtifactTests(unittest.TestCase):
             provenance = core_run_config(cfg)
 
             self.assertEqual(13, provenance["num_data"])
+
+    def test_core_run_config_records_runtime_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            provenance = core_run_config(make_config(Path(tmp)))
+
+            self.assertEqual(
+                {
+                    "tensor_parallel_size": 4,
+                    "enforce_eager": True,
+                    "swap_space": 0.0,
+                    "limit_mm_per_prompt": {"image": 7, "video": 0},
+                },
+                {
+                    key: provenance.get(key)
+                    for key in (
+                        "tensor_parallel_size",
+                        "enforce_eager",
+                        "swap_space",
+                        "limit_mm_per_prompt",
+                    )
+                },
+            )
 
     def test_run_directory_separates_split_and_run_signature(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -367,6 +394,92 @@ class ArtifactTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "generation_id.*already active"):
                 mark_stage_started(path, "base", "base-generation")
+
+    def test_stage_start_rejects_generation_id_reused_after_replacement(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+            mark_stage_started(path, "base", "base-old")
+            mark_stage_started(path, "base", "base-new")
+
+            with self.assertRaisesRegex(ValueError, "generation_id.*previously used"):
+                mark_stage_started(path, "base", "base-old")
+
+    def test_legacy_manifest_seeds_visible_generation_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            legacy = self._completed_manifest(cfg)
+            legacy.pop("generation_history", None)
+            write_manifest(path, legacy)
+            mark_stage_started(path, "subq", "subq-new")
+            saved = json.loads(path.read_text())
+
+            self.assertEqual(
+                {
+                    "subq": ["subq-old", "subq-new"],
+                    "suba": ["suba-old"],
+                    "base": ["base-old"],
+                    "refined": ["refined-old"],
+                },
+                saved.get("generation_history"),
+            )
+            mark_stage_started(path, "base", "base-new")
+
+            with self.assertRaisesRegex(ValueError, "generation_id.*previously used"):
+                mark_stage_started(path, "base", "base-old")
+
+    def test_stage_start_rejects_malformed_explicit_generation_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            empty = {stage: [] for stage in ("subq", "suba", "base", "refined")}
+            malformed = (
+                None,
+                [],
+                {"base": []},
+                {**empty, "other": []},
+                {**empty, "base": "base-old"},
+                {**empty, "base": [""]},
+                {**empty, "base": ["base-old", "base-old"]},
+            )
+            for index, history in enumerate(malformed):
+                with self.subTest(history=history):
+                    manifest = create_manifest(cfg, ["q0"])
+                    manifest["generation_history"] = history
+                    write_manifest(path, manifest)
+                    with self.assertRaisesRegex(ValueError, "generation_history"):
+                        mark_stage_started(path, "subq", f"subq-{index}")
+
+            manifest = create_manifest(cfg, ["q0"])
+            manifest["stages"]["base"] = {
+                "completed": True,
+                "state": "completed",
+                "generation_id": "visible-base",
+                "parent_generations": {},
+            }
+            manifest["generation_history"] = empty
+            write_manifest(path, manifest)
+            with self.assertRaisesRegex(ValueError, "generation_history.*visible"):
+                mark_stage_started(path, "subq", "subq-new")
+
+    def test_automatic_generation_id_is_recorded_in_history_and_completes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+
+            started = mark_stage_started(path, "base")
+            generation_id = started["stages"]["base"]["generation_id"]
+            self.assertRegex(generation_id, r"^[0-9a-f]{32}$")
+            self.assertEqual(
+                [generation_id],
+                started.get("generation_history", {}).get("base"),
+            )
+
+            completed = mark_stage_complete(path, "base", generation_id)
+            self.assertTrue(completed["stages"]["base"]["completed"])
 
     def test_completion_requires_generation_and_guards_artifact_writer(self):
         with tempfile.TemporaryDirectory() as tmp:

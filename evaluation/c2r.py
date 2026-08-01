@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from dataset.mmmu_eval import evaluate_answer
+from util.artifacts import STAGES, STAGE_DEPENDENCIES
 
 
 TAU1_GRID = tuple(round(index / 10, 1) for index in range(11))
@@ -30,6 +31,10 @@ _COMPATIBILITY_FIELDS = (
     "K",
     "confidence_type",
     "num_data",
+    "tensor_parallel_size",
+    "enforce_eager",
+    "swap_space",
+    "limit_mm_per_prompt",
 )
 _REQUIRED_CONFIG_FIELDS = _COMPATIBILITY_FIELDS + (
     "split",
@@ -319,14 +324,176 @@ def _validated_refined_stage(manifest, manifest_path):
     return stage
 
 
+def _validate_completed_stage_lineage(manifest, manifest_path):
+    stages = manifest.get("stages")
+    if not isinstance(stages, Mapping):
+        raise ValueError(f"manifest stages must be an object in {manifest_path}")
+    if set(stages) != set(STAGES):
+        raise ValueError(
+            f"manifest stages must contain exactly {list(STAGES)} in {manifest_path}"
+        )
+    for stage_name in STAGES:
+        status = stages[stage_name]
+        if not isinstance(status, Mapping):
+            raise ValueError(
+                f"stage {stage_name} status must be an object in {manifest_path}"
+            )
+        if not (
+            status.get("completed") is True
+            and status.get("state") == "completed"
+        ):
+            continue
+        generation_id = status.get("generation_id")
+        if not isinstance(generation_id, str) or not generation_id:
+            raise ValueError(
+                f"stage {stage_name} generation_id missing in {manifest_path}"
+            )
+        parent_generations = status.get("parent_generations")
+        dependencies = STAGE_DEPENDENCIES[stage_name]
+        if not isinstance(parent_generations, Mapping) or set(
+            parent_generations
+        ) != set(dependencies):
+            actual = (
+                sorted(parent_generations)
+                if isinstance(parent_generations, Mapping)
+                else parent_generations
+            )
+            raise ValueError(
+                f"stage {stage_name} parent_generations must contain exactly "
+                f"{list(dependencies)}, got {actual!r}"
+            )
+        for parent_name in dependencies:
+            expected_generation = parent_generations[parent_name]
+            if not isinstance(expected_generation, str) or not expected_generation:
+                raise ValueError(
+                    f"stage {stage_name} parent_generations[{parent_name!r}] "
+                    "must be a non-empty string"
+                )
+            parent_status = stages[parent_name]
+            if not isinstance(parent_status, Mapping) or not (
+                parent_status.get("completed") is True
+                and parent_status.get("state") == "completed"
+            ):
+                raise ValueError(
+                    f"stage {stage_name} parent_generations references incomplete "
+                    f"parent {parent_name}"
+                )
+            active_generation = parent_status.get("generation_id")
+            if active_generation != expected_generation:
+                raise ValueError(
+                    f"stage {stage_name} parent_generations mismatch for "
+                    f"{parent_name}: recorded={expected_generation!r}, "
+                    f"active={active_generation!r}"
+                )
+
+
+def _validate_runtime_config(config):
+    tensor_parallel_size = config["tensor_parallel_size"]
+    if (
+        isinstance(tensor_parallel_size, bool)
+        or not isinstance(tensor_parallel_size, int)
+        or tensor_parallel_size <= 0
+    ):
+        raise ValueError(
+            "run manifest tensor_parallel_size must be a positive integer"
+        )
+    if not isinstance(config["enforce_eager"], bool):
+        raise ValueError("run manifest enforce_eager must be a boolean")
+    swap_space = config["swap_space"]
+    if (
+        isinstance(swap_space, bool)
+        or not isinstance(swap_space, float)
+        or not math.isfinite(swap_space)
+        or swap_space < 0.0
+    ):
+        raise ValueError(
+            "run manifest swap_space must be a finite non-negative float"
+        )
+    limits = config["limit_mm_per_prompt"]
+    if limits is None:
+        return
+    if not isinstance(limits, Mapping):
+        raise ValueError(
+            "run manifest limit_mm_per_prompt must be an object or null"
+        )
+    for modality, limit in limits.items():
+        if not isinstance(modality, str) or not modality:
+            raise ValueError(
+                "run manifest limit_mm_per_prompt keys must be non-empty strings"
+            )
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
+            raise ValueError(
+                "run manifest limit_mm_per_prompt values must be "
+                "non-negative integers"
+            )
+
+
+def _validated_annotation_paths(config):
+    configured = config["annotation_paths"]
+    resolved = config["annotation_paths_resolved"]
+    if len(configured) != len(resolved):
+        raise ValueError(
+            "run manifest annotation path lists must have equal length"
+        )
+    if len(configured) != len(set(configured)) or len(resolved) != len(
+        set(resolved)
+    ):
+        raise ValueError("run manifest annotation paths contain duplicates")
+    paths = []
+    for value in resolved:
+        path = Path(value)
+        if not path.is_absolute() or str(path.resolve()) != value:
+            raise ValueError(
+                "run manifest resolved annotation paths must be canonical absolute "
+                f"paths, got {value!r}"
+            )
+        paths.append(path)
+    return paths
+
+
+def _selected_annotation_qids(config):
+    dataset = config["dataset"]
+    if dataset != "MMMU":
+        raise ValueError(f"unsupported dataset for annotation provenance: {dataset!r}")
+    all_qids = []
+    for path in _validated_annotation_paths(config):
+        annotations = _load_json(path, "annotation JSON")
+        if not isinstance(annotations, list):
+            raise ValueError(f"annotation JSON {path} must contain a list")
+        for index, annotation in enumerate(annotations):
+            if not isinstance(annotation, Mapping):
+                raise ValueError(
+                    f"annotation JSON {path} record {index} must be an object"
+                )
+            source_qid = annotation.get("question_id")
+            if source_qid is None or not str(source_qid):
+                raise ValueError(
+                    f"annotation JSON {path} record {index} question_id must be "
+                    "non-empty"
+                )
+            all_qids.append(str(source_qid))
+    if not all_qids:
+        raise ValueError("annotation provenance must contain at least one qid")
+    _unique_qids(all_qids, "annotation provenance")
+    num_data = config["num_data"]
+    if num_data == -1 or num_data >= len(all_qids):
+        return all_qids
+    indices = np.linspace(0, len(all_qids) - 1, num_data, dtype=int)
+    return [all_qids[index] for index in indices]
+
+
 def _validate_manifest_integer_fields(config):
     for field in ("N", "M", "K"):
         value = config[field]
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ValueError(f"run manifest {field} must be a positive integer")
     num_data = config["num_data"]
-    if isinstance(num_data, bool) or not isinstance(num_data, int):
-        raise ValueError("run manifest num_data must be an integer")
+    if (
+        isinstance(num_data, bool)
+        or not isinstance(num_data, int)
+        or (num_data != -1 and num_data <= 0)
+    ):
+        raise ValueError("run manifest num_data must be -1 or a positive integer")
 
 
 def load_run(run_directory):
@@ -336,7 +503,6 @@ def load_run(run_directory):
     samples_path = run_directory / _SAMPLES_NAME
     manifest = _load_json(manifest_path, "run manifest")
     records = _load_json(samples_path, "refined samples")
-    final_manifest = _load_json(manifest_path, "run manifest")
     if not isinstance(manifest, Mapping):
         raise ValueError("run manifest must be an object")
     config = manifest.get("config")
@@ -349,6 +515,7 @@ def load_run(run_directory):
             f"{missing}"
         )
     _validate_manifest_integer_fields(config)
+    _validate_runtime_config(config)
     split = config["split"]
     if not isinstance(split, str) or not split:
         raise ValueError("run manifest split must be explicit and non-empty")
@@ -359,27 +526,16 @@ def load_run(run_directory):
         ):
             raise ValueError(f"run manifest {key} must be a non-empty string list")
 
+    _validate_completed_stage_lineage(manifest, manifest_path)
     stage = _validated_refined_stage(manifest, manifest_path)
-    if not isinstance(final_manifest, Mapping):
-        raise ValueError("run manifest must be an object")
-    final_stage = _validated_refined_stage(final_manifest, manifest_path)
-    stage_identity = (
-        stage.get("completed"),
-        stage.get("state"),
-        stage.get("generation_id"),
-    )
-    final_stage_identity = (
-        final_stage.get("completed"),
-        final_stage.get("state"),
-        final_stage.get("generation_id"),
-    )
-    if stage_identity != final_stage_identity:
-        raise ValueError(
-            f"refined stage changed while reading run artifacts at {run_directory}"
-        )
-
     manifest_qids = manifest.get("qids")
     _unique_qids(manifest_qids, "manifest")
+    selected_annotation_qids = _selected_annotation_qids(config)
+    if manifest_qids != selected_annotation_qids:
+        raise ValueError(
+            "annotation selection mismatch: manifest qids must exactly match "
+            "the configured annotation selection in order"
+        )
     if not isinstance(records, list):
         raise ValueError("refined_samples.json must contain a list")
     record_qids = []
@@ -403,6 +559,27 @@ def load_run(run_directory):
         raise ValueError(
             "record qid mismatch: refined_samples.json qids must exactly match "
             "manifest qids in order"
+        )
+    final_manifest = _load_json(manifest_path, "run manifest")
+    if not isinstance(final_manifest, Mapping):
+        raise ValueError("run manifest must be an object")
+    _validate_completed_stage_lineage(final_manifest, manifest_path)
+    final_stage = _validated_refined_stage(final_manifest, manifest_path)
+    stage_identity = (
+        stage.get("completed"),
+        stage.get("state"),
+        stage.get("generation_id"),
+        dict(stage.get("parent_generations", {})),
+    )
+    final_stage_identity = (
+        final_stage.get("completed"),
+        final_stage.get("state"),
+        final_stage.get("generation_id"),
+        dict(final_stage.get("parent_generations", {})),
+    )
+    if stage_identity != final_stage_identity:
+        raise ValueError(
+            f"refined stage changed while reading run artifacts at {run_directory}"
         )
     return {
         "run_directory": str(run_directory),

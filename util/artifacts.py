@@ -40,6 +40,12 @@ def core_run_config(cfg) -> Dict[str, Any]:
     configured_num_data = dataset_cfg.get("num_data", -1)
     if isinstance(configured_num_data, Mapping):
         configured_num_data = configured_num_data.get(split, -1)
+    limit_config = dataset_cfg.get("limit_mm_per_prompt", None)
+    normalized_limit_config = None
+    if limit_config is not None:
+        normalized_limit_config = {
+            str(name): int(limit) for name, limit in limit_config.items()
+        }
 
     return {
         "dataset": str(dataset_cfg.dataset_name),
@@ -53,6 +59,10 @@ def core_run_config(cfg) -> Dict[str, Any]:
         "annotation_paths": configured_annotation_paths,
         "annotation_paths_resolved": resolved_annotation_paths,
         "num_data": int(configured_num_data),
+        "tensor_parallel_size": int(model_cfg.tensor_parallel_size),
+        "enforce_eager": bool(model_cfg.enforce_eager),
+        "swap_space": float(model_cfg.swap_space),
+        "limit_mm_per_prompt": normalized_limit_config,
     }
 
 
@@ -62,6 +72,7 @@ def create_manifest(cfg, qids: Iterable[Any]) -> Dict[str, Any]:
         "config": core_run_config(cfg),
         "qids": [str(qid) for qid in qids],
         "stages": {stage: {"completed": False} for stage in STAGES},
+        "generation_history": {stage: [] for stage in STAGES},
     }
 
 
@@ -112,6 +123,60 @@ def _require_generation_id(generation_id: str, label: str) -> str:
     if not isinstance(generation_id, str) or not generation_id:
         raise ValueError(f"{label} generation_id must be a non-empty string")
     return generation_id
+
+
+def _validated_generation_history(manifest: Dict[str, Any]) -> Dict[str, list]:
+    is_legacy = "generation_history" not in manifest
+    if is_legacy:
+        history = {stage: [] for stage in STAGES}
+        manifest["generation_history"] = history
+    else:
+        history = manifest["generation_history"]
+    if not isinstance(history, Mapping):
+        raise ValueError("manifest generation_history must be an object")
+    if set(history) != set(STAGES):
+        raise ValueError(
+            "manifest generation_history must contain exactly "
+            f"{list(STAGES)}"
+        )
+
+    validated = {}
+    for stage in STAGES:
+        stage_history = history[stage]
+        if not isinstance(stage_history, list):
+            raise ValueError(
+                f"manifest generation_history[{stage!r}] must be a list"
+            )
+        if not all(isinstance(value, str) and value for value in stage_history):
+            raise ValueError(
+                f"manifest generation_history[{stage!r}] must contain "
+                "non-empty strings"
+            )
+        if len(stage_history) != len(set(stage_history)):
+            raise ValueError(
+                f"manifest generation_history[{stage!r}] contains duplicates"
+            )
+        validated[stage] = stage_history
+
+    stages = manifest.get("stages")
+    if not isinstance(stages, Mapping):
+        raise ValueError("manifest stages must be an object")
+    for stage in STAGES:
+        status = stages.get(stage)
+        if not isinstance(status, Mapping):
+            continue
+        visible_generation = status.get("generation_id")
+        if visible_generation is None:
+            continue
+        _require_generation_id(visible_generation, f"stage {stage}")
+        if visible_generation not in validated[stage]:
+            if not is_legacy:
+                raise ValueError(
+                    "manifest generation_history is missing visible "
+                    f"generation {visible_generation!r} for stage {stage}"
+                )
+            validated[stage].append(visible_generation)
+    return validated
 
 
 def _validated_parent_generations(
@@ -181,6 +246,7 @@ def mark_stage_started(
     path = Path(path)
     with _manifest_lock(path):
         manifest = load_manifest(path)
+        generation_history = _validated_generation_history(manifest)
         validated_parents = _validated_parent_generations(
             manifest,
             stage,
@@ -191,6 +257,11 @@ def mark_stage_started(
             raise ValueError(
                 f"stage {stage} generation_id {generation_id!r} is already active"
             )
+        if generation_id in generation_history[stage]:
+            raise ValueError(
+                f"stage {stage} generation_id {generation_id!r} was previously used"
+            )
+        generation_history[stage].append(generation_id)
         stage_status.clear()
         stage_status.update(
             {

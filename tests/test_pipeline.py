@@ -108,7 +108,14 @@ def snapshot_dataset(cfg, sample=None):
                     "completed": True,
                     "state": "completed",
                     "generation_id": f"{parent}-fixture-generation",
+                    "parent_generations": {
+                        ancestor: f"{ancestor}-fixture-generation"
+                        for ancestor in STAGE_DEPENDENCIES[parent]
+                    },
                 }
+            )
+            manifest["generation_history"][parent].append(
+                f"{parent}-fixture-generation"
             )
         write_manifest(manifest_path, manifest)
     parent_generations = {
@@ -511,6 +518,11 @@ class PipelineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = make_config(
                 Path(tmp), split="dev", n=1, m=1, k=1
+            )
+            cfg.dataset_cfg.dataset_name = "MMMU"
+            (Path(tmp) / "annotations.json").write_text(
+                json.dumps([{"question_id": "q0"}]),
+                encoding="utf-8",
             )
             run_multi_stage(
                 cfg,
