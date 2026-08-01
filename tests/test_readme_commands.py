@@ -186,6 +186,28 @@ class ReadmeCommandTests(unittest.TestCase):
         self.assertEqual("2", option_value(command, "runner.M"))
         self.assertEqual("8", option_value(command, "runner.K"))
 
+    def test_smoke_and_full_commands_use_cached_huggingface_offline_mode(self):
+        offline_commands = [
+            command
+            for command in self.run_commands
+            if "runner.mode=multi_stage" in command
+            and (
+                "runner.output_dir=output/smoke" in command
+                or "dataset.num_data=-1" in command
+            )
+        ]
+        self.assertEqual(3, len(offline_commands))
+        for command in offline_commands:
+            env_index = command.index("env")
+            python_index = command.index(PYTHON)
+            for assignment in ("HF_HUB_OFFLINE=1", "TRANSFORMERS_OFFLINE=1"):
+                self.assertEqual(1, command.count(assignment), command)
+                self.assertGreater(command.index(assignment), env_index, command)
+                self.assertLess(command.index(assignment), python_index, command)
+
+        self.assertIn("already cached", self.readme)
+        self.assertIn("first model download", self.readme)
+
     def test_full_dev_and_validation_commands_have_exact_profiles(self):
         full_commands = [
             command

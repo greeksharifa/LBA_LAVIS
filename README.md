@@ -53,8 +53,12 @@ This exact smoke profile uses physical GPU 6, tensor parallelism 1, and one
 question from MMMU's `val` split. Its `output/smoke` root is intentional: a
 one-qid manifest must never collide with a full dev run in `output`.
 
+The smoke and full commands assume the model is already cached in `HF_HOME`.
+For the first model download, remove `HF_HUB_OFFLINE=1` and
+`TRANSFORMERS_OFFLINE=1`, then restore them after the cache is populated.
+
 ```bash
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/smoke
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/smoke
 ```
 
 ### Full MMMU dev and validation runs
@@ -65,8 +69,8 @@ questions). `dataset.num_data=-1` selects the entire configured split. The two
 full commands use physical GPUs 5, 6, 7, and 8 with tensor parallelism 4.
 
 ```bash
-/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
-/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=test dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
+/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
+/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=test dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
 ```
 
 ## Run namespace and artifact guards
