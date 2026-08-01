@@ -3,7 +3,8 @@
 import json
 import os
 import tempfile
-from collections import OrderedDict
+from collections import Counter, OrderedDict
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -19,6 +20,7 @@ from util.artifacts import (
     create_manifest,
     load_manifest,
     mark_stage_complete,
+    mark_stage_started,
     validate_manifest,
     write_manifest,
 )
@@ -28,6 +30,13 @@ from util.utils import IndexSampler, data_print, json_default
 
 
 STAGE_ORDER = ("subq", "suba", "base", "refined")
+OUTPUT_KEYS = {
+    "subq": ("subq_list", "conf_subq"),
+    "suba": ("suba_list", "conf_suba"),
+    "base": ("base_answer", "conf_base"),
+    "refined": ("refined_answer_list", "conf_refined"),
+}
+CONFIDENCE_KEYS = {"seq_ppl", "token_min_prob"}
 
 
 def write_json_atomic(path: Path, value) -> None:
@@ -108,6 +117,93 @@ def _refined_records(samples, split):
     return records
 
 
+def _validate_formatted_outputs(formatted, sample_qids, prompt_qids, mode, n):
+    if not isinstance(formatted, Mapping):
+        raise ValueError("formatted schema must be an object keyed by qid")
+
+    expected_qids = set(sample_qids)
+    actual_qids = set(formatted)
+    if actual_qids != expected_qids:
+        raise ValueError(
+            "formatted qid mismatch: "
+            f"missing={sorted(expected_qids - actual_qids)}, "
+            f"unexpected={sorted(actual_qids - expected_qids)}"
+        )
+
+    value_key, confidence_key = OUTPUT_KEYS[mode]
+    prompt_counts = Counter(prompt_qids)
+    for qid in sample_qids:
+        entry = formatted[qid]
+        if not isinstance(entry, Mapping) or set(entry) != {value_key, confidence_key}:
+            actual_keys = (
+                sorted(entry) if isinstance(entry, Mapping) else type(entry).__name__
+            )
+            raise ValueError(
+                f"formatted schema mismatch for qid {qid}: "
+                f"expected {[value_key, confidence_key]}, got {actual_keys}"
+            )
+        confidence = entry[confidence_key]
+        if not isinstance(confidence, Mapping) or set(confidence) != CONFIDENCE_KEYS:
+            actual_keys = (
+                sorted(confidence)
+                if isinstance(confidence, Mapping)
+                else type(confidence).__name__
+            )
+            raise ValueError(
+                f"formatted schema mismatch for qid {qid}: expected confidence "
+                f"keys {sorted(CONFIDENCE_KEYS)}, got {actual_keys}"
+            )
+
+        expected_count = prompt_counts[qid]
+        if mode in ("suba", "refined"):
+            values = entry[value_key]
+            actual_count = len(values) if isinstance(values, list) else 1
+            if not isinstance(values, list) or actual_count != expected_count:
+                raise ValueError(
+                    f"formatted count mismatch for qid {qid}: expected "
+                    f"{expected_count}, got {actual_count} for {value_key}"
+                )
+            for confidence_name, confidence_values in confidence.items():
+                actual_count = (
+                    len(confidence_values)
+                    if isinstance(confidence_values, list)
+                    else 1
+                )
+                if (
+                    not isinstance(confidence_values, list)
+                    or actual_count != expected_count
+                ):
+                    raise ValueError(
+                        f"formatted count mismatch for qid {qid}: expected "
+                        f"{expected_count}, got {actual_count} for "
+                        f"{confidence_key}.{confidence_name}"
+                    )
+        else:
+            if expected_count != 1:
+                raise ValueError(
+                    f"formatted count mismatch for qid {qid}: expected one "
+                    f"{mode} prompt, got {expected_count}"
+                )
+            if mode == "subq":
+                values = entry[value_key]
+                actual_count = len(values) if isinstance(values, list) else 1
+                if not isinstance(values, list) or actual_count != int(n):
+                    raise ValueError(
+                        f"formatted count mismatch for qid {qid}: expected "
+                        f"{int(n)}, got {actual_count} for {value_key}"
+                    )
+            elif not isinstance(entry[value_key], str):
+                raise ValueError(
+                    f"formatted schema mismatch for qid {qid}: "
+                    f"{value_key} must be a string"
+                )
+            if any(isinstance(value, list) for value in confidence.values()):
+                raise ValueError(
+                    f"formatted schema mismatch for qid {qid}: "
+                    f"{confidence_key} values must be scalars"
+                )
+
+
 def run_stage(
     cfg,
     model,
@@ -155,12 +251,27 @@ def run_stage(
             )
             qids.append(qid)
 
-    manifest_path = _prepare_manifest(cfg, list(samples), output_dir)
+    sample_qids = list(samples)
+    manifest_path = _prepare_manifest(cfg, sample_qids, output_dir)
+    started_manifest = mark_stage_started(manifest_path, mode)
+    generation_id = started_manifest["stages"][mode]["generation_id"]
     logger.info("Stage %s: prepared %d prompts", mode, len(prompts))
     if prompts:
         logger.info("Stage %s first prompt: %s", mode, data_print(prompts[0]))
     outputs = model.generate(prompts)
+    if len(outputs) != len(prompts):
+        raise ValueError(
+            f"generated output count mismatch: expected {len(prompts)}, "
+            f"got {len(outputs)}"
+        )
     formatted = output_formatter(mode, outputs, qids, cfg.runner_cfg.N)
+    _validate_formatted_outputs(
+        formatted,
+        sample_qids,
+        qids,
+        mode,
+        cfg.runner_cfg.N,
+    )
 
     for qid, output_data in formatted.items():
         if qid in samples:
@@ -171,7 +282,7 @@ def run_stage(
     if mode == "refined":
         records = _refined_records(samples.values(), str(cfg.dataset_cfg.split))
         write_json_atomic(output_dir / "refined_samples.json", records)
-    mark_stage_complete(manifest_path, mode)
+    mark_stage_complete(manifest_path, mode, generation_id)
     logger.info("Saved %s outputs to %s", mode, output_path)
     return formatted
 

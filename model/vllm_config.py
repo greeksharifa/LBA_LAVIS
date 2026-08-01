@@ -51,13 +51,17 @@ def validate_tensor_parallel_size(
     visible_device_count: Optional[Union[int, Callable[[], int]]] = None,
 ) -> int:
     """Fail before model construction if TP does not match visible CUDA GPUs."""
+    tensor_parallel_size = int(tensor_parallel_size)
+    if tensor_parallel_size < 1:
+        raise ValueError("vLLM tensor_parallel_size must be at least 1")
     if visible_device_count is None:
         visible_count = int(_cuda_device_count())
     elif callable(visible_device_count):
         visible_count = int(visible_device_count())
     else:
         visible_count = int(visible_device_count)
-    tensor_parallel_size = int(tensor_parallel_size)
+    if visible_count < 1:
+        raise ValueError("vLLM visible CUDA device count must be at least 1")
     if tensor_parallel_size != visible_count:
         raise ValueError(
             "vLLM tensor_parallel_size="

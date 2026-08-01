@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from omegaconf import OmegaConf
@@ -25,6 +26,42 @@ class VllmConfigTests(unittest.TestCase):
         )
 
         self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_importing_mutable_registry_does_not_import_vllm_or_torch(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys; from model import MODEL_REGISTRY; "
+                    "assert 'vllm' not in sys.modules; "
+                    "assert 'torch' not in sys.modules"
+                ),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_mutable_registry_extensions_are_used_by_model_factory(self):
+        from model import MODEL_REGISTRY, get_model
+
+        class FixtureModel:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+        cfg = SimpleNamespace(
+            model_cfg=SimpleNamespace(model_name="fixture-model")
+        )
+        MODEL_REGISTRY["fixture-model"] = FixtureModel
+        try:
+            model = get_model(cfg)
+            self.assertIsInstance(model, FixtureModel)
+            self.assertIs(cfg, model.cfg)
+        finally:
+            del MODEL_REGISTRY["fixture-model"]
 
     def test_environment_defaults_preserve_user_overrides(self):
         from model.vllm_config import configure_vllm_environment
@@ -89,6 +126,21 @@ class VllmConfigTests(unittest.TestCase):
             4,
             validate_tensor_parallel_size(4, visible_device_count=4),
         )
+
+    def test_tensor_parallel_preflight_rejects_non_positive_tp_before_gpu_query(self):
+        from model.vllm_config import validate_tensor_parallel_size
+
+        with self.assertRaisesRegex(ValueError, "tensor_parallel_size must be at least 1"):
+            validate_tensor_parallel_size(
+                0,
+                visible_device_count=lambda: self.fail("GPU count must not be queried"),
+            )
+
+    def test_tensor_parallel_preflight_rejects_no_visible_gpus(self):
+        from model.vllm_config import validate_tensor_parallel_size
+
+        with self.assertRaisesRegex(ValueError, "visible CUDA device count must be at least 1"):
+            validate_tensor_parallel_size(1, visible_device_count=0)
 
 
 if __name__ == "__main__":

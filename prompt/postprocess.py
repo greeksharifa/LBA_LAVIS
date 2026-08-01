@@ -198,6 +198,14 @@ def format_vllm_outputs(
                     target_dict[key] = copy.deepcopy(value)
         
         update_recursive(merged, result_item)
-    
-    
+
+    if mode in ("suba", "refined"):
+        for result in merged.values():
+            if not isinstance(result[key_name], list):
+                result[key_name] = [result[key_name]]
+            confidence = result[f"conf_{mode}"]
+            for confidence_name, value in confidence.items():
+                if not isinstance(value, list):
+                    confidence[confidence_name] = [value]
+
     return merged

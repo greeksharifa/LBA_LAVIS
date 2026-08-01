@@ -1,7 +1,9 @@
 import json
+import math
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from tests.test_artifacts import make_config
@@ -23,6 +25,26 @@ class FakeModel:
         return list(prompts)
 
 
+class VllmOutputModel(FakeModel):
+    def __init__(self, output_texts):
+        super().__init__()
+        self.output_texts = output_texts
+
+    def generate(self, prompts):
+        return [fake_vllm_output(text) for text in self.output_texts]
+
+
+def fake_vllm_output(text):
+    token_id = 7
+    completion = SimpleNamespace(
+        text=text,
+        cumulative_logprob=-0.25,
+        token_ids=[token_id],
+        logprobs=[{token_id: SimpleNamespace(logprob=math.log(0.8))}],
+    )
+    return SimpleNamespace(outputs=[completion])
+
+
 def fixture_sample():
     return {
         "qid": "q0",
@@ -42,18 +64,147 @@ def fixture_sample():
 
 def fake_formatter(mode, outputs, qids, n):
     values = {
-        "subq": {"subq_list": ["What animal?"], "conf_subq": {"token_min_prob": 0.5}},
-        "suba": {"suba_list": ["A cat."], "conf_suba": {"token_min_prob": [0.75]}},
-        "base": {"base_answer": "dog", "conf_base": {"token_min_prob": 0.25}},
+        "subq": {
+            "subq_list": ["What animal?"],
+            "conf_subq": {"seq_ppl": 2.0, "token_min_prob": 0.5},
+        },
+        "suba": {
+            "suba_list": ["A cat."],
+            "conf_suba": {"seq_ppl": [1.5], "token_min_prob": [0.75]},
+        },
+        "base": {
+            "base_answer": "dog",
+            "conf_base": {"seq_ppl": 2.0, "token_min_prob": 0.25},
+        },
         "refined": {
             "refined_answer_list": ["cat"],
-            "conf_refined": {"token_min_prob": [0.95]},
+            "conf_refined": {"seq_ppl": [1.25], "token_min_prob": [0.95]},
         },
     }
     return {"q0": values[mode]}
 
 
 class PipelineTests(unittest.TestCase):
+    def test_real_formatter_keeps_singleton_suba_and_refined_values_as_lists(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for mode in ("suba", "refined"):
+                with self.subTest(mode=mode):
+                    cfg = make_config(root / mode, n=1, m=1, k=1).for_stage(mode)
+                    result = run_stage(
+                        cfg,
+                        VllmOutputModel(["cat"]),
+                        dataset_loader=lambda stage_cfg: [fixture_sample()],
+                        prompt_builder=lambda mode, sample, stage_cfg, sampler: ["only"],
+                    )
+
+                    value_key = f"{mode}_list" if mode == "suba" else "refined_answer_list"
+                    confidence = result["q0"][f"conf_{mode}"]
+                    self.assertEqual(["cat"], result["q0"][value_key])
+                    self.assertEqual(1, len(confidence["seq_ppl"]))
+                    self.assertEqual([0.8], confidence["token_min_prob"])
+
+    def test_missing_generated_output_preserves_artifact_and_marks_rerun_incomplete(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage("base")
+            kwargs = {
+                "dataset_loader": lambda stage_cfg: [fixture_sample()],
+                "prompt_builder": lambda mode, sample, stage_cfg, sampler: "base",
+            }
+            run_stage(cfg, VllmOutputModel(["cat"]), **kwargs)
+            output_path = get_output_dir(cfg) / get_output_filename(cfg)
+            successful_artifact = output_path.read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "output count.*1.*0"):
+                run_stage(cfg, VllmOutputModel([]), **kwargs)
+
+            self.assertEqual(successful_artifact, output_path.read_bytes())
+            manifest = json.loads(
+                (get_output_dir(cfg) / MANIFEST_FILENAME).read_text()
+            )
+            self.assertFalse(manifest["stages"]["base"]["completed"])
+            self.assertEqual("running", manifest["stages"]["base"]["state"])
+            self.assertTrue(manifest["stages"]["base"]["generation_id"])
+
+    def test_rerun_crash_exposes_running_manifest_and_leaves_incomplete(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage("base")
+            kwargs = {
+                "dataset_loader": lambda stage_cfg: [fixture_sample()],
+                "prompt_builder": lambda mode, sample, stage_cfg, sampler: "base",
+            }
+            run_stage(cfg, VllmOutputModel(["cat"]), **kwargs)
+            manifest_path = get_output_dir(cfg) / MANIFEST_FILENAME
+
+            class CrashingModel(FakeModel):
+                def generate(self, prompts):
+                    running = json.loads(manifest_path.read_text())["stages"]["base"]
+                    self.seen_state = running
+                    raise RuntimeError("simulated generation crash")
+
+            model = CrashingModel()
+            with self.assertRaisesRegex(RuntimeError, "simulated generation crash"):
+                run_stage(cfg, model, **kwargs)
+
+            self.assertFalse(model.seen_state["completed"])
+            self.assertEqual("running", model.seen_state["state"])
+            saved = json.loads(manifest_path.read_text())["stages"]["base"]
+            self.assertFalse(saved["completed"])
+            self.assertEqual("running", saved["state"])
+
+    def test_formatted_qids_and_schema_must_be_exact(self):
+        from pipeline import run_stage
+
+        invalid_results = (
+            {
+                "other": {
+                    "base_answer": "cat",
+                    "conf_base": {"seq_ppl": 1.0, "token_min_prob": 0.8},
+                }
+            },
+            {"q0": {"base_answer": "cat"}},
+        )
+        for invalid in invalid_results:
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as tmp:
+                cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage("base")
+                with self.assertRaisesRegex(ValueError, "formatted (qid|schema)"):
+                    run_stage(
+                        cfg,
+                        FakeModel(),
+                        dataset_loader=lambda stage_cfg: [fixture_sample()],
+                        prompt_builder=lambda mode, sample, stage_cfg, sampler: "base",
+                        output_formatter=lambda mode, outputs, qids, n: invalid,
+                    )
+
+    def test_formatted_list_counts_must_match_prompt_occurrences(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=2, m=1, k=1).for_stage("suba")
+            invalid = {
+                "q0": {
+                    "suba_list": ["only one"],
+                    "conf_suba": {
+                        "seq_ppl": [1.0],
+                        "token_min_prob": [0.8],
+                    },
+                }
+            }
+            with self.assertRaisesRegex(ValueError, "formatted count.*q0.*2.*1"):
+                run_stage(
+                    cfg,
+                    FakeModel(),
+                    dataset_loader=lambda stage_cfg: [fixture_sample()],
+                    prompt_builder=lambda mode, sample, stage_cfg, sampler: ["a", "b"],
+                    output_formatter=lambda mode, outputs, qids, n: invalid,
+                )
+
     def test_new_manifest_is_validated_before_stage_generation(self):
         from pipeline import run_stage
         from util.artifacts import validate_manifest
@@ -108,10 +259,10 @@ class PipelineTests(unittest.TestCase):
                 stage_cfg = cfg.for_stage(stage)
                 self.assertTrue((run_dir / get_output_filename(stage_cfg)).is_file())
             manifest = json.loads((run_dir / MANIFEST_FILENAME).read_text())
-            self.assertEqual(
-                {stage: {"completed": True} for stage in stage_modes},
-                manifest["stages"],
-            )
+            for stage in stage_modes:
+                self.assertTrue(manifest["stages"][stage]["completed"])
+                self.assertEqual("completed", manifest["stages"][stage]["state"])
+                self.assertTrue(manifest["stages"][stage]["generation_id"])
 
     def test_refined_stage_writes_stable_sample_records(self):
         from pipeline import run_stage
@@ -140,7 +291,10 @@ class PipelineTests(unittest.TestCase):
                         "base_answer": "dog",
                         "conf_base": 0.25,
                         "refined_answer_list": ["cat"],
-                        "conf_refined": {"token_min_prob": [0.95]},
+                        "conf_refined": {
+                            "seq_ppl": [1.25],
+                            "token_min_prob": [0.95],
+                        },
                     }
                 ],
                 records,

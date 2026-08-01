@@ -2,6 +2,7 @@ import fcntl
 import json
 import os
 import tempfile
+import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping
@@ -80,14 +81,50 @@ def _manifest_lock(path: Path):
             fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
 
 
-def mark_stage_complete(path: Path, stage: str) -> Dict[str, Any]:
-    """Mark one stage complete and persist the updated manifest atomically."""
+def mark_stage_started(
+    path: Path,
+    stage: str,
+    generation_id: str = None,
+) -> Dict[str, Any]:
+    """Atomically mark a stage as the active, incomplete generation."""
     if stage not in STAGES:
         raise ValueError(f"unknown manifest stage: {stage}")
     path = Path(path)
     with _manifest_lock(path):
         manifest = load_manifest(path)
-        manifest.setdefault("stages", {}).setdefault(stage, {})["completed"] = True
+        stage_status = manifest.setdefault("stages", {}).setdefault(stage, {})
+        stage_status.update(
+            {
+                "completed": False,
+                "state": "running",
+                "generation_id": generation_id or uuid.uuid4().hex,
+            }
+        )
+        write_manifest(path, manifest)
+    return manifest
+
+
+def mark_stage_complete(
+    path: Path,
+    stage: str,
+    generation_id: str = None,
+) -> Dict[str, Any]:
+    """Mark one stage complete if it is still the requested generation."""
+    if stage not in STAGES:
+        raise ValueError(f"unknown manifest stage: {stage}")
+    path = Path(path)
+    with _manifest_lock(path):
+        manifest = load_manifest(path)
+        stage_status = manifest.setdefault("stages", {}).setdefault(stage, {})
+        active_generation_id = stage_status.get("generation_id")
+        if generation_id is not None and active_generation_id != generation_id:
+            raise ValueError(
+                f"stage {stage} generation changed: active={active_generation_id!r}, "
+                f"completed={generation_id!r}"
+            )
+        stage_status.update({"completed": True, "state": "completed"})
+        if generation_id is not None:
+            stage_status["generation_id"] = generation_id
         write_manifest(path, manifest)
     return manifest
 
