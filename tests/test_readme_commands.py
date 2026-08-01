@@ -123,6 +123,18 @@ class ReadmeCommandTests(unittest.TestCase):
         self.assertIn("transformers==4.55.2", requirements)
         self.assertIn("omegaconf", requirements)
 
+    def test_readme_documents_zero_cpu_swap_for_greedy_qwen_mmmu(self):
+        for expected in (
+            "Qwen2.5-VL MMMU",
+            "greedy",
+            "sampling_n=1",
+            "swap_space=0",
+            "TP=4",
+            "64 GiB",
+            "RAM exhaustion",
+        ):
+            self.assertIn(expected, self.readme)
+
     def test_every_documented_main_command_resolves_through_cpu_only_config(self):
         from config.configs import Config
 

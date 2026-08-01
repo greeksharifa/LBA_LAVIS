@@ -8,6 +8,9 @@ model:
   # cache_dir: /model/Qwen/
   # device_map: "auto"
   use_flash_attn_2: True
+  # Greedy evaluation uses n=1 and never swaps request state. Reserving the
+  # global default (16 GiB per TP rank) only exhausts host RAM.
+  swap_space: 0
   # batch_size: 8
   # tensor_parallel_size: 2
 

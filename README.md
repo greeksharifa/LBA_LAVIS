@@ -24,6 +24,10 @@ commands repeat those defaults inside the wrapper's `-- env` section for
 reproducibility, while `model.enforce_eager=true` explicitly keeps eager
 execution enabled.
 
+The verified Qwen2.5-VL MMMU profile uses greedy generation with
+`sampling_n=1`, so it sets CPU KV `swap_space=0`. This avoids the default
+16 GiB-per-GPU swap reservation (64 GiB at TP=4) and prevents RAM exhaustion.
+
 ## Available models and benchmarks
 
 - Models: `qwen2.5-vl-7b`, `qwen3-vl-8b`

@@ -171,6 +171,11 @@ class VllmConfigTests(unittest.TestCase):
         self.assertEqual(7, dataset_cfg.limit_mm_per_prompt.image)
         self.assertEqual(0, dataset_cfg.limit_mm_per_prompt.video)
 
+    def test_qwen25_greedy_eval_disables_cpu_swap_reservation(self):
+        model_cfg = OmegaConf.load("config/models/qwen2.5-vl-7b.yaml")["model"]
+
+        self.assertEqual(0, model_cfg.swap_space)
+
     def test_zero_count_dummy_video_patch_skips_the_vllm_allocation(self):
         from model.vllm_config import patch_zero_count_dummy_video_allocation
 
