@@ -5,6 +5,7 @@ import math
 import os
 import tempfile
 from collections.abc import Mapping, Sequence
+from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
@@ -172,15 +173,11 @@ def apply_thresholds(samples, tau1, tau2):
     answers = []
     correct = []
     for sample in samples:
-        refined_margin = sample["base_confidence"] + tau2
-        clears_refined_margin = sample["refined_confidence"] >= refined_margin
-        if not clears_refined_margin:
-            clears_refined_margin = math.isclose(
-                sample["refined_confidence"],
-                refined_margin,
-                rel_tol=1e-12,
-                abs_tol=1e-12,
-            )
+        refined_confidence = Decimal(str(sample["refined_confidence"]))
+        refined_margin = Decimal(str(sample["base_confidence"])) + Decimal(
+            str(tau2)
+        )
+        clears_refined_margin = refined_confidence >= refined_margin
         use_refined = (
             sample["base_confidence"] < tau1
             and clears_refined_margin

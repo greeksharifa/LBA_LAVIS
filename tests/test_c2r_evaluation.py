@@ -121,6 +121,44 @@ class ConfidenceTests(unittest.TestCase):
 
 
 class ThresholdTests(unittest.TestCase):
+    def test_gate_switches_at_exact_decimal_margin_boundary(self):
+        samples = prepare_samples(
+            [
+                record(
+                    "boundary",
+                    gold="refined",
+                    base_conf=0.4,
+                    refined=("refined",),
+                    refined_conf=(0.6,),
+                )
+            ],
+            "token_min_prob",
+            scorer=exact_scorer,
+        )
+
+        result = apply_thresholds(samples, tau1=0.8, tau2=0.2)
+
+        self.assertEqual([True], result["switched"])
+
+    def test_gate_rejects_value_strictly_below_decimal_margin_boundary(self):
+        samples = prepare_samples(
+            [
+                record(
+                    "below-boundary",
+                    gold="base",
+                    base_conf=0.4,
+                    refined=("refined",),
+                    refined_conf=(0.5999999999999,),
+                )
+            ],
+            "token_min_prob",
+            scorer=exact_scorer,
+        )
+
+        result = apply_thresholds(samples, tau1=0.8, tau2=0.2)
+
+        self.assertEqual([False], result["switched"])
+
     def test_gate_rule_obeys_base_short_circuit_and_refined_margin(self):
         samples = prepare_samples(
             [
