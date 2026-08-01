@@ -144,6 +144,87 @@ class MMMUOpenTests(unittest.TestCase):
                 self.assertEqual(0, dataset.get_score(prediction, "4", "open_ended"))
                 self.assertEqual(1, dataset.get_score(prediction, "5", "open_ended"))
 
+    def test_last_answer_line_wins_even_when_final_answer_is_longer(self):
+        dataset = make_adapter()
+        prediction = (
+            "The answer is 4\n"
+            "Therefore, the final answer is New York City."
+        )
+
+        self.assertEqual(0, dataset.get_score(prediction, "4", "open_ended"))
+        self.assertEqual(
+            1,
+            dataset.get_score(prediction, "New York City", "open_ended"),
+        )
+
+    def test_adapter_canonicalizes_stringified_open_answer_alternatives(self):
+        source_answers = (
+            "['$MgS$', 'MgS']",
+            "['Tampa', 'Florida']",
+            "['24/7', '3.429']",
+            "['Tampa', broken]",
+        )
+        expected_answers = (
+            ["$mgs$", "mgs"],
+            ["tampa", "florida"],
+            ["24/7", "3.429"],
+            "['tampa', broken]",
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            image_path = root / "image.png"
+            Image.new("RGB", (1, 1)).save(image_path)
+            annotation_path = root / "annotations.json"
+            annotation_path.write_text(
+                json.dumps(
+                    [
+                        {
+                            "answer": answer,
+                            "image_path_list": [str(image_path)],
+                            "options": [],
+                            "question": f"Question {index}? <image 1>",
+                            "question_id": f"open-{index}",
+                            "question_type": "open",
+                            "subfield": "Fixture",
+                        }
+                        for index, answer in enumerate(source_answers)
+                    ]
+                )
+            )
+            dataset = make_adapter()
+
+            dataset.load_annotation([annotation_path])
+
+            try:
+                self.assertEqual(
+                    list(expected_answers),
+                    [ann["gt_ans"] for ann in dataset.annotation],
+                )
+            finally:
+                for ann in dataset.annotation:
+                    for image in ann["image_list"]:
+                        image.close()
+
+    def test_open_scorer_accepts_each_canonical_answer_alternative(self):
+        dataset = make_adapter()
+
+        for prediction, gold in (
+            ("MgS", ["$mgs$", "mgs"]),
+            ("Tampa", ["tampa", "florida"]),
+            ("3.429", ["24/7", "3.429"]),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    1,
+                    dataset.get_score(prediction, gold, "open_ended"),
+                )
+
+        self.assertEqual(
+            0,
+            dataset.get_score("Tampa", "['tampa', broken]", "open_ended"),
+        )
+
     def test_multiple_choice_remains_exact_normalized_option_letter_match(self):
         dataset = make_adapter()
 

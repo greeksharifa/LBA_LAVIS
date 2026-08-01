@@ -1,3 +1,4 @@
+import ast
 import json
 
 from typing import List
@@ -69,6 +70,20 @@ class MMMU(BaseDataset):
             return "open_ended"
         return question_type
 
+    @staticmethod
+    def canonicalize_open_answer(answer):
+        if not isinstance(answer, str):
+            return answer
+        try:
+            parsed = ast.literal_eval(answer)
+        except (SyntaxError, ValueError):
+            return answer
+        if isinstance(parsed, list) and all(
+            isinstance(alternative, str) for alternative in parsed
+        ):
+            return parsed
+        return answer
+
     def load_annotation(self, ann_paths: List[Path]):
         for ann_path in ann_paths:
             with ann_path.open("r", encoding="utf-8") as handle:
@@ -93,16 +108,19 @@ class MMMU(BaseDataset):
                 if len(images) == 0:
                     import pdb; pdb.set_trace()
                 
-                gt_ans = sample['answer']
+                question_type = self.canonicalize_question_type(
+                    sample["question_type"]
+                )
+                gt_ans = sample["answer"]
+                if question_type == "open_ended":
+                    gt_ans = self.canonicalize_open_answer(gt_ans)
 
                 ann = {
                     "image_list": images,
                     "vpath": image_path_list,
                     "main_q": question,
                     "qid": sample['question_id'],
-                    "question_type": self.canonicalize_question_type(
-                        sample["question_type"]
-                    ),
+                    "question_type": question_type,
                     "candidate_list": sample['options'],
                     "gt_ans": gt_ans,
                     "type": sample['subfield'], # sample["topic_difficulty"]

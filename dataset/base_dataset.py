@@ -129,7 +129,9 @@ class BaseDataset(ABC):
         if ann["question_type"] in ("multiple_choice", "multiple-choice"):
             gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
         
-        if self.cfg.dataset_cfg.vqa_acc:
+        if isinstance(gt_ans, list):
+            gt_ans = [g.strip().lower() for g in gt_ans]
+        elif self.cfg.dataset_cfg.vqa_acc:
             gt_ans = [g.strip().lower() for g in gt_ans]
         else:
             gt_ans = gt_ans.strip().lower()

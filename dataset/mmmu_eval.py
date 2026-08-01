@@ -56,10 +56,11 @@ def _key_subresponses(response: str) -> List[str]:
             for candidate in candidates
             if candidate not in ("", ":", ",", ".", ";", "!", "?", "'")
         ]
-        key_responses.extend(candidates)
+        if candidates:
+            key_responses = candidates
 
     if key_responses:
-        # On equal-length tails, prefer the later (final) conclusion.
+        # Choose the shortest tail within the final answer-bearing subresponse.
         return [min(reversed(key_responses), key=len)]
     return [response]
 
