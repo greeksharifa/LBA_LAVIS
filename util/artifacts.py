@@ -17,15 +17,30 @@ def core_run_config(cfg) -> Dict[str, Any]:
     runner_cfg = cfg.runner_cfg
     dataset_cfg = cfg.dataset_cfg
     model_cfg = cfg.model_cfg
+    split = str(dataset_cfg.split)
+    configured_annotation_paths = [
+        str(path) for path in dataset_cfg.ann_paths[split]
+    ]
+    root_dir = Path(str(dataset_cfg.root_dir))
+    resolved_annotation_paths = [
+        str((root_dir / path).resolve()) for path in configured_annotation_paths
+    ]
+    configured_num_data = dataset_cfg.get("num_data", -1)
+    if isinstance(configured_num_data, Mapping):
+        configured_num_data = configured_num_data.get(split, -1)
+
     return {
         "dataset": str(dataset_cfg.dataset_name),
-        "split": str(dataset_cfg.split),
+        "split": split,
         "model_name": str(model_cfg.model_name),
         "model_id": model_cfg.get("model_id", None),
         "N": int(runner_cfg.N),
         "M": int(runner_cfg.M),
         "K": int(runner_cfg.K),
         "confidence_type": str(runner_cfg.confidence_type),
+        "annotation_paths": configured_annotation_paths,
+        "annotation_paths_resolved": resolved_annotation_paths,
+        "num_data": int(configured_num_data),
     }
 
 

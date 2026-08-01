@@ -10,6 +10,7 @@ from omegaconf import OmegaConf
 from config.configs import Config
 from dataset.base_dataset import BaseDataset
 from util.artifacts import (
+    core_run_config,
     create_manifest,
     mark_stage_complete,
     validate_manifest,
@@ -78,6 +79,29 @@ class SamplingDataset(BaseDataset):
 
 
 class ArtifactTests(unittest.TestCase):
+    def test_core_run_config_records_active_annotation_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cfg = make_config(root, split="dev", num_data=17)
+
+            provenance = core_run_config(cfg)
+
+            self.assertEqual(["annotations.json"], provenance["annotation_paths"])
+            self.assertEqual(
+                [str((root / "annotations.json").resolve())],
+                provenance["annotation_paths_resolved"],
+            )
+            self.assertEqual(17, provenance["num_data"])
+
+    def test_core_run_config_selects_split_specific_num_data(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), split="dev")
+            cfg.dataset_cfg.num_data = {"dev": 13, "validation": 29}
+
+            provenance = core_run_config(cfg)
+
+            self.assertEqual(13, provenance["num_data"])
+
     def test_run_directory_separates_split_and_run_signature(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
