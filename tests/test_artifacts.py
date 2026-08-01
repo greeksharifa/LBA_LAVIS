@@ -358,6 +358,16 @@ class ArtifactTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "generation changed"):
                 mark_stage_complete(path, "suba", "suba-running")
 
+    def test_stage_start_rejects_reusing_active_generation_id(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+            mark_stage_started(path, "base", "base-generation")
+
+            with self.assertRaisesRegex(ValueError, "generation_id.*already active"):
+                mark_stage_started(path, "base", "base-generation")
+
     def test_completion_requires_generation_and_guards_artifact_writer(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

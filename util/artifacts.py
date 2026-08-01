@@ -187,6 +187,10 @@ def mark_stage_started(
             parent_generations,
         )
         stage_status = manifest.setdefault("stages", {}).setdefault(stage, {})
+        if stage_status.get("generation_id") == generation_id:
+            raise ValueError(
+                f"stage {stage} generation_id {generation_id!r} is already active"
+            )
         stage_status.clear()
         stage_status.update(
             {
