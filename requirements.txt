@@ -1,3 +1,3 @@
-vllm
-torch
+vllm==0.8.2
+torch==2.6.0
 omegaconf
