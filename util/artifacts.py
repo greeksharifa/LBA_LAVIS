@@ -5,11 +5,23 @@ import tempfile
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Callable, Dict, Iterable, Mapping, Optional
 
 
 MANIFEST_FILENAME = "run_manifest.json"
 STAGES = ("subq", "suba", "base", "refined")
+STAGE_DEPENDENCIES = {
+    "subq": (),
+    "suba": ("subq",),
+    "base": (),
+    "refined": ("subq", "suba", "base"),
+}
+STAGE_DEPENDENTS = {
+    "subq": ("suba", "refined"),
+    "suba": ("refined",),
+    "base": ("refined",),
+    "refined": (),
+}
 
 
 def core_run_config(cfg) -> Dict[str, Any]:
@@ -96,25 +108,107 @@ def _manifest_lock(path: Path):
             fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
 
 
+def _require_generation_id(generation_id: str, label: str) -> str:
+    if not isinstance(generation_id, str) or not generation_id:
+        raise ValueError(f"{label} generation_id must be a non-empty string")
+    return generation_id
+
+
+def _validated_parent_generations(
+    manifest: Mapping[str, Any],
+    stage: str,
+    parent_generations: Optional[Mapping[str, str]],
+) -> Dict[str, str]:
+    dependencies = STAGE_DEPENDENCIES[stage]
+    expected = set(dependencies)
+    if parent_generations is None:
+        if expected:
+            raise ValueError(
+                f"stage {stage} parent generations must contain exactly "
+                f"{sorted(expected)}"
+            )
+        return {}
+    if not isinstance(parent_generations, Mapping):
+        raise ValueError(f"stage {stage} parent generations must be an object")
+    actual = set(parent_generations)
+    if actual != expected:
+        raise ValueError(
+            f"stage {stage} parent generations must contain exactly "
+            f"{sorted(expected)}, got {sorted(actual)}"
+        )
+
+    stages = manifest.get("stages")
+    if not isinstance(stages, Mapping):
+        raise ValueError("manifest stages must be an object")
+    validated = {}
+    for parent in dependencies:
+        expected_generation = parent_generations[parent]
+        _require_generation_id(
+            expected_generation,
+            f"stage {stage} parent generations[{parent!r}]",
+        )
+        status = stages.get(parent)
+        if not isinstance(status, Mapping) or not (
+            status.get("completed") is True
+            and status.get("state") == "completed"
+        ):
+            raise ValueError(f"parent generation unavailable for {parent}")
+        active_generation = status.get("generation_id")
+        _require_generation_id(active_generation, f"parent {parent}")
+        if active_generation != expected_generation:
+            raise ValueError(
+                f"parent generation changed for {parent}: "
+                f"active={active_generation!r}, expected={expected_generation!r}"
+            )
+        validated[parent] = expected_generation
+    return validated
+
+
 def mark_stage_started(
     path: Path,
     stage: str,
     generation_id: str = None,
+    *,
+    parent_generations: Optional[Mapping[str, str]] = None,
 ) -> Dict[str, Any]:
-    """Atomically mark a stage as the active, incomplete generation."""
+    """Start one generation and atomically invalidate its dependents."""
     if stage not in STAGES:
         raise ValueError(f"unknown manifest stage: {stage}")
+    if generation_id is None:
+        generation_id = uuid.uuid4().hex
+    else:
+        _require_generation_id(generation_id, f"stage {stage}")
     path = Path(path)
     with _manifest_lock(path):
         manifest = load_manifest(path)
+        validated_parents = _validated_parent_generations(
+            manifest,
+            stage,
+            parent_generations,
+        )
         stage_status = manifest.setdefault("stages", {}).setdefault(stage, {})
+        stage_status.clear()
         stage_status.update(
             {
                 "completed": False,
                 "state": "running",
-                "generation_id": generation_id or uuid.uuid4().hex,
+                "generation_id": generation_id,
+                "parent_generations": validated_parents,
             }
         )
+        for dependent in STAGE_DEPENDENTS[stage]:
+            dependent_status = manifest["stages"].setdefault(dependent, {})
+            dependent_status.clear()
+            dependent_status.update(
+                {
+                    "completed": False,
+                    "state": "invalidated",
+                    "invalidated_by": {
+                        "stage": stage,
+                        "generation_id": generation_id,
+                    },
+                }
+            )
         write_manifest(path, manifest)
     return manifest
 
@@ -123,23 +217,40 @@ def mark_stage_complete(
     path: Path,
     stage: str,
     generation_id: str = None,
+    *,
+    artifact_writer: Optional[Callable[[], None]] = None,
 ) -> Dict[str, Any]:
-    """Mark one stage complete if it is still the requested generation."""
+    """Guard artifact promotion and completion with generation lineage."""
     if stage not in STAGES:
         raise ValueError(f"unknown manifest stage: {stage}")
+    _require_generation_id(generation_id, f"stage {stage}")
+    if artifact_writer is not None and not callable(artifact_writer):
+        raise ValueError("artifact_writer must be callable")
     path = Path(path)
     with _manifest_lock(path):
         manifest = load_manifest(path)
         stage_status = manifest.setdefault("stages", {}).setdefault(stage, {})
         active_generation_id = stage_status.get("generation_id")
-        if generation_id is not None and active_generation_id != generation_id:
+        if active_generation_id != generation_id:
             raise ValueError(
                 f"stage {stage} generation changed: active={active_generation_id!r}, "
                 f"completed={generation_id!r}"
             )
+        if (
+            stage_status.get("completed") is not False
+            or stage_status.get("state") != "running"
+        ):
+            raise ValueError(
+                f"stage {stage} generation {generation_id!r} is not running"
+            )
+        _validated_parent_generations(
+            manifest,
+            stage,
+            stage_status.get("parent_generations"),
+        )
+        if artifact_writer is not None:
+            artifact_writer()
         stage_status.update({"completed": True, "state": "completed"})
-        if generation_id is not None:
-            stage_status["generation_id"] = generation_id
         write_manifest(path, manifest)
     return manifest
 
@@ -210,5 +321,10 @@ def validate_completed_stage(
             f"required {stage} stage is not completed in manifest {path}: "
             f"completed={stage_status.get('completed')!r}, "
             f"state={stage_status.get('state')!r}"
+        )
+    generation_id = stage_status.get("generation_id")
+    if not isinstance(generation_id, str) or not generation_id:
+        raise ValueError(
+            f"required {stage} generation_id missing in manifest {path}"
         )
     return manifest

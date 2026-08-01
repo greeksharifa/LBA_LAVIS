@@ -14,7 +14,11 @@ from abc import ABC, abstractmethod
 from util.logger import get_logger
 from util.utils import create_answer_mapping
 from util.path import get_sub_qas_path, get_output_dir
-from util.artifacts import MANIFEST_FILENAME, validate_completed_stage
+from util.artifacts import (
+    MANIFEST_FILENAME,
+    STAGE_DEPENDENCIES,
+    validate_completed_stage,
+)
 
 
 class BaseDataset(ABC):
@@ -167,12 +171,8 @@ class BaseDataset(ABC):
 
     def _required_artifact_stages(self):
         mode = self.cfg.runner_cfg.mode
-        if mode in ("subq", "base"):
-            return ()
-        if mode == "suba":
-            return ("subq",)
-        if mode == "refined":
-            return ("subq", "suba", "base")
+        if mode in STAGE_DEPENDENCIES:
+            return STAGE_DEPENDENCIES[mode]
         return ("subq", "suba")
 
     def _load_stage_dependencies(self):
@@ -185,14 +185,18 @@ class BaseDataset(ABC):
         selected_qids = [ann["qid"] for ann in self.annotation]
         manifest_path = get_output_dir(self.cfg) / MANIFEST_FILENAME
         required_stages = self._required_artifact_stages()
+        self.dependency_generations = {}
 
         for stage in required_stages:
-            validate_completed_stage(
+            manifest = validate_completed_stage(
                 manifest_path,
                 stage,
                 self.cfg,
                 selected_qids,
             )
+            self.dependency_generations[stage] = manifest["stages"][stage][
+                "generation_id"
+            ]
 
         for stage in required_stages:
             path = paths[stage]

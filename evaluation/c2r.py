@@ -29,12 +29,12 @@ _COMPATIBILITY_FIELDS = (
     "M",
     "K",
     "confidence_type",
+    "num_data",
 )
 _REQUIRED_CONFIG_FIELDS = _COMPATIBILITY_FIELDS + (
     "split",
     "annotation_paths",
     "annotation_paths_resolved",
-    "num_data",
 )
 _REQUIRED_RECORD_FIELDS = (
     "qid",

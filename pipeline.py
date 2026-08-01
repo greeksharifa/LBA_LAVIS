@@ -17,6 +17,7 @@ from prompt.prompts import (
 )
 from util.artifacts import (
     MANIFEST_FILENAME,
+    STAGE_DEPENDENCIES,
     create_manifest,
     load_manifest,
     mark_stage_complete,
@@ -275,7 +276,17 @@ def run_stage(
     sample_qids = list(samples)
     _validate_prompt_counts(cfg, sample_qids, qids, mode)
     manifest_path = _prepare_manifest(cfg, sample_qids, output_dir)
-    started_manifest = mark_stage_started(manifest_path, mode)
+    dependencies = STAGE_DEPENDENCIES[mode]
+    parent_generations = getattr(dataset, "dependency_generations", None)
+    if dependencies and parent_generations is None:
+        raise ValueError(
+            f"dataset loader for {mode} must provide dependency_generations"
+        )
+    started_manifest = mark_stage_started(
+        manifest_path,
+        mode,
+        parent_generations=parent_generations or {},
+    )
     generation_id = started_manifest["stages"][mode]["generation_id"]
     logger.info("Stage %s: prepared %d prompts", mode, len(prompts))
     if prompts:
@@ -300,15 +311,25 @@ def run_stage(
             samples[qid].update(output_data)
 
     output_path = output_dir / get_output_filename(cfg)
-    write_json_atomic(output_path, formatted)
+    records = None
     if mode == "refined":
         records = _refined_records(
             samples.values(),
             str(cfg.dataset_cfg.split),
             generation_id,
         )
-        write_json_atomic(output_dir / "refined_samples.json", records)
-    mark_stage_complete(manifest_path, mode, generation_id)
+
+    def write_stage_artifacts():
+        write_json_atomic(output_path, formatted)
+        if records is not None:
+            write_json_atomic(output_dir / "refined_samples.json", records)
+
+    mark_stage_complete(
+        manifest_path,
+        mode,
+        generation_id,
+        artifact_writer=write_stage_artifacts,
+    )
     logger.info("Saved %s outputs to %s", mode, output_path)
     return formatted
 

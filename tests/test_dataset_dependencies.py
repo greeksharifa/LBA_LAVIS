@@ -164,6 +164,14 @@ class DatasetDependencyTests(unittest.TestCase):
             sample = dataset[0]
 
             self.assertEqual(["q0"], [ann["qid"] for ann in dataset.annotation])
+            self.assertEqual(
+                {
+                    "subq": "subq-generation",
+                    "suba": "suba-generation",
+                    "base": "base-generation",
+                },
+                getattr(dataset, "dependency_generations", None),
+            )
             self.assertEqual(["subq value"], sample["subq_list"])
             self.assertEqual(["suba value"], sample["suba_list"])
             self.assertEqual("answer", sample["base_answer"])

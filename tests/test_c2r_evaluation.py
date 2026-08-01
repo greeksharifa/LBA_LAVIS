@@ -62,6 +62,7 @@ def manifest(
     dataset="MMMU",
     generation_id="generation-1",
     resolved_path=None,
+    num_data=-1,
 ):
     annotation_name = {"val": "dev", "test": "validation"}.get(split, split)
     resolved_path = resolved_path or f"/data/MMMU/{annotation_name}.json"
@@ -77,7 +78,7 @@ def manifest(
             "confidence_type": confidence_type,
             "annotation_paths": [f"MMMU/{annotation_name}.json"],
             "annotation_paths_resolved": [resolved_path],
-            "num_data": -1,
+            "num_data": num_data,
         },
         "qids": list(qids),
         "stages": {
@@ -440,6 +441,65 @@ class RunLoadingTests(unittest.TestCase):
                 evaluate_run_pair(
                     dev_dir,
                     val_dir,
+                    scorer=lambda *args: calls.append(args),
+                    bootstrap_count=10,
+                )
+            self.assertEqual([], calls)
+
+    def test_pair_accepts_matching_full_selection_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_dir = write_run(
+                root,
+                "dev",
+                "val",
+                [record("d")],
+                num_data=-1,
+            )
+            validation_dir = write_run(
+                root,
+                "validation",
+                "test",
+                [record("v", split="test")],
+                num_data=-1,
+            )
+
+            report = evaluate_run_pair(
+                dev_dir,
+                validation_dir,
+                scorer=exact_scorer,
+                bootstrap_count=10,
+            )
+
+            self.assertEqual(-1, report["dev"]["num_data"])
+            self.assertEqual(-1, report["validation"]["num_data"])
+
+    def test_pair_rejects_mismatched_num_data_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_dir = write_run(
+                root,
+                "dev",
+                "val",
+                [record("d")],
+                num_data=1,
+            )
+            validation_dir = write_run(
+                root,
+                "validation",
+                "test",
+                [record("v", split="test")],
+                num_data=-1,
+            )
+            calls = []
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "incompatible run manifests.*num_data",
+            ):
+                evaluate_run_pair(
+                    dev_dir,
+                    validation_dir,
                     scorer=lambda *args: calls.append(args),
                     bootstrap_count=10,
                 )

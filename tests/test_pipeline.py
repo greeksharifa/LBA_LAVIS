@@ -7,7 +7,12 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from tests.test_artifacts import make_config
-from util.artifacts import MANIFEST_FILENAME
+from util.artifacts import (
+    MANIFEST_FILENAME,
+    STAGE_DEPENDENCIES,
+    create_manifest,
+    write_manifest,
+)
 from util.path import get_output_dir, get_output_filename
 
 
@@ -82,6 +87,35 @@ def fake_formatter(mode, outputs, qids, n):
         },
     }
     return {"q0": values[mode]}
+
+
+class SnapshotDataset(list):
+    def __init__(self, values, dependency_generations):
+        super().__init__(values)
+        self.dependency_generations = dependency_generations
+
+
+def snapshot_dataset(cfg, sample=None):
+    sample = sample or fixture_sample()
+    manifest_path = get_output_dir(cfg) / MANIFEST_FILENAME
+    if manifest_path.is_file():
+        manifest = json.loads(manifest_path.read_text())
+    else:
+        manifest = create_manifest(cfg, [sample["qid"]])
+        for parent in STAGE_DEPENDENCIES[str(cfg.runner_cfg.mode)]:
+            manifest["stages"][parent].update(
+                {
+                    "completed": True,
+                    "state": "completed",
+                    "generation_id": f"{parent}-fixture-generation",
+                }
+            )
+        write_manifest(manifest_path, manifest)
+    parent_generations = {
+        parent: manifest["stages"][parent]["generation_id"]
+        for parent in STAGE_DEPENDENCIES[str(cfg.runner_cfg.mode)]
+    }
+    return SnapshotDataset([sample], parent_generations)
 
 
 class PipelineTests(unittest.TestCase):
@@ -184,7 +218,7 @@ class PipelineTests(unittest.TestCase):
                     result = run_stage(
                         cfg,
                         VllmOutputModel(["cat"]),
-                        dataset_loader=lambda stage_cfg: [fixture_sample()],
+                        dataset_loader=snapshot_dataset,
                         prompt_builder=lambda mode, sample, stage_cfg, sampler: ["only"],
                     )
 
@@ -288,7 +322,7 @@ class PipelineTests(unittest.TestCase):
                 run_stage(
                     cfg,
                     FakeModel(),
-                    dataset_loader=lambda stage_cfg: [fixture_sample()],
+                    dataset_loader=snapshot_dataset,
                     prompt_builder=lambda mode, sample, stage_cfg, sampler: ["a", "b"],
                     output_formatter=lambda mode, outputs, qids, n: invalid,
                 )
@@ -329,7 +363,7 @@ class PipelineTests(unittest.TestCase):
                 stage_modes.append(stage_cfg.runner_cfg.mode)
                 stage_configs.append(stage_cfg)
                 self.assertNotEqual(id(cfg), id(stage_cfg))
-                return [fixture_sample()]
+                return snapshot_dataset(stage_cfg)
 
             run_multi_stage(
                 cfg,
@@ -360,7 +394,7 @@ class PipelineTests(unittest.TestCase):
             run_stage(
                 cfg,
                 FakeModel(),
-                dataset_loader=lambda stage_cfg: [fixture_sample()],
+                dataset_loader=snapshot_dataset,
                 prompt_builder=lambda mode, sample, stage_cfg, sampler: "refine",
                 output_formatter=fake_formatter,
             )
@@ -392,6 +426,126 @@ class PipelineTests(unittest.TestCase):
                 ],
                 records,
             )
+
+    def test_completion_guard_failure_preserves_previous_canonical_artifact(self):
+        from pipeline import run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp), n=1, m=1, k=1).for_stage("base")
+
+            def answer_formatter(answer):
+                def formatter(mode, outputs, qids, n):
+                    formatted = fake_formatter(mode, outputs, qids, n)
+                    formatted["q0"]["base_answer"] = answer
+                    return formatted
+
+                return formatter
+
+            kwargs = {
+                "dataset_loader": lambda stage_cfg: [fixture_sample()],
+                "prompt_builder": lambda mode, sample, stage_cfg, sampler: "base",
+            }
+            run_stage(
+                cfg,
+                FakeModel(),
+                output_formatter=answer_formatter("old"),
+                **kwargs,
+            )
+            output_path = get_output_dir(cfg) / get_output_filename(cfg)
+            previous = output_path.read_bytes()
+
+            with patch(
+                "pipeline.mark_stage_complete",
+                side_effect=ValueError("superseded completion"),
+            ), self.assertRaisesRegex(ValueError, "superseded completion"):
+                run_stage(
+                    cfg,
+                    FakeModel(),
+                    output_formatter=answer_formatter("new"),
+                    **kwargs,
+                )
+
+            self.assertEqual(previous, output_path.read_bytes())
+
+    def test_refined_second_artifact_write_failure_remains_incomplete(self):
+        from evaluation.c2r import load_run
+        from pipeline import run_stage, write_json_atomic as real_write
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(
+                Path(tmp), split="dev", n=1, m=1, k=1
+            ).for_stage("refined")
+            run_dir = get_output_dir(cfg)
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "refined_samples.json").write_text("[]")
+
+            def fail_samples(path, value):
+                if Path(path).name == "refined_samples.json":
+                    raise RuntimeError("simulated refined samples write failure")
+                return real_write(path, value)
+
+            with patch("pipeline.write_json_atomic", side_effect=fail_samples):
+                with self.assertRaisesRegex(RuntimeError, "samples write failure"):
+                    run_stage(
+                        cfg,
+                        FakeModel(),
+                        dataset_loader=snapshot_dataset,
+                        prompt_builder=(
+                            lambda mode, sample, stage_cfg, sampler: "refine"
+                        ),
+                        output_formatter=fake_formatter,
+                    )
+
+            status = json.loads(
+                (run_dir / MANIFEST_FILENAME).read_text()
+            )["stages"]["refined"]
+            self.assertFalse(status["completed"])
+            self.assertEqual("running", status["state"])
+            with self.assertRaisesRegex(ValueError, "not completed"):
+                load_run(run_dir)
+
+    def test_upstream_rerun_invalidates_stale_refined_evaluation(self):
+        from evaluation.c2r import load_run
+        from pipeline import run_multi_stage, run_stage
+
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(
+                Path(tmp), split="dev", n=1, m=1, k=1
+            )
+            run_multi_stage(
+                cfg,
+                model_factory=lambda received_cfg: FakeModel(),
+                dataset_loader=snapshot_dataset,
+                prompt_builder=(
+                    lambda mode, sample, stage_cfg, sampler: f"{mode}:{sample['qid']}"
+                ),
+                output_formatter=fake_formatter,
+            )
+            run_dir = get_output_dir(cfg)
+            stale_records = (run_dir / "refined_samples.json").read_bytes()
+            self.assertEqual(["q0"], load_run(run_dir)["qids"])
+
+            class CrashingModel(FakeModel):
+                def generate(self, prompts):
+                    raise RuntimeError("simulated upstream crash")
+
+            with self.assertRaisesRegex(RuntimeError, "upstream crash"):
+                run_stage(
+                    cfg.for_stage("subq"),
+                    CrashingModel(),
+                    dataset_loader=snapshot_dataset,
+                    prompt_builder=(
+                        lambda mode, sample, stage_cfg, sampler: "subq"
+                    ),
+                    output_formatter=fake_formatter,
+                )
+
+            self.assertEqual(
+                stale_records,
+                (run_dir / "refined_samples.json").read_bytes(),
+            )
+            with self.assertRaisesRegex(ValueError, "not completed"):
+                load_run(run_dir)
 
     def test_single_stage_uses_the_same_run_stage_boundary(self):
         from pipeline import run

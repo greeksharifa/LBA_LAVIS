@@ -96,8 +96,9 @@ Evaluation applies additional generation and provenance guards: the refined
 stage must be completed, its `generation_id` must be stable while files are
 read and must match every refined sample, and ordered qids and splits must
 match the manifest exactly. A dev/validation pair must also agree on the model,
-dataset, N/M/K, confidence configuration, and sample-count policy; overlapping
-qids or resolved annotation paths are rejected.
+dataset, N/M/K, confidence configuration, and identical configured `num_data`
+selection policy (`-1` on both full splits); overlapping qids or resolved
+annotation paths are rejected.
 
 ## Leakage-free C2R evaluation
 

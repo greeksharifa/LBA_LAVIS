@@ -13,16 +13,17 @@ from util.artifacts import (
     core_run_config,
     create_manifest,
     mark_stage_complete,
+    mark_stage_started,
     validate_manifest,
     write_manifest,
 )
 from util.path import get_output_dir
 
 
-def mark_stage_in_process(path, stage, start, ready, finished):
+def mark_stage_in_process(path, stage, generation_id, start, ready, finished):
     ready.set()
     start.wait()
-    mark_stage_complete(Path(path), stage)
+    mark_stage_complete(Path(path), stage, generation_id)
     finished.set()
 
 
@@ -79,6 +80,41 @@ class SamplingDataset(BaseDataset):
 
 
 class ArtifactTests(unittest.TestCase):
+    def _start_stage(self, path, stage, generation_id, parent_generations):
+        try:
+            return mark_stage_started(
+                path,
+                stage,
+                generation_id,
+                parent_generations=parent_generations,
+            )
+        except TypeError as error:
+            self.fail(f"mark_stage_started lacks parent lineage API: {error}")
+
+    def _complete_stage(self, path, stage, generation_id, artifact_writer=None):
+        try:
+            return mark_stage_complete(
+                path,
+                stage,
+                generation_id,
+                artifact_writer=artifact_writer,
+            )
+        except TypeError as error:
+            self.fail(f"mark_stage_complete lacks guarded writer API: {error}")
+
+    @staticmethod
+    def _completed_manifest(cfg, qids=("q0",)):
+        manifest = create_manifest(cfg, qids)
+        for stage in ("subq", "suba", "base", "refined"):
+            manifest["stages"][stage].update(
+                {
+                    "completed": True,
+                    "state": "completed",
+                    "generation_id": f"{stage}-old",
+                }
+            )
+        return manifest
+
     def test_core_run_config_records_active_annotation_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -167,7 +203,12 @@ class ArtifactTests(unittest.TestCase):
             path = get_output_dir(cfg) / "run_manifest.json"
             write_manifest(path, create_manifest(cfg, ["q0"]))
 
-            mark_stage_complete(path, "subq")
+            started = mark_stage_started(path, "subq", "subq-generation")
+            mark_stage_complete(
+                path,
+                "subq",
+                started["stages"]["subq"]["generation_id"],
+            )
 
             with path.open("r") as handle:
                 saved = json.load(handle)
@@ -179,6 +220,14 @@ class ArtifactTests(unittest.TestCase):
             cfg = make_config(Path(tmp))
             path = get_output_dir(cfg) / "run_manifest.json"
             write_manifest(path, create_manifest(cfg, ["q0"]))
+            generations = {
+                "subq": mark_stage_started(path, "subq", "subq-generation")[
+                    "stages"
+                ]["subq"]["generation_id"],
+                "base": mark_stage_started(path, "base", "base-generation")[
+                    "stages"
+                ]["base"]["generation_id"],
+            }
             lock_path = path.with_name(f".{path.name}.lock")
             context = multiprocessing.get_context("fork")
             start = context.Event()
@@ -187,9 +236,16 @@ class ArtifactTests(unittest.TestCase):
             processes = [
                 context.Process(
                     target=mark_stage_in_process,
-                    args=(path, stage, start, ready[index], finished[index]),
+                    args=(
+                        path,
+                        stage,
+                        generations[stage],
+                        start,
+                        ready[index],
+                        finished[index],
+                    ),
                 )
-                for index, stage in enumerate(("subq", "suba"))
+                for index, stage in enumerate(("subq", "base"))
             ]
 
             with lock_path.open("a+") as lock_handle:
@@ -213,7 +269,144 @@ class ArtifactTests(unittest.TestCase):
             self.assertEqual([0, 0], [process.exitcode for process in processes])
             saved = json.loads(path.read_text())
             self.assertTrue(saved["stages"]["subq"]["completed"])
-            self.assertTrue(saved["stages"]["suba"]["completed"])
+            self.assertTrue(saved["stages"]["base"]["completed"])
+
+    def test_stage_start_invalidates_exact_dependents_and_preserves_base(self):
+        cases = (
+            ("subq", {}, {"suba", "refined"}, {"base"}),
+            ("suba", {"subq": "subq-old"}, {"refined"}, {"subq", "base"}),
+            ("base", {}, {"refined"}, {"subq", "suba"}),
+            (
+                "refined",
+                {
+                    "subq": "subq-old",
+                    "suba": "suba-old",
+                    "base": "base-old",
+                },
+                set(),
+                {"subq", "suba", "base"},
+            ),
+        )
+        for stage, parents, invalidated, preserved in cases:
+            with self.subTest(stage=stage), tempfile.TemporaryDirectory() as tmp:
+                cfg = make_config(Path(tmp))
+                path = get_output_dir(cfg) / "run_manifest.json"
+                write_manifest(path, self._completed_manifest(cfg))
+
+                manifest = self._start_stage(
+                    path,
+                    stage,
+                    f"{stage}-new",
+                    parents,
+                )
+
+                self.assertEqual("running", manifest["stages"][stage]["state"])
+                self.assertEqual(parents, manifest["stages"][stage]["parent_generations"])
+                for dependent in invalidated:
+                    status = manifest["stages"][dependent]
+                    self.assertFalse(status["completed"])
+                    self.assertEqual("invalidated", status["state"])
+                    self.assertNotIn("generation_id", status)
+                for independent in preserved:
+                    self.assertTrue(manifest["stages"][independent]["completed"])
+                    self.assertEqual(
+                        f"{independent}-old",
+                        manifest["stages"][independent]["generation_id"],
+                    )
+
+    def test_dependent_start_requires_exact_current_parent_generations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, self._completed_manifest(cfg))
+
+            for parents in (
+                None,
+                {},
+                {"subq": ""},
+                {"subq": "subq-old", "base": "base-old"},
+            ):
+                with self.subTest(parents=parents):
+                    kwargs = {} if parents is None else {"parent_generations": parents}
+                    try:
+                        with self.assertRaisesRegex(ValueError, "parent generations"):
+                            mark_stage_started(path, "suba", "suba-new", **kwargs)
+                    except TypeError as error:
+                        self.fail(
+                            f"mark_stage_started lacks parent lineage API: {error}"
+                        )
+
+            snapshot = {"subq": "subq-old"}
+            mark_stage_started(path, "subq", "subq-new")
+            with self.assertRaisesRegex(ValueError, "parent generation.*subq"):
+                self._start_stage(path, "suba", "suba-new", snapshot)
+
+    def test_invalidated_downstream_cannot_complete_old_generation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, self._completed_manifest(cfg))
+            self._start_stage(
+                path,
+                "suba",
+                "suba-running",
+                {"subq": "subq-old"},
+            )
+
+            mark_stage_started(path, "subq", "subq-new")
+
+            with self.assertRaisesRegex(ValueError, "generation changed"):
+                mark_stage_complete(path, "suba", "suba-running")
+
+    def test_completion_requires_generation_and_guards_artifact_writer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cfg = make_config(root)
+            path = get_output_dir(cfg) / "run_manifest.json"
+            artifact = root / "artifact.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+
+            with self.assertRaisesRegex(ValueError, "generation_id"):
+                mark_stage_complete(path, "base")
+
+            mark_stage_started(path, "base", "base-old")
+            mark_stage_started(path, "base", "base-new")
+            self._complete_stage(
+                path,
+                "base",
+                "base-new",
+                artifact_writer=lambda: artifact.write_text("new"),
+            )
+            with self.assertRaisesRegex(ValueError, "generation changed"):
+                self._complete_stage(
+                    path,
+                    "base",
+                    "base-old",
+                    artifact_writer=lambda: artifact.write_text("old"),
+                )
+            self.assertEqual("new", artifact.read_text())
+
+    def test_writer_failure_leaves_stage_running(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+            mark_stage_started(path, "base", "base-generation")
+
+            def fail_write():
+                raise RuntimeError("simulated artifact write failure")
+
+            with self.assertRaisesRegex(RuntimeError, "artifact write failure"):
+                self._complete_stage(
+                    path,
+                    "base",
+                    "base-generation",
+                    artifact_writer=fail_write,
+                )
+
+            status = json.loads(path.read_text())["stages"]["base"]
+            self.assertFalse(status["completed"])
+            self.assertEqual("running", status["state"])
 
     def test_manifest_rejects_malformed_container_types(self):
         with tempfile.TemporaryDirectory() as tmp:

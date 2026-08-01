@@ -266,6 +266,8 @@ class ReadmeCommandTests(unittest.TestCase):
             "validation",
             "/home/ywjang/C2R",
             "historical",
+            "identical configured `num_data`",
+            "`-1` on both full splits",
         ):
             self.assertIn(expected, self.readme)
 
