@@ -64,7 +64,7 @@ def get_base_prompt(sample: dict, cfg: Config) -> str:
         Answer with the option's letter from the given choices directly.
     """
     # import pdb; pdb.set_trace()
-    if sample["question_type"] == "open_ended":
+    if sample["question_type"] in ("open", "open_ended"):
         prompt = f"{sample['main_q']}"
         if cfg.runner_cfg.mode == "CoT":
             prompt += "\nYou should think about the problem-solving process step by step, and at the end, output the final answer in the format 'The answer is <final answer>.'"

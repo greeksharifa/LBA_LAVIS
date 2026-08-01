@@ -6,6 +6,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from dataset.base_dataset import BaseDataset
+from dataset.mmmu_eval import evaluate_answer
 
 
 class MMMU(BaseDataset):
@@ -62,9 +63,16 @@ class MMMU(BaseDataset):
         self.mme_eval_results = {}
         super().__init__(cfg, **kwargs)
 
+    @staticmethod
+    def canonicalize_question_type(question_type: str) -> str:
+        if question_type in ("open", "open-ended"):
+            return "open_ended"
+        return question_type
+
     def load_annotation(self, ann_paths: List[Path]):
         for ann_path in ann_paths:
-            samples = json.load(open(ann_path, 'r'))
+            with ann_path.open("r", encoding="utf-8") as handle:
+                samples = json.load(handle)
             for sample in tqdm(samples, desc="Loading MMMU dataset"):
                 question = sample['question']
                 
@@ -92,7 +100,9 @@ class MMMU(BaseDataset):
                     "vpath": image_path_list,
                     "main_q": question,
                     "qid": sample['question_id'],
-                    "question_type": sample['question_type'],
+                    "question_type": self.canonicalize_question_type(
+                        sample["question_type"]
+                    ),
                     "candidate_list": sample['options'],
                     "gt_ans": gt_ans,
                     "type": sample['subfield'], # sample["topic_difficulty"]
@@ -115,3 +125,8 @@ class MMMU(BaseDataset):
         result = self.load_additional_attr(ann, result)
         
         return result
+
+    def get_score(self, pred, gt_ans, question_type: str, main_q: str = None):
+        if self.cfg.dataset_cfg.vqa_acc:
+            raise NotImplementedError("VQA accuracy is not implemented")
+        return int(evaluate_answer(pred, gt_ans, question_type))

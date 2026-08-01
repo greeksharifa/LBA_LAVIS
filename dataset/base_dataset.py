@@ -126,7 +126,7 @@ class BaseDataset(ABC):
         
         main_q = main_q.strip() #.rstrip("?") + "?"
         
-        if ann["question_type"] != "open_ended":
+        if ann["question_type"] in ("multiple_choice", "multiple-choice"):
             gt_ans = self.ANSWER_MAPPING.get(gt_ans, gt_ans)
         
         if self.cfg.dataset_cfg.vqa_acc:
@@ -257,7 +257,7 @@ class BaseDataset(ABC):
                         ans = ans.split(main_q[-10:])[-1].strip()
                     ans = ans[:3]
 
-        if question_type != "open_ended":
+        if question_type in ("multiple_choice", "multiple-choice"):
             ans = ans.split(".")[0].strip()
             ans = self.ANSWER_MAPPING.get(ans, ans)
 
