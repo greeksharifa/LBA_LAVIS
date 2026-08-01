@@ -1,6 +1,7 @@
 import re
 import shlex
 import unittest
+from argparse import Namespace
 from pathlib import Path
 
 
@@ -76,15 +77,26 @@ class ReadmeCommandTests(unittest.TestCase):
         self.assertTrue(self.run_commands, "README must contain runnable main.py examples")
         for command in self.run_commands:
             self.assertEqual(GPU_WRAPPER, command[0], command)
+            self.assertEqual(1, command.count("--"), command)
+            separator = command.index("--")
+            self.assertEqual("env", command[separator + 1], command)
+
+            self.assertEqual(1, command.count(PYTHON), command)
+            python_index = command.index(PYTHON)
+            self.assertGreater(python_index, separator + 1, command)
+            for assignment in (
+                "HF_HOME=/home/ywjang/.cache/huggingface",
+                "VLLM_USE_V1=0",
+                "VLLM_WORKER_MULTIPROC_METHOD=spawn",
+            ):
+                self.assertEqual(1, command.count(assignment), command)
+                self.assertGreater(command.index(assignment), separator + 1, command)
+                self.assertLess(command.index(assignment), python_index, command)
+
             gpu_ids = command[1].split(",")
             self.assertTrue(set(gpu_ids) <= {"5", "6", "7", "8"}, command)
             self.assertEqual(len(gpu_ids), len(set(gpu_ids)), command)
             self.assertEqual(len(gpu_ids), int(option_value(command, "model.tensor_parallel_size")))
-
-            if "HF_HOME=/home/ywjang/.cache/huggingface" in command:
-                separator = command.index("--")
-                self.assertEqual("env", command[separator + 1], command)
-                self.assertGreater(command.index("HF_HOME=/home/ywjang/.cache/huggingface"), separator)
 
     def test_readme_documents_verified_runtime_and_pinned_requirements(self):
         for expected in (
@@ -96,6 +108,8 @@ class ReadmeCommandTests(unittest.TestCase):
             "VLLM_WORKER_MULTIPROC_METHOD=spawn",
             "enforce_eager=true",
             "environment-specific",
+            "model/vllm_config.py",
+            "setdefault",
         ):
             self.assertIn(expected, self.readme)
 
@@ -106,7 +120,48 @@ class ReadmeCommandTests(unittest.TestCase):
         }
         self.assertIn("torch==2.6.0", requirements)
         self.assertIn("vllm==0.8.2", requirements)
+        self.assertIn("transformers==4.55.2", requirements)
         self.assertIn("omegaconf", requirements)
+
+    def test_every_documented_main_command_resolves_through_cpu_only_config(self):
+        from config.configs import Config
+
+        for command in self.run_commands:
+            with self.subTest(command=command):
+                main_index = command.index("main.py")
+                self.assertEqual("--options", command[main_index + 1], command)
+                options = command[main_index + 2 :]
+                cfg = Config(
+                    Namespace(cfg_path="config/default.yaml", options=options)
+                )
+
+                self.assertEqual(option_value(command, "runner.mode"), cfg.runner_cfg.mode)
+                self.assertEqual(5, cfg.runner_cfg.N)
+                self.assertEqual(2, cfg.runner_cfg.M)
+                self.assertEqual(8, cfg.runner_cfg.K)
+                self.assertEqual(
+                    option_value(command, "runner.output_dir"),
+                    cfg.runner_cfg.output_dir,
+                )
+
+                self.assertEqual("qwen2.5-vl-7b", cfg.model_cfg.model_name)
+                self.assertEqual("Qwen/Qwen2.5-VL-7B-Instruct", cfg.model_cfg.model_id)
+                self.assertEqual(
+                    int(option_value(command, "model.tensor_parallel_size")),
+                    cfg.model_cfg.tensor_parallel_size,
+                )
+                self.assertIs(True, cfg.model_cfg.enforce_eager)
+
+                self.assertEqual("MMMU", cfg.dataset_cfg.dataset_name)
+                self.assertEqual(
+                    option_value(command, "dataset.split"),
+                    cfg.dataset_cfg.split,
+                )
+                self.assertEqual(
+                    int(option_value(command, "dataset.num_data")),
+                    cfg.dataset_cfg.num_data,
+                )
+                self.assertTrue(cfg.dataset_cfg.ann_paths[cfg.dataset_cfg.split])
 
     def test_readme_documents_all_single_stage_and_multi_stage_modes(self):
         modes = {option_value(command, "runner.mode") for command in self.run_commands}

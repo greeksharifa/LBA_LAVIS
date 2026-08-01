@@ -17,10 +17,12 @@ Install the repository requirements with the verified interpreter:
 
 The absolute interpreter, cache, and GPU-wrapper paths below are
 environment-specific. Adapt them if the checkout runs on another server. The
-repository defaults vLLM to the V0 engine (`VLLM_USE_V1=0`) with spawn workers
-(`VLLM_WORKER_MULTIPROC_METHOD=spawn`), while `model.enforce_eager=true` keeps
-eager execution enabled. Explicit values are included inside the wrapper's
-`-- env` section in the inference commands for reproducibility.
+runtime setup in `model/vllm_config.py` installs the V0 engine
+(`VLLM_USE_V1=0`) and spawn workers (`VLLM_WORKER_MULTIPROC_METHOD=spawn`) as
+process defaults via `setdefault`, so explicit user settings still win. The
+commands repeat those defaults inside the wrapper's `-- env` section for
+reproducibility, while `model.enforce_eager=true` explicitly keeps eager
+execution enabled.
 
 ## Available models and benchmarks
 
