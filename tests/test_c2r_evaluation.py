@@ -4,6 +4,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
 
 from evaluation.c2r import (
     TAU1_GRID,
@@ -27,13 +30,14 @@ def exact_scorer(prediction, gold, question_type):
 def record(
     qid,
     *,
-    split="dev",
+    split="val",
     gold="base",
     base="base",
     base_conf=0.5,
     refined=("wrong", "refined"),
     refined_conf=(0.2, 0.8),
     confidence_type="token_min_prob",
+    generation_id="generation-1",
 ):
     return {
         "qid": qid,
@@ -45,13 +49,25 @@ def record(
         "conf_base": {confidence_type: base_conf},
         "refined_answer_list": list(refined),
         "conf_refined": {confidence_type: list(refined_conf)},
+        "generation_id": generation_id,
     }
 
 
-def manifest(split, qids, *, confidence_type="token_min_prob", model_id="model/id"):
+def manifest(
+    split,
+    qids,
+    *,
+    confidence_type="token_min_prob",
+    model_id="model/id",
+    dataset="MMMU",
+    generation_id="generation-1",
+    resolved_path=None,
+):
+    annotation_name = {"val": "dev", "test": "validation"}.get(split, split)
+    resolved_path = resolved_path or f"/data/MMMU/{annotation_name}.json"
     return {
         "config": {
-            "dataset": "MMMU",
+            "dataset": dataset,
             "split": split,
             "model_name": "fixture-model",
             "model_id": model_id,
@@ -59,12 +75,18 @@ def manifest(split, qids, *, confidence_type="token_min_prob", model_id="model/i
             "M": 2,
             "K": 8,
             "confidence_type": confidence_type,
-            "annotation_paths": [f"MMMU/{split}.json"],
-            "annotation_paths_resolved": [f"/data/MMMU/{split}.json"],
+            "annotation_paths": [f"MMMU/{annotation_name}.json"],
+            "annotation_paths_resolved": [resolved_path],
             "num_data": -1,
         },
         "qids": list(qids),
-        "stages": {"refined": {"completed": True, "state": "completed"}},
+        "stages": {
+            "refined": {
+                "completed": True,
+                "state": "completed",
+                "generation_id": generation_id,
+            }
+        },
     }
 
 
@@ -238,14 +260,108 @@ class BootstrapTests(unittest.TestCase):
         self.assertEqual(10_000, first["count"])
         self.assertEqual(2, len(first["percentile_95_ci"]))
 
+    def test_paired_bootstrap_batches_sampling_without_changing_result(self):
+        base = [index % 2 for index in range(1000)]
+        gated = [int(index % 3 != 0) for index in range(1000)]
+        real_rng = np.random.default_rng(42)
+        expected_indices = real_rng.integers(0, len(base), size=(1200, len(base)))
+        differences = np.asarray(gated) - np.asarray(base)
+        expected_ci = np.percentile(
+            differences[expected_indices].mean(axis=1), [2.5, 97.5]
+        ).tolist()
+        batch_shapes = []
+        batched_rng = np.random.default_rng(42)
+
+        class TrackingGenerator:
+            def integers(self, *args, **kwargs):
+                batch_shapes.append(kwargs["size"])
+                return batched_rng.integers(*args, **kwargs)
+
+        with patch(
+            "evaluation.c2r.np.random.default_rng",
+            return_value=TrackingGenerator(),
+        ):
+            result = paired_bootstrap_delta(base, gated, seed=42, count=1200)
+
+        self.assertEqual(expected_ci, result["percentile_95_ci"])
+        self.assertEqual(1200, sum(shape[0] for shape in batch_shapes))
+        self.assertLessEqual(max(shape[0] for shape in batch_shapes), 512)
+
+    def test_paired_bootstrap_rejects_non_binary_vectors_and_non_integer_seed(self):
+        for base, gated, seed, message in (
+            ([0, 2], [0, 1], 42, "binary"),
+            ([0, 1], [0, 0.5], 42, "binary"),
+            ([0, 1], [1, 1], True, "seed"),
+            ([0, 1], [1, 1], "42", "seed"),
+        ):
+            with self.subTest(base=base, gated=gated, seed=seed):
+                with self.assertRaisesRegex(ValueError, message):
+                    paired_bootstrap_delta(base, gated, seed=seed, count=10)
+
 
 class RunLoadingTests(unittest.TestCase):
+    def test_loader_requires_records_bound_to_completed_manifest_generation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, generation_id, message in (
+                ("missing", None, "generation_id"),
+                ("mismatch", "generation-2", "generation mismatch"),
+            ):
+                bad = record("q0", generation_id=generation_id)
+                run_dir = write_run(root, name, "val", [bad])
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, message):
+                        load_run(run_dir)
+
+            missing_manifest_generation = write_run(
+                root,
+                "missing-manifest-generation",
+                "val",
+                [record("q0")],
+                generation_id=None,
+            )
+            with self.assertRaisesRegex(ValueError, "generation_id missing"):
+                load_run(missing_manifest_generation)
+
+    def test_loader_rejects_manifest_generation_change_during_read(self):
+        first = manifest("val", ["q0"])
+        changed = json.loads(json.dumps(first))
+        changed["stages"]["refined"]["generation_id"] = "generation-2"
+
+        with patch(
+            "evaluation.c2r._load_json",
+            side_effect=[first, [record("q0")], changed],
+        ):
+            with self.assertRaisesRegex(ValueError, "changed while reading"):
+                load_run("unused")
+
+    def test_loader_rejects_malformed_gold_and_manifest_integer_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad_gold = record("q0", gold=[])
+            bad_gold_dir = write_run(root, "bad-gold", "val", [bad_gold])
+            with self.assertRaisesRegex(ValueError, "gt_ans.*non-empty strings"):
+                load_run(bad_gold_dir)
+
+            for name, field, value in (
+                ("zero-n", "N", 0),
+                ("bool-k", "K", True),
+                ("string-num-data", "num_data", "-1"),
+            ):
+                run_dir = write_run(root, name, "val", [record("q0")])
+                saved = json.loads((run_dir / "run_manifest.json").read_text())
+                saved["config"][field] = value
+                (run_dir / "run_manifest.json").write_text(json.dumps(saved))
+                with self.subTest(field=field):
+                    with self.assertRaisesRegex(ValueError, field):
+                        load_run(run_dir)
+
     def test_loader_rejects_malformed_confidence_schema_before_scoring(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             malformed = record("q0")
             malformed["conf_refined"] = {"token_min_prob": [0.2]}
-            run_dir = write_run(root, "run", "dev", [malformed])
+            run_dir = write_run(root, "run", "val", [malformed])
 
             with self.assertRaisesRegex(ValueError, "count mismatch"):
                 load_run(run_dir)
@@ -255,7 +371,7 @@ class RunLoadingTests(unittest.TestCase):
             root = Path(tmp)
             scalar = record("q0")
             scalar["conf_base"] = 0.5
-            run_dir = write_run(root, "run", "dev", [scalar])
+            run_dir = write_run(root, "run", "val", [scalar])
 
             loaded = load_run(run_dir)
 
@@ -266,7 +382,7 @@ class RunLoadingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             good_records = [record("q0")]
-            run_dir = write_run(root, "run", "dev", good_records)
+            run_dir = write_run(root, "run", "val", good_records)
             loaded = load_run(run_dir)
             self.assertEqual(["q0"], loaded["qids"])
 
@@ -276,7 +392,7 @@ class RunLoadingTests(unittest.TestCase):
             cases.append(
                 (
                     "duplicate",
-                    manifest("dev", ["q0", "q0"]),
+                    manifest("val", ["q0", "q0"]),
                     [record("q0"), record("q0")],
                     "duplicate qid",
                 )
@@ -284,7 +400,7 @@ class RunLoadingTests(unittest.TestCase):
             cases.append(
                 (
                     "qid",
-                    manifest("dev", ["q0"]),
+                    manifest("val", ["q0"]),
                     [record("q1")],
                     "qid mismatch",
                 )
@@ -292,8 +408,8 @@ class RunLoadingTests(unittest.TestCase):
             cases.append(
                 (
                     "split",
-                    manifest("dev", ["q0"]),
-                    [record("q0", split="validation")],
+                    manifest("val", ["q0"]),
+                    [record("q0", split="test")],
                     "split mismatch",
                 )
             )
@@ -310,12 +426,12 @@ class RunLoadingTests(unittest.TestCase):
     def test_pair_compatibility_fails_before_scorer_is_called(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            dev_dir = write_run(root, "dev", "dev", [record("d")])
+            dev_dir = write_run(root, "dev", "val", [record("d")])
             val_dir = write_run(
                 root,
                 "validation",
-                "validation",
-                [record("v", split="validation")],
+                "test",
+                [record("v", split="test")],
                 model_id="other/id",
             )
             calls = []
@@ -329,15 +445,96 @@ class RunLoadingTests(unittest.TestCase):
                 )
             self.assertEqual([], calls)
 
+    def test_pair_requires_explicit_mmmu_roles_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            calls = []
+            for name, dev_split, validation_split, dataset, message in (
+                ("reversed", "test", "val", "MMMU", "expected dev split 'val'"),
+                (
+                    "arbitrary",
+                    "dev",
+                    "validation",
+                    "MMMU",
+                    "expected dev split 'val'",
+                ),
+                ("unsupported", "val", "test", "Other", "unsupported dataset"),
+            ):
+                case = root / name
+                case.mkdir()
+                dev = write_run(
+                    case,
+                    "dev",
+                    dev_split,
+                    [record("d", split=dev_split)],
+                    dataset=dataset,
+                )
+                validation = write_run(
+                    case,
+                    "validation",
+                    validation_split,
+                    [record("v", split=validation_split)],
+                    dataset=dataset,
+                )
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, message):
+                        evaluate_run_pair(
+                            dev,
+                            validation,
+                            scorer=lambda *args: calls.append(args),
+                            bootstrap_count=10,
+                        )
+            self.assertEqual([], calls)
+
+    def test_pair_rejects_qid_and_annotation_overlap_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            calls = []
+            for name, val_qid, resolved_path, message in (
+                ("qid-overlap", "same", None, "qid overlap"),
+                (
+                    "annotation-overlap",
+                    "validation",
+                    "/shared/data.json",
+                    "annotation path overlap",
+                ),
+            ):
+                case = root / name
+                case.mkdir()
+                shared_path = "/shared/data.json" if resolved_path else None
+                dev = write_run(
+                    case,
+                    "dev",
+                    "val",
+                    [record("same")],
+                    resolved_path=shared_path,
+                )
+                validation = write_run(
+                    case,
+                    "validation",
+                    "test",
+                    [record(val_qid, split="test")],
+                    resolved_path=resolved_path,
+                )
+                with self.subTest(name=name):
+                    with self.assertRaisesRegex(ValueError, message):
+                        evaluate_run_pair(
+                            dev,
+                            validation,
+                            scorer=lambda *args: calls.append(args),
+                            bootstrap_count=10,
+                        )
+            self.assertEqual([], calls)
+
     def test_report_contains_metrics_threshold_source_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            dev_dir = write_run(root, "dev", "dev", [record("d")])
+            dev_dir = write_run(root, "dev", "val", [record("d")])
             val_dir = write_run(
                 root,
                 "validation",
-                "validation",
-                [record("v", split="validation")],
+                "test",
+                [record("v", split="test")],
             )
 
             report = evaluate_run_pair(
@@ -347,7 +544,7 @@ class RunLoadingTests(unittest.TestCase):
                 bootstrap_count=100,
             )
 
-            self.assertEqual("dev", report["threshold_source"]["split"])
+            self.assertEqual("val", report["threshold_source"]["split"])
             self.assertEqual(42, report["bootstrap_seed"])
             self.assertEqual(100, report["bootstrap_count"])
             for split_name in ("dev", "validation"):
@@ -359,7 +556,7 @@ class RunLoadingTests(unittest.TestCase):
                 self.assertIn("relative_delta", split_report)
                 self.assertIn("paired_95_ci", split_report)
                 self.assertIn("paired_delta", split_report)
-                self.assertEqual("dev", split_report["threshold_source"]["split"])
+                self.assertEqual("val", split_report["threshold_source"]["split"])
                 self.assertEqual(-1, split_report["num_data"])
                 self.assertEqual(1, split_report["sample_count"])
                 self.assertEqual(1, len(split_report["qids"]))
@@ -372,12 +569,12 @@ class CliTests(unittest.TestCase):
     def test_cli_default_output_is_atomic_json_in_validation_run(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            dev_dir = write_run(root, "dev", "dev", [record("d")])
+            dev_dir = write_run(root, "dev", "val", [record("d")])
             val_dir = write_run(
                 root,
                 "validation",
-                "validation",
-                [record("v", split="validation")],
+                "test",
+                [record("v", split="test")],
             )
 
             result = subprocess.run(
@@ -397,7 +594,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             output = val_dir / "c2r_evaluation.json"
             self.assertTrue(output.is_file())
-            self.assertEqual("dev", json.loads(output.read_text())["threshold_source"]["split"])
+            self.assertEqual("val", json.loads(output.read_text())["threshold_source"]["split"])
             self.assertEqual([], list(val_dir.glob(".c2r_evaluation.json.*.tmp")))
 
 

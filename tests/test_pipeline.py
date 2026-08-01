@@ -368,6 +368,10 @@ class PipelineTests(unittest.TestCase):
             records = json.loads(
                 (get_output_dir(cfg) / "refined_samples.json").read_text()
             )
+            manifest = json.loads(
+                (get_output_dir(cfg) / MANIFEST_FILENAME).read_text()
+            )
+            generation_id = manifest["stages"]["refined"]["generation_id"]
             self.assertEqual(
                 [
                     {
@@ -383,6 +387,7 @@ class PipelineTests(unittest.TestCase):
                             "seq_ppl": [1.25],
                             "token_min_prob": [0.95],
                         },
+                        "generation_id": generation_id,
                     }
                 ],
                 records,

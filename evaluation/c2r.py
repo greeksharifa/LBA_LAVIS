@@ -17,6 +17,7 @@ TAU1_GRID = tuple(round(index / 10, 1) for index in range(11))
 TAU2_GRID = tuple(round(-1 + index / 10, 1) for index in range(21))
 BOOTSTRAP_SEED = 42
 BOOTSTRAP_COUNT = 10_000
+BOOTSTRAP_BATCH_SIZE = 512
 
 _MANIFEST_NAME = "run_manifest.json"
 _SAMPLES_NAME = "refined_samples.json"
@@ -45,7 +46,11 @@ _REQUIRED_RECORD_FIELDS = (
     "conf_base",
     "refined_answer_list",
     "conf_refined",
+    "generation_id",
 )
+_DATASET_ROLE_SPLITS = {
+    "MMMU": {"dev": "val", "validation": "test"},
+}
 
 
 def _number(value, label):
@@ -115,6 +120,17 @@ def _validate_record(record, index):
     gold = record["gt_ans"]
     if not isinstance(gold, (str, list)):
         raise ValueError(f"record {index} field gt_ans must be a string or list")
+    if isinstance(gold, list) and (
+        not gold
+        or not all(isinstance(answer, str) and answer for answer in gold)
+    ):
+        raise ValueError(
+            f"record {index} field gt_ans list must contain non-empty strings"
+        )
+    if not isinstance(record["generation_id"], str) or not record["generation_id"]:
+        raise ValueError(
+            f"record {index} field generation_id must be a non-empty string"
+        )
 
 
 def _validated_candidates(record, index, confidence_type):
@@ -226,16 +242,38 @@ def paired_bootstrap_delta(base_correct, gated_correct, *, seed=42, count=10_000
         raise ValueError("gated_correct must be a sequence")
     if len(base_correct) != len(gated_correct) or not base_correct:
         raise ValueError("paired correctness vectors must have equal non-zero length")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise ValueError("bootstrap seed must be an integer")
     if isinstance(count, bool) or not isinstance(count, int) or count <= 0:
         raise ValueError("bootstrap count must be a positive integer")
+    for label, values in (
+        ("base_correct", base_correct),
+        ("gated_correct", gated_correct),
+    ):
+        if any(
+            isinstance(value, (str, bytes))
+            or not isinstance(value, (bool, int, float, np.bool_, np.number))
+            or value not in (0, 1)
+            for value in values
+        ):
+            raise ValueError(f"{label} values must be binary boolean/0/1")
     differences = np.asarray(gated_correct, dtype=float) - np.asarray(
         base_correct, dtype=float
     )
     rng = np.random.default_rng(seed)
-    sample_indices = rng.integers(
-        0, len(differences), size=(count, len(differences))
-    )
-    bootstrap_deltas = differences[sample_indices].mean(axis=1)
+    bootstrap_deltas = np.empty(count, dtype=float)
+    offset = 0
+    while offset < count:
+        batch_count = min(BOOTSTRAP_BATCH_SIZE, count - offset)
+        sample_indices = rng.integers(
+            0,
+            len(differences),
+            size=(batch_count, len(differences)),
+        )
+        bootstrap_deltas[offset : offset + batch_count] = differences[
+            sample_indices
+        ].mean(axis=1)
+        offset += batch_count
     lower, upper = np.percentile(bootstrap_deltas, [2.5, 97.5])
     return {
         "delta": float(differences.mean()),
@@ -264,6 +302,33 @@ def _unique_qids(qids, label):
         raise ValueError(f"{label} contains duplicate qid values")
 
 
+def _validated_refined_stage(manifest, manifest_path):
+    stages = manifest.get("stages")
+    stage = stages.get("refined") if isinstance(stages, Mapping) else None
+    if not isinstance(stage, Mapping) or not (
+        stage.get("completed") is True and stage.get("state") == "completed"
+    ):
+        raise ValueError(
+            f"refined stage is not completed in manifest {manifest_path}"
+        )
+    generation_id = stage.get("generation_id")
+    if not isinstance(generation_id, str) or not generation_id:
+        raise ValueError(
+            f"refined stage generation_id missing in manifest {manifest_path}"
+        )
+    return stage
+
+
+def _validate_manifest_integer_fields(config):
+    for field in ("N", "M", "K"):
+        value = config[field]
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise ValueError(f"run manifest {field} must be a positive integer")
+    num_data = config["num_data"]
+    if isinstance(num_data, bool) or not isinstance(num_data, int):
+        raise ValueError("run manifest num_data must be an integer")
+
+
 def load_run(run_directory):
     """Load one fresh completed run and validate its exact provenance."""
     run_directory = Path(run_directory).resolve()
@@ -271,6 +336,7 @@ def load_run(run_directory):
     samples_path = run_directory / _SAMPLES_NAME
     manifest = _load_json(manifest_path, "run manifest")
     records = _load_json(samples_path, "refined samples")
+    final_manifest = _load_json(manifest_path, "run manifest")
     if not isinstance(manifest, Mapping):
         raise ValueError("run manifest must be an object")
     config = manifest.get("config")
@@ -282,6 +348,7 @@ def load_run(run_directory):
             "run manifest lacks fresh evaluation provenance fields: "
             f"{missing}"
         )
+    _validate_manifest_integer_fields(config)
     split = config["split"]
     if not isinstance(split, str) or not split:
         raise ValueError("run manifest split must be explicit and non-empty")
@@ -292,13 +359,23 @@ def load_run(run_directory):
         ):
             raise ValueError(f"run manifest {key} must be a non-empty string list")
 
-    stages = manifest.get("stages")
-    stage = stages.get("refined") if isinstance(stages, Mapping) else None
-    if not isinstance(stage, Mapping) or not (
-        stage.get("completed") is True and stage.get("state") == "completed"
-    ):
+    stage = _validated_refined_stage(manifest, manifest_path)
+    if not isinstance(final_manifest, Mapping):
+        raise ValueError("run manifest must be an object")
+    final_stage = _validated_refined_stage(final_manifest, manifest_path)
+    stage_identity = (
+        stage.get("completed"),
+        stage.get("state"),
+        stage.get("generation_id"),
+    )
+    final_stage_identity = (
+        final_stage.get("completed"),
+        final_stage.get("state"),
+        final_stage.get("generation_id"),
+    )
+    if stage_identity != final_stage_identity:
         raise ValueError(
-            f"refined stage is not completed in manifest {manifest_path}"
+            f"refined stage changed while reading run artifacts at {run_directory}"
         )
 
     manifest_qids = manifest.get("qids")
@@ -314,6 +391,12 @@ def load_run(run_directory):
                 f"record={record['split']!r}, manifest={split!r}"
             )
         _validated_candidates(record, index, config["confidence_type"])
+        if record["generation_id"] != stage["generation_id"]:
+            raise ValueError(
+                f"record generation mismatch for qid {record['qid']}: "
+                f"record={record['generation_id']!r}, "
+                f"manifest={stage['generation_id']!r}"
+            )
         record_qids.append(record["qid"])
     _unique_qids(record_qids, "refined samples")
     if record_qids != manifest_qids:
@@ -347,9 +430,37 @@ def _validate_run_pair(dev_run, validation_run):
             for field in mismatches
         )
         raise ValueError(f"incompatible run manifests: {details}")
-    if dev_config["split"] == validation_config["split"]:
+    dataset = dev_config["dataset"]
+    role_splits = _DATASET_ROLE_SPLITS.get(dataset)
+    if role_splits is None:
         raise ValueError(
-            "dev and validation run manifests must declare different explicit splits"
+            f"unsupported dataset for explicit evaluation roles: {dataset!r}"
+        )
+    if dev_config["split"] != role_splits["dev"]:
+        raise ValueError(
+            f"{dataset}: expected dev split {role_splits['dev']!r}, "
+            f"got {dev_config['split']!r}"
+        )
+    if validation_config["split"] != role_splits["validation"]:
+        raise ValueError(
+            f"{dataset}: expected validation split "
+            f"{role_splits['validation']!r}, got {validation_config['split']!r}"
+        )
+    qid_overlap = sorted(set(dev_run["qids"]) & set(validation_run["qids"]))
+    if qid_overlap:
+        raise ValueError(f"dev/validation qid overlap: {qid_overlap}")
+    dev_paths = {
+        str(Path(path).resolve())
+        for path in dev_config["annotation_paths_resolved"]
+    }
+    validation_paths = {
+        str(Path(path).resolve())
+        for path in validation_config["annotation_paths_resolved"]
+    }
+    annotation_overlap = sorted(dev_paths & validation_paths)
+    if annotation_overlap:
+        raise ValueError(
+            f"dev/validation annotation path overlap: {annotation_overlap}"
         )
 
 

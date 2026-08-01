@@ -99,7 +99,7 @@ def _prepare_manifest(cfg, qids, output_dir: Path) -> Path:
     return manifest_path
 
 
-def _refined_records(samples, split):
+def _refined_records(samples, split, generation_id):
     records = []
     for sample in samples:
         record = {
@@ -112,6 +112,7 @@ def _refined_records(samples, split):
             "conf_base": sample["conf_base"],
             "refined_answer_list": sample["refined_answer_list"],
             "conf_refined": sample["conf_refined"],
+            "generation_id": generation_id,
         }
         records.append(record)
     return records
@@ -301,7 +302,11 @@ def run_stage(
     output_path = output_dir / get_output_filename(cfg)
     write_json_atomic(output_path, formatted)
     if mode == "refined":
-        records = _refined_records(samples.values(), str(cfg.dataset_cfg.split))
+        records = _refined_records(
+            samples.values(),
+            str(cfg.dataset_cfg.split),
+            generation_id,
+        )
         write_json_atomic(output_dir / "refined_samples.json", records)
     mark_stage_complete(manifest_path, mode, generation_id)
     logger.info("Saved %s outputs to %s", mode, output_path)
