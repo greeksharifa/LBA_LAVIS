@@ -1,4 +1,6 @@
+import fcntl
 import json
+import multiprocessing
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +16,13 @@ from util.artifacts import (
     write_manifest,
 )
 from util.path import get_output_dir
+
+
+def mark_stage_in_process(path, stage, start, ready, finished):
+    ready.set()
+    start.wait()
+    mark_stage_complete(Path(path), stage)
+    finished.set()
 
 
 def make_config(root: Path, *, split="dev", n=5, m=2, k=8, num_data=-1):
@@ -140,6 +149,63 @@ class ArtifactTests(unittest.TestCase):
                 saved = json.load(handle)
             self.assertTrue(saved["stages"]["subq"]["completed"])
             self.assertEqual([], list(path.parent.glob(f".{path.name}.*.tmp")))
+
+    def test_concurrent_stage_completions_preserve_both_updates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            path = get_output_dir(cfg) / "run_manifest.json"
+            write_manifest(path, create_manifest(cfg, ["q0"]))
+            lock_path = path.with_name(f".{path.name}.lock")
+            context = multiprocessing.get_context("fork")
+            start = context.Event()
+            ready = [context.Event(), context.Event()]
+            finished = [context.Event(), context.Event()]
+            processes = [
+                context.Process(
+                    target=mark_stage_in_process,
+                    args=(path, stage, start, ready[index], finished[index]),
+                )
+                for index, stage in enumerate(("subq", "suba"))
+            ]
+
+            with lock_path.open("a+") as lock_handle:
+                fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+                try:
+                    for process in processes:
+                        process.start()
+                    for event in ready:
+                        self.assertTrue(event.wait(5))
+                    start.set()
+                    completed_while_locked = [event.wait(0.5) for event in finished]
+                finally:
+                    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+                    for process in processes:
+                        process.join(5)
+                        if process.is_alive():
+                            process.terminate()
+                            process.join(5)
+
+            self.assertEqual([False, False], completed_while_locked)
+            self.assertEqual([0, 0], [process.exitcode for process in processes])
+            saved = json.loads(path.read_text())
+            self.assertTrue(saved["stages"]["subq"]["completed"])
+            self.assertTrue(saved["stages"]["suba"]["completed"])
+
+    def test_manifest_rejects_malformed_container_types(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            valid = create_manifest(cfg, ["q0"])
+            malformed_manifests = (
+                [],
+                {**valid, "config": []},
+                {**valid, "qids": None},
+                {**valid, "qids": "q0"},
+            )
+
+            for manifest in malformed_manifests:
+                with self.subTest(manifest=manifest):
+                    with self.assertRaises(ValueError):
+                        validate_manifest(manifest, cfg, ["q0"])
 
     def test_num_data_manifest_uses_post_sampling_qids(self):
         with tempfile.TemporaryDirectory() as tmp:
