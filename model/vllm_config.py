@@ -13,6 +13,40 @@ def configure_vllm_environment() -> None:
 configure_vllm_environment()
 
 
+def patch_zero_count_dummy_video_allocation(builder_cls=None) -> None:
+    """Work around vLLM 0.8.2 allocating a dummy video for count zero.
+
+    Qwen2-VL's dummy-input builder constructs the maximum-size video array
+    before multiplying the result list by ``num_videos``. On image-only jobs
+    that count is zero, but the discarded allocation can still consume tens of
+    GiB per tensor-parallel process.
+    """
+    if builder_cls is None:
+        from vllm.multimodal.profiling import BaseDummyInputsBuilder
+
+        builder_cls = BaseDummyInputsBuilder
+
+    original = builder_cls._get_dummy_videos
+    if getattr(original, "_lba_skips_zero_video", False):
+        return
+
+    def _skip_zero_video(
+        self, *, width: int, height: int, num_frames: int, num_videos: int
+    ):
+        if num_videos == 0:
+            return []
+        return original(
+            self,
+            width=width,
+            height=height,
+            num_frames=num_frames,
+            num_videos=num_videos,
+        )
+
+    _skip_zero_video._lba_skips_zero_video = True
+    builder_cls._get_dummy_videos = _skip_zero_video
+
+
 def build_engine_kwargs(cfg) -> Dict[str, object]:
     """Build the kwargs passed to ``vllm.LLM`` from application config."""
     model_cfg = cfg.model_cfg if hasattr(cfg, "model_cfg") else cfg.model
@@ -31,11 +65,20 @@ def build_engine_kwargs(cfg) -> Dict[str, object]:
             "fps": 1,
         },
     }
+    if os.environ.get("VLLM_USE_V1", "0") == "0":
+        kwargs["worker_cls"] = "model.vllm_worker.ZeroCountVideoSafeWorker"
 
     limit_config = dataset_cfg.get("limit_mm_per_prompt", None)
     if limit_config is not None:
         modality = dataset_cfg.data_type
-        kwargs["limit_mm_per_prompt"] = {modality: limit_config[modality]}
+        if modality not in limit_config:
+            raise ValueError(
+                "dataset.limit_mm_per_prompt must configure its active "
+                f"modality: {modality}"
+            )
+        kwargs["limit_mm_per_prompt"] = {
+            str(name): int(limit) for name, limit in limit_config.items()
+        }
     return kwargs
 
 

@@ -10,7 +10,11 @@ import numpy as np
 import torch
 from transformers import AutoProcessor, AutoModelForCausalLM, AutoTokenizer
 
-from model.vllm_config import build_engine_kwargs, validate_tensor_parallel_size
+from model.vllm_config import (
+    build_engine_kwargs,
+    patch_zero_count_dummy_video_allocation,
+    validate_tensor_parallel_size,
+)
 
 from vllm import LLM, SamplingParams
 
@@ -121,6 +125,7 @@ class Qwen2_5VL(C2RFramework):
 
         engine_args = build_engine_kwargs(self.cfg)
         validate_tensor_parallel_size(engine_args["tensor_parallel_size"])
+        patch_zero_count_dummy_video_allocation()
         llm = LLM(**engine_args)
         return engine_args, llm
 

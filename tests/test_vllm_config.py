@@ -109,6 +109,113 @@ class VllmConfigTests(unittest.TestCase):
         self.assertEqual(0.81, kwargs["gpu_memory_utilization"])
         self.assertEqual(7, kwargs["swap_space"])
         self.assertIs(False, kwargs["enforce_eager"])
+        self.assertEqual(
+            "model.vllm_worker.ZeroCountVideoSafeWorker",
+            kwargs["worker_cls"],
+        )
+
+    def test_engine_kwargs_preserve_zero_limits_for_unused_modalities(self):
+        from model.vllm_config import build_engine_kwargs
+
+        cfg = OmegaConf.create(
+            {
+                "model": {
+                    "model_id": "fixture/model",
+                    "max_model_len": 8192,
+                    "max_num_seqs": 17,
+                    "tensor_parallel_size": 1,
+                    "gpu_memory_utilization": 0.81,
+                    "swap_space": 7,
+                    "enforce_eager": True,
+                },
+                "dataset": {
+                    "data_type": "image",
+                    "limit_mm_per_prompt": {"image": 7, "video": 0},
+                },
+            }
+        )
+
+        kwargs = build_engine_kwargs(cfg)
+
+        self.assertEqual(
+            {"image": 7, "video": 0},
+            kwargs["limit_mm_per_prompt"],
+        )
+
+    def test_v1_keeps_vllm_automatic_worker_selection(self):
+        from model.vllm_config import build_engine_kwargs
+
+        cfg = OmegaConf.create(
+            {
+                "model": {
+                    "model_id": "fixture/model",
+                    "max_model_len": 8192,
+                    "max_num_seqs": 17,
+                    "tensor_parallel_size": 1,
+                    "gpu_memory_utilization": 0.81,
+                    "swap_space": 7,
+                    "enforce_eager": True,
+                },
+                "dataset": {"data_type": "image"},
+            }
+        )
+
+        with patch.dict(os.environ, {"VLLM_USE_V1": "1"}):
+            kwargs = build_engine_kwargs(cfg)
+
+        self.assertNotIn("worker_cls", kwargs)
+
+    def test_mmmu_disables_unused_video_inputs(self):
+        dataset_cfg = OmegaConf.load("config/datasets/MMMU.yaml")["dataset"]
+
+        self.assertEqual(7, dataset_cfg.limit_mm_per_prompt.image)
+        self.assertEqual(0, dataset_cfg.limit_mm_per_prompt.video)
+
+    def test_zero_count_dummy_video_patch_skips_the_vllm_allocation(self):
+        from model.vllm_config import patch_zero_count_dummy_video_allocation
+
+        class FakeDummyInputsBuilder:
+            calls = 0
+
+            def _get_dummy_videos(
+                self, *, width, height, num_frames, num_videos
+            ):
+                type(self).calls += 1
+                return [object()] * num_videos
+
+        patch_zero_count_dummy_video_allocation(FakeDummyInputsBuilder)
+        patch_zero_count_dummy_video_allocation(FakeDummyInputsBuilder)
+        builder = FakeDummyInputsBuilder()
+
+        self.assertEqual(
+            [],
+            builder._get_dummy_videos(
+                width=1280, height=1280, num_frames=1024, num_videos=0
+            ),
+        )
+        self.assertEqual(0, FakeDummyInputsBuilder.calls)
+        self.assertEqual(
+            2,
+            len(
+                builder._get_dummy_videos(
+                    width=16, height=16, num_frames=2, num_videos=2
+                )
+            ),
+        )
+        self.assertEqual(1, FakeDummyInputsBuilder.calls)
+
+    def test_custom_worker_applies_patch_inside_spawned_process(self):
+        from model.vllm_worker import ZeroCountVideoSafeWorker
+        from vllm.worker.worker import Worker
+
+        worker = object.__new__(ZeroCountVideoSafeWorker)
+        with patch(
+            "model.vllm_worker.patch_zero_count_dummy_video_allocation"
+        ) as apply_patch, patch.object(Worker, "__init__", return_value=None) as parent_init:
+            ZeroCountVideoSafeWorker.__init__(worker, fixture=True)
+
+        apply_patch.assert_called_once_with()
+        parent_init.assert_called_once_with(fixture=True)
 
     def test_tensor_parallel_preflight_rejects_visible_device_mismatch(self):
         from model.vllm_config import validate_tensor_parallel_size

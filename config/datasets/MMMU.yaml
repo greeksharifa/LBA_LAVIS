@@ -9,7 +9,9 @@ dataset:
     add_base_prompt: True
   
   vis_root: huggingface # [None|huggingface|vis_path]
-  limit_mm_per_prompt: {image: 7}
+  # Qwen2.5-VL also supports video. Disable it explicitly so vLLM does not
+  # allocate a maximum-size dummy video on every tensor-parallel rank.
+  limit_mm_per_prompt: {image: 7, video: 0}
 
   ann_paths:
     val:
