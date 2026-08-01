@@ -1,7 +1,6 @@
 import re
 import json
 
-from dataclasses import asdict
 from pprint import pprint
 from pathlib import Path
 from typing import Any, List, Tuple, Union, Optional
@@ -10,7 +9,10 @@ from abc import ABC, abstractmethod
 import numpy as np
 import torch
 from transformers import AutoProcessor, AutoModelForCausalLM, AutoTokenizer
-from vllm import LLM, SamplingParams, EngineArgs
+
+from model.vllm_config import build_engine_kwargs, validate_tensor_parallel_size
+
+from vllm import LLM, SamplingParams
 
 from config.configs import Config
 # from utils.logger import get_logger
@@ -117,23 +119,8 @@ class Qwen2_5VL(C2RFramework):
         self.model_id = self.cfg.model_cfg.model_id
         self.modality = self.cfg.dataset_cfg.data_type
 
-        engine_args = asdict(EngineArgs(
-            model=self.model_id,
-            max_model_len=16384,
-            max_num_seqs=self.cfg.model_cfg.max_num_seqs,
-            mm_processor_kwargs={
-                "min_pixels": 28 * 28,
-                "max_pixels": 1280 * 28 * 28,
-                "fps": 1,
-            },
-            # limit_mm_per_prompt={modality: limit_mm_per_prompt},
-        ))
-        # hasattr
-        if self.cfg.dataset_cfg.get("limit_mm_per_prompt", None) is not None:
-            limit_mm_per_prompt = self.cfg.dataset_cfg.limit_mm_per_prompt[self.modality]
-            engine_args.update({
-                "limit_mm_per_prompt": {self.modality: limit_mm_per_prompt}
-            })
+        engine_args = build_engine_kwargs(self.cfg)
+        validate_tensor_parallel_size(engine_args["tensor_parallel_size"])
         llm = LLM(**engine_args)
         return engine_args, llm
 
@@ -160,4 +147,3 @@ class Qwen2_5VL(C2RFramework):
             'multi_modal_uuids': {self.modality: mm_uuids},
             'prompt': text_prompt
         }
-        

@@ -1,6 +1,6 @@
 runner:
   # context     : "subqa"   # [subqa, default]
-  mode        : "dummy" # [subq, suba, base, refined, CoT, blind, llm_judge] | subqa: generate sub-qas. visualize: visualize the results without inference. others: inference and visualize.
+  mode        : "dummy" # [multi_stage, subq, suba, base, refined]
   subqa_mode  : "self"    # [self, GT, irrSubQ, wrongSubA, QC_K, QC_C, QC_Q] | question category: [Knowledge, C, Question]
   visualize_only: False
 
@@ -51,6 +51,8 @@ model:
   tensor_parallel_size: 4
   gpu_memory_utilization: 0.95
   swap_space: 16
+  max_model_len: 16384
+  enforce_eager: true
 
   max_num_seqs: 256
   max_tokens: 1024
