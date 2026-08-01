@@ -8,6 +8,7 @@
 import logging
 import json
 import os
+import copy
 from typing import Dict
 
 from omegaconf import OmegaConf
@@ -105,6 +106,16 @@ class Config:
     def get_config(self):
         return self.config
 
+    def for_stage(self, mode):
+        """Return an independent config whose runner mode targets one stage."""
+        stage_config = self.__class__.__new__(self.__class__)
+        stage_config.__dict__ = {
+            key: value for key, value in self.__dict__.items() if key != "config"
+        }
+        stage_config.config = copy.deepcopy(self.config)
+        stage_config.config.runner.mode = mode
+        return stage_config
+
     @property
     def runner_cfg(self):
         return self.config.runner
@@ -132,4 +143,3 @@ class Config:
 
     def to_dict(self):
         return OmegaConf.to_container(self.config)
-

@@ -21,25 +21,15 @@ def get_output_dir(cfg: Config) -> Path:
     dataset_cfg = cfg.dataset_cfg
     model_cfg = cfg.model_cfg
 
-    if runner_cfg.mode == "subq" or runner_cfg.mode == "suba":
-        output_dir = Path(runner_cfg.subqa_dir) / runner_cfg.subqa_mode
-    else:
-        output_dir = Path(runner_cfg.output_dir)
-        # if runner_cfg.mode == "CoT":
-        #     output_dir = Path(runner_cfg.output_dir) / f"CoT_{runner_cfg.CoT_path}_paths"
-        # elif runner_cfg.mode == "llm_judge":
-        #     output_dir = Path(runner_cfg.output_dir) / f"llm_judge_{runner_cfg.llm_judge_mode}"
-        # else:
-        #     output_dir = Path(runner_cfg.output_dir) / runner_cfg.mode
-    
-    output_dir = output_dir / dataset_cfg.dataset_name / model_cfg.model_name
-    return output_dir
+    return (
+        Path(runner_cfg.output_dir)
+        / dataset_cfg.dataset_name
+        / model_cfg.model_name
+        / dataset_cfg.split
+        / f"N={runner_cfg.N}_M={runner_cfg.M}_K={runner_cfg.K}"
+    )
 
 
 def get_sub_qas_path(cfg: Config) -> Tuple[Path, Path]:
-    runner_cfg = cfg.runner_cfg
-    dataset_cfg = cfg.dataset_cfg
-    model_cfg = cfg.model_cfg
-
-    sub_qas_path = Path("subqa") / runner_cfg.subqa_mode / dataset_cfg.dataset_name / model_cfg.model_name
-    return sub_qas_path / "subq_outputs.json", sub_qas_path / "suba_outputs.json"
+    output_dir = get_output_dir(cfg)
+    return output_dir / "subq_outputs.json", output_dir / "suba_outputs.json"

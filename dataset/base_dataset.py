@@ -53,26 +53,6 @@ class BaseDataset(ABC):
             ann["qid"] = str(ann["qid"])
 
 
-        # load sub-qas
-        if runner_cfg.mode == "subq":
-            pass
-        elif runner_cfg.mode == "suba":
-            sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
-            self.subqs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
-        else:
-            sub_qs_path, sub_as_path = get_sub_qas_path(self.cfg)
-            self.subqs = json.load(open(sub_qs_path, 'r')) if sub_qs_path.exists() else None
-            self.subas = json.load(open(sub_as_path, 'r')) if sub_as_path.exists() else None
-            if runner_cfg.mode == "refined":
-                # load base answers
-                base_answers_path = get_output_dir(self.cfg) / "base_outputs.json"
-                self.bases = json.load(open(base_answers_path, 'r')) if base_answers_path.exists() else None
-        # if runner_cfg.mode != "subqa":
-        #     sub_qas_path, sub_as_path = get_sub_qas_path(self.cfg)
-        #     self.sub_qas = json.load(open(sub_qas_path, 'r')) if sub_qas_path.exists() else None
-        # else:
-        #     self.sub_qas = None
-
         self.logger.info(f"Original dataset size: {len(self.annotation)}")
         self.logger.info(f"Original qids        : {self.annotation[0]['qid']} ... {self.annotation[-1]['qid']}")
 
@@ -87,6 +67,10 @@ class BaseDataset(ABC):
             self.annotation = [self.annotation[i] for i in idxs]
             self.logger.info(f"Adjusted dataset size: {len(self.annotation)}")
             self.logger.info(f"Adjusted qids        : {self.annotation[0]['qid']} ... {self.annotation[-1]['qid']}")
+
+        # Dependencies are intentionally loaded after sampling so qid validation
+        # applies to the exact examples in this run.
+        self._load_stage_dependencies()
         # if runner_cfg.start_pnt != -1:
         #     start_idx = int((len(self.annotation) / model_cfg.batch_size) * (runner_cfg.start_pnt / 100))
         #     self.logger.info(f"start_idx: {start_idx}")
@@ -160,27 +144,13 @@ class BaseDataset(ABC):
         if "data_type" not in result:
             result["data_type"] = self.cfg.dataset_cfg.data_type
             
-        # load sub-qas
-        if self.cfg.runner_cfg.mode != "subq":
-            subq_list, conf_subq_list = self._get_base_or_subs(ann, "subq")
-            result.update({
-                "subq_list": subq_list,
-                "conf_subq_list": conf_subq_list,
-            })
-
-            if self.cfg.runner_cfg.mode != "suba":
-                suba_list, conf_suba_list = self._get_base_or_subs(ann, "suba")
-                result.update({
-                    "suba_list": suba_list,
-                    "conf_suba_list": conf_suba_list,
-                })
-            if self.cfg.runner_cfg.mode == "refined":
-                # load base answers
-                base_answer, conf_base = self._get_base_or_subs(ann, "base")
-                result.update({
-                    "base_answer": base_answer,
-                    "conf_base": conf_base,
-                })
+        for dependency in self._required_artifact_stages():
+            value, confidence = self._get_base_or_subs(ann, dependency)
+            value_key = "base_answer" if dependency == "base" else f"{dependency}_list"
+            confidence_key = (
+                "conf_base" if dependency == "base" else f"conf_{dependency}_list"
+            )
+            result.update({value_key: value, confidence_key: confidence})
         
         if self.cfg.runner_cfg.few_shot:
             # Get few-shot samples for the current sub-category
@@ -191,6 +161,57 @@ class BaseDataset(ABC):
             })
 
         return result
+
+    def _required_artifact_stages(self):
+        mode = self.cfg.runner_cfg.mode
+        if mode in ("subq", "base"):
+            return ()
+        if mode == "suba":
+            return ("subq",)
+        if mode == "refined":
+            return ("subq", "suba", "base")
+        return ("subq", "suba")
+
+    def _load_stage_dependencies(self):
+        subq_path, suba_path = get_sub_qas_path(self.cfg)
+        paths = {
+            "subq": subq_path,
+            "suba": suba_path,
+            "base": get_output_dir(self.cfg) / "base_outputs.json",
+        }
+        selected_qids = [ann["qid"] for ann in self.annotation]
+
+        for stage in self._required_artifact_stages():
+            path = paths[stage]
+            if not path.is_file():
+                raise FileNotFoundError(f"required {stage} artifact not found: {path}")
+            with path.open("r", encoding="utf-8") as handle:
+                artifact = json.load(handle)
+            self._validate_stage_artifact(stage, path, artifact, selected_qids)
+            setattr(self, f"{stage}s", artifact)
+
+    def _validate_stage_artifact(self, stage, path, artifact, qids):
+        value_key = "base_answer" if stage == "base" else f"{stage}_list"
+        confidence_key = f"conf_{stage}"
+        confidence_type = self.cfg.runner_cfg.confidence_type
+
+        if not isinstance(artifact, dict):
+            raise KeyError(f"{path}: artifact must be keyed by qid")
+        for qid in qids:
+            if qid not in artifact:
+                raise KeyError(f"{path}: missing qid {qid}")
+            entry = artifact[qid]
+            if not isinstance(entry, dict):
+                raise KeyError(f"{path}: qid {qid} must map to an object")
+            for key in (value_key, confidence_key):
+                if key not in entry:
+                    raise KeyError(f"{path}: qid {qid} missing key {key}")
+            confidence = entry[confidence_key]
+            if not isinstance(confidence, dict) or confidence_type not in confidence:
+                raise KeyError(
+                    f"{path}: qid {qid} missing key "
+                    f"{confidence_key}.{confidence_type}"
+                )
 
     def _get_base_or_subs(self, ann, mode: str):
         qid = ann["qid"]
