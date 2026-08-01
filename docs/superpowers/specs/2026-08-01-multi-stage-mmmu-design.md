@@ -71,7 +71,7 @@ dev 탐색 grid는 `tau1 = 0.0, 0.1, ..., 1.0`, `tau2 = -1.0, -0.9, ..., 1.0`으
 
 동일 split에서 임계값을 탐색한 oracle/post-hoc 값은 진단값으로만 표시하며 성능 향상으로 보고하지 않는다. 결과 JSON에는 split, 표본 수, 임계값, threshold source를 기록한다.
 
-confidence 비교는 `[0, 1]` 범위의 공통 higher-is-better score로 변환한다. `token_min_prob`는 그대로, `seq_ppl`은 `1 / max(seq_ppl, epsilon)`을 사용한다. 후보 선택과 gate는 이 변환을 공유하며 두 방향을 단위 테스트한다.
+confidence 비교는 `[0, 1]` 범위의 공통 higher-is-better score로 변환한다. `token_min_prob`는 그대로, `seq_ppl`은 `min(1, 1 / max(seq_ppl, epsilon))`을 사용한다. 후보 선택과 gate는 이 변환을 공유하며 두 방향을 단위 테스트한다.
 
 현재 저장소의 1문항 smoke는 정확도를 주장할 근거가 아니다. 기존 `/home/ywjang/C2R`의 900문항 수치는 provenance가 다른 historical result로만 보고한다. 이번 구현의 성능 결론은 historical artifact와 비교 가능한 `N=5, M=2, K=8, confidence=token_min_prob`로 fresh dev 150문항에서 threshold를 선택하고 fresh validation 900문항에 고정 적용한 뒤에만 확정한다. 동일 900 qid의 paired base/C2R delta에 대해 seed 42, 10,000회 paired bootstrap의 percentile 95% CI를 함께 기록한다.
 
