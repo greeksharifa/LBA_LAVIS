@@ -98,6 +98,42 @@ class MMMUOpenTests(unittest.TestCase):
             ),
         )
 
+    def test_final_conclusion_overrides_conflicting_intermediate_answer(self):
+        dataset = make_adapter()
+
+        self.assertEqual(
+            0,
+            dataset.get_score(
+                "The answer is 4. Therefore, the final answer is 5.",
+                "4",
+                "open_ended",
+            ),
+        )
+
+    def test_final_conclusion_ignores_unrelated_earlier_number(self):
+        dataset = make_adapter()
+
+        self.assertEqual(
+            0,
+            dataset.get_score(
+                "The intermediate result is 4. Therefore, the final answer is 5.",
+                "4",
+                "open_ended",
+            ),
+        )
+
+    def test_empty_final_conclusion_does_not_fall_back_to_intermediate_answer(self):
+        dataset = make_adapter()
+
+        self.assertEqual(
+            0,
+            dataset.get_score(
+                "The answer is 4. Therefore, the final answer is empty.",
+                "4",
+                "open_ended",
+            ),
+        )
+
     def test_multiple_choice_remains_exact_normalized_option_letter_match(self):
         dataset = make_adapter()
 
@@ -117,13 +153,26 @@ class MMMUOpenTests(unittest.TestCase):
         root_dir = Path(OmegaConf.load("config/default.yaml").dataset.root_dir)
         expected = {"val": 9, "test": 53}
 
+        annotation_paths = {
+            split: root_dir / dataset_cfg.ann_paths[split][0]
+            for split in expected
+        }
+        missing_paths = [
+            str(path) for path in annotation_paths.values() if not path.is_file()
+        ]
+        if missing_paths:
+            self.skipTest(
+                "configured MMMU annotation files are unavailable: "
+                + ", ".join(missing_paths)
+            )
+
         self.assertTrue(hasattr(MMMU, "canonicalize_question_type"))
         if not hasattr(MMMU, "canonicalize_question_type"):
             return
 
         for split, expected_count in expected.items():
             with self.subTest(split=split):
-                annotation_path = root_dir / dataset_cfg.ann_paths[split][0]
+                annotation_path = annotation_paths[split]
                 samples = json.loads(annotation_path.read_text())
                 source_types = [sample["question_type"] for sample in samples]
                 canonical_types = [

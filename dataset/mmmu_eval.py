@@ -39,12 +39,12 @@ def _extract_numbers(value: str) -> List[str]:
 
 
 def _key_subresponses(response: str) -> List[str]:
-    response = response.strip().strip(".")
+    response = response.strip().strip(".").lower()
     subresponses = re.split(r"\.\s+(?=[A-Z])|\n", response)
     key_responses = []
 
     for index, subresponse in enumerate(subresponses):
-        lowered = subresponse.lower()
+        lowered = subresponse
         indicators = _KEY_INDICATORS + (("=",) if index == len(subresponses) - 1 else ())
         candidates = [
             lowered.split(indicator)[-1].strip()
@@ -59,7 +59,7 @@ def _key_subresponses(response: str) -> List[str]:
         if candidates:
             key_responses.append(min(candidates, key=len))
 
-    return key_responses or [response.lower()]
+    return key_responses or [response]
 
 
 def parse_open_response(response: str) -> List[NormalizedAnswer]:
