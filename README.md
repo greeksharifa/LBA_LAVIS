@@ -9,6 +9,14 @@ The server profile verified for these commands is:
 - vLLM 0.8.2
 - transformers 4.55.2
 
+Qwen3-VL requires the newer server profile used by the branch-local Qwen3
+experiments:
+
+- Python 3.10.20 at `/home/ywjang/miniconda3/envs/qwen3vl/bin/python`
+- torch 2.9.0+cu128
+- vLLM 0.11.2
+- transformers 4.57.6
+
 Install the repository requirements with the verified interpreter:
 
 ```bash
@@ -23,6 +31,11 @@ process defaults via `setdefault`, so explicit user settings still win. The
 commands repeat those defaults inside the wrapper's `-- env` section for
 reproducibility, while `model.enforce_eager=true` explicitly keeps eager
 execution enabled.
+
+Use the `qwen3vl` interpreter and explicitly set `VLLM_USE_V1=1` for
+`qwen3-vl-8b`. The older `qwen2vl` environment does not recognize the
+`qwen3_vl` architecture. Qwen2.5 commands continue to use the V0 profile shown
+below.
 
 The verified Qwen2.5-VL MMMU profile uses greedy generation with
 `sampling_n=1`, so it sets CPU KV `swap_space=0`. This avoids the default
@@ -180,6 +193,25 @@ were regenerated; raw generation artifacts and manifests remained
 byte-for-byte unchanged. The only recorded structural caveat is that one
 Qwen2.5 validation parent expansion was partial; all 900 qids and all depth-1
 projections were retained.
+
+## Fresh branch-local original C2R TP=1 MMMU validation results
+
+These depth-1 runs use the same current comparison settings as the hierarchy:
+`N=4`, `M=2`, `K=4`, full 150-question dev and 900-question validation splits,
+and tensor parallelism 1. Their run directories are under
+`output/original-c2r-current-tp1/MMMU/<model>/<split>/N=4_M=2_K=4`.
+
+| Model | Direct baseline | Raw C2R | Dev-tuned gated (primary) | Validation in-sample (diagnostic) |
+|---|---:|---:|---:|---:|
+| Qwen2.5-VL-7B | 454/900 (50.44%) | 454/900 (50.44%) | 452/900 (50.22%); tau1=0.6, tau2=-0.1; delta=-0.22 pp; W-to-C/C-to-W=37/39; 95% CI [-2.11, +1.67] pp | 462/900 (51.33%); tau1=0.8, tau2=0.0; delta=+0.89 pp; W-to-C/C-to-W=47/39; 95% CI [-1.11, +2.89] pp |
+| Qwen3-VL-8B | 473/900 (52.56%) | 495/900 (55.00%) | 492/900 (54.67%); tau1=0.8, tau2=0.2; delta=+2.11 pp; W-to-C/C-to-W=20/1; 95% CI [+1.22, +3.11] pp | 495/900 (55.00%); tau1=1.0, tau2=-0.1; delta=+2.44 pp; W-to-C/C-to-W=25/3; 95% CI [+1.33, +3.56] pp |
+
+Under the requested validation in-sample comparison, Qwen2.5 scores 50.44%,
+51.33%, and 51.22% at depths 0, 1, and 2. Qwen3 scores 52.56%, 55.00%, and
+56.11%; the independently generated depth-2 direct baseline is 52.44%, one
+answer below the depth-1 run's direct baseline. Under leakage-free dev tuning,
+the corresponding depth-1/depth-2 scores are 50.22%/49.89% for Qwen2.5 and
+54.67%/55.00% for Qwen3.
 
 ## Historical results
 
