@@ -28,8 +28,11 @@ Apply these rules in order:
    Markdown emphasis, whitespace, and terminal punctuation, such as `A`,
    `(A).`, or `**A.**`.
 2. Find explicit conclusions such as `answer is A`, `answer: option A`,
-   `final answer is (C)`, and `\\boxed{C}`. If multiple explicit conclusions
-   occur, select the last one by source position.
+   `final answer is (C)`, `**Answer: D**`,
+   `Final Answer: **B. option text**`, `\\boxed{C}`, and
+   `\\boxed{C. option text}`. Markdown headings, emphasis, and blockquote
+   wrappers do not change the selected leading label. If multiple conclusion
+   events occur, select the last one by source position.
 3. Accept a leading, delimited option label followed by option text or an
    explanation, such as `A. $6`, `A) explanation`, `(A) explanation`, or
    `A: option text`.
@@ -38,11 +41,18 @@ Apply these rules in order:
 The parser is case-insensitive. It may return letters `A` through `Z`; the
 separate gold comparison determines correctness.
 
+The parser models recognized conclusions as ordered valid, invalid, or ignored
+events. A later malformed strong marker such as `Final answer: unknown`
+invalidates an earlier answer. Bounded explanatory reuse such as
+`The answer is based on the calculation` is ignored rather than treated as a
+new conclusion. Coordinated alternatives remain invalid through Markdown and
+blockquote wrappers, including `**A** or **B**`.
+
 The parser must reject ambiguous prose such as `A because it is correct`, a
 letter occurring incidentally inside a sentence, responses with no explicit or
-leading answer format, empty values, and malformed values. It must not match
-option text, use the gold answer to extract a candidate, or randomly select a
-fallback.
+leading answer format, empty values, malformed values, numeric boxed payloads,
+and multiple coordinated labels. It must not match option text, use the gold
+answer to extract a candidate, or randomly select a fallback.
 
 `evaluate_multiple_choice()` parses the prediction, normalizes the gold as an
 exact option letter, and compares the two. MMMU open-ended evaluation is
@@ -79,6 +89,8 @@ Use TDD to add focused tests before production changes.
 - Accept leading delimited labels with option text.
 - Accept explicit answer/final-answer/boxed forms and choose the last explicit
   conclusion when earlier reasoning conflicts.
+- Accept Markdown-emphasized and labeled boxed singleton conclusions while
+  rejecting coordinated alternatives across emphasis and blockquote wrappers.
 - Reject `A because ...`, incidental letters, missing conclusions, and empty
   responses.
 - Preserve all existing open-ended normalization cases.

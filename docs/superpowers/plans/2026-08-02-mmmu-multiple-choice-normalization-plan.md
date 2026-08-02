@@ -26,7 +26,7 @@
 - Modify: `tests/test_mmmu_open.py:228`
 - Modify: `tests/test_c2r_evaluation.py`
 
-- [ ] **Step 1: Add focused accepted-format tests**
+- [x] **Step 1: Add focused accepted-format tests**
 
 Add tests through the real `MMMU.get_score()` boundary for:
 
@@ -48,7 +48,7 @@ for prediction in (
     self.assertEqual(1, dataset.get_score(prediction, "A", "multiple-choice"))
 ```
 
-- [ ] **Step 2: Add precedence and rejection tests**
+- [x] **Step 2: Add precedence and rejection tests**
 
 Assert the last explicit conclusion wins, while ambiguous/non-answer prose is
 not guessed:
@@ -68,14 +68,14 @@ for prediction in (
     self.assertEqual(0, dataset.get_score(prediction, "A", "multiple-choice"))
 ```
 
-- [ ] **Step 3: Add a C2R boundary test**
+- [x] **Step 3: Add a C2R boundary test**
 
 Create a normal multiple-choice `refined_samples` record with `base_answer` set
 to `A. option text` and the selected refined answer set to `Final answer: A`.
 Call `prepare_samples()` without a custom scorer and assert both
 `base_correct` and `refined_correct` are true.
 
-- [ ] **Step 4: Run RED tests**
+- [x] **Step 4: Run RED tests**
 
 Run:
 
@@ -92,13 +92,13 @@ requires a whole-string single letter; existing open-answer tests remain green.
 **Files:**
 - Modify: `dataset/mmmu_eval.py:90-107`
 
-- [ ] **Step 1: Add dedicated compiled patterns**
+- [x] **Step 1: Add dedicated compiled patterns**
 
 Create separate patterns for whole answers, explicit answer markers, boxed
 answers, and leading delimited labels. Keep matching case-insensitive and
 require a non-letter boundary after every captured option letter.
 
-- [ ] **Step 2: Implement the parser without the gold answer**
+- [x] **Step 2: Implement the parser without the gold answer**
 
 Implement this control flow:
 
@@ -125,18 +125,18 @@ def parse_multiple_choice_response(response: str):
 Do not add option-text matching, random fallback, candidate-list dependencies,
 or gold-dependent extraction.
 
-- [ ] **Step 3: Route multiple-choice evaluation through the parser**
+- [x] **Step 3: Route multiple-choice evaluation through the parser**
 
 Parse only the prediction. Normalize the gold with the existing exact-letter
 normalizer, and return false when prediction parsing returns `None`. This avoids
 malformed `None == None` matches. Leave open-answer code byte-for-byte
 unchanged.
 
-- [ ] **Step 4: Run GREEN focused tests**
+- [x] **Step 4: Run GREEN focused tests**
 
 Run the Task 1 command. Expected: all focused tests pass.
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 ```bash
 /home/ywjang/miniconda3/envs/qwen2vl/bin/python -m unittest discover -s tests -p 'test_*.py'
@@ -144,7 +144,7 @@ Run the Task 1 command. Expected: all focused tests pass.
 
 Expected: zero failures.
 
-- [ ] **Step 6: Commit the parser and tests**
+- [x] **Step 6: Commit the parser and tests**
 
 ```bash
 git add dataset/mmmu_eval.py tests/test_mmmu_open.py tests/test_c2r_evaluation.py
@@ -158,7 +158,7 @@ git commit -m "fix: normalize MMMU choice responses"
 - Create: `scripts/evaluate_c2r_in_sample.py`
 - Modify: `tests/test_c2r_evaluation.py`
 
-- [ ] **Step 1: Add failing paired-transition assertions**
+- [x] **Step 1: Add failing paired-transition assertions**
 
 Extend report tests with samples containing one base-wrong/gated-correct and one
 base-correct/gated-wrong transition. Require every split report to contain:
@@ -170,7 +170,7 @@ base-correct/gated-wrong transition. Require every split report to contain:
 }
 ```
 
-- [ ] **Step 2: Add a failing in-sample report test**
+- [x] **Step 2: Add a failing in-sample report test**
 
 Specify a public `evaluate_run_in_sample()` API. Assert that it searches all
 231 threshold pairs, reports every max-accuracy threshold, applies the existing
@@ -178,12 +178,12 @@ deterministic tie break, labels its method
 `fixed_validation_grid_search_in_sample`, and keeps the same provenance,
 bootstrap, and transition fields as pair evaluation.
 
-- [ ] **Step 3: Add a failing CLI test**
+- [x] **Step 3: Add a failing CLI test**
 
 Run `scripts/evaluate_c2r_in_sample.py --run <fixture>` and require atomic
 `c2r_evaluation_validation_tuned.json` output with no temporary file left.
 
-- [ ] **Step 4: Run tests to verify RED**
+- [x] **Step 4: Run tests to verify RED**
 
 ```bash
 /home/ywjang/miniconda3/envs/qwen2vl/bin/python -m unittest tests.test_c2r_evaluation
@@ -191,7 +191,7 @@ Run `scripts/evaluate_c2r_in_sample.py --run <fixture>` and require atomic
 
 Expected: failures for the missing public API, transition fields, and CLI.
 
-- [ ] **Step 5: Implement transition counts and the public report builder**
+- [x] **Step 5: Implement transition counts and the public report builder**
 
 Add `paired_transitions` in `_split_report()`. Add
 `evaluate_run_in_sample(run_directory, *, scorer=evaluate_answer,
@@ -200,12 +200,12 @@ bootstrap_seed=42, bootstrap_count=10000)` using `load_run()`,
 grid metadata in the public function rather than the CLI so direct callers and
 the CLI produce an identical schema.
 
-- [ ] **Step 6: Implement the thin CLI**
+- [x] **Step 6: Implement the thin CLI**
 
 Parse `--run` and optional `--output`, call `evaluate_run_in_sample()`, and use
 `write_report_atomic()`. Do not import private names from `evaluation.c2r`.
 
-- [ ] **Step 7: Run GREEN tests and commit**
+- [x] **Step 7: Run GREEN tests and commit**
 
 ```bash
 /home/ywjang/miniconda3/envs/qwen2vl/bin/python -m unittest tests.test_c2r_evaluation
@@ -222,24 +222,24 @@ git commit -m "feat: add reproducible in-sample C2R evaluation"
   - `output/hierarchical-full-qwen3-tp1/.../c2r_evaluation.json`
   - `output/hierarchical-full-qwen3-tp1/.../c2r_evaluation_validation_tuned.json`
 
-- [ ] **Step 1: Snapshot generation artifact hashes and manifests**
+- [x] **Step 1: Snapshot generation artifact hashes and manifests**
 
 Hash both models' dev/validation `run_manifest.json`, `base_outputs.json`,
 `refined_outputs.json`, and `refined_samples.json`. These hashes are the
 non-mutation acceptance baseline.
 
-- [ ] **Step 2: Recompute dev-selected reports in parallel on CPU**
+- [x] **Step 2: Recompute dev-selected reports in parallel on CPU**
 
 Run two `scripts/evaluate_c2r.py` processes concurrently, one per model, with
 the existing Qwen2.5 and Qwen3 dev/validation run directories.
 
-- [ ] **Step 3: Recompute validation-selected diagnostic reports in parallel**
+- [x] **Step 3: Recompute validation-selected diagnostic reports in parallel**
 
 Run two `scripts/evaluate_c2r_in_sample.py` processes concurrently to rewrite
 each `c2r_evaluation_validation_tuned.json` with the explicit
 `fixed_validation_grid_search_in_sample` provenance label.
 
-- [ ] **Step 4: Verify metrics and transitions**
+- [x] **Step 4: Verify metrics and transitions**
 
 Report direct, raw hierarchy, dev-selected validation, validation-selected
 validation, thresholds, switch counts, paired confidence intervals, and
@@ -250,7 +250,7 @@ Require Qwen3 validation direct accuracy to be at least 50% and no more than
 count under the approved parser is `472/900 = 52.44%`; investigate rather than
 accept completion if the fresh result falls outside that range.
 
-- [ ] **Step 5: Prove generation artifacts were not changed**
+- [x] **Step 5: Prove generation artifacts were not changed**
 
 Recompute Task 4 Step 1 hashes and require exact equality. Validate both
 manifests, qid ordering, stage lineage, tree counts, and report sample counts.
@@ -261,26 +261,26 @@ manifests, qid ordering, stage lineage, tree counts, and report sample counts.
 - Modify: `README.md:118-140`
 - Test: `tests/test_readme_commands.py`
 
-- [ ] **Step 1: Document the scoring boundary**
+- [x] **Step 1: Document the scoring boundary**
 
 Explain that MMMU multiple-choice generations are deterministically parsed from
 explicit answer formats before exact option-letter comparison; no random or
 ground-truth-based fallback is used.
 
-- [ ] **Step 2: Add fresh branch-local results**
+- [x] **Step 2: Add fresh branch-local results**
 
 Add the corrected Qwen2.5/Qwen3 validation comparison. Keep the historical
 table clearly labeled, and label validation-tuned figures as in-sample rather
 than leakage-free generalization results.
 
-- [ ] **Step 3: Run README and evaluator tests**
+- [x] **Step 3: Run README and evaluator tests**
 
 ```bash
 /home/ywjang/miniconda3/envs/qwen2vl/bin/python -m unittest \
   tests.test_readme_commands tests.test_mmmu_open tests.test_c2r_evaluation
 ```
 
-- [ ] **Step 4: Run closing verification**
+- [x] **Step 4: Run closing verification**
 
 ```bash
 /home/ywjang/miniconda3/envs/qwen2vl/bin/python -m unittest discover -s tests -p 'test_*.py'
@@ -288,14 +288,28 @@ git diff --check
 git status --short
 ```
 
-- [ ] **Step 5: Request independent code review and address blockers**
+- [x] **Step 5: Request independent code review and address blockers**
 
 Review for parser false positives, open-answer regression, C2R scorer drift,
 artifact mutation, and misleading validation-tuned reporting.
 
-- [ ] **Step 6: Commit documentation and final fixes**
+- [x] **Step 6: Commit documentation and final fixes**
 
 ```bash
 git add README.md tests/test_readme_commands.py
 git commit -m "docs: report normalized MMMU results"
 ```
+
+## Implementation outcome
+
+Completed on 2026-08-02. The implementation added gold-independent MMMU
+multiple-choice normalization, reproducible dev-selected and validation
+in-sample evaluators, paired transition counts, and branch-local Qwen2.5/Qwen3
+results. Final verification covered 213 unit tests, exact report recomputation,
+four-run manifest/tree/projection validation, and SHA-256 equality for all 16
+source generation and manifest artifacts before and after evaluation.
+
+The only observed hierarchy degradation was one allowed partial descendant
+expansion in the 900-question Qwen2.5 validation run; all qids and all four
+depth-1 projections were retained. Validation-tuned numbers remain diagnostic
+because threshold selection and reporting use the same split.
