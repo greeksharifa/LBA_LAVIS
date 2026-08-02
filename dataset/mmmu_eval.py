@@ -30,17 +30,28 @@ _WHOLE_CHOICE = re.compile(
     """,
     re.IGNORECASE | re.VERBOSE,
 )
+_EXPLICIT_MARKER = re.compile(
+    r"\b(?:final\s+)?answer\s*(?:is\b|:)",
+    re.IGNORECASE,
+)
 _EXPLICIT_CHOICE = re.compile(
     rf"""
-    \b(?:final\s+)?answer\s*(?:is\b|:)\s*(?:option\s+)?(?:
-        \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+    \b(?:final\s+)?answer\s*(?:is\b|:)\s*(?:
+        option\s+(?:
+            \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+            |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+            |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
+            |([A-Z])(?![A-Z)*])\s*{_TERMINAL_PUNCTUATION}
+        )
+        |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
-        |([A-Z])(?![A-Z)*])\s*{_TERMINAL_PUNCTUATION}
+        |([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*$
     )
     """,
     re.IGNORECASE | re.VERBOSE,
 )
+_BOXED_MARKER = re.compile(r"(?<!\\)\\boxed\b", re.IGNORECASE)
 _BOXED_CHOICE = re.compile(
     r"(?<!\\)\\boxed\s*\{\s*([A-Z])(?![A-Z])\s*\}",
     re.IGNORECASE,
@@ -154,13 +165,16 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
     if whole:
         return _matched_choice(whole)
 
-    explicit = [
-        (match.start(), _matched_choice(match))
-        for pattern in (_EXPLICIT_CHOICE, _BOXED_CHOICE)
-        for match in pattern.finditer(response)
+    conclusions = [
+        (marker.start(), _EXPLICIT_CHOICE.match(response, marker.start()))
+        for marker in _EXPLICIT_MARKER.finditer(response)
+    ] + [
+        (marker.start(), _BOXED_CHOICE.match(response, marker.start()))
+        for marker in _BOXED_MARKER.finditer(response)
     ]
-    if explicit:
-        return max(explicit, key=lambda item: item[0])[1]
+    if conclusions:
+        conclusion = max(conclusions, key=lambda item: item[0])[1]
+        return _matched_choice(conclusion) if conclusion else None
 
     leading = _LEADING_CHOICE.match(response)
     if leading:

@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 from PIL import Image
 
 from dataset.MMMU import MMMU
+from dataset.mmmu_eval import parse_multiple_choice_response
 from prompt.prompts import get_base_prompt
 from util.utils import create_answer_mapping
 
@@ -258,6 +259,34 @@ class MMMUOpenTests(unittest.TestCase):
                     expected,
                     dataset.get_score(prediction, gold, "multiple-choice"),
                 )
+
+    def test_multiple_choice_later_malformed_conclusion_invalidates_earlier(self):
+        dataset = make_adapter()
+        prediction = "The answer is B. After checking, final answer: unknown."
+
+        self.assertIsNone(parse_multiple_choice_response(prediction))
+        for gold in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            with self.subTest(gold=gold):
+                self.assertEqual(
+                    0,
+                    dataset.get_score(prediction, gold, "multiple-choice"),
+                )
+
+    def test_multiple_choice_rejects_ambiguous_explicit_bare_letters(self):
+        dataset = make_adapter()
+
+        for prediction, possible_gold in (
+            ("The answer is a complex expression.", "A"),
+            ("The answer is A or B.", "AB"),
+            ("Final answer: C and D.", "CD"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in possible_gold:
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(prediction, gold, "multiple-choice"),
+                    )
 
     def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
         dataset = make_adapter()
