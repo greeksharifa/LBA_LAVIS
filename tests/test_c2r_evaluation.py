@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import numpy as np
 
+import evaluation.c2r as c2r
 from subqa.schema import FALLBACK_POLICY
 
 from evaluation.c2r import (
@@ -1138,6 +1139,174 @@ class RunLoadingTests(unittest.TestCase):
                 self.assertIn("resolved", split_report["annotation_paths"])
                 self.assertIn("manifest", split_report["provenance"])
 
+    def test_all_pair_split_reports_include_exact_paired_transitions(self):
+        dev_records = [
+            record(
+                "wrong-to-correct-0",
+                gold="refined",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+            record(
+                "wrong-to-correct-1",
+                gold="refined",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+            record(
+                "correct-to-wrong",
+                gold="base",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_dir = write_run(root, "dev", "val", dev_records)
+            validation_records = [
+                dict(item, split="test", qid=f"validation-{item['qid']}")
+                for item in (dev_records[0], dev_records[2])
+            ]
+            validation_dir = write_run(
+                root,
+                "validation",
+                "test",
+                validation_records,
+            )
+
+            report = evaluate_run_pair(
+                dev_dir,
+                validation_dir,
+                scorer=exact_scorer,
+                bootstrap_count=10,
+            )
+
+            for split_name in ("dev", "validation"):
+                self.assertIn("paired_transitions", report[split_name])
+            self.assertEqual(
+                {"wrong_to_correct": 2, "correct_to_wrong": 1},
+                report["dev"]["paired_transitions"],
+            )
+            self.assertEqual(
+                {"wrong_to_correct": 1, "correct_to_wrong": 1},
+                report["validation"]["paired_transitions"],
+            )
+
+    def test_in_sample_report_searches_full_grid_and_preserves_report_schema(self):
+        self.assertTrue(
+            hasattr(c2r, "evaluate_run_in_sample"),
+            "evaluation.c2r must expose evaluate_run_in_sample",
+        )
+        records = [
+            record(
+                "wrong-to-correct-0",
+                split="test",
+                gold="refined",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+            record(
+                "wrong-to-correct-1",
+                split="test",
+                gold="refined",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+            record(
+                "correct-to-wrong",
+                split="test",
+                gold="base",
+                base="base",
+                base_conf=0.1,
+                refined=("wrong", "refined"),
+                refined_conf=(0.2, 0.9),
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = write_run(
+                Path(tmp),
+                "validation",
+                "test",
+                records,
+            )
+
+            report = c2r.evaluate_run_in_sample(
+                run_dir,
+                scorer=exact_scorer,
+                bootstrap_seed=7,
+                bootstrap_count=100,
+            )
+
+        self.assertEqual(
+            "fixed_validation_grid_search_in_sample",
+            report["threshold_source"]["method"],
+        )
+        samples = prepare_samples(
+            records,
+            "token_min_prob",
+            scorer=exact_scorer,
+        )
+        selected = search_thresholds(samples)
+        self.assertEqual(
+            (selected["tau1"], selected["tau2"]),
+            (report["tau1"], report["tau2"]),
+        )
+        self.assertEqual(231, report["tuning"]["candidate_count"])
+        self.assertEqual(list(TAU1_GRID), report["tuning"]["tau1_grid"])
+        self.assertEqual(list(TAU2_GRID), report["tuning"]["tau2_grid"])
+        self.assertEqual(
+            [
+                "maximum_correct_count",
+                "fewest_switches",
+                "lowest_tau1",
+                "highest_tau2",
+            ],
+            report["tuning"]["tie_break"],
+        )
+        grid_results = []
+        for tau1 in TAU1_GRID:
+            for tau2 in TAU2_GRID:
+                result = apply_thresholds(samples, tau1, tau2)
+                grid_results.append(
+                    {
+                        "tau1": tau1,
+                        "tau2": tau2,
+                        "correct_count": result["correct_count"],
+                        "switch_count": result["switch_count"],
+                    }
+                )
+        max_correct = max(item["correct_count"] for item in grid_results)
+        self.assertEqual(
+            [
+                item
+                for item in grid_results
+                if item["correct_count"] == max_correct
+            ],
+            report["tuning"]["max_accuracy_thresholds"],
+        )
+        validation = report["validation"]
+        self.assertEqual(
+            "fixed_validation_grid_search_in_sample",
+            validation["threshold_source"]["method"],
+        )
+        self.assertEqual(
+            {"wrong_to_correct": 2, "correct_to_wrong": 1},
+            validation["paired_transitions"],
+        )
+        self.assertEqual((7, 100), (validation["bootstrap_seed"], validation["bootstrap_count"]))
+        self.assertEqual(3, validation["sample_count"])
+        self.assertEqual(3, len(validation["provenance"]["manifest_qids"]))
+
 
 class CliTests(unittest.TestCase):
     def test_cli_default_output_is_atomic_json_in_validation_run(self):
@@ -1170,6 +1339,43 @@ class CliTests(unittest.TestCase):
             self.assertTrue(output.is_file())
             self.assertEqual("val", json.loads(output.read_text())["threshold_source"]["split"])
             self.assertEqual([], list(val_dir.glob(".c2r_evaluation.json.*.tmp")))
+
+    def test_in_sample_cli_writes_default_and_optional_outputs_atomically(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run_dir = write_run(
+                root,
+                "validation",
+                "test",
+                [record("v", split="test")],
+            )
+            default_output = run_dir / "c2r_evaluation_validation_tuned.json"
+            custom_output = root / "custom-report.json"
+
+            for extra_args, output in (
+                ([], default_output),
+                (["--output", str(custom_output)], custom_output),
+            ):
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "scripts/evaluate_c2r_in_sample.py",
+                        "--run",
+                        str(run_dir),
+                        *extra_args,
+                    ],
+                    cwd=Path(__file__).parents[1],
+                    text=True,
+                    capture_output=True,
+                )
+
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual(str(output), result.stdout.strip())
+                self.assertEqual(
+                    "fixed_validation_grid_search_in_sample",
+                    json.loads(output.read_text())["threshold_source"]["method"],
+                )
+                self.assertEqual([], list(output.parent.glob(f".{output.name}.*.tmp")))
 
 
 if __name__ == "__main__":

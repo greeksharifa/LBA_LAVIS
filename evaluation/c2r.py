@@ -696,6 +696,16 @@ def _split_report(
             "method": "fixed_dev_grid_search",
         },
         "switch_count": gated["switch_count"],
+        "paired_transitions": {
+            "wrong_to_correct": sum(
+                not base and gated_value
+                for base, gated_value in zip(base_correct, gated_correct)
+            ),
+            "correct_to_wrong": sum(
+                base and not gated_value
+                for base, gated_value in zip(base_correct, gated_correct)
+            ),
+        },
         "paired_95_ci": bootstrap["percentile_95_ci"],
         "bootstrap_seed": seed,
         "bootstrap_count": count,
@@ -754,6 +764,75 @@ def evaluate_run_pair(
             bootstrap_seed,
             bootstrap_count,
         ),
+    }
+
+
+def evaluate_run_in_sample(
+    run_directory,
+    *,
+    scorer=evaluate_answer,
+    bootstrap_seed=BOOTSTRAP_SEED,
+    bootstrap_count=BOOTSTRAP_COUNT,
+):
+    """Select and report thresholds on the same run as an in-sample diagnostic."""
+    run = load_run(run_directory)
+    confidence_type = run["config"]["confidence_type"]
+    samples = prepare_samples(run["records"], confidence_type, scorer)
+    selected = search_thresholds(samples)
+    grid_results = []
+    for tau1 in TAU1_GRID:
+        for tau2 in TAU2_GRID:
+            result = apply_thresholds(samples, tau1, tau2)
+            grid_results.append(
+                {
+                    "tau1": tau1,
+                    "tau2": tau2,
+                    "correct_count": result["correct_count"],
+                    "switch_count": result["switch_count"],
+                }
+            )
+    max_correct = max(item["correct_count"] for item in grid_results)
+    split_report = _split_report(
+        run,
+        run,
+        samples,
+        selected,
+        selected["tau1"],
+        selected["tau2"],
+        bootstrap_seed,
+        bootstrap_count,
+    )
+    method = "fixed_validation_grid_search_in_sample"
+    split_report["threshold_source"]["method"] = method
+    return {
+        "threshold_source": {
+            "split": run["config"]["split"],
+            "run_directory": run["run_directory"],
+            "method": method,
+        },
+        "confidence_type": confidence_type,
+        "tau1": selected["tau1"],
+        "tau2": selected["tau2"],
+        "bootstrap_seed": bootstrap_seed,
+        "bootstrap_count": bootstrap_count,
+        "tuning": {
+            "scope": "same_validation_split_as_reported_metric",
+            "candidate_count": len(grid_results),
+            "tau1_grid": list(TAU1_GRID),
+            "tau2_grid": list(TAU2_GRID),
+            "tie_break": [
+                "maximum_correct_count",
+                "fewest_switches",
+                "lowest_tau1",
+                "highest_tau2",
+            ],
+            "max_accuracy_thresholds": [
+                item
+                for item in grid_results
+                if item["correct_count"] == max_correct
+            ],
+        },
+        "validation": split_report,
     }
 
 
