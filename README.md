@@ -115,6 +115,17 @@ dataset, N/M/K, confidence configuration, and identical configured `num_data`
 selection policy (`-1` on both full splits); overlapping qids or resolved
 annotation paths are rejected.
 
+## MMMU multiple-choice answer normalization
+
+Before comparing a multiple-choice prediction with the gold label, MMMU uses a
+deterministic, conservative parser. It accepts a whole-letter response,
+parenthesized choices, a leading-delimited choice such as `A. explanation`,
+explicit final-answer forms, and `\boxed{...}`. When a response contains
+multiple recognized conclusions, the last conclusion controls the score; a
+later malformed explicit conclusion invalidates an earlier one. Ambiguous
+outputs are rejected. Parsing never uses option text, the candidate list,
+ground truth, or a random fallback.
+
 ## Leakage-free C2R evaluation
 
 After both full runs complete, evaluate the exact run directories with:
@@ -127,6 +138,36 @@ The evaluator selects the C2R thresholds only on the dev role (`val`, the 150
 question MMMU dev file). It then fixes those thresholds and applies them
 unchanged to the validation role (`test`, the 900 question MMMU validation
 file). Do not tune again on validation.
+
+For a same-split diagnostic, the public in-sample evaluator searches and
+applies thresholds on one run:
+
+```bash
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r_in_sample.py --run output/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4
+```
+
+This command tunes on the same validation split that it reports, so its result
+is diagnostic only. The dev-tuned evaluation above is the leakage-free primary
+result.
+
+## Fresh branch-local hierarchical TP=1 MMMU validation results
+
+The baseline is the backbone model's direct answer to the main question; it is
+not the Flat pipeline. Raw hierarchy is the ungated refined answer from the
+hierarchical run. `Dev-tuned gated` fixes thresholds selected on the separate
+150-question dev split and is the leakage-free primary result. `Validation
+in-sample` selects thresholds on the same validation split and is diagnostic
+only. Deltas and paired transitions are relative to the direct baseline.
+
+| Model | Direct baseline | Raw hierarchy | Dev-tuned gated (primary) | Validation in-sample (diagnostic) |
+|---|---:|---:|---:|---:|
+| Qwen2.5-VL-7B | 454/900 (50.44%) | 448/900 (49.78%) | 449/900 (49.89%); tau1=0.7, tau2=-0.1; delta=-0.56 pp; W-to-C/C-to-W=46/51; 95% CI [-2.67, +1.67] pp | 461/900 (51.22%); tau1=0.7, tau2=0.2; delta=+0.78 pp; W-to-C/C-to-W=30/23; 95% CI [-0.78, +2.44] pp |
+| Qwen3-VL-8B | 462/900 (51.33%) | 505/900 (56.11%) | 495/900 (55.00%); tau1=0.8, tau2=0.1; delta=+3.67 pp; W-to-C/C-to-W=35/2; 95% CI [+2.44, +5.00] pp | 505/900 (56.11%); tau1=1.0, tau2=-0.1; delta=+4.78 pp; W-to-C/C-to-W=46/3; 95% CI [+3.33, +6.33] pp |
+
+This reevaluation only wrote evaluation reports: raw generation artifacts and
+manifests remained byte-for-byte unchanged. The only recorded structural
+caveat is that one Qwen2.5 validation parent expansion was partial; all 900
+qids and all depth-1 projections were retained.
 
 ## Historical results
 

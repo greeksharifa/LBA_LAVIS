@@ -265,6 +265,83 @@ class ReadmeCommandTests(unittest.TestCase):
             command[command.index("--validation-run") + 1],
         )
 
+    def test_readme_documents_public_in_sample_evaluation_command(self):
+        evaluation_commands = [
+            command
+            for command in self.commands
+            if "scripts/evaluate_c2r_in_sample.py" in command
+        ]
+        self.assertEqual(1, len(evaluation_commands))
+        command = evaluation_commands[0]
+        self.assertEqual(PYTHON, command[0])
+        self.assertEqual(
+            f"{RUN_ROOT}/test/{RUN_SIGNATURE}",
+            command[command.index("--run") + 1],
+        )
+
+    def test_readme_documents_conservative_mmmu_choice_normalization(self):
+        normalized_readme = re.sub(r"\s+", " ", self.readme)
+        for expected in (
+            "deterministic, conservative parser",
+            "whole-letter",
+            "parenthesized",
+            "leading-delimited",
+            "explicit final-answer",
+            r"\boxed{...}",
+            "last conclusion",
+            "Ambiguous outputs are rejected",
+            "option text",
+            "candidate list",
+            "ground truth",
+            "random fallback",
+        ):
+            self.assertIn(expected, normalized_readme)
+
+    def test_readme_reports_fresh_normalized_validation_results(self):
+        normalized_readme = re.sub(r"\s+", " ", self.readme)
+        for expected in (
+            "Fresh branch-local hierarchical TP=1 MMMU validation results",
+            "backbone model's direct answer",
+            "not the Flat pipeline",
+            "ungated refined answer from the hierarchical run",
+            "leakage-free primary result",
+            "same validation split",
+            "diagnostic only",
+            "454/900 (50.44%)",
+            "448/900 (49.78%)",
+            "449/900 (49.89%)",
+            "tau1=0.7, tau2=-0.1",
+            "delta=-0.56 pp",
+            "W-to-C/C-to-W=46/51",
+            "95% CI [-2.67, +1.67] pp",
+            "461/900 (51.22%)",
+            "tau1=0.7, tau2=0.2",
+            "delta=+0.78 pp",
+            "W-to-C/C-to-W=30/23",
+            "95% CI [-0.78, +2.44] pp",
+            "462/900 (51.33%)",
+            "505/900 (56.11%)",
+            "495/900 (55.00%)",
+            "tau1=0.8, tau2=0.1",
+            "delta=+3.67 pp",
+            "W-to-C/C-to-W=35/2",
+            "95% CI [+2.44, +5.00] pp",
+            "tau1=1.0, tau2=-0.1",
+            "delta=+4.78 pp",
+            "W-to-C/C-to-W=46/3",
+            "95% CI [+3.33, +6.33] pp",
+            "raw generation artifacts and manifests remained byte-for-byte unchanged",
+            "one Qwen2.5 validation parent expansion was partial",
+            "all 900 qids and all depth-1 projections were retained",
+        ):
+            self.assertIn(expected, normalized_readme)
+
+        for historical_row in (
+            "| Qwen3-VL-8B | base | 50.44 |",
+            "| Qwen3-VL-8B | refined | 53.44 |",
+        ):
+            self.assertIn(historical_row, self.readme)
+
     def test_readme_explains_artifact_and_evaluation_guards(self):
         for expected in (
             "run namespace",
