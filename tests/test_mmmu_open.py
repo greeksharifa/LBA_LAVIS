@@ -225,14 +225,56 @@ class MMMUOpenTests(unittest.TestCase):
             dataset.get_score("Tampa", "['tampa', broken]", "open_ended"),
         )
 
-    def test_multiple_choice_remains_exact_normalized_option_letter_match(self):
+    def test_multiple_choice_accepts_supported_answer_formats(self):
         dataset = make_adapter()
 
-        self.assertEqual(1, dataset.get_score("(A).", "A", "multiple-choice"))
-        self.assertEqual(
-            0,
-            dataset.get_score("A because it is correct", "A", "multiple-choice"),
-        )
+        for prediction in (
+            "A",
+            "(A).",
+            "A. $6",
+            "A) explanation",
+            "(A) explanation",
+            "**A.** $6",
+            "The answer is A.",
+            "answer: option A",
+            "Final answer: option A",
+            "final answer is (A)",
+            "final answer is a",
+            r"\boxed{A}",
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    1,
+                    dataset.get_score(prediction, "A", "multiple-choice"),
+                )
+
+    def test_multiple_choice_final_answer_overrides_intermediate_answer(self):
+        dataset = make_adapter()
+        prediction = "The answer is B. After checking, final answer: C."
+
+        for gold, expected in (("C", 1), ("B", 0)):
+            with self.subTest(gold=gold):
+                self.assertEqual(
+                    expected,
+                    dataset.get_score(prediction, gold, "multiple-choice"),
+                )
+
+    def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
+        dataset = make_adapter()
+
+        for prediction in (
+            "A because it is correct",
+            "A result was observed",
+            "",
+            "No conclusion",
+            None,
+        ):
+            with self.subTest(prediction=prediction):
+                try:
+                    score = dataset.get_score(prediction, "A", "multiple-choice")
+                except Exception as exc:
+                    self.fail(f"get_score raised {type(exc).__name__}: {exc}")
+                self.assertEqual(0, score)
 
     def test_common_cleanser_does_not_truncate_source_open_decimal(self):
         dataset = make_adapter()

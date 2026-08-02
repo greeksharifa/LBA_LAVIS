@@ -168,6 +168,23 @@ def write_run(
 
 
 class ConfidenceTests(unittest.TestCase):
+    def test_default_scorer_normalizes_multiple_choice_base_and_refined_answers(self):
+        choice_record = record(
+            "choice",
+            gold="A",
+            base="A. option text",
+            refined=("wrong", "Final answer: A"),
+            refined_conf=(0.2, 0.8),
+        )
+        choice_record["question_type"] = "multiple-choice"
+
+        samples = prepare_samples([choice_record], "token_min_prob")
+
+        self.assertEqual(
+            (True, True),
+            (samples[0]["base_correct"], samples[0]["refined_correct"]),
+        )
+
     def test_token_min_prob_higher_candidate_wins(self):
         answer, confidence, index = select_refined_candidate(
             ["low", "high"], [0.1, 0.9], "token_min_prob"
