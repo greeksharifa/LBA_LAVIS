@@ -74,6 +74,8 @@ In this repository, MMMU `dataset.split=val` selects `dev.json` (150
 questions), and `dataset.split=test` selects `validation.json` (900
 questions). `dataset.num_data=-1` selects the entire configured split. The two
 full commands use physical GPUs 5, 6, 7, and 8 with tensor parallelism 4.
+They are generic TP=4 depth-1 examples; they do not reproduce the TP=1
+hierarchical result table below.
 
 ```bash
 /home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=-1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output
@@ -133,7 +135,8 @@ the candidate list, ground truth, or a random fallback.
 After both full runs complete, evaluate the exact run directories with:
 
 ```bash
-/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r.py --dev-run output/MMMU/qwen2.5-vl-7b/val/N=4_M=2_K=4 --validation-run output/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r.py --dev-run output/hierarchical-full-repair-tp1/MMMU/qwen2.5-vl-7b/val/N=4_M=2_K=4/D=2_H=c60e804cccb6 --validation-run output/hierarchical-full-repair-tp1/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4/D=2_H=c60e804cccb6
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r.py --dev-run output/hierarchical-full-qwen3-tp1/MMMU/qwen3-vl-8b/val/N=4_M=2_K=4/D=2_H=c60e804cccb6 --validation-run output/hierarchical-full-qwen3-tp1/MMMU/qwen3-vl-8b/test/N=4_M=2_K=4/D=2_H=c60e804cccb6
 ```
 
 The evaluator selects the C2R thresholds only on the dev role (`val`, the 150
@@ -145,14 +148,20 @@ For a same-split diagnostic, the public in-sample evaluator searches and
 applies thresholds on one run:
 
 ```bash
-/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r_in_sample.py --run output/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r_in_sample.py --run output/hierarchical-full-repair-tp1/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4/D=2_H=c60e804cccb6
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r_in_sample.py --run output/hierarchical-full-qwen3-tp1/MMMU/qwen3-vl-8b/test/N=4_M=2_K=4/D=2_H=c60e804cccb6
 ```
 
-This command tunes on the same validation split that it reports, so its result
+Each command tunes on the same validation split that it reports, so its result
 is diagnostic only. The dev-tuned evaluation above is the leakage-free primary
 result.
 
 ## Fresh branch-local hierarchical TP=1 MMMU validation results
+
+The two dev/validation command pairs above name the exact four run directories
+behind this table. Their manifests record tensor parallelism 1,
+`subqa_depth=2`, `branching_by_depth=[4,3]`, `suba_M=2`, and `suba_K=3`; these
+settings come from each run's `run_manifest.json`.
 
 The baseline is the backbone model's direct answer to the main question; it is
 not the Flat pipeline. Raw hierarchy is the ungated refined answer from the
@@ -166,10 +175,11 @@ only. Deltas and paired transitions are relative to the direct baseline.
 | Qwen2.5-VL-7B | 454/900 (50.44%) | 448/900 (49.78%) | 449/900 (49.89%); tau1=0.7, tau2=-0.1; delta=-0.56 pp; W-to-C/C-to-W=46/51; 95% CI [-2.67, +1.67] pp | 461/900 (51.22%); tau1=0.7, tau2=0.2; delta=+0.78 pp; W-to-C/C-to-W=30/23; 95% CI [-0.78, +2.44] pp |
 | Qwen3-VL-8B | 472/900 (52.44%) | 505/900 (56.11%) | 495/900 (55.00%); tau1=0.8, tau2=0.1; delta=+2.56 pp; W-to-C/C-to-W=25/2; 95% CI [+1.56, +3.67] pp | 505/900 (56.11%); tau1=1.0, tau2=-0.1; delta=+3.67 pp; W-to-C/C-to-W=36/3; 95% CI [+2.33, +5.00] pp |
 
-This reevaluation only wrote evaluation reports: raw generation artifacts and
-manifests remained byte-for-byte unchanged. The only recorded structural
-caveat is that one Qwen2.5 validation parent expansion was partial; all 900
-qids and all depth-1 projections were retained.
+These are preserved raw generation artifacts, and only the evaluation reports
+were regenerated; raw generation artifacts and manifests remained
+byte-for-byte unchanged. The only recorded structural caveat is that one
+Qwen2.5 validation parent expansion was partial; all 900 qids and all depth-1
+projections were retained.
 
 ## Historical results
 

@@ -10,8 +10,21 @@ README = REPOSITORY_ROOT / "README.md"
 REQUIREMENTS = REPOSITORY_ROOT / "requirements.txt"
 GPU_WRAPPER = "/home/ywjang/.codex/bin/run_gpu.sh"
 PYTHON = "/home/ywjang/miniconda3/envs/qwen2vl/bin/python"
-RUN_ROOT = "output/MMMU/qwen2.5-vl-7b"
 RUN_SIGNATURE = "N=4_M=2_K=4"
+HIERARCHY_SIGNATURE = f"{RUN_SIGNATURE}/D=2_H=c60e804cccb6"
+QWEN25_RUN_ROOT = "output/hierarchical-full-repair-tp1/MMMU/qwen2.5-vl-7b"
+QWEN3_RUN_ROOT = "output/hierarchical-full-qwen3-tp1/MMMU/qwen3-vl-8b"
+EXPECTED_EVALUATION_RUNS = {
+    (
+        f"{QWEN25_RUN_ROOT}/val/{HIERARCHY_SIGNATURE}",
+        f"{QWEN25_RUN_ROOT}/test/{HIERARCHY_SIGNATURE}",
+    ),
+    (
+        f"{QWEN3_RUN_ROOT}/val/{HIERARCHY_SIGNATURE}",
+        f"{QWEN3_RUN_ROOT}/test/{HIERARCHY_SIGNATURE}",
+    ),
+}
+EXPECTED_IN_SAMPLE_RUNS = {validation for _, validation in EXPECTED_EVALUATION_RUNS}
 
 
 def shell_blocks(markdown):
@@ -249,20 +262,22 @@ class ReadmeCommandTests(unittest.TestCase):
             self.assertEqual("4", option_value(command, "runner.K"))
             self.assertNotIn("runner.output_dir=output/smoke-hierarchical", command)
 
-    def test_evaluation_command_uses_exact_dev_and_validation_run_paths(self):
+    def test_evaluation_commands_use_reported_hierarchical_run_paths(self):
         evaluation_commands = [
             command for command in self.commands if "scripts/evaluate_c2r.py" in command
         ]
-        self.assertEqual(1, len(evaluation_commands))
-        command = evaluation_commands[0]
-        self.assertEqual(PYTHON, command[0])
+        self.assertEqual(2, len(evaluation_commands))
+        for command in evaluation_commands:
+            self.assertEqual(PYTHON, command[0])
         self.assertEqual(
-            f"{RUN_ROOT}/val/{RUN_SIGNATURE}",
-            command[command.index("--dev-run") + 1],
-        )
-        self.assertEqual(
-            f"{RUN_ROOT}/test/{RUN_SIGNATURE}",
-            command[command.index("--validation-run") + 1],
+            EXPECTED_EVALUATION_RUNS,
+            {
+                (
+                    command[command.index("--dev-run") + 1],
+                    command[command.index("--validation-run") + 1],
+                )
+                for command in evaluation_commands
+            },
         )
 
     def test_readme_documents_public_in_sample_evaluation_command(self):
@@ -271,12 +286,16 @@ class ReadmeCommandTests(unittest.TestCase):
             for command in self.commands
             if "scripts/evaluate_c2r_in_sample.py" in command
         ]
-        self.assertEqual(1, len(evaluation_commands))
-        command = evaluation_commands[0]
-        self.assertEqual(PYTHON, command[0])
+        self.assertEqual(2, len(evaluation_commands))
+        for command in evaluation_commands:
+            self.assertEqual(PYTHON, command[0])
         self.assertEqual(
-            f"{RUN_ROOT}/test/{RUN_SIGNATURE}",
-            command[command.index("--run") + 1],
+            EXPECTED_IN_SAMPLE_RUNS,
+            {command[command.index("--run") + 1] for command in evaluation_commands},
+        )
+        self.assertIn(
+            "Each command tunes on the same validation split that it reports",
+            re.sub(r"\s+", " ", self.readme),
         )
 
     def test_readme_documents_conservative_mmmu_choice_normalization(self):
@@ -309,6 +328,15 @@ class ReadmeCommandTests(unittest.TestCase):
             "leakage-free primary result",
             "same validation split",
             "diagnostic only",
+            "generic TP=4 depth-1 examples",
+            "do not reproduce the TP=1 hierarchical result table",
+            "manifests record tensor parallelism 1",
+            "subqa_depth=2",
+            "branching_by_depth=[4,3]",
+            "suba_M=2",
+            "suba_K=3",
+            "preserved raw generation artifacts",
+            "only the evaluation reports were regenerated",
             "454/900 (50.44%)",
             "448/900 (49.78%)",
             "449/900 (49.89%)",
