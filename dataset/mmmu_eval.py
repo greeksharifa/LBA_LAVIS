@@ -19,6 +19,17 @@ _KEY_INDICATORS = (
 )
 
 _TERMINAL_PUNCTUATION = r"[.,!?;:'\"]*"
+_COORDINATED_ALTERNATIVE = rf"""
+(?!
+    \s*{_TERMINAL_PUNCTUATION}\s*
+    (?:(?:and|or)\b|[/&])\s*
+    (?:(?:option|choice)\s+)?
+    (?:\*\*\s*)?(?:\(\s*)?[A-Z](?![A-Z])
+)
+"""
+_BARE_EXPLICIT_COMPLETION = rf"""
+(?=\s*(?:[.!?]+\s+\S|{_TERMINAL_PUNCTUATION}\s*$))
+"""
 _WHOLE_CHOICE = re.compile(
     rf"""
     ^\s*(?:
@@ -37,7 +48,7 @@ _EXPLICIT_MARKER = re.compile(
 _EXPLICIT_CHOICE = re.compile(
     rf"""
     \b(?:final\s+)?answer\s*(?:is\b|:)\s*(?:
-        option\s+(?:
+        (?:option|choice)\s+(?:
             \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
             |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
             |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
@@ -46,15 +57,16 @@ _EXPLICIT_CHOICE = re.compile(
         |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
-        |([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*$
-    )
+        |([A-Z])(?![A-Z]){_BARE_EXPLICIT_COMPLETION}
+    ){_COORDINATED_ALTERNATIVE}
     """,
     re.IGNORECASE | re.VERBOSE,
 )
 _BOXED_MARKER = re.compile(r"(?<!\\)\\boxed\b", re.IGNORECASE)
 _BOXED_CHOICE = re.compile(
-    r"(?<!\\)\\boxed\s*\{\s*([A-Z])(?![A-Z])\s*\}",
-    re.IGNORECASE,
+    rf"(?<!\\)\\boxed\s*\{{\s*([A-Z])(?![A-Z])\s*\}}"
+    rf"{_COORDINATED_ALTERNATIVE}",
+    re.IGNORECASE | re.VERBOSE,
 )
 _LEADING_CHOICE = re.compile(
     r"""

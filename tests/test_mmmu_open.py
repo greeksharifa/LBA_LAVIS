@@ -288,6 +288,39 @@ class MMMUOpenTests(unittest.TestCase):
                         dataset.get_score(prediction, gold, "multiple-choice"),
                     )
 
+    def test_multiple_choice_accepts_delimited_bare_conclusion_with_explanation(self):
+        dataset = make_adapter()
+
+        for prediction in (
+            "The answer is A. This follows from the calculation.",
+            "The answer is a. This follows from the calculation.",
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    "a",
+                    parse_multiple_choice_response(prediction),
+                )
+                self.assertEqual(
+                    1,
+                    dataset.get_score(prediction, "A", "multiple-choice"),
+                )
+
+    def test_multiple_choice_rejects_coordinated_explicit_alternatives(self):
+        dataset = make_adapter()
+
+        for prediction, possible_gold in (
+            ("Final answer: option C and D.", "CD"),
+            ("The answer is (A) or (B).", "AB"),
+            ("The answer is **A** or **B**.", "AB"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in possible_gold:
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(prediction, gold, "multiple-choice"),
+                    )
+
     def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
         dataset = make_adapter()
 
