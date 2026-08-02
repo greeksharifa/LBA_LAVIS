@@ -1,5 +1,5 @@
 import re
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 NormalizedAnswer = Union[str, float]
@@ -16,6 +16,45 @@ _KEY_INDICATORS = (
     "final ",
     "answer ",
     "result ",
+)
+
+_TERMINAL_PUNCTUATION = r"[.,!?;:'\"]*"
+_WHOLE_CHOICE = re.compile(
+    rf"""
+    ^\s*(?:
+        \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+        |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+        |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
+        |([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}
+    )\s*$
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+_EXPLICIT_CHOICE = re.compile(
+    rf"""
+    \b(?:final\s+)?answer\s*(?:is\b|:)\s*(?:option\s+)?(?:
+        \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+        |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+        |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
+        |([A-Z])(?![A-Z)*])\s*{_TERMINAL_PUNCTUATION}
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+_BOXED_CHOICE = re.compile(
+    r"(?<!\\)\\boxed\s*\{\s*([A-Z])(?![A-Z])\s*\}",
+    re.IGNORECASE,
+)
+_LEADING_CHOICE = re.compile(
+    r"""
+    ^\s*(?:
+        \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*[.:]?\s*\*\*
+        |\*\*\s*([A-Z])(?![A-Z])\s*[.):]\s*\*\*
+        |\(\s*([A-Z])(?![A-Z])\s*\)\s*[.:]?
+        |([A-Z])(?![A-Z])\s*[.):]
+    )\s+\S
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 
 
@@ -103,8 +142,37 @@ def _normalize_option_letter(value: str) -> str:
     return match.group(1).lower() if match else value.lower()
 
 
+def _matched_choice(match: re.Match) -> str:
+    return next(group for group in match.groups() if group).lower()
+
+
+def parse_multiple_choice_response(response: str) -> Optional[str]:
+    if not isinstance(response, str) or not response.strip():
+        return None
+
+    whole = _WHOLE_CHOICE.fullmatch(response)
+    if whole:
+        return _matched_choice(whole)
+
+    explicit = [
+        (match.start(), _matched_choice(match))
+        for pattern in (_EXPLICIT_CHOICE, _BOXED_CHOICE)
+        for match in pattern.finditer(response)
+    ]
+    if explicit:
+        return max(explicit, key=lambda item: item[0])[1]
+
+    leading = _LEADING_CHOICE.match(response)
+    if leading:
+        return _matched_choice(leading)
+    return None
+
+
 def evaluate_multiple_choice(gold: str, prediction: str) -> bool:
-    return _normalize_option_letter(prediction) == _normalize_option_letter(gold)
+    parsed_prediction = parse_multiple_choice_response(prediction)
+    if parsed_prediction is None:
+        return False
+    return parsed_prediction == _normalize_option_letter(gold)
 
 
 def evaluate_answer(prediction: str, gold: str, question_type: str) -> bool:
