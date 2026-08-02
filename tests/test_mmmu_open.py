@@ -249,6 +249,64 @@ class MMMUOpenTests(unittest.TestCase):
                     dataset.get_score(prediction, "A", "multiple-choice"),
                 )
 
+    def test_multiple_choice_accepts_artifact_markdown_conclusions(self):
+        dataset = make_adapter()
+
+        for prediction, expected in (
+            ("**Answer: D**", "d"),
+            ("### ✅ Final Answer: **B. t=2.46s**", "b"),
+            ("### ✅ Correct Answer: **D. $75,283**", "d"),
+            (
+                "### Final Answer:\n\n> **A. $y=...$**\n\n"
+                "✅ **Answer: A**",
+                "a",
+            ),
+            ("The answer is **C**", "c"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    expected,
+                    parse_multiple_choice_response(prediction),
+                )
+                self.assertEqual(
+                    1,
+                    dataset.get_score(
+                        prediction, expected.upper(), "multiple-choice"
+                    ),
+                )
+
+    def test_multiple_choice_rejects_ambiguous_markdown_conclusions(self):
+        dataset = make_adapter()
+
+        for prediction, possible_gold in (
+            ("Answer: **A or B**", "AB"),
+            ("Final Answer: **A and B**", "AB"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in possible_gold:
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(prediction, gold, "multiple-choice"),
+                    )
+
+        malformed_final = "Answer: **A**. Final Answer: **unknown**"
+        self.assertIsNone(parse_multiple_choice_response(malformed_final))
+
+    def test_multiple_choice_accepts_delimited_boxed_label_only(self):
+        dataset = make_adapter()
+        prediction = r"Final Answer: \boxed{C. option text}"
+
+        self.assertEqual("c", parse_multiple_choice_response(prediction))
+        self.assertEqual(
+            1,
+            dataset.get_score(prediction, "C", "multiple-choice"),
+        )
+
+        for ambiguous in (r"\boxed{A or B}", r"\boxed{157}"):
+            with self.subTest(prediction=ambiguous):
+                self.assertIsNone(parse_multiple_choice_response(ambiguous))
+
     def test_multiple_choice_final_answer_overrides_intermediate_answer(self):
         dataset = make_adapter()
         prediction = "The answer is B. After checking, final answer: C."

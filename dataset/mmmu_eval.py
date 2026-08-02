@@ -62,7 +62,7 @@ _WHOLE_CHOICE = re.compile(
 _EXPLICIT_MARKER = re.compile(
     r"""
     \b(?:
-        (?P<strong>final\s+answer\s*(?:is\b|:)|answer\s*:)
+        (?P<strong>(?:final|correct)\s+answer\s*(?:is\b|:)|answer\s*:)
         |(?:(?P<referential>this|that)\s+|the\s+)?
          (?P<generic>answer\s+is\b)
     )
@@ -71,13 +71,17 @@ _EXPLICIT_MARKER = re.compile(
 )
 _EXPLICIT_CHOICE_PAYLOAD = re.compile(
     rf"""
-    \s*(?:
+    \s*(?:>\s*)?(?:
         (?:option|choice)\s+(?:
-            \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+            \*\*\s*([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
+                \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
+            |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
             |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
             |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
             |([A-Z])(?![A-Z)*])\s*{_TERMINAL_PUNCTUATION}
         )
+        |\*\*\s*([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
+            \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
         |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
         |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
@@ -86,10 +90,26 @@ _EXPLICIT_CHOICE_PAYLOAD = re.compile(
     """,
     re.IGNORECASE | re.VERBOSE,
 )
+_MARKDOWN_MARKER_CHOICE_PAYLOAD = re.compile(
+    rf"""
+    \s*(?:>\s*)?(?:
+        ([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
+            \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
+        |([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+    ){_COORDINATED_ALTERNATIVE}
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
 _BOXED_MARKER = re.compile(r"(?<!\\)\\boxed\b", re.IGNORECASE)
 _BOXED_CHOICE = re.compile(
-    r"(?<!\\)\\boxed\s*\{\s*([A-Z])(?![A-Z])\s*\}",
-    re.IGNORECASE,
+    rf"""
+    (?<!\\)\\boxed\s*\{{\s*(?:
+        ([A-Z])(?![A-Z])\s*
+        |([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
+            \s*[.):]\s+\S[^}}\n]*
+    )\}}
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 _LEADING_CHOICE = re.compile(
     r"""
@@ -217,8 +237,18 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
     choice_spans = []
     for marker in _EXPLICIT_MARKER.finditer(response):
         choice = _EXPLICIT_CHOICE_PAYLOAD.match(response, marker.end())
+        choice_start = marker.start()
+        if (
+            choice is None
+            and marker.start() >= 2
+            and response[marker.start() - 2 : marker.start()] == "**"
+        ):
+            choice = _MARKDOWN_MARKER_CHOICE_PAYLOAD.match(
+                response, marker.end()
+            )
+            choice_start -= 2
         if choice:
-            choice_spans.append(_ChoiceSpan(marker.start(), choice.end()))
+            choice_spans.append(_ChoiceSpan(choice_start, choice.end()))
             events.append(
                 _ConclusionEvent(marker.start(), _matched_choice(choice))
             )
