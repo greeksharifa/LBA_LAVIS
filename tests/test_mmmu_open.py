@@ -378,6 +378,9 @@ class MMMUOpenTests(unittest.TestCase):
             ("Answer: B because the result follows.", "b"),
             ("The correct answer is C since the calculation.", "c"),
             ("Final answer: A\nExplanation: details", "a"),
+            ("Answer: B, because the result follows.", "b"),
+            ("The correct answer is C, since calculation.", "c"),
+            ("Final answer: A, Explanation: details", "a"),
         ):
             with self.subTest(prediction=prediction):
                 self.assertEqual(
@@ -399,6 +402,27 @@ class MMMUOpenTests(unittest.TestCase):
                 "The answer is a complex expression"
             )
         )
+
+    def test_multiple_choice_accepts_colon_after_explicit_is_marker(self):
+        dataset = make_adapter()
+
+        for prediction, expected in (
+            ("The correct answer is: A", "a"),
+            ("The answer is: B", "b"),
+            ("Final answer is: C", "c"),
+            ("Answer is: D", "d"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    expected,
+                    parse_multiple_choice_response(prediction),
+                )
+                self.assertEqual(
+                    1,
+                    dataset.get_score(
+                        prediction, expected.upper(), "multiple-choice"
+                    ),
+                )
 
     def test_multiple_choice_rejects_coordinated_explicit_alternatives(self):
         dataset = make_adapter()

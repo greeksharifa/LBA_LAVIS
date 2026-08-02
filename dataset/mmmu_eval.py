@@ -40,12 +40,15 @@ _COORDINATED_CONTINUATION_SOURCE = rf"""
     (?:\*\*\s*)?(?:\(\s*)?[A-Z](?![A-Z])
 """
 _COORDINATED_ALTERNATIVE = rf"(?!{_COORDINATED_CONTINUATION_SOURCE})"
+_BOUNDED_EXPLANATION_START = (
+    r"(?:(?:because|since|as)\b|(?:explanation|reasoning)\s*:)"
+)
 _BARE_EXPLICIT_COMPLETION = rf"""
 (?=\s*(?:
     [.!?]+\s+\S
     |{_TERMINAL_PUNCTUATION}\s*$
-    |(?:because|since|as)\b
-    |(?:explanation|reasoning)\s*:
+    |{_BOUNDED_EXPLANATION_START}
+    |,\s*{_BOUNDED_EXPLANATION_START}
 ))
 """
 _COORDINATED_CONTINUATION = re.compile(
@@ -86,9 +89,12 @@ _WHOLE_CHOICE = re.compile(
 _EXPLICIT_MARKER = re.compile(
     r"""
     \b(?:
-        (?P<strong>(?:final|correct)\s+answer\s*(?:is\b|:)|answer\s*:)
+        (?P<strong>
+            (?:final|correct)\s+answer\s*(?:is\b\s*:?\s*|:)
+            |answer\s*:
+        )
         |(?:(?P<referential>this|that)\s+|the\s+)?
-         (?P<generic>answer\s+is\b)
+         (?P<generic>answer\s+is\b\s*:?\s*)
     )
     """,
     re.IGNORECASE | re.VERBOSE,
