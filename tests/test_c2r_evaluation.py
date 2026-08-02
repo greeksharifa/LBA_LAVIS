@@ -1307,6 +1307,54 @@ class RunLoadingTests(unittest.TestCase):
         self.assertEqual(3, validation["sample_count"])
         self.assertEqual(3, len(validation["provenance"]["manifest_qids"]))
 
+    def test_in_sample_rejects_non_validation_mmmu_splits_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for split in ("val", "arbitrary"):
+                calls = []
+                run_dir = write_run(
+                    root,
+                    f"run-{split}",
+                    split,
+                    [record("q0", split=split)],
+                )
+
+                with self.subTest(split=split):
+                    with self.assertRaisesRegex(
+                        ValueError,
+                        rf"MMMU: expected validation split 'test', got '{split}'",
+                    ):
+                        c2r.evaluate_run_in_sample(
+                            run_dir,
+                            scorer=lambda *args: calls.append(args),
+                            bootstrap_count=10,
+                        )
+                    self.assertEqual([], calls)
+
+    def test_in_sample_rejects_unsupported_dataset_before_scoring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = write_run(
+                Path(tmp),
+                "validation",
+                "test",
+                [record("q0", split="test")],
+            )
+            loaded = load_run(run_dir)
+            loaded["config"] = dict(loaded["config"], dataset="Other")
+            calls = []
+
+            with patch("evaluation.c2r.load_run", return_value=loaded):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "unsupported dataset for explicit evaluation roles: 'Other'",
+                ):
+                    c2r.evaluate_run_in_sample(
+                        run_dir,
+                        scorer=lambda *args: calls.append(args),
+                        bootstrap_count=10,
+                    )
+            self.assertEqual([], calls)
+
 
 class CliTests(unittest.TestCase):
     def test_cli_default_output_is_atomic_json_in_validation_run(self):

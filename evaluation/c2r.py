@@ -776,6 +776,19 @@ def evaluate_run_in_sample(
 ):
     """Select and report thresholds on the same run as an in-sample diagnostic."""
     run = load_run(run_directory)
+    dataset = run["config"]["dataset"]
+    role_splits = _DATASET_ROLE_SPLITS.get(dataset)
+    if role_splits is None:
+        raise ValueError(
+            f"unsupported dataset for explicit evaluation roles: {dataset!r}"
+        )
+    validation_split = role_splits["validation"]
+    actual_split = run["config"]["split"]
+    if actual_split != validation_split:
+        raise ValueError(
+            f"{dataset}: expected validation split {validation_split!r}, "
+            f"got {actual_split!r}"
+        )
     confidence_type = run["config"]["confidence_type"]
     samples = prepare_samples(run["records"], confidence_type, scorer)
     selected = search_thresholds(samples)
