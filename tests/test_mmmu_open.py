@@ -321,6 +321,38 @@ class MMMUOpenTests(unittest.TestCase):
                         dataset.get_score(prediction, gold, "multiple-choice"),
                     )
 
+    def test_multiple_choice_ignores_explanatory_generic_answer_is_marker(self):
+        dataset = make_adapter()
+        prediction = (
+            "Final answer: option B. "
+            "This answer is based on the calculation."
+        )
+
+        self.assertEqual("b", parse_multiple_choice_response(prediction))
+        self.assertEqual(
+            1,
+            dataset.get_score(prediction, "B", "multiple-choice"),
+        )
+
+        valid_generic = "Final answer: option B. Actually, the answer is C."
+        self.assertEqual("c", parse_multiple_choice_response(valid_generic))
+
+        malformed_strong = "Final answer: option B. Later, answer: unknown."
+        self.assertIsNone(parse_multiple_choice_response(malformed_strong))
+
+    def test_multiple_choice_rejects_coordinated_boxed_alternatives(self):
+        dataset = make_adapter()
+
+        for coordinator in ("and", "or", "/", "&"):
+            prediction = rf"\boxed{{A}} {coordinator} \boxed{{B}}"
+            with self.subTest(coordinator=coordinator):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in "AB":
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(prediction, gold, "multiple-choice"),
+                    )
+
     def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
         dataset = make_adapter()
 

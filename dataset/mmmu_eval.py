@@ -30,6 +30,10 @@ _COORDINATED_ALTERNATIVE = rf"""
 _BARE_EXPLICIT_COMPLETION = rf"""
 (?=\s*(?:[.!?]+\s+\S|{_TERMINAL_PUNCTUATION}\s*$))
 """
+_COORDINATED_SEPARATOR = re.compile(
+    rf"\s*{_TERMINAL_PUNCTUATION}\s*(?:(?:and|or)\b|[/&])\s*",
+    re.IGNORECASE,
+)
 _WHOLE_CHOICE = re.compile(
     rf"""
     ^\s*(?:
@@ -42,8 +46,13 @@ _WHOLE_CHOICE = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 _EXPLICIT_MARKER = re.compile(
-    r"\b(?:final\s+)?answer\s*(?:is\b|:)",
-    re.IGNORECASE,
+    r"""
+    \b(?:
+        (?P<strong>final\s+answer\s*(?:is\b|:)|answer\s*:)
+        |(?P<generic>answer\s+is\b)
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 _EXPLICIT_CHOICE = re.compile(
     rf"""
@@ -169,6 +178,16 @@ def _matched_choice(match: re.Match) -> str:
     return next(group for group in match.groups() if group).lower()
 
 
+def _has_coordinated_choices(response: str, choices: List[re.Match]) -> bool:
+    choices = sorted(choices, key=lambda match: match.start())
+    return any(
+        _COORDINATED_SEPARATOR.fullmatch(
+            response[first.end() : second.start()]
+        )
+        for first, second in zip(choices, choices[1:])
+    )
+
+
 def parse_multiple_choice_response(response: str) -> Optional[str]:
     if not isinstance(response, str) or not response.strip():
         return None
@@ -177,13 +196,24 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
     if whole:
         return _matched_choice(whole)
 
-    conclusions = [
-        (marker.start(), _EXPLICIT_CHOICE.match(response, marker.start()))
-        for marker in _EXPLICIT_MARKER.finditer(response)
-    ] + [
-        (marker.start(), _BOXED_CHOICE.match(response, marker.start()))
-        for marker in _BOXED_MARKER.finditer(response)
-    ]
+    conclusions = []
+    choices = []
+    for marker in _EXPLICIT_MARKER.finditer(response):
+        choice = _EXPLICIT_CHOICE.match(response, marker.start())
+        if choice:
+            choices.append(choice)
+            conclusions.append((marker.start(), choice))
+        elif marker.group("strong"):
+            conclusions.append((marker.start(), None))
+
+    for marker in _BOXED_MARKER.finditer(response):
+        choice = _BOXED_CHOICE.match(response, marker.start())
+        if choice:
+            choices.append(choice)
+        conclusions.append((marker.start(), choice))
+
+    if _has_coordinated_choices(response, choices):
+        return None
     if conclusions:
         conclusion = max(conclusions, key=lambda item: item[0])[1]
         return _matched_choice(conclusion) if conclusion else None
