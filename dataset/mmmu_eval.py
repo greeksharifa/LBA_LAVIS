@@ -1,8 +1,19 @@
 import re
-from typing import List, Optional, Union
+from typing import List, NamedTuple, Optional, Union
 
 
 NormalizedAnswer = Union[str, float]
+
+
+class _ConclusionEvent(NamedTuple):
+    position: int
+    choice: Optional[str]
+
+
+class _ChoiceSpan(NamedTuple):
+    start: int
+    end: int
+
 
 _NUMBER_WITH_COMMAS = r"-?\b\d{1,3}(?:,\d{3})+\b"
 _SCIENTIFIC_NUMBER = r"-?\d+(?:\.\d+)?[eE][+-]?\d+"
@@ -19,17 +30,20 @@ _KEY_INDICATORS = (
 )
 
 _TERMINAL_PUNCTUATION = r"[.,!?;:'\"]*"
-_COORDINATED_ALTERNATIVE = rf"""
-(?!
+_COORDINATED_CONTINUATION_SOURCE = rf"""
     \s*{_TERMINAL_PUNCTUATION}\s*
     (?:(?:and|or)\b|[/&])\s*
     (?:(?:option|choice)\s+)?
     (?:\*\*\s*)?(?:\(\s*)?[A-Z](?![A-Z])
-)
 """
+_COORDINATED_ALTERNATIVE = rf"(?!{_COORDINATED_CONTINUATION_SOURCE})"
 _BARE_EXPLICIT_COMPLETION = rf"""
 (?=\s*(?:[.!?]+\s+\S|{_TERMINAL_PUNCTUATION}\s*$))
 """
+_COORDINATED_CONTINUATION = re.compile(
+    _COORDINATED_CONTINUATION_SOURCE,
+    re.IGNORECASE | re.VERBOSE,
+)
 _COORDINATED_SEPARATOR = re.compile(
     rf"\s*{_TERMINAL_PUNCTUATION}\s*(?:(?:and|or)\b|[/&])\s*",
     re.IGNORECASE,
@@ -49,14 +63,15 @@ _EXPLICIT_MARKER = re.compile(
     r"""
     \b(?:
         (?P<strong>final\s+answer\s*(?:is\b|:)|answer\s*:)
-        |(?P<generic>answer\s+is\b)
+        |(?:(?P<referential>this|that)\s+|the\s+)?
+         (?P<generic>answer\s+is\b)
     )
     """,
     re.IGNORECASE | re.VERBOSE,
 )
-_EXPLICIT_CHOICE = re.compile(
+_EXPLICIT_CHOICE_PAYLOAD = re.compile(
     rf"""
-    \b(?:final\s+)?answer\s*(?:is\b|:)\s*(?:
+    \s*(?:
         (?:option|choice)\s+(?:
             \*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
             |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
@@ -73,9 +88,8 @@ _EXPLICIT_CHOICE = re.compile(
 )
 _BOXED_MARKER = re.compile(r"(?<!\\)\\boxed\b", re.IGNORECASE)
 _BOXED_CHOICE = re.compile(
-    rf"(?<!\\)\\boxed\s*\{{\s*([A-Z])(?![A-Z])\s*\}}"
-    rf"{_COORDINATED_ALTERNATIVE}",
-    re.IGNORECASE | re.VERBOSE,
+    r"(?<!\\)\\boxed\s*\{\s*([A-Z])(?![A-Z])\s*\}",
+    re.IGNORECASE,
 )
 _LEADING_CHOICE = re.compile(
     r"""
@@ -178,14 +192,17 @@ def _matched_choice(match: re.Match) -> str:
     return next(group for group in match.groups() if group).lower()
 
 
-def _has_coordinated_choices(response: str, choices: List[re.Match]) -> bool:
-    choices = sorted(choices, key=lambda match: match.start())
-    return any(
-        _COORDINATED_SEPARATOR.fullmatch(
-            response[first.end() : second.start()]
+def _coordinated_choice_events(
+    response: str, choice_spans: List[_ChoiceSpan]
+) -> List[_ConclusionEvent]:
+    choice_spans = sorted(choice_spans)
+    return [
+        _ConclusionEvent(second.end, None)
+        for first, second in zip(choice_spans, choice_spans[1:])
+        if _COORDINATED_SEPARATOR.fullmatch(
+            response[first.end : second.start]
         )
-        for first, second in zip(choices, choices[1:])
-    )
+    ]
 
 
 def parse_multiple_choice_response(response: str) -> Optional[str]:
@@ -196,27 +213,36 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
     if whole:
         return _matched_choice(whole)
 
-    conclusions = []
-    choices = []
+    events = []
+    choice_spans = []
     for marker in _EXPLICIT_MARKER.finditer(response):
-        choice = _EXPLICIT_CHOICE.match(response, marker.start())
+        choice = _EXPLICIT_CHOICE_PAYLOAD.match(response, marker.end())
         if choice:
-            choices.append(choice)
-            conclusions.append((marker.start(), choice))
-        elif marker.group("strong"):
-            conclusions.append((marker.start(), None))
+            choice_spans.append(_ChoiceSpan(marker.start(), choice.end()))
+            events.append(
+                _ConclusionEvent(marker.start(), _matched_choice(choice))
+            )
+        elif marker.group("strong") or not marker.group("referential"):
+            events.append(_ConclusionEvent(marker.start(), None))
 
     for marker in _BOXED_MARKER.finditer(response):
         choice = _BOXED_CHOICE.match(response, marker.start())
         if choice:
-            choices.append(choice)
-        conclusions.append((marker.start(), choice))
+            choice_spans.append(_ChoiceSpan(marker.start(), choice.end()))
+            events.append(
+                _ConclusionEvent(marker.start(), _matched_choice(choice))
+            )
+            continuation = _COORDINATED_CONTINUATION.match(
+                response, choice.end()
+            )
+            if continuation:
+                events.append(_ConclusionEvent(continuation.end(), None))
+        else:
+            events.append(_ConclusionEvent(marker.start(), None))
 
-    if _has_coordinated_choices(response, choices):
-        return None
-    if conclusions:
-        conclusion = max(conclusions, key=lambda item: item[0])[1]
-        return _matched_choice(conclusion) if conclusion else None
+    events.extend(_coordinated_choice_events(response, choice_spans))
+    if events:
+        return max(events, key=lambda event: event.position).choice
 
     leading = _LEADING_CHOICE.match(response)
     if leading:

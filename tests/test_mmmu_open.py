@@ -337,6 +337,9 @@ class MMMUOpenTests(unittest.TestCase):
         valid_generic = "Final answer: option B. Actually, the answer is C."
         self.assertEqual("c", parse_multiple_choice_response(valid_generic))
 
+        malformed_generic = "The answer is B. Actually, the answer is unknown."
+        self.assertIsNone(parse_multiple_choice_response(malformed_generic))
+
         malformed_strong = "Final answer: option B. Later, answer: unknown."
         self.assertIsNone(parse_multiple_choice_response(malformed_strong))
 
@@ -352,6 +355,24 @@ class MMMUOpenTests(unittest.TestCase):
                         0,
                         dataset.get_score(prediction, gold, "multiple-choice"),
                     )
+
+    def test_multiple_choice_applies_coordinated_boxed_event_in_source_order(self):
+        dataset = make_adapter()
+        pair_then_final = r"\boxed{A} or \boxed{B}. Final answer: C."
+        final_then_pair = r"Final answer: C. \boxed{A} or \boxed{B}."
+
+        self.assertEqual("c", parse_multiple_choice_response(pair_then_final))
+        self.assertEqual(
+            1,
+            dataset.get_score(pair_then_final, "C", "multiple-choice"),
+        )
+        self.assertIsNone(parse_multiple_choice_response(final_then_pair))
+        for gold in "ABC":
+            with self.subTest(gold=gold):
+                self.assertEqual(
+                    0,
+                    dataset.get_score(final_then_pair, gold, "multiple-choice"),
+                )
 
     def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
         dataset = make_adapter()
