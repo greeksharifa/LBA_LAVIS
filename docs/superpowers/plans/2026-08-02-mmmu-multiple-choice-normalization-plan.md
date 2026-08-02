@@ -305,7 +305,7 @@ git commit -m "docs: report normalized MMMU results"
 Completed on 2026-08-02. The implementation added gold-independent MMMU
 multiple-choice normalization, reproducible dev-selected and validation
 in-sample evaluators, paired transition counts, and branch-local Qwen2.5/Qwen3
-results. Final verification covered 213 unit tests, exact report recomputation,
+results. Final verification covered 216 unit tests, exact report recomputation,
 four-run manifest/tree/projection validation, and SHA-256 equality for all 16
 source generation and manifest artifacts before and after evaluation.
 

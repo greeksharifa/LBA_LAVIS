@@ -46,7 +46,10 @@ events. A later malformed strong marker such as `Final answer: unknown`
 invalidates an earlier answer. Bounded explanatory reuse such as
 `The answer is based on the calculation` is ignored rather than treated as a
 new conclusion. Coordinated alternatives remain invalid through Markdown and
-blockquote wrappers, including `**A** or **B**`.
+blockquote wrappers, including `**A** or **B**` and `(A), (B)`. A recognized
+answer marker may be followed by a bounded explanation introducer such as
+`because`, `since`, or `Explanation:`; the same bare unmarked text remains
+invalid.
 
 The parser must reject ambiguous prose such as `A because it is correct`, a
 letter occurring incidentally inside a sentence, responses with no explicit or
