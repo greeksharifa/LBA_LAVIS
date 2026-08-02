@@ -371,6 +371,35 @@ class MMMUOpenTests(unittest.TestCase):
                     dataset.get_score(prediction, "A", "multiple-choice"),
                 )
 
+    def test_multiple_choice_accepts_explicit_choice_before_bounded_explanation(self):
+        dataset = make_adapter()
+
+        for prediction, expected in (
+            ("Answer: B because the result follows.", "b"),
+            ("The correct answer is C since the calculation.", "c"),
+            ("Final answer: A\nExplanation: details", "a"),
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertEqual(
+                    expected,
+                    parse_multiple_choice_response(prediction),
+                )
+                self.assertEqual(
+                    1,
+                    dataset.get_score(
+                        prediction, expected.upper(), "multiple-choice"
+                    ),
+                )
+
+        self.assertIsNone(
+            parse_multiple_choice_response("A because it is correct")
+        )
+        self.assertIsNone(
+            parse_multiple_choice_response(
+                "The answer is a complex expression"
+            )
+        )
+
     def test_multiple_choice_rejects_coordinated_explicit_alternatives(self):
         dataset = make_adapter()
 
@@ -386,6 +415,35 @@ class MMMUOpenTests(unittest.TestCase):
                         0,
                         dataset.get_score(prediction, gold, "multiple-choice"),
                     )
+
+    def test_multiple_choice_rejects_comma_separated_explicit_alternatives(self):
+        dataset = make_adapter()
+
+        for prediction in (
+            "Answer: (A), (B)",
+            r"Final answer: \boxed{A}, \boxed{B}",
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in "AB":
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(
+                            prediction, gold, "multiple-choice"
+                        ),
+                    )
+
+        self.assertEqual(
+            "a",
+            parse_multiple_choice_response("Answer: (A), explanation"),
+        )
+
+    def test_multiple_choice_applies_comma_pair_event_in_source_order(self):
+        pair_then_final = "Answer: (A), (B). Final answer: C."
+        final_then_pair = "Final answer: C. Answer: (A), (B)"
+
+        self.assertEqual("c", parse_multiple_choice_response(pair_then_final))
+        self.assertIsNone(parse_multiple_choice_response(final_then_pair))
 
     def test_multiple_choice_ignores_explanatory_generic_answer_is_marker(self):
         dataset = make_adapter()

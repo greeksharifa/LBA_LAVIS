@@ -30,17 +30,23 @@ _KEY_INDICATORS = (
 )
 
 _TERMINAL_PUNCTUATION = r"[.,!?;:'\"]*"
+_EXPLICIT_TERMINAL_PUNCTUATION = r"[.!?;:'\"]*"
 _COORDINATED_CONTINUATION_SOURCE = rf"""
     \s*(?:\*\*\s*)?{_TERMINAL_PUNCTUATION}\s*
     (?:>\s*)*
-    (?:(?:and|or)\b|[/&])\s*
+    (?:(?:and|or)\b|[,/&])\s*
     (?:>\s*)*
     (?:(?:option|choice)\s+)?
     (?:\*\*\s*)?(?:\(\s*)?[A-Z](?![A-Z])
 """
 _COORDINATED_ALTERNATIVE = rf"(?!{_COORDINATED_CONTINUATION_SOURCE})"
 _BARE_EXPLICIT_COMPLETION = rf"""
-(?=\s*(?:[.!?]+\s+\S|{_TERMINAL_PUNCTUATION}\s*$))
+(?=\s*(?:
+    [.!?]+\s+\S
+    |{_TERMINAL_PUNCTUATION}\s*$
+    |(?:because|since|as)\b
+    |(?:explanation|reasoning)\s*:
+))
 """
 _COORDINATED_CONTINUATION = re.compile(
     _COORDINATED_CONTINUATION_SOURCE,
@@ -49,7 +55,7 @@ _COORDINATED_CONTINUATION = re.compile(
 _COORDINATED_SEPARATOR = re.compile(
     rf"""
     \s*(?:\*\*\s*)?{_TERMINAL_PUNCTUATION}\s*
-    (?:>\s*)*(?:(?:and|or)\b|[/&])\s*(?:>\s*)*
+    (?:>\s*)*(?:(?:and|or)\b|[,/&])\s*(?:>\s*)*
     """,
     re.IGNORECASE | re.VERBOSE,
 )
@@ -93,16 +99,16 @@ _EXPLICIT_CHOICE_PAYLOAD = re.compile(
         (?:option|choice)\s+(?:
             \*\*\s*([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
                 \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
-            |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
-            |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
-            |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
-            |([A-Z])(?![A-Z)*])\s*{_TERMINAL_PUNCTUATION}
+            |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_EXPLICIT_TERMINAL_PUNCTUATION}\s*\*\*
+            |\*\*\s*([A-Z])(?![A-Z])\s*{_EXPLICIT_TERMINAL_PUNCTUATION}\s*\*\*
+            |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_EXPLICIT_TERMINAL_PUNCTUATION}
+            |([A-Z])(?![A-Z)*])\s*{_EXPLICIT_TERMINAL_PUNCTUATION}
         )
         |\*\*\s*([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
             \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
-        |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}\s*\*\*
-        |\*\*\s*([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
-        |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_TERMINAL_PUNCTUATION}
+        |\*\*\s*\(\s*([A-Z])(?![A-Z])\s*\)\s*{_EXPLICIT_TERMINAL_PUNCTUATION}\s*\*\*
+        |\*\*\s*([A-Z])(?![A-Z])\s*{_EXPLICIT_TERMINAL_PUNCTUATION}\s*\*\*
+        |\(\s*([A-Z])(?![A-Z])\s*\)\s*{_EXPLICIT_TERMINAL_PUNCTUATION}
         |([A-Z])(?![A-Z]){_BARE_EXPLICIT_COMPLETION}
     ){_COORDINATED_ALTERNATIVE}
     """,
@@ -113,7 +119,7 @@ _MARKDOWN_MARKER_CHOICE_PAYLOAD = re.compile(
     \s*(?:>\s*)?(?:
         ([A-Z])(?![A-Z]){_COORDINATED_ALTERNATIVE}
             \s*[.):]\s+\S(?:(?!\*\*).)*\*\*
-        |([A-Z])(?![A-Z])\s*{_TERMINAL_PUNCTUATION}\s*\*\*
+        |([A-Z])(?![A-Z])\s*{_EXPLICIT_TERMINAL_PUNCTUATION}\s*\*\*
     ){_COORDINATED_ALTERNATIVE}
     """,
     re.IGNORECASE | re.VERBOSE,
