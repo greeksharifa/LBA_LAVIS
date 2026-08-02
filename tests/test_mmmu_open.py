@@ -281,6 +281,14 @@ class MMMUOpenTests(unittest.TestCase):
         for prediction, possible_gold in (
             ("Answer: **A or B**", "AB"),
             ("Final Answer: **A and B**", "AB"),
+            ("**Final Answer: (A)** or **B**", "AB"),
+            ("**Final Answer: (A)** and **B**", "AB"),
+            ("**Final Answer: (A)** / **B**", "AB"),
+            ("**Final Answer: (A)** & **B**", "AB"),
+            (
+                "Final Answer:\n> **A. first**\n> or **B. second**",
+                "AB",
+            ),
         ):
             with self.subTest(prediction=prediction):
                 self.assertIsNone(parse_multiple_choice_response(prediction))
@@ -381,16 +389,25 @@ class MMMUOpenTests(unittest.TestCase):
 
     def test_multiple_choice_ignores_explanatory_generic_answer_is_marker(self):
         dataset = make_adapter()
-        prediction = (
-            "Final answer: option B. "
-            "This answer is based on the calculation."
-        )
-
-        self.assertEqual("b", parse_multiple_choice_response(prediction))
-        self.assertEqual(
-            1,
-            dataset.get_score(prediction, "B", "multiple-choice"),
-        )
+        for explanation in (
+            "This answer is based on the calculation.",
+            "The answer is based on the calculation.",
+            "The answer is supported by the calculation.",
+            "The answer is derived from the calculation.",
+            "The answer is calculated from the given values.",
+            "The answer is obtained from the equation.",
+            "The answer is consistent with the diagram.",
+        ):
+            prediction = f"Final answer: B. {explanation}"
+            with self.subTest(explanation=explanation):
+                self.assertEqual(
+                    "b",
+                    parse_multiple_choice_response(prediction),
+                )
+                self.assertEqual(
+                    1,
+                    dataset.get_score(prediction, "B", "multiple-choice"),
+                )
 
         valid_generic = "Final answer: option B. Actually, the answer is C."
         self.assertEqual("c", parse_multiple_choice_response(valid_generic))

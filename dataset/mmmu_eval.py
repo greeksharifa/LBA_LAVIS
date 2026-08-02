@@ -31,8 +31,10 @@ _KEY_INDICATORS = (
 
 _TERMINAL_PUNCTUATION = r"[.,!?;:'\"]*"
 _COORDINATED_CONTINUATION_SOURCE = rf"""
-    \s*{_TERMINAL_PUNCTUATION}\s*
+    \s*(?:\*\*\s*)?{_TERMINAL_PUNCTUATION}\s*
+    (?:>\s*)*
     (?:(?:and|or)\b|[/&])\s*
+    (?:>\s*)*
     (?:(?:option|choice)\s+)?
     (?:\*\*\s*)?(?:\(\s*)?[A-Z](?![A-Z])
 """
@@ -45,8 +47,24 @@ _COORDINATED_CONTINUATION = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 _COORDINATED_SEPARATOR = re.compile(
-    rf"\s*{_TERMINAL_PUNCTUATION}\s*(?:(?:and|or)\b|[/&])\s*",
-    re.IGNORECASE,
+    rf"""
+    \s*(?:\*\*\s*)?{_TERMINAL_PUNCTUATION}\s*
+    (?:>\s*)*(?:(?:and|or)\b|[/&])\s*(?:>\s*)*
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+_EXPLANATORY_GENERIC_PREDICATE = re.compile(
+    r"""
+    \s*(?:
+        based\s+(?:on|upon)
+        |supported\s+by
+        |derived\s+from
+        |calculated\s+(?:from|using|by)
+        |obtained\s+(?:from|using|by)
+        |consistent\s+with
+    )\b
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 _WHOLE_CHOICE = re.compile(
     rf"""
@@ -252,7 +270,17 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
             events.append(
                 _ConclusionEvent(marker.start(), _matched_choice(choice))
             )
-        elif marker.group("strong") or not marker.group("referential"):
+            continuation = _COORDINATED_CONTINUATION.match(
+                response, choice.end()
+            )
+            if continuation:
+                events.append(_ConclusionEvent(continuation.end(), None))
+        elif marker.group("strong") or (
+            not marker.group("referential")
+            and not _EXPLANATORY_GENERIC_PREDICATE.match(
+                response, marker.end()
+            )
+        ):
             events.append(_ConclusionEvent(marker.start(), None))
 
     for marker in _BOXED_MARKER.finditer(response):
