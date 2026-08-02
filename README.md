@@ -42,10 +42,10 @@ compatible. These minimal examples use physical GPU 6 and a separate output
 root:
 
 ```bash
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=subq model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/single-stage
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=suba model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/single-stage
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=base model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/single-stage
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=refined model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/single-stage
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=subq model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output/single-stage
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=suba model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output/single-stage
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=base model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output/single-stage
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=refined model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output/single-stage
 ```
 
 Set `runner.mode=multi_stage` to execute those four stages in order while
@@ -53,16 +53,19 @@ reusing one loaded model.
 
 ### One-item smoke run
 
-This exact smoke profile uses physical GPU 6, tensor parallelism 1, and one
-question from MMMU's `val` split. Its `output/smoke` root is intentional: a
-one-qid manifest must never collide with a full dev run in `output`.
+This exact hierarchical Sub-QA smoke profile uses physical GPU 6, tensor
+parallelism 1, and one question from MMMU's `val` split. It expands four
+depth-1 questions and three depth-2 questions below each one, then projects
+only the four selected depth-1 QA pairs into the existing refined stage. Its
+`output/smoke-hierarchical` root is intentional: a one-qid manifest must never
+collide with a full dev run in `output`.
 
 The smoke and full commands assume the model is already cached in `HF_HOME`.
 For the first model download, remove `HF_HUB_OFFLINE=1` and
 `TRANSFORMERS_OFFLINE=1`, then restore them after the cache is populated.
 
 ```bash
-/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output/smoke
+/home/ywjang/.codex/bin/run_gpu.sh 6 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=1 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=1 runner.N=4 runner.M=2 runner.K=4 runner.subqa_depth=2 'runner.branching_by_depth=[4,3]' runner.suba_M=2 runner.suba_K=3 runner.suba_confidence_type=token_min_prob runner.condition_on_direct_suba=true runner.output_dir=output/smoke-hierarchical
 ```
 
 ### Full MMMU dev and validation runs
@@ -73,24 +76,36 @@ questions). `dataset.num_data=-1` selects the entire configured split. The two
 full commands use physical GPUs 5, 6, 7, and 8 with tensor parallelism 4.
 
 ```bash
-/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
-/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=test dataset.num_data=-1 runner.N=5 runner.M=2 runner.K=8 runner.output_dir=output
+/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=val dataset.num_data=-1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output
+/home/ywjang/.codex/bin/run_gpu.sh 5,6,7,8 -- env HF_HOME=/home/ywjang/.cache/huggingface HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_USE_V1=0 VLLM_WORKER_MULTIPROC_METHOD=spawn /home/ywjang/miniconda3/envs/qwen2vl/bin/python main.py --options runner.mode=multi_stage model.model_name=qwen2.5-vl-7b model.tensor_parallel_size=4 model.enforce_eager=true dataset.dataset_name=MMMU dataset.split=test dataset.num_data=-1 runner.N=4 runner.M=2 runner.K=4 runner.output_dir=output
 ```
 
 ## Run namespace and artifact guards
 
-The run namespace is
+The depth-1 run namespace is
 `<output-root>/<dataset>/<model>/<split>/N=<N>_M=<M>_K=<K>`. Dataset split and
-the N/M/K signature therefore separate the full run directories. A different
-`num_data` value is checked by provenance but does not create another path, so
-partial and full runs must use different output roots, as the smoke command
-does.
+the N/M/K signature therefore separate the full run directories. Hierarchical
+Sub-QA adds one canonical child directory, `D=<depth>_H=<hash>`, whose hash
+covers branching, internal M/K/confidence, direct conditioning, limits,
+repair/batch settings, schema version, and fallback policy. Existing depth-1
+artifacts keep their old path; an older N=5 artifact remains addressable only
+when `runner.N=5` is explicitly supplied. A different `num_data` value is
+checked by provenance but does not create another path, so partial and full
+runs must use different output roots, as the smoke command does.
 
 Each namespace contains `run_manifest.json`, which records the exact run
-configuration, annotation paths, selected qids, per-stage completion state,
-and each stage's `generation_id`. The final stage also writes
+configuration including the normalized hierarchy contract, annotation paths,
+selected qids, per-stage completion state, and each stage's `generation_id`.
+`subq_outputs.json` stores the schema-v2 tree and `suba_outputs.json` stores
+direct/candidate/selected answers by node while retaining depth-1 flat
+projections. The final stage also writes
 `refined_samples.json`. Producers reject incompatible manifests and require
 completed dependencies before consuming their outputs.
+
+The hierarchy contract is documented in the
+[design](docs/superpowers/specs/2026-08-01-hierarchical-subqa-design.md), with
+[implementation steps](docs/superpowers/plans/2026-08-01-hierarchical-subqa-plan.md)
+and [completed execution evidence](docs/exec-plans/completed/2026-08-01-hierarchical-subqa.md).
 
 Evaluation applies additional generation and provenance guards: the refined
 stage must be completed, its `generation_id` must be stable while files are
@@ -105,7 +120,7 @@ annotation paths are rejected.
 After both full runs complete, evaluate the exact run directories with:
 
 ```bash
-/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r.py --dev-run output/MMMU/qwen2.5-vl-7b/val/N=5_M=2_K=8 --validation-run output/MMMU/qwen2.5-vl-7b/test/N=5_M=2_K=8
+/home/ywjang/miniconda3/envs/qwen2vl/bin/python scripts/evaluate_c2r.py --dev-run output/MMMU/qwen2.5-vl-7b/val/N=4_M=2_K=4 --validation-run output/MMMU/qwen2.5-vl-7b/test/N=4_M=2_K=4
 ```
 
 The evaluator selects the C2R thresholds only on the dev role (`val`, the 150

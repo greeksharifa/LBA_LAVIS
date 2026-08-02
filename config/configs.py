@@ -36,6 +36,9 @@ class Config:
         
 
         self.config = OmegaConf.merge(config, model_config, dataset_config, user_config)
+        from subqa.schema import normalize_hierarchy_config
+
+        normalize_hierarchy_config(self.config.runner)
         if self.config.model.get("cache_dir", None) is None:
             self.config.model.cache_dir = os.path.join(self.config.model.HF_HOME, self.config.model.model_name.split("/")[0].split("-")[0])
             

@@ -239,6 +239,21 @@ def run_stage(
     if mode not in STAGE_ORDER:
         raise ValueError(f"unsupported inference stage: {mode}")
 
+    from subqa.schema import normalize_hierarchy_config
+
+    hierarchy = normalize_hierarchy_config(cfg.runner_cfg)
+    if hierarchy.enabled and mode in ("subq", "suba"):
+        from subqa.orchestrator import run_hierarchical_stage
+
+        return run_hierarchical_stage(
+            cfg,
+            model,
+            hierarchy,
+            dataset_loader=dataset_loader or _default_dataset_loader,
+            prepare_manifest=_prepare_manifest,
+            atomic_writer=write_json_atomic,
+        )
+
     dataset_loader = dataset_loader or _default_dataset_loader
     prompt_builder = prompt_builder or _build_prompt
     output_formatter = output_formatter or format_vllm_outputs
@@ -361,6 +376,9 @@ def run(
     **stage_kwargs,
 ):
     """Run either the full pipeline or one legacy inference stage."""
+    from subqa.schema import normalize_hierarchy_config
+
+    normalize_hierarchy_config(cfg.runner_cfg)
     mode = str(cfg.runner_cfg.mode)
     if mode == "multi_stage":
         return run_multi_stage(

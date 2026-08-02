@@ -6,6 +6,8 @@ from collections import defaultdict
 
 from typing import List, Any, Dict, Union
 
+from model.protocol import generation_result_from_vllm
+
 
 def postprocess_subqs(output_texts: str, N: int) -> List[str]:
     """
@@ -121,45 +123,19 @@ def format_vllm_outputs(
 
     # outputs와 qids를 순서대로 매핑
     for output, qid in zip(outputs, qids):
-        # vLLM은 n=1일 때 outputs[0]에 결과를 담음
-        completion = output.outputs[0]
-        
-        # 1. Sequence Perplexity (PPL) 계산
-        cumulative_logprob = completion.cumulative_logprob
-        num_tokens = len(completion.token_ids)
-        
-        if num_tokens > 0:
-            seq_ppl = math.exp(-cumulative_logprob / num_tokens)
-        else:
-            seq_ppl = 0.0
-
-        # 2. Token Minimum Probability 계산
-        # 초기값 1.0 (확률은 0~1 사이)
-        min_prob = 1.0
-        has_tokens = False
-
-        if completion.logprobs:
-            for idx, token_logprob_dict in enumerate(completion.logprobs):
-                token_id = completion.token_ids[idx]
-                if token_id in token_logprob_dict:
-                    has_tokens = True
-                    log_p = token_logprob_dict[token_id].logprob
-                    prob = math.exp(log_p)
-                    if prob < min_prob:
-                        min_prob = prob
-        
-        # 토큰이 하나도 없었다면 min_prob는 0.0 처리 (안전장치)
-        token_min_prob = min_prob if has_tokens else 0.0
+        generation = generation_result_from_vllm(output)
+        seq_ppl = generation.confidence["seq_ppl"]
+        token_min_prob = generation.confidence["token_min_prob"]
 
         # output_text postprocess
         if mode == "subq":
-            output_text = postprocess_subqs(completion.text, N)
+            output_text = postprocess_subqs(generation.text, N)
         elif mode == "suba":
-            output_text = completion.text   # postprocess_subas(completion.text)
+            output_text = generation.text   # postprocess_subas(generation.text)
         # elif mode == "refined":
         #     output_text = postprocess_refineds(completion.text)
         else: # "base"
-            output_text = postprocess_bases(completion.text)
+            output_text = postprocess_bases(generation.text)
 
 
         # 3. 결과 딕셔너리 생성

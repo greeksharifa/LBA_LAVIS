@@ -11,7 +11,12 @@ from pathlib import Path
 import numpy as np
 
 from dataset.mmmu_eval import evaluate_answer
-from util.artifacts import STAGES, STAGE_DEPENDENCIES
+from util.artifacts import (
+    STAGES,
+    STAGE_DEPENDENCIES,
+    canonical_manifest_hierarchy,
+)
+from util.confidence import normalize_confidence, select_first_maximum
 
 
 TAU1_GRID = tuple(round(index / 10, 1) for index in range(11))
@@ -67,22 +72,6 @@ def _number(value, label):
     return value
 
 
-def normalize_confidence(value, confidence_type):
-    """Convert a configured confidence metric to higher-is-better [0, 1]."""
-    value = _number(value, confidence_type)
-    if confidence_type == "token_min_prob":
-        if not 0.0 <= value <= 1.0:
-            raise ValueError(
-                f"token_min_prob must be in [0, 1], got {value!r}"
-            )
-        return value
-    if confidence_type == "seq_ppl":
-        if value < 0.0:
-            raise ValueError(f"seq_ppl must be non-negative, got {value!r}")
-        return min(1.0, 1.0 / max(value, 1e-12))
-    raise ValueError(f"unsupported confidence_type: {confidence_type!r}")
-
-
 def select_refined_candidate(answers, confidences, confidence_type):
     """Select the first maximum-confidence refined candidate."""
     if not isinstance(answers, list) or not answers:
@@ -96,11 +85,7 @@ def select_refined_candidate(answers, confidences, confidence_type):
         )
     if not all(isinstance(answer, str) for answer in answers):
         raise ValueError("refined_answer_list values must be strings")
-    normalized = [
-        normalize_confidence(value, confidence_type) for value in confidences
-    ]
-    index = max(range(len(normalized)), key=normalized.__getitem__)
-    return answers[index], normalized[index], index
+    return select_first_maximum(answers, confidences, confidence_type)
 
 
 def _metric_value(container, confidence_type, label, *, require_mapping=False):
@@ -516,6 +501,7 @@ def load_run(run_directory):
         )
     _validate_manifest_integer_fields(config)
     _validate_runtime_config(config)
+    hierarchy = canonical_manifest_hierarchy(config)
     split = config["split"]
     if not isinstance(split, str) or not split:
         raise ValueError("run manifest split must be explicit and non-empty")
@@ -587,6 +573,7 @@ def load_run(run_directory):
         "samples_path": str(samples_path),
         "manifest": manifest,
         "config": dict(config),
+        "hierarchy": hierarchy,
         "records": records,
         "qids": manifest_qids,
     }
@@ -595,6 +582,17 @@ def load_run(run_directory):
 def _validate_run_pair(dev_run, validation_run):
     dev_config = dev_run["config"]
     validation_config = validation_run["config"]
+    dev_hierarchy = dev_run.get("hierarchy")
+    if dev_hierarchy is None:
+        dev_hierarchy = canonical_manifest_hierarchy(dev_config)
+    validation_hierarchy = validation_run.get("hierarchy")
+    if validation_hierarchy is None:
+        validation_hierarchy = canonical_manifest_hierarchy(validation_config)
+    if dev_hierarchy != validation_hierarchy:
+        raise ValueError(
+            "incompatible run manifests: hierarchy: "
+            f"dev={dev_hierarchy!r}, validation={validation_hierarchy!r}"
+        )
     mismatches = [
         field
         for field in _COMPATIBILITY_FIELDS

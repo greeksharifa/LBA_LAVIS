@@ -19,6 +19,7 @@ from model.vllm_config import (
 from vllm import LLM, SamplingParams
 
 from config.configs import Config
+from model.protocol import generation_result_from_vllm
 # from utils.logger import get_logger
 # from utils.util import transpose_list, get_confidence_and_ppl
 # from dataset.video_dataset import EXTs
@@ -38,7 +39,12 @@ class C2RFramework(ABC):
         pass
 
     @abstractmethod
-    def apply_chat_template(self, text_prompt: str, vision: Any = None, mm_uuids: str = None) -> dict:
+    def apply_chat_template(
+        self,
+        text_prompt: str,
+        vision: Any = None,
+        mm_uuids: str = None,
+    ) -> object:
         """
         Apply chat template to text prompts.
         Args:
@@ -73,6 +79,10 @@ class C2RFramework(ABC):
         )
         outputs = self.llm.generate(prompts, sampling_params)
         return outputs
+
+    def generate_results(self, prompts: List[Any]):
+        """Generate model-independent text and confidence results."""
+        return [generation_result_from_vllm(output) for output in self.generate(prompts)]
 
     def _generate(self,
                   inputs: Any,
@@ -130,10 +140,23 @@ class Qwen2_5VL(C2RFramework):
         return engine_args, llm
 
     def apply_chat_template(self, text_prompt: str, vision: Any = None, mm_uuids: str = None) -> dict:
+        if self.modality == "text":
+            if vision is not None:
+                raise ValueError("text modality does not accept a vision payload")
+            return (
+                "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n"
+                f"<|im_start|>user\n{text_prompt}<|im_end|>\n"
+                "<|im_start|>assistant\n"
+            )
         if self.modality == "image":
             placeholder = "<|image_pad|>"
         elif self.modality == "video":
             placeholder = "<|video_pad|>"
+        else:
+            raise ValueError(f"unsupported modality: {self.modality!r}")
+
+        if vision is None:
+            raise ValueError(f"{self.modality} modality requires a vision payload")
 
         vision_placeholder = placeholder * len(vision)
         # make mm_uuids identical to vision, postfix with _<index>

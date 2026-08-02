@@ -1,4 +1,5 @@
 import fcntl
+import hashlib
 import json
 import multiprocessing
 import tempfile
@@ -9,6 +10,7 @@ from omegaconf import OmegaConf
 
 from config.configs import Config
 from dataset.base_dataset import BaseDataset
+from subqa.schema import normalize_hierarchy_config
 from util.artifacts import (
     core_run_config,
     create_manifest,
@@ -27,7 +29,16 @@ def mark_stage_in_process(path, stage, generation_id, start, ready, finished):
     finished.set()
 
 
-def make_config(root: Path, *, split="dev", n=5, m=2, k=8, num_data=-1):
+def make_config(
+    root: Path,
+    *,
+    split="dev",
+    n=5,
+    m=2,
+    k=8,
+    num_data=-1,
+    hierarchy=None,
+):
     cfg = Config.__new__(Config)
     cfg.args = None
     cfg.config = OmegaConf.create(
@@ -64,6 +75,8 @@ def make_config(root: Path, *, split="dev", n=5, m=2, k=8, num_data=-1):
             },
         }
     )
+    if hierarchy:
+        cfg.config.runner.update(hierarchy)
     return cfg
 
 
@@ -192,6 +205,151 @@ class ArtifactTests(unittest.TestCase):
                 / "N=5_M=2_K=8",
                 get_output_dir(dev),
             )
+
+    def test_depth_two_namespace_uses_exact_canonical_hierarchy_hash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(
+                Path(tmp),
+                n=4,
+                m=2,
+                k=4,
+                hierarchy={
+                    "subqa_depth": 2,
+                    "branching_by_depth": [4, 3],
+                    "suba_M": 2,
+                    "suba_K": 3,
+                    "suba_confidence_type": "token_min_prob",
+                    "condition_on_direct_suba": True,
+                    "subqa_max_nodes": 64,
+                    "subqa_repair_attempts": 1,
+                    "subqa_generation_batch_size": 64,
+                    "subqa_schema_version": 2,
+                },
+            )
+            canonical = normalize_hierarchy_config(
+                cfg.runner_cfg
+            ).to_manifest_dict()
+            digest = hashlib.sha256(
+                json.dumps(
+                    canonical,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()[:12]
+
+            self.assertEqual(
+                Path(tmp)
+                / "output"
+                / "FixtureDataset"
+                / "fixture-model"
+                / "dev"
+                / "N=4_M=2_K=4"
+                / f"D=2_H={digest}",
+                get_output_dir(cfg),
+            )
+
+    def test_manifest_records_full_canonical_hierarchy_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(
+                Path(tmp),
+                n=4,
+                m=2,
+                k=4,
+                hierarchy={
+                    "subqa_depth": 2,
+                    "branching_by_depth": [4, 3],
+                    "suba_M": 2,
+                    "suba_K": 3,
+                },
+            )
+
+            config = create_manifest(cfg, ["q0"])["config"]
+
+            self.assertIn("hierarchy", config)
+            saved = config["hierarchy"]
+
+            self.assertEqual(
+                normalize_hierarchy_config(cfg.runner_cfg).to_manifest_dict(),
+                saved,
+            )
+            self.assertEqual(
+                {
+                    "depth",
+                    "branching",
+                    "suba_m",
+                    "suba_k",
+                    "confidence_type",
+                    "condition_on_direct_suba",
+                    "max_nodes",
+                    "repair_attempts",
+                    "generation_batch_size",
+                    "schema_version",
+                    "fallback_policy",
+                },
+                set(saved),
+            )
+
+    def test_manifest_hierarchy_mismatch_and_partial_fields_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cfg = make_config(
+                root,
+                n=4,
+                m=2,
+                k=4,
+                hierarchy={
+                    "subqa_depth": 2,
+                    "branching_by_depth": [4, 3],
+                },
+            )
+            manifest = create_manifest(cfg, ["q0"])
+            manifest["config"]["hierarchy"] = normalize_hierarchy_config(
+                cfg.runner_cfg
+            ).to_manifest_dict()
+            manifest["config"]["hierarchy"]["suba_k"] = 2
+
+            with self.assertRaisesRegex(
+                ValueError, "manifest config mismatch.*hierarchy"
+            ):
+                validate_manifest(manifest, cfg, ["q0"])
+
+            partial = create_manifest(cfg, ["q0"])
+            partial["config"]["hierarchy"] = {"depth": 2}
+            with self.assertRaisesRegex(ValueError, "partial hierarchy"):
+                validate_manifest(partial, cfg, ["q0"])
+
+    def test_legacy_manifest_without_hierarchy_is_depth_one_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            flat_cfg = make_config(root, n=5, m=2, k=8)
+            legacy = create_manifest(flat_cfg, ["q0"])
+            legacy["config"].pop("hierarchy", None)
+
+            validate_manifest(legacy, flat_cfg, ["q0"])
+            self.assertEqual(
+                root
+                / "output"
+                / "FixtureDataset"
+                / "fixture-model"
+                / "dev"
+                / "N=5_M=2_K=8",
+                get_output_dir(flat_cfg),
+            )
+
+            deep_cfg = make_config(
+                root,
+                n=4,
+                m=2,
+                k=4,
+                hierarchy={
+                    "subqa_depth": 2,
+                    "branching_by_depth": [4, 3],
+                },
+            )
+            deep_legacy = create_manifest(deep_cfg, ["q0"])
+            deep_legacy["config"].pop("hierarchy", None)
+            with self.assertRaisesRegex(ValueError, "legacy.*depth 1"):
+                validate_manifest(deep_legacy, deep_cfg, ["q0"])
 
     def test_for_stage_returns_independent_deep_copy(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -546,6 +704,14 @@ class ArtifactTests(unittest.TestCase):
                 with self.subTest(manifest=manifest):
                     with self.assertRaises(ValueError):
                         validate_manifest(manifest, cfg, ["q0"])
+
+    def test_manifest_rejects_qid_reordering(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = make_config(Path(tmp))
+            manifest = create_manifest(cfg, ["q0", "q1"])
+
+            with self.assertRaisesRegex(ValueError, "order"):
+                validate_manifest(manifest, cfg, ["q1", "q0"])
 
     def test_num_data_manifest_uses_post_sampling_qids(self):
         with tempfile.TemporaryDirectory() as tmp:

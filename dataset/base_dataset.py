@@ -14,6 +14,13 @@ from abc import ABC, abstractmethod
 from util.logger import get_logger
 from util.utils import create_answer_mapping
 from util.path import get_sub_qas_path, get_output_dir
+from subqa.schema import (
+    normalize_hierarchy_config,
+    project_depth_one_questions,
+    validate_confidence_mapping,
+    validate_suba_artifact_entry,
+    validate_subq_tree,
+)
 from util.artifacts import (
     MANIFEST_FILENAME,
     STAGE_DEPENDENCIES,
@@ -32,6 +39,7 @@ class BaseDataset(ABC):
         runner_cfg = cfg.runner_cfg
         dataset_cfg = cfg.dataset_cfg
         model_cfg = cfg.model_cfg
+        self.hierarchy_config = normalize_hierarchy_config(runner_cfg)
 
         self.root_dir = Path(dataset_cfg.root_dir)
         self.vis_root = self.root_dir / dataset_cfg.vis_root
@@ -158,6 +166,12 @@ class BaseDataset(ABC):
                 "conf_base" if dependency == "base" else f"conf_{dependency}_list"
             )
             result.update({value_key: value, confidence_key: confidence})
+            if (
+                dependency == "subq"
+                and self.hierarchy_config.enabled
+                and self.cfg.runner_cfg.mode == "suba"
+            ):
+                result["subq_tree"] = self.subqs[str(ann["qid"])]["subq_tree"]
         
         if self.cfg.runner_cfg.few_shot:
             # Get few-shot samples for the current sub-category
@@ -229,6 +243,64 @@ class BaseDataset(ABC):
                     f"{path}: qid {qid} missing key "
                     f"{confidence_key}.{confidence_type}"
                 )
+            if not self.hierarchy_config.enabled:
+                continue
+            if stage == "subq":
+                self._validate_hierarchy_subq_entry(path, qid, entry)
+            elif stage == "suba" and self.cfg.runner_cfg.mode == "refined":
+                tree = self.subqs[qid]["subq_tree"]
+                self._validate_hierarchy_suba_entry(path, qid, entry, tree)
+
+    def _validate_hierarchy_subq_entry(self, path, qid, entry):
+        try:
+            if "subq_tree" not in entry:
+                raise KeyError("missing key subq_tree")
+            tree = entry["subq_tree"]
+            validate_subq_tree(
+                tree,
+                branching=self.hierarchy_config.branching,
+            )
+            validate_confidence_mapping(
+                entry["conf_subq"],
+                "conf_subq",
+                self.hierarchy_config.required_confidence_types,
+            )
+            for node in tree["nodes"]:
+                if (
+                    node["depth"] < tree["max_depth"]
+                    and node["expansion_confidence"] is None
+                ):
+                    raise ValueError(
+                        f"node {node['id']!r} expansion_confidence is required"
+                    )
+                if node["depth"] < tree["max_depth"]:
+                    validate_confidence_mapping(
+                        node["expansion_confidence"],
+                        f"node {node['id']!r} expansion_confidence",
+                        self.hierarchy_config.required_confidence_types,
+                    )
+            expected = project_depth_one_questions(
+                tree,
+                expected_count=self.hierarchy_config.branching[0],
+            )
+            if entry["subq_list"] != expected:
+                raise ValueError(
+                    "subq_list is not the exact depth-1 tree projection"
+                )
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(
+                f"{path}: qid {qid} invalid subq_tree: {error}"
+            ) from error
+
+    def _validate_hierarchy_suba_entry(self, path, qid, entry, tree):
+        try:
+            validate_suba_artifact_entry(
+                entry, tree, self.hierarchy_config
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(
+                f"{path}: qid {qid} invalid answers_by_node: {error}"
+            ) from error
 
     def _get_base_or_subs(self, ann, mode: str):
         qid = ann["qid"]

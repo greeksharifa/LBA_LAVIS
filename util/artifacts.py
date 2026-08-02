@@ -7,6 +7,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, Mapping, Optional
 
+from subqa.schema import normalize_hierarchy_config
+
 
 MANIFEST_FILENAME = "run_manifest.json"
 STAGES = ("subq", "suba", "base", "refined")
@@ -22,6 +24,62 @@ STAGE_DEPENDENTS = {
     "base": ("refined",),
     "refined": (),
 }
+
+_HIERARCHY_MANIFEST_FIELDS = frozenset(
+    normalize_hierarchy_config({}).to_manifest_dict()
+)
+
+
+def canonical_manifest_hierarchy(config: Mapping[str, Any]) -> Dict[str, Any]:
+    """Validate and canonicalize hierarchy provenance, including legacy depth 1."""
+    if not isinstance(config, Mapping):
+        raise ValueError("manifest config must be an object")
+    runner_values = {
+        "N": config.get("N"),
+        "M": config.get("M"),
+        "K": config.get("K"),
+        "confidence_type": config.get("confidence_type", "token_min_prob"),
+    }
+    if "hierarchy" not in config:
+        return normalize_hierarchy_config(runner_values).to_manifest_dict()
+
+    hierarchy = config["hierarchy"]
+    if not isinstance(hierarchy, Mapping):
+        raise ValueError("manifest hierarchy must be an object")
+    actual_fields = set(hierarchy)
+    if actual_fields != _HIERARCHY_MANIFEST_FIELDS:
+        missing = sorted(_HIERARCHY_MANIFEST_FIELDS - actual_fields)
+        unexpected = sorted(actual_fields - _HIERARCHY_MANIFEST_FIELDS)
+        raise ValueError(
+            "partial hierarchy configuration in manifest: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+
+    runner_values.update(
+        {
+            "subqa_depth": hierarchy["depth"],
+            "branching_by_depth": hierarchy["branching"],
+            "suba_M": hierarchy["suba_m"],
+            "suba_K": hierarchy["suba_k"],
+            "suba_confidence_type": hierarchy["confidence_type"],
+            "condition_on_direct_suba": hierarchy["condition_on_direct_suba"],
+            "subqa_max_nodes": hierarchy["max_nodes"],
+            "subqa_repair_attempts": hierarchy["repair_attempts"],
+            "subqa_generation_batch_size": hierarchy["generation_batch_size"],
+            "subqa_schema_version": hierarchy["schema_version"],
+        }
+    )
+    canonical = normalize_hierarchy_config(runner_values).to_manifest_dict()
+    if dict(hierarchy) != canonical:
+        mismatches = sorted(
+            field
+            for field in _HIERARCHY_MANIFEST_FIELDS
+            if hierarchy[field] != canonical[field]
+        )
+        raise ValueError(
+            "manifest hierarchy is not canonical: " + ", ".join(mismatches)
+        )
+    return canonical
 
 
 def core_run_config(cfg) -> Dict[str, Any]:
@@ -63,6 +121,9 @@ def core_run_config(cfg) -> Dict[str, Any]:
         "enforce_eager": bool(model_cfg.enforce_eager),
         "swap_space": float(model_cfg.swap_space),
         "limit_mm_per_prompt": normalized_limit_config,
+        "hierarchy": normalize_hierarchy_config(
+            runner_cfg
+        ).to_manifest_dict(),
     }
 
 
@@ -338,10 +399,19 @@ def validate_manifest(manifest: Mapping[str, Any], cfg, qids: Iterable[Any]) -> 
     actual_config = manifest.get("config")
     if not isinstance(actual_config, Mapping):
         raise ValueError("manifest config must be an object")
+    expected_hierarchy = expected_config["hierarchy"]
+    if "hierarchy" not in actual_config and expected_hierarchy["depth"] != 1:
+        raise ValueError(
+            "legacy manifest without hierarchy fields is valid only for depth 1"
+        )
+    actual_hierarchy = canonical_manifest_hierarchy(actual_config)
     mismatched_fields = [
         key
         for key, expected_value in expected_config.items()
-        if actual_config.get(key) != expected_value
+        if (
+            actual_hierarchy if key == "hierarchy" else actual_config.get(key)
+        )
+        != expected_value
     ]
     if mismatched_fields:
         details = ", ".join(
@@ -355,12 +425,18 @@ def validate_manifest(manifest: Mapping[str, Any], cfg, qids: Iterable[Any]) -> 
     if not isinstance(manifest_qids, list):
         raise ValueError("manifest qids must be a list")
     actual_qids = [str(qid) for qid in manifest_qids]
-    if len(actual_qids) != len(expected_qids) or set(actual_qids) != set(expected_qids):
+    if actual_qids != expected_qids:
         missing = sorted(set(expected_qids) - set(actual_qids))
         unexpected = sorted(set(actual_qids) - set(expected_qids))
+        order_mismatch = (
+            len(actual_qids) == len(expected_qids)
+            and not missing
+            and not unexpected
+        )
         raise ValueError(
             "manifest qid mismatch: "
             f"missing={missing}, unexpected={unexpected}, "
+            f"order_mismatch={order_mismatch}, "
             f"expected_count={len(expected_qids)}, actual_count={len(actual_qids)}"
         )
 

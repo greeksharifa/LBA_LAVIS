@@ -1,5 +1,8 @@
 # subqa and output
 subqa/
+!subqa/
+subqa/*
+!subqa/*.py
 output/
 
 # temp

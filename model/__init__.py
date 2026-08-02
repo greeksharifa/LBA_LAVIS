@@ -7,6 +7,8 @@ Keeping this package initializer lightweight lets CPU-only tooling import
 from collections.abc import MutableMapping
 from importlib import import_module
 
+from model.protocol import GenerationResult
+
 
 class _LazyModelClass:
     def __init__(self, class_name):
@@ -49,7 +51,13 @@ MODEL_REGISTRY = LazyModelRegistry(
     }
 )
 
-__all__ = ["C2RFramework", "Qwen2_5VL", "MODEL_REGISTRY", "get_model"]
+__all__ = [
+    "C2RFramework",
+    "GenerationResult",
+    "Qwen2_5VL",
+    "MODEL_REGISTRY",
+    "get_model",
+]
 
 
 def _models_module():

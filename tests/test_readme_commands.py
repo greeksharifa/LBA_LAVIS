@@ -11,7 +11,7 @@ REQUIREMENTS = REPOSITORY_ROOT / "requirements.txt"
 GPU_WRAPPER = "/home/ywjang/.codex/bin/run_gpu.sh"
 PYTHON = "/home/ywjang/miniconda3/envs/qwen2vl/bin/python"
 RUN_ROOT = "output/MMMU/qwen2.5-vl-7b"
-RUN_SIGNATURE = "N=5_M=2_K=8"
+RUN_SIGNATURE = "N=4_M=2_K=4"
 
 
 def shell_blocks(markdown):
@@ -148,9 +148,9 @@ class ReadmeCommandTests(unittest.TestCase):
                 )
 
                 self.assertEqual(option_value(command, "runner.mode"), cfg.runner_cfg.mode)
-                self.assertEqual(5, cfg.runner_cfg.N)
+                self.assertEqual(4, cfg.runner_cfg.N)
                 self.assertEqual(2, cfg.runner_cfg.M)
-                self.assertEqual(8, cfg.runner_cfg.K)
+                self.assertEqual(4, cfg.runner_cfg.K)
                 self.assertEqual(
                     option_value(command, "runner.output_dir"),
                     cfg.runner_cfg.output_dir,
@@ -183,7 +183,7 @@ class ReadmeCommandTests(unittest.TestCase):
         smoke_commands = [
             command
             for command in self.run_commands
-            if "runner.output_dir=output/smoke" in command
+            if "runner.output_dir=output/smoke-hierarchical" in command
         ]
         self.assertEqual(1, len(smoke_commands))
         command = smoke_commands[0]
@@ -194,9 +194,19 @@ class ReadmeCommandTests(unittest.TestCase):
         self.assertEqual("MMMU", option_value(command, "dataset.dataset_name"))
         self.assertEqual("val", option_value(command, "dataset.split"))
         self.assertEqual("1", option_value(command, "dataset.num_data"))
-        self.assertEqual("5", option_value(command, "runner.N"))
+        self.assertEqual("4", option_value(command, "runner.N"))
         self.assertEqual("2", option_value(command, "runner.M"))
-        self.assertEqual("8", option_value(command, "runner.K"))
+        self.assertEqual("4", option_value(command, "runner.K"))
+        self.assertEqual("2", option_value(command, "runner.subqa_depth"))
+        self.assertEqual("[4,3]", option_value(command, "runner.branching_by_depth"))
+        self.assertEqual("2", option_value(command, "runner.suba_M"))
+        self.assertEqual("3", option_value(command, "runner.suba_K"))
+        self.assertEqual(
+            "token_min_prob", option_value(command, "runner.suba_confidence_type")
+        )
+        self.assertEqual(
+            "true", option_value(command, "runner.condition_on_direct_suba")
+        )
 
     def test_smoke_and_full_commands_use_cached_huggingface_offline_mode(self):
         offline_commands = [
@@ -204,7 +214,7 @@ class ReadmeCommandTests(unittest.TestCase):
             for command in self.run_commands
             if "runner.mode=multi_stage" in command
             and (
-                "runner.output_dir=output/smoke" in command
+                "runner.output_dir=output/smoke-hierarchical" in command
                 or "dataset.num_data=-1" in command
             )
         ]
@@ -234,10 +244,10 @@ class ReadmeCommandTests(unittest.TestCase):
             self.assertEqual("4", option_value(command, "model.tensor_parallel_size"))
             self.assertEqual("qwen2.5-vl-7b", option_value(command, "model.model_name"))
             self.assertEqual("MMMU", option_value(command, "dataset.dataset_name"))
-            self.assertEqual("5", option_value(command, "runner.N"))
+            self.assertEqual("4", option_value(command, "runner.N"))
             self.assertEqual("2", option_value(command, "runner.M"))
-            self.assertEqual("8", option_value(command, "runner.K"))
-            self.assertNotIn("runner.output_dir=output/smoke", command)
+            self.assertEqual("4", option_value(command, "runner.K"))
+            self.assertNotIn("runner.output_dir=output/smoke-hierarchical", command)
 
     def test_evaluation_command_uses_exact_dev_and_validation_run_paths(self):
         evaluation_commands = [
@@ -268,6 +278,9 @@ class ReadmeCommandTests(unittest.TestCase):
             "historical",
             "identical configured `num_data`",
             "`-1` on both full splits",
+            "D=<depth>_H=<hash>",
+            "depth-1",
+            "hierarchical Sub-QA",
         ):
             self.assertIn(expected, self.readme)
 

@@ -11,10 +11,21 @@ runner:
   # confidence
   confidence_type: "token_min_prob" # "token_min_prob", "seq_ppl", "seq_conf"
 
-  N           : 5 # number of sub-qas to generate
+  N           : 4 # number of sub-qas to generate
   M           : 2 # number of curated sub-qas
   K           : 4 # number of reasoning paths
   early_stop_K: True # if confidence is high enough, early stop 
+
+  subqa_depth: 1
+  branching_by_depth: null
+  suba_M: 2
+  suba_K: 3
+  suba_confidence_type: token_min_prob
+  condition_on_direct_suba: true
+  subqa_max_nodes: 64
+  subqa_repair_attempts: 1
+  subqa_generation_batch_size: 64
+  subqa_schema_version: 2
 
   seed: 42
   start_pnt: -1 # -1 or 0 to 100. -1: all. 0: all, but do not collect results. else: start from percent%

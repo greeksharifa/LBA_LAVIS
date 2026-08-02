@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 import numpy as np
 
+from subqa.schema import FALLBACK_POLICY
+
 from evaluation.c2r import (
     TAU1_GRID,
     TAU2_GRID,
@@ -67,10 +69,11 @@ def manifest(
     enforce_eager=True,
     swap_space=0.0,
     limit_mm_per_prompt=None,
+    hierarchy=None,
 ):
     annotation_name = {"val": "dev", "test": "validation"}.get(split, split)
     resolved_path = resolved_path or f"/data/MMMU/{annotation_name}.json"
-    return {
+    result = {
         "config": {
             "dataset": dataset,
             "split": split,
@@ -124,6 +127,9 @@ def manifest(
             }
         },
     }
+    if hierarchy is not None:
+        result["config"]["hierarchy"] = hierarchy
+    return result
 
 
 def write_annotation(root, name, qids):
@@ -736,6 +742,123 @@ class RunLoadingTests(unittest.TestCase):
                     bootstrap_count=10,
                 )
             self.assertEqual([], calls)
+
+    def test_pair_rejects_hierarchy_mismatch_before_scorer_is_called(self):
+        hierarchy = {
+            "depth": 2,
+            "branching": [5, 3],
+            "suba_m": 2,
+            "suba_k": 3,
+            "confidence_type": "token_min_prob",
+            "condition_on_direct_suba": True,
+            "max_nodes": 64,
+            "repair_attempts": 1,
+            "generation_batch_size": 64,
+            "schema_version": 2,
+            "fallback_policy": FALLBACK_POLICY,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_dir = write_run(
+                root,
+                "dev",
+                "val",
+                [record("d")],
+                hierarchy=hierarchy,
+            )
+            mismatched = dict(hierarchy, generation_batch_size=32)
+            val_dir = write_run(
+                root,
+                "validation",
+                "test",
+                [record("v", split="test")],
+                hierarchy=mismatched,
+            )
+            calls = []
+
+            with self.assertRaisesRegex(
+                ValueError, "incompatible run manifests.*hierarchy"
+            ):
+                evaluate_run_pair(
+                    dev_dir,
+                    val_dir,
+                    scorer=lambda *args: calls.append(args),
+                    bootstrap_count=10,
+                )
+            self.assertEqual([], calls)
+
+    def test_loader_rejects_partial_hierarchy_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = write_run(
+                Path(tmp),
+                "partial",
+                "val",
+                [record("q0")],
+                hierarchy={"depth": 2},
+            )
+
+            with self.assertRaisesRegex(ValueError, "partial hierarchy"):
+                load_run(run_dir)
+
+    def test_matching_hierarchy_preserves_threshold_and_question_denominator(self):
+        hierarchy = {
+            "depth": 2,
+            "branching": [5, 3],
+            "suba_m": 2,
+            "suba_k": 3,
+            "confidence_type": "token_min_prob",
+            "condition_on_direct_suba": True,
+            "max_nodes": 64,
+            "repair_attempts": 1,
+            "generation_batch_size": 64,
+            "schema_version": 2,
+            "fallback_policy": FALLBACK_POLICY,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dev_records = [
+                record("d0", gold="base"),
+                record("d1", gold="refined", base_conf=0.1),
+            ]
+            validation_records = [
+                record("v0", split="test", gold="base"),
+                record("v1", split="test", gold="refined", base_conf=0.1),
+            ]
+            dev_dir = write_run(
+                root,
+                "dev",
+                "val",
+                dev_records,
+                hierarchy=hierarchy,
+            )
+            val_dir = write_run(
+                root,
+                "validation",
+                "test",
+                validation_records,
+                hierarchy=hierarchy,
+            )
+
+            report = evaluate_run_pair(
+                dev_dir,
+                val_dir,
+                scorer=exact_scorer,
+                bootstrap_count=10,
+            )
+
+            expected = search_thresholds(
+                prepare_samples(
+                    dev_records,
+                    "token_min_prob",
+                    scorer=exact_scorer,
+                )
+            )
+            self.assertEqual(
+                (expected["tau1"], expected["tau2"]),
+                (report["tau1"], report["tau2"]),
+            )
+            self.assertEqual(2, report["dev"]["sample_count"])
+            self.assertEqual(2, report["validation"]["sample_count"])
 
     def test_pair_rejects_incomplete_matching_full_selection_policy(self):
         with tempfile.TemporaryDirectory() as tmp:
