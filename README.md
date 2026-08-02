@@ -120,11 +120,13 @@ annotation paths are rejected.
 Before comparing a multiple-choice prediction with the gold label, MMMU uses a
 deterministic, conservative parser. It accepts a whole-letter response,
 parenthesized choices, a leading-delimited choice such as `A. explanation`,
-explicit final-answer forms, and `\boxed{...}`. When a response contains
-multiple recognized conclusions, the last conclusion controls the score; a
-later malformed explicit conclusion invalidates an earlier one. Ambiguous
-outputs are rejected. Parsing never uses option text, the candidate list,
-ground truth, or a random fallback.
+explicit final-answer forms, Markdown-emphasized explicit conclusions such as
+`**Answer: D**`, and both `\boxed{...}` and labeled boxed payloads such as
+`\boxed{C. option text}`. Only the leading label in such a payload is used.
+When a response contains multiple recognized conclusions, the last conclusion
+controls the score; a later malformed explicit conclusion invalidates an
+earlier one. Ambiguous outputs are rejected. Parsing never uses option text,
+the candidate list, ground truth, or a random fallback.
 
 ## Leakage-free C2R evaluation
 
@@ -162,7 +164,7 @@ only. Deltas and paired transitions are relative to the direct baseline.
 | Model | Direct baseline | Raw hierarchy | Dev-tuned gated (primary) | Validation in-sample (diagnostic) |
 |---|---:|---:|---:|---:|
 | Qwen2.5-VL-7B | 454/900 (50.44%) | 448/900 (49.78%) | 449/900 (49.89%); tau1=0.7, tau2=-0.1; delta=-0.56 pp; W-to-C/C-to-W=46/51; 95% CI [-2.67, +1.67] pp | 461/900 (51.22%); tau1=0.7, tau2=0.2; delta=+0.78 pp; W-to-C/C-to-W=30/23; 95% CI [-0.78, +2.44] pp |
-| Qwen3-VL-8B | 462/900 (51.33%) | 505/900 (56.11%) | 495/900 (55.00%); tau1=0.8, tau2=0.1; delta=+3.67 pp; W-to-C/C-to-W=35/2; 95% CI [+2.44, +5.00] pp | 505/900 (56.11%); tau1=1.0, tau2=-0.1; delta=+4.78 pp; W-to-C/C-to-W=46/3; 95% CI [+3.33, +6.33] pp |
+| Qwen3-VL-8B | 472/900 (52.44%) | 505/900 (56.11%) | 495/900 (55.00%); tau1=0.8, tau2=0.1; delta=+2.56 pp; W-to-C/C-to-W=25/2; 95% CI [+1.56, +3.67] pp | 505/900 (56.11%); tau1=1.0, tau2=-0.1; delta=+3.67 pp; W-to-C/C-to-W=36/3; 95% CI [+2.33, +5.00] pp |
 
 This reevaluation only wrote evaluation reports: raw generation artifacts and
 manifests remained byte-for-byte unchanged. The only recorded structural
