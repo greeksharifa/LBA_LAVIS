@@ -98,7 +98,7 @@ _LEADING_CHOICE = re.compile(
         |\*\*\s*([A-Z])(?![A-Z])\s*[.):]\s*\*\*
         |\(\s*([A-Z])(?![A-Z])\s*\)\s*[.:]?
         |([A-Z])(?![A-Z])\s*[.):]
-    )\s+\S
+    )(?=\s+\S)
     """,
     re.IGNORECASE | re.VERBOSE,
 )
@@ -246,6 +246,8 @@ def parse_multiple_choice_response(response: str) -> Optional[str]:
 
     leading = _LEADING_CHOICE.match(response)
     if leading:
+        if _COORDINATED_CONTINUATION.match(response, leading.end()):
+            return None
         return _matched_choice(leading)
     return None
 

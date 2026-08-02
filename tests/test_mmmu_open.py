@@ -374,6 +374,23 @@ class MMMUOpenTests(unittest.TestCase):
                     dataset.get_score(final_then_pair, gold, "multiple-choice"),
                 )
 
+    def test_multiple_choice_rejects_coordinated_leading_labels(self):
+        dataset = make_adapter()
+
+        for prediction in (
+            "(A) or (B)",
+            "A) and B)",
+            "**A.** & **B.**",
+            "(A) / (B)",
+        ):
+            with self.subTest(prediction=prediction):
+                self.assertIsNone(parse_multiple_choice_response(prediction))
+                for gold in "AB":
+                    self.assertEqual(
+                        0,
+                        dataset.get_score(prediction, gold, "multiple-choice"),
+                    )
+
     def test_multiple_choice_rejects_ambiguous_and_non_answer_inputs(self):
         dataset = make_adapter()
 
