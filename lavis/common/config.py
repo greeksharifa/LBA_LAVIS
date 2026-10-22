@@ -21,8 +21,11 @@ class Config:
 
         # Register the config and configuration for setup
         registry.register("configuration", self)
+        
+        # print('self.args.options:', self.args.options)
 
         user_config = self._build_opt_list(self.args.options)
+        print('user_config:', user_config)
 
         config = OmegaConf.load(self.args.cfg_path)
         # logging.info('config:', config)
@@ -57,6 +60,12 @@ class Config:
 
     @staticmethod
     def build_model_config(config, **kwargs):
+        # print('kwargs:', kwargs)
+        # print('kwargs.get("load_finetuned"):', type(kwargs.get("load_finetuned")), kwargs.get("load_finetuned"))
+        # print('kwargs.get("finetuned"):', type(kwargs.get("finetuned")), kwargs.get("finetuned"))
+        # print('kwargs.get("model.load_finetuned"):', type(kwargs.get("model.load_finetuned")), kwargs.get("model.load_finetuned"))
+        # print('kwargs.get("model.finetuned"):', type(kwargs.get("model.finetuned")), kwargs.get("model.finetuned"))
+        
         model = config.get("model", None)
         assert model is not None, "Missing model configuration file."
 
@@ -74,12 +83,31 @@ class Config:
 
         model_config = OmegaConf.create()
         # hiararchy override, customized config > default config
+        # if kwargs.get("load_finetuned") and kwargs.get("finetuned"):
+        #     print('wow true')
+        #     model_config = OmegaConf.merge(
+        #         model_config,
+        #         OmegaConf.load(model_config_path),
+        #         {
+        #             "model": config["model"],
+        #             "load_finetuned": kwargs.get("load_finetuned"),
+        #             "finetuned": kwargs.get("finetuned"),
+        #         },
+        #     )
+        #     # model_config.
+        # else:
+        #     print('wow false')
+        #     model_config = OmegaConf.merge(
+        #         model_config,
+        #         OmegaConf.load(model_config_path),
+        #         {"model": config["model"]},
+        #     )
         model_config = OmegaConf.merge(
             model_config,
             OmegaConf.load(model_config_path),
             {"model": config["model"]},
         )
-
+        # print('model_config:', model_config)
         return model_config
 
     @staticmethod

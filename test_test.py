@@ -1,39 +1,45 @@
 import json
-import os
-import glob
 
-from tqdm import tqdm
-from PIL import Image
+"""base
+[
+    {
+        "image_id": 565248,
+        "question_id": "565248001",
+        "question": "are they at the beach?",
+        "pred_ans": "yes",
+        "gt_ans": "yes"
+    },
+    ...
+]
+"""
 
-import torch
+"""ours
+    {
+        "image_id": 565248,
+        "question_id": "565248001",
+        "question": "are they at the beach?",
+        "pred_ans": "yes",
+        "gt_ans": "yes",
+        "sub_q_list": "is there sand and water?",
+        "sub_a_list": "yes"
+    },
 
-from collections import Counter
+"""
 
-ROOT_DIR = 'data/'     # local
-# ROOT_DIR = '/home/ywjang/data/'     # 3090ti
-# ROOT_DIR = '/data/'  # BIVI
-# ROOT_DIR = '/data/dataset/'     # VTT
-result = {}
 
-splits = ['train', 'val']
-for split in splits:
-    counter = Counter()
-    print(f'Generate in {split} split...')
-    
-    with open(os.path.join(ROOT_DIR, f'VQA-Introspect/VQAIntrospect_{split}v1.0.json'), 'r') as f_in:
-        json_data = json.load(f_in)
+base = json.load(open("lavis/ywjang_output_qar_test/20230815093/result/val_vqa_result.json", "r"))
+# ours = json.load(open("lavis/ywjang_output_qar_aok_vqa/20230815101/result/val_vqa_result.json", "r")) # SQ 1
+ours = json.load(open("lavis/ywjang_output_qar_aok_vqa/20230815103/result/val_vqa_result.json", "r")) # SQ 2
+
+for b, o in zip(base, ours):
+    if b["pred_ans"] != b["gt_ans"] and o["pred_ans"] == o["gt_ans"]:
+        print('ID:', b["image_id"])
+        print('MQ:', b["question"])
+        print('SQ:', o["sub_q_list"])
+        print('SA:', o["sub_a_list"])
+        print('MA:', b["gt_ans"])
+        print('BA:', b["pred_ans"])
+        print('OA:', o["pred_ans"])
+        print()
         
-        for idx, (main_question_id, value) in enumerate(json_data.items()):
-            # if idx >= 3:
-            #     break
-            sub_qa_set = set()
-            introspects = value['introspect']
-            for introspect in introspects:
-                sub_qa_list = introspect['sub_qa']
-                for sub_qa in sub_qa_list:
-                    sub_qa_set.add(sub_qa['sub_question'])
-            counter[len(sub_qa_set)] += 1
-            # if len(sub_qa_set) == 0:
-            #     print(f'No sub question in {main_question_id}')
-    print('counter: ', sorted(list(counter.items())))
-    
+print('done')

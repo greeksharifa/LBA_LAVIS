@@ -8,13 +8,15 @@
 import logging
 import json
 import os
+from lavis.common.logger import setup_logger
+
 
 import lavis.common.dist_utils as dist_utils
 from lavis.common.registry import registry
 from lavis.common.vqa_tools.vqa import VQA
 from lavis.common.vqa_tools.vqa_eval import VQAEval
 from lavis.tasks.base_task import BaseTask
-
+from colors import Colors, print_sample
 
 @registry.register_task("vqa")
 class VQATask(BaseTask):
@@ -29,6 +31,8 @@ class VQATask(BaseTask):
         prompt="",
     ):
         super().__init__()
+        
+        setup_logger()
 
         self.num_beams = num_beams
         self.max_len = max_len
@@ -57,6 +61,7 @@ class VQATask(BaseTask):
         inference_method = run_cfg.get("inference_method", "rank")
         num_ans_candidates = run_cfg.get("num_ans_candidates", 128)
         prompt = run_cfg.get("prompt", "")
+        logging.info(Colors.BRIGHT_RED + "in setup_task(), prompt: " + prompt + Colors.RESET)
 
         return cls(
             num_beams=num_beams,
@@ -232,7 +237,11 @@ class GQATask(VQATask):
 
 @registry.register_task("aok_vqa")
 class AOKVQATask(VQATask):
+    _cnt = 0
     def valid_step(self, model, samples):
+        # if AOKVQATask._cnt == 0:
+        #     AOKVQATask._cnt += 1
+        #     print_sample(samples, msg="AOK-VQA samples:", color=Colors.BRIGHT_YELLOW)
         answers = model.predict_answers(
             samples=samples,
             answer_list=self.answer_list,
@@ -242,15 +251,28 @@ class AOKVQATask(VQATask):
             min_len=self.min_len,
             num_ans_candidates=self.num_ans_candidates,
         )
+        pred_choice_idxs = model.predict_class(
+            samples=samples,
+            candidates=samples["choices"],
+            n_segments=1
+        ).cpu().numpy()
 
         pred_qa_pairs = []
 
         question_id = samples["question_id"]
         gt_answers = samples["direct_answers"]
+        correct_choice_idxs = samples["correct_choice_idx"]
+        choices = samples["choices"]
+        # image_ids = samples["image_id"]
 
-        for pred_answer, ques_id, gt_answer in zip(answers, question_id, gt_answers):
+        for pred_answer, ques_id, gt_answer, pred_choice_idx_ndarray, correct_choice_idx, choice in zip(answers, question_id, gt_answers, pred_choice_idxs, correct_choice_idxs, choices):
+            pred_choice_idx = int(pred_choice_idx_ndarray[0])
             pred_qa_pairs.append(
-                {"question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer}
+                {#"image_id": image_id,
+                 "question_id": ques_id, "pred_ans": pred_answer, "gt_ans": gt_answer,
+                 "pred_choice_idx": pred_choice_idx, "correct_choice_idx": correct_choice_idx,
+                 "predicted_class": choice[pred_choice_idx], "choices": choice,
+                 }
             )
 
         return pred_qa_pairs
@@ -265,6 +287,7 @@ class AOKVQATask(VQATask):
 
         results = json.load(open(result_file, "r"))
         acc = []
+        mc_acc = []
 
         for res in results:
             if res["gt_ans"] is None:
@@ -279,9 +302,15 @@ class AOKVQATask(VQATask):
             vqa_acc = min(1.0, num_match / 3.0)
 
             acc.append(vqa_acc)
+            
+            pred_choice_idx = res["pred_choice_idx"]
+            correct_choice_idx = res["correct_choice_idx"]
+            mc_acc.append(1 if pred_choice_idx == correct_choice_idx else 0)
 
         accuracy = sum(acc) / len(acc) * 100
-        metrics = {"agg_metrics": accuracy, "acc": accuracy}
+        mc_accuracy = sum(mc_acc) / len(mc_acc) * 100
+        metrics = {"agg_metrics": accuracy, "mc_acc": mc_accuracy,  # "acc": accuracy,
+                   "da_acc": accuracy}
 
         with open(
             os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
@@ -289,6 +318,7 @@ class AOKVQATask(VQATask):
             f.write(json.dumps(metrics) + "\n")
 
         logging.info(metrics)
+        print('metrics: ', metrics)
 
         return metrics
 
@@ -303,7 +333,7 @@ class AOKVQATask(VQATask):
         for res in results:
             result_leaderboard[res["question_id"]] = {
                 "direct_answer": res["pred_ans"],
-                "multiple_choice": "",
+                "multiple_choice": res["predicted_class"],  # "",
             }
 
         result_file = registry.get_path("result_dir") + "_leaderboard.json"
@@ -312,6 +342,127 @@ class AOKVQATask(VQATask):
             json.dump(result_leaderboard, f)
 
         logging.info(f"Saved results for leaderboard evaluation at {result_file}")
+
+
+@registry.register_task("vqa_introspect_test_task")
+class VQAIntrospectTestTask(VQATask):
+        _cnt = 0
+        
+        
+        def valid_step(self, model, samples):
+            if VQAIntrospectTestTask._cnt == 0:
+                VQAIntrospectTestTask._cnt += 1
+                print_sample(samples, msg=f"prompt: {self.prompt}, VQA-Introspect Test samples:", color=Colors.BRIGHT_YELLOW)
+            result = model.predict_answers(
+                samples=samples,
+                answer_list=self.answer_list,
+                inference_method=self.inference_method,
+                num_beams=self.num_beams,
+                max_len=self.max_len,
+                min_len=self.min_len,
+                num_ans_candidates=self.num_ans_candidates,
+                prompt="Q: {} A:",
+            )
+            
+            if type(result) == tuple:
+                pred_answers, sub_q_lists, sub_a_lists = result
+            else:
+                pred_answers, sub_q_lists, sub_a_lists = result, None, None
+            
+            pred_qa_pairs = []
+            
+            image_ids = samples["image_id"]
+            questions = samples["text_input"]
+            question_ids = samples["question_id"]
+            gt_answers = samples["answer"]
+            # image_ids = samples["image_id"]
+            
+            if sub_q_lists is not None:
+                for image_id, pred_answer, question, ques_id, gt_answer, sub_q_list, sub_a_list in zip(image_ids, pred_answers, questions, question_ids, gt_answers, sub_q_lists, sub_a_lists):
+                    pred_qa_pairs.append(
+                        {
+                            "image_id": image_id,
+                            "question_id": ques_id,
+                            "question": question,
+                            "pred_ans": pred_answer,
+                            "gt_ans": gt_answer,
+                            "sub_q_list": sub_q_list,
+                            "sub_a_list": sub_a_list,
+                        }
+                    )
+            else:
+                for image_id, pred_answer, question, ques_id, gt_answer in zip(image_ids, pred_answers, questions, question_ids, gt_answers):
+                    pred_qa_pairs.append(
+                        {
+                            "image_id": image_id,
+                            "question_id": ques_id,
+                            "question": question,
+                            "pred_ans": pred_answer,
+                            "gt_ans": gt_answer,
+                        }
+                    )
+                
+            return pred_qa_pairs
+        
+        
+        @dist_utils.main_process
+        def _report_metrics(self, result_file, split):
+            """
+            Implementing accuracy computation for AOKVQA, see
+            https://github.com/allenai/aokvqa/blob/main/evaluation/eval_predictions.py#L45 for details.
+            """
+            # TODO add evaluation for multi-choice
+            results = json.load(open(result_file, "r"))
+            acc = []
+            # mc_acc = []
+            
+            for res in results:
+                if res["gt_ans"] is None:
+                    # prepare test results for leaderboard evaluation
+                    self._save_result_leaderboard(results)
+                    return
+                
+                pred = res["pred_ans"]
+                gt_ans = res["gt_ans"]
+                
+                vqa_acc = 1.0 if pred == gt_ans else 0.0
+                
+                acc.append(vqa_acc)
+                
+            accuracy = sum(acc) / len(acc) * 100
+            metrics = {"agg_metrics": accuracy, "da_acc": accuracy},  # "acc": accuracy,
+            
+            with open(
+                    os.path.join(registry.get_path("output_dir"), "evaluate.txt"), "a"
+            ) as f:
+                f.write(json.dumps(metrics) + "\n")
+            
+            logging.info(metrics)
+            print('metrics: ', metrics)
+            
+            return metrics
+        
+        
+        @dist_utils.main_process
+        def _save_result_leaderboard(self, results):
+            """
+            Saving the results in the format required for leaderboard evaluation.
+
+            [TODO] add support for multi-choice.
+            """
+            result_leaderboard = dict()
+            for res in results:
+                result_leaderboard[res["question_id"]] = {
+                    "direct_answer": res["pred_ans"],
+                    "multiple_choice": "",
+                }
+            
+            result_file = registry.get_path("result_dir") + "_leaderboard.json"
+            
+            with open(result_file, "w") as f:
+                json.dump(result_leaderboard, f)
+            
+            logging.info(f"Saved results for leaderboard evaluation at {result_file}")
 
 
 @registry.register_task("vqa_introspect")

@@ -26,10 +26,41 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
-## instructBLIP Fine-Tuning을 위한 수정사항
+## InstructBLIP Fine-Tuning을 위한 수정사항
 
-- task 추가: `lavis/tasks/captioning.py`
+- https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
+- 참고: qar(Questioner-Answerer-Reasoner)은 이전 이름으로 추후 SQ_InstructBLIP로 변경 예정
+- 아래 내용은 InstructBLIP-vicuna7b를 수정하고 새로운 dataset, task를 정의한 경우에 대한 내용
+- 새로운 task 추가(vqa_introspect_captioning): `lavis/tasks/captioning.py` or `lavis/tasks/vqa.py`
+  - `__init__.py`에도 등록(위 사이트 참조)
+- 새로운 데이터셋 추가(vqa_introspect_qar_caption)
+  - sub_qa를 불러오는 방식에 따라 2가지로 구분함
+  - `lavis/datasets/datasets/vqa_introspect_datasets.py`: role(Q, A, R)에 따라 sub_qa를 불러오는 방식이 다름
+    - 원래는 prompt 적용을 모델 안에서 하는 것이 맞으나 임시로 이렇게 작성
+  - `lavis/datasets/datasets/vqa_introspect_datasets_test.py`: 최종 모델인 SQ_InstructBLIP을 테스트하기 위한 데이터셋
+  - dataset builder(`lavis/datasets/builders/vqa_builder.py, __init__.py`)에도 등록 완료
+  - dataset config yaml 파일로 새로 생성하여 등록(`lavis/configs/datasets/vqa_introspect/defaults.yaml`)
 - configs(yaml) 파일 수정: `./instructBLIP_FT_vicuna7b.yaml`
+  - baseline model test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_test.yaml`
+  - SQ_InstructBLIP 모델 test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_qar.yaml`
+- 모델 수정(`blip2_vicuna_instruct.py, blip2_vicuna_instruct_qar.py`)
+  - `lavis/models/blip2_models/blip2_vicuna_instruct.py` 수정:
+    - model role(Questioner, Answerer, or Reasoner) 추가
+    - sq_prompts 추가: role 별로 적용하는 prompts가 다를 수 있음(추가 예정)
+    - log를 위한 cnt 추가
+  - `lavis/models/blip2_models/blip2_vicuna_instruct_qar.py` 수정:
+    - Questioner-Answerer-Reasoner framework를 generate() 함수에서 구현
+    - module weight 통합 시 deprecate 시킬 예정
+- 학습: `train.py / train.sh`, baseline test: `test.py / test.sh`, SQ_Instruct test: `test_qar.py / test_qar.sh`
+- `./prompts.json`에 현재 SQ_InstructBLIP에 적용할 prompt 저장
+- 데이터 root 폴더는 `lavis/configs/default.yaml`에서 지정
+- KT의 보안에 의해 huggingface 등에서 모델 다운로드가 안 되므로 모델을 local에 다운로드하여 사용하기 위한 코드 변경:
+  - `lavis/models/eva_vit.py`
+  - `lavis/models/blip2_models/blip2.py`
+  - `lavis/models/blip2_models/blip2_vicuna_instruct.py`
+  - `lavis/configs/models/blip2/blip2_instruct_vicuna7b.yaml`
+  - 추가로 기존 데이터셋(ex. A-OKVQA) 등을 사용할 때에도 그에 맞는 `configs/datasets/이름`에 들어가서 경로 수정해주어야 함
+
 
 ywjang 수정:
 
@@ -333,3 +364,33 @@ If you have any questions, comments or suggestions, please do not hesitate to co
 
 ## License
 [BSD 3-Clause License](LICENSE.txt)
+
+## BIVI 사본의 실제 실행·보존 범위
+
+이 checkout은 `captioning_base` 기준 `c134045`의 후속 QAR/SQ-InstructBLIP 실험이다.
+`lavis/datasets/datasets/vqa_introspect_test_datasets.py`가 실제 test dataset 파일명이며,
+위의 `vqa_introspect_datasets_test.py` 설명은 이 이름으로 읽는다.
+`backups/`의 작은 Python/YAML/shell 파일은 당시 caption·VQA 구현을 보존한 source이다.
+
+| entrypoint / 설정 | 역할 및 출력 |
+| --- | --- |
+| `train.py`, `train.sh`, `instructBLIP_FT_vicuna7b.yaml` | 역할별 fine-tuning, `ywjang_output_train/`, seed 42 |
+| `test.py`, `test.sh`, `instructBLIP_FT_vicuna7b_test.yaml` | Reasoner checkpoint 검증, `ywjang_output_test/`, val split |
+| `test_qar.py`, `test_qar.sh`, `instructBLIP_FT_vicuna7b_qar.yaml` | QAR 평가, `vqa_introspect_test`, seed 48, val split |
+| `test_qar_answerer.py`, `test_qar_answerer.sh` | Answerer 실험 분기 |
+| `test_vqa.sh`, `instructBLIP_FT_vicuna7b_vqa_test.yaml` | A-OKVQA 설정, seed 42, val split |
+
+현재 `lavis/configs/default.yaml`의 data root는 `/data`, base InstructBLIP은
+`/models/instruct_blip_vicuna7b_trimmed.pth`, Vicuna는 `/models/lmsys/vicuna-7b-v1.1`이다.
+`prompts.json`이 역할 prompt를 지정한다. QAR YAML의 dummy checkpoint 값은 실제
+`test_qar.py` 로딩 경로와 함께 확인해야 하며 그대로 독립 실행 가능한 설정이라고
+보장하지 않는다. GQA defaults의 annotation URL은 A-OKVQA URL을 가리키는 기존
+실험 변경이므로 일반 GQA 다운로드 recipe로 사용하면 안 된다.
+
+설치는 기존 `requirements.txt` / `setup.py` 기준이다. 의존성 lock, 모델 revision,
+최종 논문 행과 run/QID/표본 수·metric의 대응은 이 사본만으로 확정하지 못했다.
+`lavis/ywjang_output*/`와 `ywjang_log.txt`는 산출물로 제외하며 삭제하지 않는다.
+`port_value_file.txt`의 증가 값은 실행 counter여서 source commit에서 제외한다.
+소스 syntax 및 shell syntax만 점검했고 학습·GPU·평가를 실행하지 않았다.
+기존 debug 출력과 multi-worker 파일 logger는 이 보존 작업에서 변경하지 않았다.
+chmod/CRLF만 다른 대량 파일과 바이너리는 보존 commit에서 제외했다.

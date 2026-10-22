@@ -7,6 +7,7 @@
 
 import datetime
 import logging
+import os
 import time
 from collections import defaultdict, deque
 
@@ -187,10 +188,35 @@ class AttrDict(dict):
         self.__dict__ = self
 
 
-def setup_logger():
+def setup_logger(output_dir='./'):
+    # stream_handler = logging.StreamHandler()
+    # file_handler = logging.FileHandler(os.path.join(output_dir, "ywjang_log.txt"), mode="a")
+    #
+    # # formatter 객체 생성
+    # formatter = logging.Formatter(fmt="%(asctime)s [%(levelname)7s]in [%(funcName)20s() in %(filename)25s:%(lineno)3d]\t| %(message)s")
+    #
+    # # handler에 level 설정
+    # stream_handler.setLevel(logging.INFO)
+    # file_handler.setLevel(logging.INFO)
+    #
+    # # handler에 format 설정
+    # stream_handler.setFormatter(formatter)
+    # file_handler.setFormatter(formatter)
+    #
+    # logger = logging.getLogger()
+    #
+    # logger.addHandler(stream_handler)
+    # logger.addHandler(file_handler)
+    
     logging.basicConfig(
         level=logging.INFO if dist_utils.is_main_process() else logging.WARN,
         # format="%(asctime)s [%(levelname)s] %(message)s",
-        format="%(asctime)s [%(levelname)7s]in [%(funcName)20s() in %(filename)25s:%(lineno)3d]\t| %(message)s",
-        handlers=[logging.StreamHandler()],
+        format="%(asctime)s [%(levelname)7s]in [%(funcName)20s() in %(pathname)50s:%(lineno)3d]\t| %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(os.path.join(output_dir, "ywjang_log.txt"), mode="a"),
+        ],
     )
+    # logger.setLevel(logging.INFO if dist_utils.is_main_process() else logging.WARN)
+    
+    # print("Effective logging level is {}".format(logger.getEffectiveLevel()))

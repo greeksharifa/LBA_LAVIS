@@ -5,8 +5,8 @@
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
 
-import argparse
 import logging
+import argparse
 import os
 import random
 
@@ -88,16 +88,22 @@ def main():
 
     # set after init_distributed_mode() to only log on master.
     setup_logger()
-
+    
     cfg.pretty_print()
 
     task = tasks.setup_task(cfg)
     datasets = task.build_datasets(cfg)
     model = task.build_model(cfg)
+    # model = model.to("cuda:0")
+    logging.info(f"model device: {model.device}")
 
     runner = get_runner_class(cfg)(
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )
+    # import pudb;    pudb.set_trace()
+    
+    # set after init_distributed_mode() to only log on master.
+    # setup_logger(runner.output_dir)
     
     runner.evaluate(skip_reload=True)
 

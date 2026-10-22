@@ -7,6 +7,7 @@
 
 import logging
 import os
+from colors import Colors, print_sample
 
 import torch
 import torch.distributed as dist
@@ -89,17 +90,17 @@ class BaseTask:
         metric_logger = MetricLogger(delimiter="  ")
         header = "Evaluation"
         # TODO make it configurable
-        print_freq = 10
+        print_freq = 20
 
         results = []
+        _cnt = 0
 
         for samples in metric_logger.log_every(data_loader, print_freq, header):
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             
-            # print('in base_task. evaluation()', '&' * 170)
-            # for key in samples.keys():
-            #     if key != "image":
-            #         print(key, samples[key])
+            if _cnt == 0:
+                _cnt += 1
+                print_sample(samples, msg="eval sample: ", color=Colors.CYAN)
             """
             samples: {
                 'image': Tensor
@@ -122,6 +123,7 @@ class BaseTask:
                 }
             """
             eval_output = self.valid_step(model=model, samples=samples)
+            # import pudb; pudb.set_trace()
             results.extend(eval_output)
 
         if is_dist_avail_and_initialized():
@@ -192,7 +194,7 @@ class BaseTask:
         lr_scheduler,
         scaler=None,
         start_iters=None,
-        log_freq=50,
+        log_freq=100,
         cuda_enabled=False,
         accum_grad_iters=1,
     ):
@@ -226,6 +228,8 @@ class BaseTask:
             # In iter-based runner, we schedule the learning rate based on iterations.
             inner_epoch = start_iters // iters_per_epoch
             header = header + "; inner epoch [{}]".format(inner_epoch)
+            
+        _cnt = 0
 
         for i in metric_logger.log_every(range(iters_per_epoch), log_freq, header):
             # if using iter-based runner, we stop after iters_per_epoch iterations.
@@ -233,9 +237,9 @@ class BaseTask:
                 break
 
             samples = next(data_loader)
-            # for key in samples.keys():
-            #     if key != "image":
-            #         print(key, samples[key])
+            if _cnt == 0:
+                _cnt += 1
+                print_sample(samples, msg="train sample: ", color=Colors.BRIGHT_CYAN)
 
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             samples.update(
