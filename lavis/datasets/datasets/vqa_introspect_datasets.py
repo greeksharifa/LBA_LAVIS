@@ -25,6 +25,29 @@ from colors import Colors, print_sample
 COCOCapDataset = CaptionDataset
 
 
+def _normalize_optional_int(value):
+    if value is None:
+        return None
+    return int(value)
+
+
+def _apply_sample_fraction(annotation, sample_fraction=None, sample_seed=42):
+    if sample_fraction is None:
+        return annotation
+
+    fraction = float(sample_fraction)
+    if not 0 < fraction <= 1:
+        raise ValueError(f"sample_fraction must be in (0, 1], got {sample_fraction}")
+
+    indices = list(range(len(annotation)))
+    random.Random(int(sample_seed)).shuffle(indices)
+    sample_count = int(len(indices) * fraction)
+    if fraction > 0 and sample_count == 0 and len(indices) > 0:
+        sample_count = 1
+
+    return [annotation[index] for index in indices[:sample_count]]
+
+
 def _init_VQAIntrospectSingleSubQ(ann_paths, max_sample_num=99999999):
     """
     set annotation of DataLoader
@@ -169,9 +192,10 @@ _prompt_file_path = "prompts.json"
 
 
 # 1개의 sub-question 생성
-def _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(main_question, sub_question):
+def _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(main_question, sub_question, rng=None):
+    rng = rng or random
     prompts = json.load(open(_prompt_file_path, "r"))["Questioner_SingleSubQ"]
-    prompt = random.choice(prompts)
+    prompt = rng.choice(prompts)
     
     text_input = prompt.format(main_question)
     text_output = sub_question
@@ -180,14 +204,15 @@ def _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(main_question, sub_questio
 
 
 # sequential하게 sub-question 생성
-def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list, split):
+def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_question_list, sub_answer_list, split, rng=None):
     # logging.info('in _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt()')
+    rng = rng or random
     
     prompts = json.load(open(_prompt_file_path, "r"))["Questioner_MultipleSubQ"]
     # text_output으로 1개, previous generated sub_qa로 0~2개 비복원추출
     # sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))     # index 0은 text_output으로 사용
     sub_qa_pair_num = min(1+3, len(sub_question_list))     # index 0은 text_output으로 사용
-    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    sub_qa_indices = rng.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
     text_input = prompts["init_prompt"].format(main_question)
     if sub_qa_pair_num > 1:
@@ -206,23 +231,27 @@ def _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(main_question, sub_quest
     if split == 'train':
         text_output = sub_question_list[sub_qa_indices[0]]
     else:
-        text_output = set(sub_question_list)
-        for i in range(1, sub_qa_pair_num):
-            index = sub_qa_indices[i]
-            text_output.remove(sub_question_list[index])
-        text_output = '\n'.join(text_output)
+        context_questions = {
+            sub_question_list[sub_qa_indices[i]] for i in range(1, sub_qa_pair_num)
+        }
+        text_output = '\n'.join(
+            question
+            for question in sub_question_list
+            if question not in context_questions
+        )
     
     return text_input, text_output
 
 
 # 생성된 sub-qa들로 main-question에 대한 답변 생성
-def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_question_list, sub_answer_list):
+def _apply_VQAIntrospect_Reasoner_prompt(main_question, main_answer, sub_question_list, sub_answer_list, rng=None):
     # logging.info('in _apply_VQAIntrospect_Reasoner_prompt()')
+    rng = rng or random
     
     prompts = json.load(open(_prompt_file_path, "r"))["Reasoner"]
     # generated sub_qa를 1~3개 비복원추출
-    sub_qa_pair_num = random.randint(1, min(3, len(sub_question_list)))
-    sub_qa_indices = random.sample(range(len(sub_question_list)), sub_qa_pair_num)
+    sub_qa_pair_num = rng.randint(1, min(3, len(sub_question_list)))
+    sub_qa_indices = rng.sample(range(len(sub_question_list)), sub_qa_pair_num)
     
     text_input = prompts["init_prompt"].format(main_question)
     # text_input = ""
@@ -253,19 +282,21 @@ def _apply_VQAIntrospect_Answerer_prompt(sub_question, sub_answer):
     return text_input, text_output
 
 
-def _get_text_input_output(prompt_type, ann, split="train"):
+def _get_text_input_output(prompt_type, ann, split="train", rng=None):
     # logging.info('in _get_text_input_output()')
     if prompt_type == "Questioner_SingleSubQ":
         text_input, text_output = _apply_VQAIntrospect_Questioner_SingleSubQ_prompt(
             ann["main_question"],
             ann["sub_question"] if split == "train" else '\n'.join(ann["sub_question_list"]),
+            rng=rng,
         )
-    elif prompt_type == "Questioner_MultipleSubQ":
+    elif prompt_type in ["Questioner", "Questioner_MultipleSubQ"]:
         text_input, text_output = _apply_VQAIntrospect_Questioner_MultipleSubQ_prompt(
             ann["main_question"],
             ann["sub_question_list"],
             ann["sub_answer_list"],
             split,
+            rng=rng,
         )
     elif prompt_type == "Reasoner":
         text_input, text_output = _apply_VQAIntrospect_Reasoner_prompt(
@@ -273,12 +304,16 @@ def _get_text_input_output(prompt_type, ann, split="train"):
             ann["main_answer"],
             ann["sub_question_list"],
             ann["sub_answer_list"],
+            rng=rng,
         )
     elif prompt_type == "Answerer":
         text_input, text_output = _apply_VQAIntrospect_Answerer_prompt(
             ann["sub_question"],
             ann["sub_answer"],
         )
+    elif prompt_type == "QAR":
+        text_input = ann["main_question"]
+        text_output = ann["main_answer"]
     else:
         raise Exception("prompt_type must be specified in lavis.configs.datasets.vqa_introspect.<blabla>.yaml")
     
@@ -286,7 +321,17 @@ def _get_text_input_output(prompt_type, ann, split="train"):
     
 
 class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
+    def __init__(
+        self,
+        vis_processor,
+        text_processor,
+        vis_root,
+        ann_paths,
+        prompt_type,
+        sample_fraction=None,
+        sample_seed=42,
+        **kwargs,
+    ):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -298,8 +343,14 @@ class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
         
         if prompt_type in ["Questioner_SingleSubQ", "Answerer"]:
             self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths)#, 100)
-        elif prompt_type in ["Questioner_MultipleSubQ", "Reasoner"]:
+        elif prompt_type in ["Questioner", "Questioner_MultipleSubQ", "Reasoner", "QAR"]:
             self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths)#, 100)
+
+        self.annotation = _apply_sample_fraction(
+            self.annotation,
+            sample_fraction=sample_fraction,
+            sample_seed=sample_seed,
+        )
         
         self.img_ids = {}
         n = 0
@@ -317,6 +368,7 @@ class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
         
         logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapDataset len: {len(self.annotation)}{Colors.RESET}")
         logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}sample_fraction: {sample_fraction}, sample_seed: {sample_seed}{Colors.RESET}")
 
         
     def __getitem__(self, index):
@@ -339,7 +391,18 @@ class VQAIntrospectQARCapDataset(CaptionDataset, __DisplMixin):
 
 
 class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_paths, prompt_type):
+    def __init__(
+        self,
+        vis_processor,
+        text_processor,
+        vis_root,
+        ann_paths,
+        prompt_type,
+        eval_max_samples=None,
+        eval_sample_fraction=None,
+        eval_sample_seed=42,
+        **kwargs,
+    ):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -349,10 +412,20 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         self.vis_root = vis_root
         self.prompt_type = prompt_type
         
+        eval_max_samples = _normalize_optional_int(eval_max_samples)
+
         if prompt_type in ["Answerer"]:
-            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths, 50)
-        elif prompt_type in ["Questioner_SingleSubQ", "Questioner_MultipleSubQ", "Reasoner"]:
-            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths, 50)
+            self.annotation = _init_VQAIntrospectSingleSubQ(ann_paths)
+        elif prompt_type in ["Questioner", "Questioner_SingleSubQ", "Questioner_MultipleSubQ", "Reasoner", "QAR"]:
+            self.annotation = _init_VQAIntrospectMultipleSubQ(ann_paths)
+
+        self.annotation = _apply_sample_fraction(
+            self.annotation,
+            sample_fraction=eval_sample_fraction,
+            sample_seed=eval_sample_seed,
+        )
+        if eval_max_samples is not None:
+            self.annotation = self.annotation[:eval_max_samples]
         
         self.img_ids = {}
         n = 0
@@ -370,6 +443,11 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         
         logging.info(f"{Colors.BRIGHT_MAGENTA}VQAIntrospectMultipleCapEvalDataset len: {len(self.annotation)}{Colors.RESET}")
         logging.info(f"{Colors.BRIGHT_MAGENTA}prompt_type: {self.prompt_type}{Colors.RESET}")
+        logging.info(f"{Colors.BRIGHT_MAGENTA}eval_max_samples: {eval_max_samples}{Colors.RESET}")
+        logging.info(
+            f"{Colors.BRIGHT_MAGENTA}eval_sample_fraction: {eval_sample_fraction}, "
+            f"eval_sample_seed: {eval_sample_seed}{Colors.RESET}"
+        )
     
     
     def collater(self, samples):
@@ -414,7 +492,12 @@ class VQAIntrospectQARCapEvalDataset(CaptionEvalDataset):
         
         image = self.vis_processor(image)
         
-        text_input, text_output = _get_text_input_output(self.prompt_type, ann, "eval")
+        text_input, text_output = _get_text_input_output(
+            self.prompt_type,
+            ann,
+            "eval",
+            rng=random.Random(int(ann["main_question_id"])),
+        )
         
         _return = {
             "image": image,

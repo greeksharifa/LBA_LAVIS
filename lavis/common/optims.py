@@ -10,6 +10,18 @@ import math
 from lavis.common.registry import registry
 
 
+def _warmup_global_step(cur_epoch, cur_step, num_iters_per_epoch):
+    if num_iters_per_epoch is None:
+        return cur_step if cur_epoch == 0 else None
+    return cur_epoch * num_iters_per_epoch + cur_step
+
+
+def _epoch_progress(cur_epoch, cur_step, num_iters_per_epoch):
+    if num_iters_per_epoch is None or num_iters_per_epoch <= 0:
+        return cur_epoch
+    return cur_epoch + cur_step / num_iters_per_epoch
+
+
 @registry.register_lr_scheduler("linear_warmup_step_lr")
 class LinearWarmupStepLRScheduler:
     def __init__(
@@ -34,10 +46,11 @@ class LinearWarmupStepLRScheduler:
         self.warmup_steps = warmup_steps
         self.warmup_start_lr = warmup_start_lr if warmup_start_lr >= 0 else init_lr
 
-    def step(self, cur_epoch, cur_step):
-        if cur_epoch == 0:
+    def step(self, cur_epoch, cur_step, num_iters_per_epoch=None):
+        warmup_step = _warmup_global_step(cur_epoch, cur_step, num_iters_per_epoch)
+        if warmup_step is not None and warmup_step < self.warmup_steps:
             warmup_lr_schedule(
-                step=cur_step,
+                step=warmup_step,
                 optimizer=self.optimizer,
                 max_step=self.warmup_steps,
                 init_lr=self.warmup_start_lr,
@@ -74,11 +87,11 @@ class LinearWarmupCosineLRScheduler:
         self.warmup_steps = warmup_steps
         self.warmup_start_lr = warmup_start_lr if warmup_start_lr >= 0 else init_lr
 
-    def step(self, cur_epoch, cur_step):
-        # assuming the warmup iters less than one epoch
-        if cur_epoch == 0:
+    def step(self, cur_epoch, cur_step, num_iters_per_epoch=None):
+        warmup_step = _warmup_global_step(cur_epoch, cur_step, num_iters_per_epoch)
+        if warmup_step is not None and warmup_step < self.warmup_steps:
             warmup_lr_schedule(
-                step=cur_step,
+                step=warmup_step,
                 optimizer=self.optimizer,
                 max_step=self.warmup_steps,
                 init_lr=self.warmup_start_lr,
@@ -86,7 +99,7 @@ class LinearWarmupCosineLRScheduler:
             )
         else:
             cosine_lr_schedule(
-                epoch=cur_epoch,
+                epoch=_epoch_progress(cur_epoch, cur_step, num_iters_per_epoch),
                 optimizer=self.optimizer,
                 max_epoch=self.max_epoch,
                 init_lr=self.init_lr,
@@ -102,10 +115,11 @@ class ConstantLRScheduler:
         self.warmup_start_lr = warmup_start_lr if warmup_start_lr >= 0 else init_lr
         self.warmup_steps = warmup_steps
     
-    def step(self, cur_epoch, cur_step):
-        if cur_epoch == 0:
+    def step(self, cur_epoch, cur_step, num_iters_per_epoch=None):
+        warmup_step = _warmup_global_step(cur_epoch, cur_step, num_iters_per_epoch)
+        if warmup_step is not None and warmup_step < self.warmup_steps:
             warmup_lr_schedule(
-                step=cur_step,
+                step=warmup_step,
                 optimizer=self.optimizer,
                 max_step=self.warmup_steps,
                 init_lr=self.warmup_start_lr,

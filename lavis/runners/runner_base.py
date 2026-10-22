@@ -87,14 +87,14 @@ class RunnerBase:
         if self._model.device != self.device:
             self._model = self._model.to(self.device)
 
-            # distributed training wrapper
-            if self.use_distributed:
-                if self._wrapped_model is None:
-                    self._wrapped_model = DDP(
-                        self._model, device_ids=[self.config.run_cfg.gpu]
-                    )
-            else:
-                self._wrapped_model = self._model
+        # distributed training wrapper
+        if self.use_distributed:
+            if self._wrapped_model is None:
+                self._wrapped_model = DDP(
+                    self._model, device_ids=[self.config.run_cfg.gpu]
+                )
+        else:
+            self._wrapped_model = self._model
 
         return self._wrapped_model
 
@@ -392,6 +392,9 @@ class RunnerBase:
                             agg_metrics = val_log["agg_metrics"]
                             print('agg_metrics:', agg_metrics)
                             print('split_name:', split_name)
+
+                            if split_name == "val" and not self.evaluate_only:
+                                self._save_checkpoint(cur_epoch, is_best=False)
                             
                             save_to = os.path.join(
                                 self.output_dir,
@@ -653,7 +656,13 @@ class RunnerBase:
             raise RuntimeError("checkpoint url or path is invalid")
 
         state_dict = checkpoint["model"]
-        self.unwrap_dist_model(self.model).load_state_dict(state_dict)
+        try:
+            self.unwrap_dist_model(self.model).load_state_dict(state_dict)
+        except RuntimeError:
+            logging.warning(
+                "Checkpoint is partial; loading resume checkpoint with strict=False."
+            )
+            self.unwrap_dist_model(self.model).load_state_dict(state_dict, strict=False)
 
         self.optimizer.load_state_dict(checkpoint["optimizer"])
         if self.scaler and "scaler" in checkpoint:

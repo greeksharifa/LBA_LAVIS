@@ -128,6 +128,7 @@ class BaseDatasetBuilder:
             # assert len(urls) == len(storage_paths)
 
             for url_or_filename, storage_path in zip(urls, storage_paths):
+                original_storage_path = storage_path
                 # if storage_path is relative, make it full by prefixing with cache_root.
                 if not os.path.isabs(storage_path):
                     storage_path = os.path.join(cache_root, storage_path)
@@ -136,7 +137,35 @@ class BaseDatasetBuilder:
                 if not os.path.exists(dirname):
                     os.makedirs(dirname)
 
-                if os.path.isfile(url_or_filename):
+                local_storage_candidates = []
+                if not os.path.isabs(original_storage_path):
+                    repo_root = registry.get_path("repo_root")
+                    local_storage_candidates.extend(
+                        [
+                            os.path.join(repo_root, original_storage_path),
+                            os.path.join(repo_root, "data", original_storage_path),
+                        ]
+                    )
+
+                local_storage_path = next(
+                    (
+                        candidate
+                        for candidate in local_storage_candidates
+                        if os.path.isfile(candidate)
+                    ),
+                    None,
+                )
+
+                if os.path.isfile(storage_path):
+                    logging.info("Using existing file {}.".format(storage_path))
+                elif local_storage_path is not None:
+                    shutil.copyfile(src=local_storage_path, dst=storage_path)
+                    logging.info(
+                        "Copied local annotation file from {} to {}.".format(
+                            local_storage_path, storage_path
+                        )
+                    )
+                elif os.path.isfile(url_or_filename):
                     src, dst = url_or_filename, storage_path
                     if not os.path.exists(dst):
                         shutil.copyfile(src=src, dst=dst)
@@ -185,6 +214,11 @@ class BaseDatasetBuilder:
         prompt_type = self.config.get("prompt_type", None)
         logging.info(f"prompt_type: {prompt_type}")
         # lavis.configs.datasets.vqa_introspect.<blabla>.yaml 파일 수정해서 변경 가능
+        sample_fraction = self.config.get("sample_fraction", None)
+        sample_seed = self.config.get("sample_seed", 42)
+        eval_max_samples = self.config.get("eval_max_samples", None)
+        eval_sample_fraction = self.config.get("eval_sample_fraction", None)
+        eval_sample_seed = self.config.get("eval_sample_seed", sample_seed)
 
         datasets = dict()
         for split in ann_info.keys():
@@ -238,13 +272,25 @@ class BaseDatasetBuilder:
                     vis_root=vis_path,
                 )
             else:     # ywjang: prompt type added for VQA_Introspect
-                datasets[split] = dataset_cls(
-                    vis_processor=vis_processor,
-                    text_processor=text_processor,
-                    ann_paths=ann_paths,
-                    vis_root=vis_path,
-                    prompt_type=prompt_type,
-                )
+                dataset_kwargs = {
+                    "vis_processor": vis_processor,
+                    "text_processor": text_processor,
+                    "ann_paths": ann_paths,
+                    "vis_root": vis_path,
+                    "prompt_type": prompt_type,
+                }
+                if is_train:
+                    dataset_kwargs.update(
+                        sample_fraction=sample_fraction,
+                        sample_seed=sample_seed,
+                    )
+                else:
+                    dataset_kwargs.update(
+                        eval_max_samples=eval_max_samples,
+                        eval_sample_fraction=eval_sample_fraction,
+                        eval_sample_seed=eval_sample_seed,
+                    )
+                datasets[split] = dataset_cls(**dataset_kwargs)
 
         return datasets
 

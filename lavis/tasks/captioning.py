@@ -7,6 +7,8 @@
 
 import json
 import os
+import re
+import string
 
 import numpy as np
 from nltk.translate.bleu_score import sentence_bleu
@@ -16,9 +18,24 @@ from lavis.common.registry import registry
 from lavis.tasks.base_task import BaseTask
 
 
+def _normalize_vqa_answer(answer):
+    answer = str(answer).lower().strip()
+    answer = answer.translate(str.maketrans("", "", string.punctuation))
+    answer = re.sub(r"\b(a|an|the)\b", " ", answer)
+    return " ".join(answer.split())
+
+
 @registry.register_task("captioning")
 class CaptionTask(BaseTask):
-    def __init__(self, num_beams, max_len, min_len, evaluate, report_metric=True):
+    def __init__(
+        self,
+        num_beams,
+        max_len,
+        min_len,
+        evaluate,
+        report_metric=True,
+        metric=None,
+    ):
         super().__init__()
 
         self.num_beams = num_beams
@@ -27,6 +44,7 @@ class CaptionTask(BaseTask):
         self.evaluate = evaluate
 
         self.report_metric = report_metric
+        self.metric = metric
 
     @classmethod
     def setup_task(cls, cfg):
@@ -38,6 +56,7 @@ class CaptionTask(BaseTask):
         evaluate = run_cfg.evaluate
 
         report_metric = run_cfg.get("report_metric", True)
+        metric = run_cfg.get("metric", None)
 
         return cls(
             num_beams=num_beams,
@@ -45,6 +64,7 @@ class CaptionTask(BaseTask):
             min_len=min_len,
             evaluate=evaluate,
             report_metric=report_metric,
+            metric=metric,
         )
 
     def valid_step(self, model, samples):   # samples(batch)에 대해 모델의 inference 결과를 반환
@@ -63,30 +83,39 @@ class CaptionTask(BaseTask):
         main_question_ids = samples["main_question_id"]
         text_inputs = samples["text_input"]
         text_outputs = samples["text_output"]
+        instance_ids = samples.get("instance_id", [None] * len(captions))
         # sub_question_ids = samples["sub_question_id"]
         # print('in valid step(): img_ids, main_question_ids, text_inputs, sub_question_ids, captions')
         # print(img_ids, main_question_ids, text_inputs, sub_question_ids, captions, sep='\n')
         # for caption, img_id, main_question_id, text_input, sub_question_id in zip(captions, img_ids, main_question_ids, text_inputs, sub_question_ids):
-        for caption, img_id, main_question_id, text_input, text_output in zip(captions, img_ids, main_question_ids, text_inputs, text_outputs):
+        for caption, img_id, main_question_id, instance_id, text_input, text_output in zip(captions, img_ids, main_question_ids, instance_ids, text_inputs, text_outputs):
             # print('in valid step(): img_id, main_question_id, text_input, sub_question_id, caption')
             # print(img_id, main_question_id, text_input, sub_question_id, caption, sep='\n')
-            results.append({
+            result = {
                 "image_id": int(img_id),
                 "main_question_id": int(main_question_id),
                 "text_input": text_input,
                 "text_output": text_output,
                 # "sub_question_id": int(sub_question_id),
                 "caption": caption,
-            })
+            }
+            if instance_id is not None:
+                result["instance_id"] = instance_id
+            results.append(result)
 
         return results
 
     def after_evaluation(self, val_result, split_name, epoch, **kwargs):
+        remove_duplicate = (
+            "instance_id"
+            if val_result and "instance_id" in val_result[0]
+            else ""
+        )
         eval_result_file = self.save_result(
             result=val_result,
             result_dir=registry.get_path("result_dir"),
             filename="{}_epoch{}".format(split_name, epoch),
-            # remove_duplicate="sub_question_id",
+            remove_duplicate=remove_duplicate,
         )
 
         if self.report_metric:
@@ -126,7 +155,39 @@ class VQAIntrospectCaptionTask(CaptionTask):
 
     @main_process
     def _report_metrics(self, eval_result_file, split_name):
-        gt_file = os.path.join(registry.get_path("cache_root"), "VQA-Introspect/VQAIntrospect_valv1.0.json")
+        if self.metric == "answer_exact_match":
+            res_data = json.load(open(eval_result_file))
+            if not res_data:
+                return {"agg_metrics": 0.0, "answer_exact_match": 0.0}
+            correct = 0
+            for res in res_data:
+                pred = res.get("caption", "")
+                if isinstance(pred, list):
+                    pred = pred[0] if pred else ""
+                gt = res.get("text_output", "")
+                correct += int(
+                    _normalize_vqa_answer(pred) == _normalize_vqa_answer(gt)
+                )
+            accuracy = correct / len(res_data)
+            return {"agg_metrics": accuracy, "answer_exact_match": accuracy}
+
+        gt_candidates = [
+            os.environ.get("VQA_INTROSPECT_GT_FILE"),
+            os.path.join(
+                registry.get_path("cache_root"),
+                "VQA-Introspect/VQAIntrospect_valv1.0.json",
+            ),
+            os.path.join(
+                registry.get_path("repo_root"),
+                "data/VQA-Introspect/VQAIntrospect_valv1.0.json",
+            ),
+        ]
+        gt_file = next((path for path in gt_candidates if path and os.path.isfile(path)), None)
+        if gt_file is None:
+            raise FileNotFoundError(
+                "VQA-Introspect GT file not found. Tried: "
+                + ", ".join(path for path in gt_candidates if path)
+            )
         raw_gt_data = json.load(open(gt_file))              # gt data
         """
         >>> raw_gt_data['565248001']
@@ -160,7 +221,10 @@ class VQAIntrospectCaptionTask(CaptionTask):
         # res example: {'caption': 'stabilityout land guerre...', 'image_id': 565248, 'main_question_id': 565248001}
         for res in res_data:
             reference = [ref_sentence.split() for ref_sentence in gt_data[str(res['main_question_id'])]]
-            candidate = res['caption'].split()
+            caption = res['caption']
+            if isinstance(caption, list):
+                caption = caption[0] if caption else ""
+            candidate = str(caption).split()
             blue_score = sentence_bleu(reference, candidate, weights=(0.25, 0.25, 0.25, 0.25))
             # print('blue_score:', blue_score)
             blue_scores.append(blue_score)

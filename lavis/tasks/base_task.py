@@ -251,11 +251,20 @@ class BaseTask:
             )
             # logging.info(samples)
 
-            lr_scheduler.step(cur_epoch=inner_epoch, cur_step=i)
+            lr_scheduler.step(
+                cur_epoch=inner_epoch,
+                cur_step=i,
+                num_iters_per_epoch=iters_per_epoch,
+            )
+
+            accumulation_start = (i // accum_grad_iters) * accum_grad_iters
+            accumulation_size = min(
+                accum_grad_iters, iters_per_epoch - accumulation_start
+            )
 
             with torch.cuda.amp.autocast(enabled=use_amp):
                 loss, loss_dict = self.train_step(model=model, samples=samples)
-                loss /= accum_grad_iters #TODO: not affect loss_dict values for logging
+                loss /= accumulation_size  # TODO: not affect loss_dict values for logging
 
             # after_train_step()
             if use_amp:
@@ -263,8 +272,8 @@ class BaseTask:
             else:
                 loss.backward()
 
-            # update gradients every accum_grad_iters iterations
-            if (i + 1) % accum_grad_iters == 0:
+            # update gradients every accum_grad_iters iterations, including final partial group
+            if (i + 1) % accum_grad_iters == 0 or (i + 1) == iters_per_epoch:
                 if use_amp:
                     scaler.step(optimizer)
                     scaler.update()                     
