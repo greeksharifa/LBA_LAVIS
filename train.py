@@ -73,7 +73,7 @@ def get_runner_class(cfg):
 
 
 def main():
-    logging.info('in captioning_base branch')
+    # logging.info('in captioning_base branch')
     # allow auto-dl completes on main process without timeout when using NCCL backend.
     # os.environ["NCCL_BLOCKING_WAIT"] = "1"
 
@@ -98,6 +98,7 @@ def main():
     runner = get_runner_class(cfg)(
         cfg=cfg, job_id=job_id, task=task, model=model, datasets=datasets
     )
+    # import pdb; pdb.set_trace()
     runner.train()
 
 

@@ -191,6 +191,6 @@ def setup_logger():
     logging.basicConfig(
         level=logging.INFO if dist_utils.is_main_process() else logging.WARN,
         # format="%(asctime)s [%(levelname)s] %(message)s",
-        format="%(asctime)s [%(levelname)5s] in [%(funcName)s() in %(filename)s:%(lineno)3d]\t| %(message)s",
+        format="%(asctime)s [%(levelname)7s]in [%(funcName)20s() in %(filename)25s:%(lineno)3d]\t| %(message)s",
         handlers=[logging.StreamHandler()],
     )

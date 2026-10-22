@@ -13,4 +13,4 @@ echo "new port_value: $port_value"
 
 echo ${port_value} > ${port_value_file}
 
-python -m torch.distributed.run --nproc_per_node=1 --master_port=$port_value train.py --cfg-path instructBLIP_FT_vicuna7b.yaml
+python -m torch.distributed.run --nproc_per_node=2 --master_port=$port_value train.py --cfg-path instructBLIP_FT_vicuna7b.yaml

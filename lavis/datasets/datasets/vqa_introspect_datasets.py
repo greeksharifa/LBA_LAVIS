@@ -7,6 +7,7 @@
 
 import os
 import json
+import logging
 
 from PIL import Image
 
@@ -39,11 +40,11 @@ class VQAIntrospectDataset(VQADataset, __DisplMixin):
         ann_root (string): directory to store the annotation file
         """
         # super().__init__(vis_processor, text_processor, vis_root, ann_paths)
-        print('in datasets.datasets.vqa_introspect_datasets.py VQAIntrosectDataset class')
-        print('vis_processor', vis_processor)
-        print('text_processor', text_processor)
-        print('vis_root', vis_root)
-        print('ann_paths', ann_paths)
+        logging.info('in datasets.datasets.vqa_introspect_datasets.py VQAIntrosectDataset class')
+        logging.info('vis_processor', vis_processor)
+        logging.info('text_processor', text_processor)
+        logging.info('vis_root', vis_root)
+        logging.info('ann_paths', ann_paths)
         
         self.vis_root = vis_root
         
@@ -78,7 +79,7 @@ class VQAIntrospectDataset(VQADataset, __DisplMixin):
                         self.annotation.append(_sample)
                         
         from pprint import pprint
-        print('self.annotation[0]:')
+        logging.info('self.annotation[0]:')
         pprint(self.annotation[0])
 
         self.vis_processor = vis_processor

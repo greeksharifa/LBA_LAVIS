@@ -51,9 +51,9 @@ class BaseTask:
         assert len(datasets_config) > 0, "At least one dataset has to be specified."
 
         for name in datasets_config:
-            logging.info('name:', name)
+            logging.info('name: ' + str(name))
             dataset_config = datasets_config[name]
-            logging.info('dataset_config:', dataset_config)
+            logging.info('dataset_config: ' + str(dataset_config))
 
             builder = registry.get_builder_class(name)(dataset_config)
             dataset = builder.build_datasets()
@@ -95,7 +95,32 @@ class BaseTask:
 
         for samples in metric_logger.log_every(data_loader, print_freq, header):
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
-
+            
+            # print('in base_task. evaluation()', '&' * 170)
+            # for key in samples.keys():
+            #     if key != "image":
+            #         print(key, samples[key])
+            """
+            samples: {
+                'image': Tensor
+                'image_id': tensor([565248, 284885, 276693, 119210], device='cuda:0'),
+                'main_question_id': ['565248001', '284885001', '276693003', '119210000'],
+                'instance_id': ['0', '4', '8', '12'],
+                'text_input': ["write a informative sub-question about image, when main-question is 'are they at the beach?'",
+                                "write a sub-question about image, when main-question is 'is the house new?'",
+                                "write a informative sub-question about image, when main-question is 'is the woman going up or downhill?'",
+                                "write a sub-question about image, when main-question is 'what feature is significant about this animal?'"],
+                'prompt': ["write a informative sub-question about image, when main-question is 'are they at the beach?'",
+                            "write a sub-question about image, when main-question is 'is the house new?'",
+                            "write a informative sub-question about image, when main-question is 'is the woman going up or downhill?'",
+                            "write a sub-question about image, when main-question is 'what feature is significant about this animal?'"],
+                'sub_question_id': 무언가,
+                'text_output': ['are the woman on the horses near to the sea?</s>',
+                                'is the window of the house boarded up?</s>',
+                                'is the path in the distance higher or lower than in the front?</s>',
+                                'does the zebra have stripes?</s>']
+                }
+            """
             eval_output = self.valid_step(model=model, samples=samples)
             results.extend(eval_output)
 
@@ -208,6 +233,9 @@ class BaseTask:
                 break
 
             samples = next(data_loader)
+            # for key in samples.keys():
+            #     if key != "image":
+            #         print(key, samples[key])
 
             samples = prepare_sample(samples, cuda_enabled=cuda_enabled)
             samples.update(
@@ -217,6 +245,7 @@ class BaseTask:
                     "iters": i,
                 }
             )
+            # logging.info(samples)
 
             lr_scheduler.step(cur_epoch=inner_epoch, cur_step=i)
 

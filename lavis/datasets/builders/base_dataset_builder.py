@@ -181,6 +181,10 @@ class BaseDatasetBuilder:
 
         ann_info = build_info.annotations
         vis_info = build_info.get(self.data_type)
+        # ywjang
+        prompt_type = self.config.get("prompt_type", None)
+        logging.info(f"prompt_type: {prompt_type}")
+        # lavis.configs.datasets.vqa_introspect.<blabla>.yaml 파일 수정해서 변경 가능
 
         datasets = dict()
         for split in ann_info.keys():
@@ -225,12 +229,22 @@ class BaseDatasetBuilder:
 
             # create datasets
             dataset_cls = self.train_dataset_cls if is_train else self.eval_dataset_cls
-            datasets[split] = dataset_cls(
-                vis_processor=vis_processor,
-                text_processor=text_processor,
-                ann_paths=ann_paths,
-                vis_root=vis_path,
-            )
+            # ywjang
+            if prompt_type is None:     # Original
+                datasets[split] = dataset_cls(
+                    vis_processor=vis_processor,
+                    text_processor=text_processor,
+                    ann_paths=ann_paths,
+                    vis_root=vis_path,
+                )
+            else:     # ywjang: prompt type added for VQA_Introspect
+                datasets[split] = dataset_cls(
+                    vis_processor=vis_processor,
+                    text_processor=text_processor,
+                    ann_paths=ann_paths,
+                    vis_root=vis_path,
+                    prompt_type=prompt_type,
+                )
 
         return datasets
 

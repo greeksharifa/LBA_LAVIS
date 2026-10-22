@@ -157,3 +157,6 @@ debug*/
 *.gz
 
 cache/
+
+# Local generated training artifacts
+/lavis/ywjang_output/

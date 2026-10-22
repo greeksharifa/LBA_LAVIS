@@ -333,3 +333,34 @@ If you have any questions, comments or suggestions, please do not hesitate to co
 
 ## License
 [BSD 3-Clause License](LICENSE.txt)
+
+## 보존된 이전 captioning 실험 사본
+
+이 사본은 `captioning_base` 기준 `5bdf1fa` 위에 단일/복수 sub-question captioning
+변경을 보존한다. 현재 주 개발본 또는 최종 논문 채택본이라고 단정하지 않는다.
+`lavis/datasets/datasets/vqa_instrospect_caption_datasets.py` 삭제와
+`vqa_introspect_caption_datasets.py` 추가는 spelling 수정이며,
+`vqa_introspect_multiple_caption_datasets.py`와 대응 builder/config가 복수 질문을 담당한다.
+
+`train.py` / `run.sh` 및 `instructBLIP_FT_vicuna7b.yaml`은 seed 42, 5 epochs,
+batch 8, accumulation 16, max length 128의 실험 설정이다. 복수 질문 설정은
+`instructBLIP_FT_vicuna7b_multiple.yaml`과
+`lavis/configs/datasets/vqa_introspect/defaults_multiple_cap.yaml`에 있다.
+val/test annotation 모두 VQA-Introspect val JSON을 가리키므로 독립 test split이 아니다.
+`generate_image_description.py`와 `.sh`, `demo.py`는 설명 생성 및 수동 디버깅 초안이다.
+
+base InstructBLIP은 `/home/ywjang/models/instruct_blip_vicuna7b_trimmed.pth`,
+Vicuna config는 `/home/ywjang/models/lmsys/vicuna-7b-v1.1`이다.
+`download_pretrained_models.py`의 활성 모델 ID는 `eachadea/vicuna-7b-1.1`이어서
+config의 lmsys 경로와 자동으로 동일하다고 볼 수 없다. 의존성은 기존
+`requirements.txt` / `setup.py`이며 version lock·모델 revision은 미확정이다.
+
+`lavis/ywjang_output/`의 `20230802110`, `20230803010`, `20230803082`, `20230803084`에는
+`checkpoint_best.pth`가 남아 있고 각 run 하위 `result/*epoch*.json`이 raw 출력이다.
+이름만으로 최종 checkpoint/표의 채택 여부나 metric을 확정하지 않는다.
+checkpoint·raw 결과·로그는 Git에서 제외하되 삭제하지 않는다. 원본 output의 별도
+archive ID/체크섬 manifest 및 논문 행 대응은 아직 확인되지 않았다.
+작은 `data/VQA-Introspect/VQAIntrospect_samplev1.0.json`은 source 예제로 보존한다.
+
+이번 검증은 Python/shell syntax만 수행했다. GPU·학습·평가는 실행하지 않았다.
+실행 port counter와 대량 chmod/CRLF noise는 commit하지 않는다.
