@@ -524,7 +524,7 @@ def run_dataset(
         dataloader,
         total=total_batches,
         desc=f"{dataset_name} rank{rank}",
-        disable=False,
+        disable=not is_main_process(),
     )
     for batch_index, batch in enumerate(progress, start=1):
         sub_questions = generate_sub_questions_for_batch(
@@ -616,9 +616,10 @@ def main() -> None:
     )
     job_id = _broadcast_job_id()
     final_paths = {}
-    print(
-        f"Starting generation: rank={get_rank()} world_size={get_world_size()} device={_current_device_label()} datasets={args.datasets}"
-    )
+    if is_main_process():
+        print(
+            f"Starting generation: rank={get_rank()} world_size={get_world_size()} device={_current_device_label()} datasets={args.datasets}"
+        )
 
     try:
         for dataset_name in args.datasets:

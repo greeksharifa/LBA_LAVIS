@@ -26,7 +26,48 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
+## Qwen2.5-VL Questioner sub-question generation
+
+`generate_questioner_subquestions_qwen.py` runs the C2R Questioner baseline with
+Qwen2.5-VL-7B-Instruct. It supports MMLU, MMLU-Pro, StrategyQA, MMMU, and
+EgoSchema. The tracked `qids/<dataset>.json` files select which source question
+IDs are processed; they are selection manifests, not the source datasets.
+
+The Qwen entrypoint has an add-on dependency set in
+`requirements-qwen-vl.txt` (Transformers from Git, Accelerate, and
+`qwen-vl-utils[decord]==0.0.8`); install the model/runtime dependencies such as
+PyTorch, pandas, and Pillow for the target machine separately. The repository's
+`.python-version` is 3.12. This add-on is separate from the legacy
+`requirements.txt`, which pins an older Transformers release; use an environment
+compatible with Qwen2.5-VL.
+
+From the repository root, override the old machine-specific defaults for the
+C2R data, QID manifests, and output directory:
+
+```bash
+python -m pip install -r requirements-qwen-vl.txt
+python generate_questioner_subquestions_qwen.py \
+  --dataset MMMU \
+  --c2r-root /path/to/C2R \
+  --qids-root ./qids \
+  --output-root /path/to/output
+```
+
+The default model is `Qwen/Qwen2.5-VL-7B-Instruct`; `--model-name` can select
+another compatible checkpoint. Output is written to
+`<output-root>/C2R/<dataset>/Baseline-Qwen2.5-VL-7B/sub_qas.json`, alongside
+per-rank temporary shards. The C2R dataset files and media remain external.
+The focused CPU-side tests are:
+
+```bash
+python -m pytest tests/test_qwen_questioner_subquestions.py \
+  tests/test_generate_questioner_subquestions_qwen.py
+```
+
 ## InstructBLIP Fine-Tuning을 위한 수정사항(VQA-Introspect)
+
+아래 내용은 구형 InstructBLIP 학습·평가 절차이며, 위 Qwen C2R 생성기는
+별도 의존성과 출력 경로를 사용하는 추론 entrypoint이다.
 
 - https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
 - 참고: qar(Questioner-Answerer-Reasoner)은 이전 이름으로 추후 (SQ_InstructBLIP로) 변경 예정
