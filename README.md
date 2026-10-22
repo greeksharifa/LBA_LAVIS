@@ -39,6 +39,31 @@ We provide code that enables the reproduction of our experiments with LLaVA v1.6
  # Multiple-choice VQA
  python eval_llava_multiplechoice.py --path_qa_pair_csv ./data/multiple_choice_qa/TVQA.csv --path_video /data/TVQA/videos/%s.mp4 --path_result ./result_tvqa/ --llm_size 34b
  ```
+
+### 34B multiple-choice runs for NExT-QA and STAR
+
+`run_mc_34b.sh` reads the multiple-choice CSV generated for the selected
+dataset and runs the LLaVA 1.6 34B evaluation. From this directory, pass the
+dataset key, the currently unused legacy device argument, number of rows, and
+sub-question index:
+
+```bash
+bash run_mc_34b.sh NExT_QA unused 10 base
+bash run_mc_34b.sh STAR unused 10 1
+```
+
+The input CSV is
+`data/multiple_choice_qa/<dataset>_sub_qas_val_xl_fewshot_vqaintrospect_unique.csv`,
+and the video template is `data/<dataset>/videos/%s.mp4`. For example, the
+launcher expects `NExT_QA_sub_qas_val_xl_fewshot_vqaintrospect_unique.csv` and
+the corresponding NExT-QA videos, or the matching `STAR` CSV and videos. Keep
+the dataset key as `NExT_QA` or `STAR`, matching the parser and directory names.
+The output is written under `result_<dataset>/<sub-question-index>`.
+
+The current launcher fixes `CUDA_VISIBLE_DEVICES` to `2,3,4,5`. Edit that line
+locally if the four 34B GPUs have different IDs. Dataset media and generated QA
+files are not included as part of this README update.
+
  * When conducting experiments with GPT-4V combined with IG-VLM, the process can be initiated using the following command. Please be aware that utilizing the GPT-4 vision API may incur significant costs. 
  ```bash
  # Open-ended video question answering
