@@ -21,6 +21,8 @@ the task, model, dataset and training recipes.
 
 Available options and their descriptions are as below.
 
+For repository-specific environment and path guidance, see the `SQ-InstructBLIP runbook <sq-instructblip-runbook.md>`_; for training, evaluation, generation, and export commands, see its `script guide <../scripts/README.md>`_.
+
 .. LAVIS executes training and evaluation based on arguments specified in the configuration files. The default model and dataset configurations are defined in ``lavis/configs``. The task-specific configurations are defined in ``lavis/projects``. Task-specific configurations have higher priority over the default configurations.
 
 .. The following tables provide explanations for the arguments in the configuration files.

@@ -26,54 +26,42 @@
 
 # LAVIS - A Library for Language-Vision Intelligence
 
-## InstructBLIP Fine-Tuning을 위한 수정사항(VQA-Introspect)
+## SQ-InstructBLIP / VQA-Introspect
 
-- https://opensource.salesforce.com/LAVIS/latest/tutorial.datasets.html 참고
-- 참고: qar(Questioner-Answerer-Reasoner)은 이전 이름으로 추후 (SQ_InstructBLIP로) 변경 예정
-- 아래 내용은 InstructBLIP-vicuna7b를 수정하고 새로운 dataset, task를 정의한 경우에 대한 내용
-- 새로운 task 추가(vqa_introspect_captioning): `lavis/tasks/captioning.py` or `lavis/tasks/vqa.py`
-  - `__init__.py`에도 등록(위 사이트 참조)
-- 새로운 데이터셋 추가(vqa_introspect_qar_caption)
-  - sub_qa를 불러오는 방식에 따라 2가지로 구분함
-  - `lavis/datasets/datasets/vqa_introspect_datasets.py`: role(Q, A, R)에 따라 sub_qa를 불러오는 방식이 다름
-    - 원래는 prompt 적용을 모델 안에서 하는 것이 맞으나 임시로 이렇게 작성
-  - `lavis/datasets/datasets/vqa_introspect_datasets_test.py`: 최종 모델인 SQ_InstructBLIP을 테스트하기 위한 데이터셋
-  - dataset builder(`lavis/datasets/builders/vqa_builder.py, __init__.py`)에도 등록 완료
-  - dataset config yaml 파일로 새로 생성하여 등록(`lavis/configs/datasets/vqa_introspect/defaults.yaml`)
-- configs(yaml) 파일 수정: `./instructBLIP_FT_vicuna7b.yaml`
-  - baseline model test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_test.yaml`
-  - SQ_InstructBLIP 모델 test를 위한 yaml 파일 수정: `./instructBLIP_FT_vicuna7b_qar.yaml`
-  - yaml 파일의 datasets나 task만 변경해도 되지만 빠른 테스트를 위하 파일을 분리한 것. 합쳐도 상관 없음
-  - 주의할 점:
-    - yaml 파일의 `datasets:` 아래의 데이터셋 이름은 dataset builder의 register 이름과 일치(class 이름 아님)
-    - dataset은 여러 개 지정 가능
-    - `run: task:`는 `tasks/<blabla>.py`의 원하는 task와 register 이름과 일치
-- 모델 수정(`blip2_vicuna_instruct.py, blip2_vicuna_instruct_qar.py`)
-  - `lavis/models/blip2_models/blip2_vicuna_instruct.py` 수정:
-    - model role(Questioner, Answerer, or Reasoner) 추가
-    - sq_prompts 추가: role 별로 적용하는 prompts가 다를 수 있음(추가 예정)
-    - log를 위한 cnt 추가
-  - `lavis/models/blip2_models/blip2_vicuna_instruct_qar.py` 수정:
-    - Questioner-Answerer-Reasoner framework를 generate() 함수에서 구현
-    - module weight 통합 시 deprecate 시킬 예정
-- 학습: `train.py / train.sh`, baseline test: `test.py / test.sh`, SQ_Instruct test: `test_qar.py / test_qar.sh`
-- `./prompts.json`에 현재 SQ_InstructBLIP에 적용할 prompt 저장
-- 데이터 root 폴더는 `lavis/configs/default.yaml`에서 지정
-- KT의 보안에 의해 huggingface 등에서 모델 다운로드가 안 되므로 모델을 local에 다운로드하여 사용하기 위한 코드 변경:
-  - `lavis/models/eva_vit.py`
-  - `lavis/models/blip2_models/blip2.py`
-  - `lavis/models/blip2_models/blip2_vicuna_instruct.py`
-  - `lavis/configs/models/blip2/blip2_instruct_vicuna7b.yaml`
-  - 추가로 기존 데이터셋(ex. A-OKVQA) 등을 사용할 때에도 그에 맞는 `configs/datasets/이름`에 들어가서 경로 수정해주어야 함
-- 기타
-  - `init_distributed_mode(cfg.run_cfg)` 바로 다음에 `setup_logger()`을 위치시켜야 `logging.info()`가 제대로 작동
-  - evaluate(test) 할 때는 `runner.train()` 대신 `runner.evaluate(skip_reload=True)`을 사용
-  - yaml 파일의 `output_dir:`은 `lavis/` 폴더 아래에 저장됨
+이 브랜치는 InstructBLIP-vicuna7b 기반 Questioner·Answerer·Reasoner 연구 코드다. Questioner와 Reasoner를 학습하고, 생성한 sub-QA로 최종 답변을 평가한다. `QAR`은 기존 registry와 파일명의 호환 명칭이다.
 
-ywjang 수정:
+- [SQ-InstructBLIP runbook](docs/sq-instructblip-runbook.md): 환경·경로·실험 안전 규칙의 짧은 진입점.
+- [스크립트 상세 안내](scripts/README.md): fraction 학습, epoch3 비교, QAR 평가, Questioner·Qwen·baseline 생성, 논문용 export와 결과 보관.
+- [작업 지침](AGENTS.md): 환경, 검증, 실험 실행 위치와 코드 규칙.
+- 학습 설정: [Questioner](configs/sq_instructblip/questioner.yaml), [Reasoner](configs/sq_instructblip/reasoner.yaml).
+- 학습/역할별 평가 데이터: `lavis/datasets/datasets/vqa_introspect_datasets.py`, registry `vqa_introspect_qar_caption`, task `vqa_introspect_captioning`.
+- 통합 QAR 평가 데이터: `lavis/datasets/datasets/vqa_introspect_test_datasets.py`, registry `vqa_introspect_test`. `test_qar.py`와 `run_test_qar_entrypoint.py`는 `instructBLIP_FT_vicuna7b_vqaintrospect_qar.yaml`을 사용한다.
+- 역할별 prompt는 `prompts.json`, baseline prompt는 `baseline_prompts_single_subq.json`, 변환·검증 helper는 `subqa/`에 있다.
 
-- output: `/home/ywjang/LBA/LBA_LAVIS/lavis/ywjang_output/`
+### 환경과 검증
 
+프로젝트는 `.python-version`의 Python 3.10을 사용하며 `pyproject.toml`과 `uv.lock`은 Python `>=3.8,<3.11` 범위다. `uv.lock`에는 개발용 pytest도 포함된다. 기본 LAVIS 의존성은 Transformers 4.28 계열과 CUDA 12.1 PyTorch index를 사용한다. Qwen 생성은 별도 Python 3.11 환경에서 실행한다. 상세 절차는 [runbook](docs/sq-instructblip-runbook.md)과 [스크립트 안내](scripts/README.md)를 따른다.
+
+```bash
+uv sync --locked --python 3.10 --group dev
+uv run --python 3.10 python -m pytest tests --ignore=tests/models -q
+DRY_RUN=1 scripts/run_sq_instructblip_fraction_experiments.sh
+DRY_RUN=1 scripts/run_sq_instructblip_epoch3_fraction_comparison.sh
+```
+
+`tests/models/`는 대형 가중치를 다운로드하거나 모델 추론을 수행하는 upstream integration suite다. 해당 가중치를 준비한 뒤 tmux `lavis:0 (run)`에서 별도로 실행한다.
+
+학습·생성·평가 실험은 tmux 세션 `lavis`, 창 `0`(`run`)에서 실행한다. 순차 실행 큐도 같은 창에 두고 지속 로그는 `${HOME}/.codex/`에 남긴다.
+
+### 모델·데이터·출력
+
+기본 모델 위치는 `/model/InstructBLIP/instruct_blip_vicuna7b_trimmed.pth`와 `/model/lmsys/vicuna-7b-v1.1`이다. fraction 스크립트는 `BASE_CKPT`, `VICUNA_PATH`, `GPUS`, `CUDA_VISIBLE_DEVICES`로 조정한다. 직접 실행은 `--options model.finetuned=... model.llm_model=...`을 사용한다.
+
+`lavis/configs/default.yaml`의 `env.cache_root` 기본값은 `/home/ywjang/data`이며, VQA annotation과 COCO images 기본 경로는 `lavis/configs/datasets/vqa_introspect/defaults.yaml`에 있다. 다른 서버에서는 annotation/image storage를 절대경로로 override한다. 간단한 fraction 스크립트는 데이터 경로 환경변수를 받지 않으므로 직접 `train.py --options`를 사용하거나 설정 파일을 준비한다. epoch3 스크립트는 `ANN_TRAIN`, `ANN_VAL`, `IMAGE_ROOT`를 받는다.
+
+`RunnerBase`는 상대 `run.output_dir`를 `lavis/` 아래에 해석한다. 따라서 기본 fraction 출력은 `lavis/ywjang_output_sq_fraction/<role>_<size>/<job_id>/`, epoch3 비교는 `lavis/ywjang_output_sq_epoch3_fraction/`이다. 절대 출력 경로는 그대로 사용한다. 원시 결과·로그·가중치는 Git에 넣지 않고 run ID, split/sample 수, 코드·설정 revision, archive 위치와 모델 해시를 연결해 별도 보존한다.
+
+아래 일반 LAVIS 소개와 예제는 upstream 참고 자료다. 이 브랜치의 설치·실행은 위 문서와 잠금 환경을 기준으로 한다.
 
 ## What's New: 🎉 
   * [Model Release] July 2023, released implementation of **BLIP-Diffusion** <br>
