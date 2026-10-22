@@ -5,10 +5,27 @@
  For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 """
 
-import cv2
 import numpy as np
 
 import torch
+
+
+try:
+    import cv2
+except Exception as exc:  # pragma: no cover - depends on optional binary package state
+    class _MissingCv2:
+        def __init__(self, original_error):
+            self.original_error = original_error
+
+        def __getattr__(self, name):
+            raise ImportError(
+                "OpenCV is required for randaugment image operations, but cv2 "
+                "could not be imported. Reinstall opencv-python for the active "
+                "NumPy version. Original error: {}".format(self.original_error)
+            ) from self.original_error
+
+    cv2 = _MissingCv2(exc)
+
 
 
 ## aug functions

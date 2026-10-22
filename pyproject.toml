@@ -1,3 +1,61 @@
 [build-system]
 requires      = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "salesforce-lavis"
+version = "1.0.1"
+requires-python = ">=3.8,<3.11"
+dynamic = ["authors", "description", "keywords", "license", "readme"]
+dependencies = [
+    "accelerate",
+    "nltk",
+    "contexttimer",
+    "decord",
+    "diffusers<=0.16.0",
+    "easydict",
+    "einops>=0.4.1",
+    "fairscale==0.4.4",
+    "ftfy",
+    "iopath",
+    "ipython",
+    "omegaconf",
+    "opencv-python-headless==4.5.5.64",
+    "opendatasets",
+    "packaging",
+    "pandas",
+    "plotly",
+    "pre-commit",
+    "pycocoevalcap",
+    "pycocotools",
+    "python-magic",
+    "scikit-image",
+    "sentencepiece",
+    "spacy",
+    "streamlit",
+    "timm==0.4.12",
+    "torch>=1.10.0",
+    "torchvision",
+    "tqdm",
+    "transformers>=4.28.0,<4.29",
+    "huggingface-hub<1.0",
+    "webdataset",
+    "wheel",
+    "jsonlines",
+    "regex",
+    "pyyaml",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
+
+[dependency-groups]
+dev = [
+    "pytest>=7,<9",
+]

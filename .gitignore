@@ -169,3 +169,15 @@ debug*/
 *.gz
 
 cache/
+
+# Local environments and research artifacts.
+.venv*/
+/archived/
+/ywjang_output*/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+/temp.py
+/ywjang_log.txt
+/lavis/tmp_runner_test_output/
