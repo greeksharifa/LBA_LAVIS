@@ -11,6 +11,7 @@ import os
 import json
 import random
 import easydict
+from omegaconf import OmegaConf
 from time import sleep
 
 import numpy as np
@@ -35,25 +36,79 @@ from lavis.models import *
 from lavis.processors import *
 from lavis.runners import *
 from lavis.tasks import *
+from subqa.vqa_introspect_export import build_compact_subqa_mapping
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Training")
+    parser = argparse.ArgumentParser(description="Generate SQ-InstructBLIP sub-QA")
 
-    parser.add_argument("--cfg-path", required=True, help="path to configuration file.")
     parser.add_argument(
-        "--options",
-        nargs="+",
-        help="override some settings in the used config, the key-value pair "
-        "in xxx=yyy format will be merged into config file (deprecate), "
-        "change to --cfg-options instead.",
+        "--cfg-path",
+        default="instructBLIP_FT_vicuna7b_vqaintrospect_qar.yaml",
+        help="Path to the VQA-Introspect QAR configuration file.",
+    )
+    parser.add_argument(
+        "--split",
+        default="val",
+        choices=["train", "val", "test"],
+        help="Dataset split to evaluate and export.",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default=None,
+        help="Local path or HF model id for the Vicuna-compatible LLM.",
+    )
+    parser.add_argument(
+        "--base-checkpoint",
+        default=None,
+        help="Fallback InstructBLIP checkpoint used when a role-specific checkpoint is missing.",
+    )
+    parser.add_argument("--questioner-checkpoint", default=None)
+    parser.add_argument("--answerer-checkpoint", default=None)
+    parser.add_argument("--reasoner-checkpoint", default=None)
+    parser.add_argument("--reasoner-device", default="cuda:0")
+    parser.add_argument("--questioner-device", default="cuda:1")
+    parser.add_argument("--answerer-device", default="cuda:2")
+    parser.add_argument(
+        "--compact-output-dir",
+        default="/home/ywjang/data/VQA-Introspect/ywjang_sub_qas",
+        help="Directory for compact sub-QA json exports.",
+    )
+    parser.add_argument(
+        "--output-tag",
+        default="sq_instructblip",
+        help="Tag used in exported compact filenames.",
+    )
+    parser.add_argument(
+        "--gt-sub-qa",
+        action="store_true",
+        help="Use GT sub-QA instead of Questioner/Answerer models.",
+    )
+    parser.add_argument(
+        "--sample-stride",
+        type=int,
+        default=1,
+        help="Keep every Nth VQA-Introspect example. Useful for smoke runs.",
+    )
+    parser.add_argument(
+        "--eval-sample-fraction",
+        type=float,
+        default=None,
+        help="Uniformly sample this fraction of the eval split with --eval-sample-seed.",
+    )
+    parser.add_argument(
+        "--eval-sample-seed",
+        type=int,
+        default=42,
+        help="Seed for uniform eval split sampling.",
+    )
+    parser.add_argument(
+        "--dataset-prompt-type",
+        default="QAR",
+        help="Prompt type used for QAR eval dataset; QAR keeps raw main questions.",
     )
 
-    args = parser.parse_args()
-    # if 'LOCAL_RANK' not in os.environ:
-    #     os.environ['LOCAL_RANK'] = str(args.local_rank)
-
-    return args
+    return parser.parse_args()
 
 
 def setup_seeds(config):
@@ -100,17 +155,133 @@ class Colors:
     BRIGHT_END = '\033[0m'
 
 
-def _get_model(finetuned, role, prompts):
-    model_arch = "blip2_vicuna_instruct_qar" if role == "Reasoner" else "blip2_vicuna_instruct"
-    args = easydict.EasyDict({
-        "cfg_path": "instructBLIP_FT_vicuna7b_qar.yaml",
-        "options": [
-            "model.load_finetuned=True",
-            f"model.finetuned={finetuned[role]}",
-            f"model.arch={model_arch}",
-            f"model.role={role}",
+def _first_existing_path(candidates, fallback=None):
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
+
+    return fallback
+
+
+def _default_base_checkpoint():
+    return _first_existing_path(
+        [
+            "/home/ywjang/.cache/torch/hub/checkpoints/instruct_blip_vicuna7b_trimmed.pth",
         ]
-    })
+    )
+
+
+def _default_reasoner_checkpoint(base_checkpoint):
+    return _first_existing_path(
+        [
+            os.path.join(
+                os.getcwd(),
+                "lavis/ywjang_output/best_models/20230810155_Reasoner_epoch10/checkpoint_best.pth",
+            ),
+            "/home/ywjang/_backup_github/LBA_LAVIS/lavis/ywjang_output/best_models/20230810155_Reasoner_epoch10/checkpoint_best.pth",
+        ],
+        fallback=base_checkpoint,
+    )
+
+
+def _default_questioner_checkpoint(base_checkpoint):
+    return _first_existing_path(
+        [
+            os.path.join(
+                os.getcwd(),
+                "lavis/ywjang_output/best_models/20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth",
+            ),
+            "/home/ywjang/_backup_github/LBA_LAVIS/lavis/ywjang_output/best_models/20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth",
+        ],
+        fallback=base_checkpoint,
+    )
+
+
+def _default_answerer_checkpoint(base_checkpoint):
+    return _first_existing_path(
+        [
+            os.path.join(
+                os.getcwd(),
+                "lavis/ywjang_output/best_models/20230810124_Answerer/checkpoint_best.pth",
+            ),
+            "/home/ywjang/_backup_github/LBA_LAVIS/lavis/ywjang_output/best_models/20230810124_Answerer/checkpoint_best.pth",
+        ],
+        fallback=base_checkpoint,
+    )
+
+
+def _default_llm_model():
+    return _first_existing_path(
+        [
+            "/home/ywjang/models/lmsys/vicuna-7b-v1.1",
+            "/models/lmsys/vicuna-7b-v1.1",
+            "/home/ywjang/models/eachadea/vicuna-7b-1.1",
+        ],
+        fallback="lmsys/vicuna-7b-v1.5",
+    )
+
+
+def _resolve_finetuned_paths(args):
+    base_checkpoint = args.base_checkpoint or _default_base_checkpoint()
+    if not base_checkpoint:
+        raise FileNotFoundError(
+            "Could not find a base InstructBLIP checkpoint. "
+            "Pass --base-checkpoint explicitly."
+        )
+
+    return {
+        "Questioner": args.questioner_checkpoint or _default_questioner_checkpoint(base_checkpoint),
+        "Answerer": args.answerer_checkpoint or _default_answerer_checkpoint(base_checkpoint),
+        "Reasoner": args.reasoner_checkpoint or _default_reasoner_checkpoint(base_checkpoint),
+    }
+
+
+def _qar_dataset_options(cfg_path, prompt_type="QAR", image_root=None):
+    config = OmegaConf.load(cfg_path)
+    if (
+        set(config.get("datasets", {})) != {"vqa_introspect_test"}
+        or config.get("run", {}).get("task") != "vqa_introspect_test_task"
+        or prompt_type != "QAR"
+    ):
+        raise ValueError(
+            "QAR export requires vqa_introspect_test with "
+            "vqa_introspect_test_task and raw QAR questions."
+        )
+    if image_root:
+        return [f"datasets.vqa_introspect_test.build_info.images.storage={image_root}"]
+    return []
+
+
+def _get_model(
+    cfg_path,
+    finetuned,
+    role,
+    prompts,
+    llm_model=None,
+    build_runtime=True,
+    extra_options=None,
+):
+    model_arch = "blip2_vicuna_instruct_qar" if role == "Reasoner" else "blip2_vicuna_instruct"
+    options = [
+        "model.load_finetuned=True",
+        f"model.finetuned={finetuned[role]}",
+        f"model.arch={model_arch}",
+        f"model.role={role}",
+    ]
+    if llm_model:
+        options.append(f"model.llm_model={llm_model}")
+    options.extend(_qar_dataset_options(
+        cfg_path, image_root=os.environ.get("VQA_INTROSPECT_IMAGE_ROOT")
+    ))
+    if extra_options:
+        options.extend(extra_options)
+
+    args = easydict.EasyDict(
+        {
+            "cfg_path": cfg_path,
+            "options": options,
+        }
+    )
     cfg = Config(args)
     
     if role == "Reasoner":
@@ -121,7 +292,7 @@ def _get_model(finetuned, role, prompts):
         cfg.pretty_print()
         
     task = tasks.setup_task(cfg)
-    datasets = task.build_datasets(cfg)
+    datasets = task.build_datasets(cfg) if build_runtime else None
     model = task.build_model(cfg)
     
     print(Colors.BRIGHT_RED + f"Loading finetuned model from {finetuned[role]}" + Colors.RESET)
@@ -131,12 +302,73 @@ def _get_model(finetuned, role, prompts):
     return model, (task, datasets, cfg)
 
 
+def _find_eval_result_file(result_dir, split):
+    legacy_result = os.path.join(result_dir, f"{split}_vqa_result.json")
+    if os.path.isfile(legacy_result):
+        return legacy_result
+
+    raise FileNotFoundError(
+        f"Expected result file not found in {result_dir}: "
+        f"{split}_vqa_result.json (vqa_introspect_test_task output required)"
+    )
+
+
+def _export_compact_results(result_dir, split, compact_output_dir, output_tag):
+    result_file = _find_eval_result_file(result_dir, split)
+
+    with open(result_file, "r") as f:
+        results = json.load(f)
+
+    compact = build_compact_subqa_mapping(results, dedupe=False)
+    compact_unique = build_compact_subqa_mapping(results, dedupe=True)
+
+    os.makedirs(compact_output_dir, exist_ok=True)
+
+    compact_file = os.path.join(
+        compact_output_dir, f"sub_qas_{split}_{output_tag}.json"
+    )
+    compact_unique_file = os.path.join(
+        compact_output_dir, f"sub_qas_{split}_{output_tag}_unique.json"
+    )
+
+    with open(compact_file, "w") as f:
+        json.dump(compact, f, indent=4)
+
+    with open(compact_unique_file, "w") as f:
+        json.dump(compact_unique, f, indent=4)
+
+    logging.info(
+        "Saved compact sub-QA exports: %s, %s",
+        compact_file,
+        compact_unique_file,
+    )
+    print(Colors.BRIGHT_GREEN + f"Saved compact sub-QA: {compact_file}" + Colors.RESET)
+    print(
+        Colors.BRIGHT_GREEN
+        + f"Saved unique compact sub-QA: {compact_unique_file}"
+        + Colors.RESET
+    )
+
+
 class GTSubQA:
     def __init__(self, model_type):
         self.model_type = model_type
         
         self.sub_qa = dict()
-        with open('/data/VQA-Introspect/VQAIntrospect_valv1.0.json', 'r') as f:
+        gt_file = _first_existing_path(
+            [
+                os.environ.get("VQA_INTROSPECT_GT_FILE"),
+                "/data/VQA-Introspect/VQAIntrospect_valv1.0.json",
+                "/home/ywjang/data/VQA-Introspect/VQAIntrospect_valv1.0.json",
+                os.path.join(
+                    os.getcwd(),
+                    "data/VQA-Introspect/VQAIntrospect_valv1.0.json",
+                ),
+            ]
+        )
+        if gt_file is None:
+            raise FileNotFoundError("Could not find VQA-Introspect GT file for GT sub-QA")
+        with open(gt_file, 'r') as f:
             json_data = json.load(f)
             for main_question_id, value in json_data.items():
                 sub_q_set = set()
@@ -159,7 +391,13 @@ class GTSubQA:
     
     
     def generate(self, samples):
-        main_question_id = samples["question_id"][0]
+        question_id_values = samples.get("main_question_id", samples.get("question_id"))
+        if question_id_values is None:
+            raise KeyError("Expected main_question_id or question_id in samples")
+        main_question_id = question_id_values[0]
+        if torch.is_tensor(main_question_id):
+            main_question_id = main_question_id.item()
+        main_question_id = str(main_question_id)
         # print('self.sub_qa[main_question_id][self.model_type]:', self.sub_qa[main_question_id][self.model_type])
         if len(self.sub_qa[main_question_id][self.model_type]) > 0:
             output = str(self.sub_qa[main_question_id][self.model_type][0])
@@ -171,6 +409,7 @@ class GTSubQA:
 
 
 def main():
+    args = parse_args()
     _prompt_file_path = "prompts.json"
     prompts = json.load(open(_prompt_file_path, "r"))
     # logging.warning(Colors.YELLOW + "prompts: \n" + json.dumps(prompts, indent=4) + Colors.RESET)
@@ -182,30 +421,31 @@ def main():
 
     # set before init_distributed_mode() to ensure the same job_id shared across all ranks.
     job_id = now()
-    
-    best_model_dir = "lavis/ywjang_output/best_models/"
-    
-    GT_SUB_QA = False
-    finetuned = {
-        # "Questioner": f"{best_model_dir}20230810150_Questioner_MultipleSubQ_epoch10/checkpoint_best.pth",
-        "Questioner": f"{best_model_dir}20230812121_Questioner_MultipleSubQ_epoch50/checkpoint_best.pth",
-        
-        # "Answerer": f"{best_model_dir}20230810124_Answerer/checkpoint_best.pth",
-        "Answerer": "/models/instruct_blip_vicuna7b_trimmed.pth",
-        
-        # "Reasoner": "/models/instruct_blip_vicuna7b_trimmed.pth",
-        "Reasoner": f"{best_model_dir}20230810155_Reasoner_epoch10/checkpoint_best.pth",
-        # "Reasoner": f"{best_model_dir}20230812163_Reasoner_epoch50/checkpoint_best.pth",
-        # "Reasoner": f"{best_model_dir}20230810074_Reasoner/checkpoint_best.pth",
-        # "Reasoner": f"{best_model_dir}20230812113_Reasoner_simpleprompt_epoch10/checkpoint_best.pth",
-    }
-    
+
+    GT_SUB_QA = args.gt_sub_qa
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    os.environ["VQA_INTROSPECT_SAMPLE_STRIDE"] = str(args.sample_stride)
+    finetuned = _resolve_finetuned_paths(args)
+    llm_model = args.llm_model or _default_llm_model()
+
+    eval_options = _qar_dataset_options(args.cfg_path, args.dataset_prompt_type)
+    if args.eval_sample_fraction is not None:
+        os.environ["VQA_INTROSPECT_EVAL_SAMPLE_FRACTION"] = str(args.eval_sample_fraction)
+        os.environ["VQA_INTROSPECT_EVAL_SAMPLE_SEED"] = str(args.eval_sample_seed)
+
     Reasoner, (task, datasets, cfg) = _get_model(
+        cfg_path=args.cfg_path,
         finetuned=finetuned,
         role="Reasoner",
-        prompts=prompts
+        prompts=prompts,
+        llm_model=llm_model,
+        build_runtime=True,
+        extra_options=eval_options,
     )
-    
+    cfg.run_cfg.test_splits = [args.split]
+    cfg.run_cfg.valid_splits = []
+    cfg.run_cfg.device = args.reasoner_device
+
     # Reasoner.set_prompts()
     print(Colors.RED + "set_prompts done." + Colors.RESET)
 
@@ -214,15 +454,28 @@ def main():
         Answerer = GTSubQA("Answerer")
     else:
         Questioner, _ = _get_model(
+            cfg_path=args.cfg_path,
             finetuned=finetuned,
             role="Questioner",
-            prompts=prompts
+            prompts=prompts,
+            llm_model=llm_model,
+            build_runtime=False,
         )
         Answerer, _ = _get_model(
+            cfg_path=args.cfg_path,
             finetuned=finetuned,
             role="Answerer",
-            prompts=prompts
+            prompts=prompts,
+            llm_model=llm_model,
+            build_runtime=False,
         )
+
+    if torch.cuda.is_available():
+        Reasoner = Reasoner.to(args.reasoner_device)
+        if hasattr(Questioner, "to"):
+            Questioner = Questioner.to(args.questioner_device)
+        if hasattr(Answerer, "to"):
+            Answerer = Answerer.to(args.answerer_device)
     
     Reasoner.set_questioner_and_answerer(Questioner, Answerer, finetuned)
     logging.info(Colors.YELLOW + "set_questioner_and_answerer done." + Colors.RESET)
@@ -234,6 +487,13 @@ def main():
         cfg=cfg, job_id=job_id, task=task, model=Reasoner, datasets=datasets
     )
     runner.evaluate(skip_reload=True)
+    if dist_utils.is_main_process():
+        _export_compact_results(
+            result_dir=str(runner.result_dir),
+            split=args.split,
+            compact_output_dir=args.compact_output_dir,
+            output_tag=args.output_tag,
+        )
     
     # set after init_distributed_mode() to only log on master.
     # setup_logger(runner.output_dir)

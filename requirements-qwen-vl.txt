@@ -1,0 +1,3 @@
+git+https://github.com/huggingface/transformers
+accelerate
+qwen-vl-utils[decord]==0.0.8

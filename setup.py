@@ -27,7 +27,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="Vision-Language, Multimodal, Image Captioning, Generative AI, Deep Learning, Library, PyTorch",
     license="3-Clause BSD",
-    packages=find_namespace_packages(include="lavis.*"),
+    packages=find_namespace_packages(include=["lavis", "lavis.*", "subqa", "subqa.*"]),
     install_requires=fetch_requirements("requirements.txt"),
     python_requires=">=3.7.0",
     include_package_data=True,
